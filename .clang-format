@@ -1,0 +1,30 @@
+---
+# We'll use defaults from the LLVM style, but with 4 columns indentation.
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 80
+UseTab: Never
+
+---
+Language: Cpp
+
+# modifier formatting
+DerivePointerAlignment: false
+PointerAlignment: Right
+
+# indendation
+IndentCaseLabels: false
+AccessModifierOffset: -4
+NamespaceIndentation: All
+
+# csv configs
+AlwaysBreakTemplateDeclarations: Yes
+BreakInheritanceList: BeforeComma
+BreakConstructorInitializers: BeforeComma
+
+# block configs
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
