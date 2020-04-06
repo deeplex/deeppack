@@ -82,6 +82,7 @@ set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_encoder.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
 )
@@ -119,6 +120,8 @@ if (BUILD_TESTING)
 
         "tests/test_output_stream.hpp"
         "tests/test_utils.hpp"
+
+        "tests/type_encoder.integer.test.cpp"
      )
 
     target_link_libraries(deeppack-tests PRIVATE

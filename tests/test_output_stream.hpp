@@ -50,11 +50,19 @@ public:
         std::size_t mInitSize;
     };
 
-    auto begin() const
+    auto begin() noexcept
     {
         return std::ranges::begin(mBuffer);
     }
-    auto end() const
+    auto begin() const noexcept
+    {
+        return std::ranges::begin(mBuffer);
+    }
+    auto end() noexcept
+    {
+        return std::ranges::begin(mBuffer) + mCurrentSize;
+    }
+    auto end() const noexcept
     {
         return std::ranges::begin(mBuffer) + mCurrentSize;
     }
@@ -85,5 +93,6 @@ private:
     std::array<std::byte, MaxSize> mBuffer{};
 };
 static_assert(dplx::dp::output_stream<test_output_stream<>>);
+static_assert(std::ranges::contiguous_range<test_output_stream<>>);
 
 } // namespace dplx::dp::test_utils

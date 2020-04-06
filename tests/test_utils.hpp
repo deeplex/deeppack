@@ -22,3 +22,16 @@ inline auto boost_test_print_type(std::ostream &s, type_code c)
 }
 
 } // namespace dplx::dp
+
+namespace dp_tests
+{
+
+template <typename... Ts>
+constexpr auto make_byte_array(Ts... ts) noexcept
+    -> std::array<std::byte, sizeof...(Ts)>
+{
+    static_assert((... && std::is_integral_v<Ts>));
+    return {static_cast<std::byte>(ts)...};
+}
+
+} // namespace dp_tests
