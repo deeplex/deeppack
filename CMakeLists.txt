@@ -36,11 +36,34 @@ endif()
 # dependencies
 
 if (BUILD_TESTING)
+    find_package(fmt REQUIRED)
+
     set(DP_REQUIRE_UNIT_TEST_FRAMEWORK unit_test_framework)
 endif()
 find_package(Boost 1.71 REQUIRED COMPONENTS
     ${DP_REQUIRE_UNIT_TEST_FRAMEWORK}
 )
+
+
+########################################################################
+# warning configuration
+# the warning are not added to the library target in order to allow
+# consumers to use a different warning configuration
+if (CL_COMPATIBLE)
+    add_compile_options(
+        /W4 # warning level 4
+        /WX # treat warnings as errors
+        # with the following exceptions
+    )
+elseif (GXX_COMPATIBLE)
+    add_compile_options(
+        -Wall # easily avoidable code smells
+        -Wextra # more code smell warnings
+        -pedantic # ISO C++ conformance warnings
+        -Werror # treat warnings as errors
+        # with the following exceptions
+    )
+endif()
 
 
 ########################################################################
@@ -86,25 +109,16 @@ if (BUILD_TESTING)
         CXX_EXTENSIONS OFF
     )
     target_sources(deeppack-tests PRIVATE
-        tests/deeppack-tests.main.cpp
-        tests/boost-test.hpp
+        "tests/deeppack-tests.main.cpp"
+        "tests/boost-test.hpp"
+        "tests/cpp.hint"
     )
-
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
-        target_precompile_headers(deeppack-tests PRIVATE
-            tests/boost-test.hpp
-        )
-        # we need to define the test suite name before including the unit
-        # test framework
-        set_source_files_properties(tests/deeppack-tests.main.cpp PROPERTIES
-            SKIP_PRECOMPILE_HEADERS ON
-        )
-    endif()
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack
 
         Boost::unit_test_framework
+        fmt::fmt
     )
     set_target_properties(deeppack-tests PROPERTIES
         CXX_EXTENSIONS OFF
@@ -113,26 +127,6 @@ if (BUILD_TESTING)
     add_test(NAME deeppack-tests COMMAND deeppack-tests)
 endif()
 
-
-########################################################################
-# warning configuration
-# the warning are not added to the library target in order to allow
-# consumers to use a different warning configuration
-if (CL_COMPATIBLE)
-    add_compile_options(
-        /W4 # warning level 4
-        /WX # treat warnings as errors
-        # with the following exceptions
-    )
-elseif (GXX_COMPATIBLE)
-    add_compile_options(
-        -Wall # easily avoidable code smells
-        -Wextra # more code smell warnings
-        -pedantic # ISO C++ conformance warnings
-        -Werror # treat warnings as errors
-        # with the following exceptions
-    )
-endif()
 
 ########################################################################
 # cmake install

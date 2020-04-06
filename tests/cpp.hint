@@ -1,0 +1,10 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+
+#define BOOST_FIXTURE_TEST_SUITE(suite_name, F) namespace suite_name { typedef F BOOST_AUTO_TEST_CASE_FIXTURE;
+#define BOOST_AUTO_TEST_SUITE(suite_name) namespace suite_name {
+#define BOOST_AUTO_TEST_SUITE_END() }
+
+#define BOOST_FIXTURE_TEST_CASE(test_name, F) struct test_name : public F { void test_method(); }; void test_name::test_method()
+#define BOOST_AUTO_TEST_CASE(test_name) BOOST_FIXTURE_TEST_CASE(test_name, BOOST_AUTO_TEST_CASE_FIXTURE)
