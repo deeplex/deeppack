@@ -24,11 +24,21 @@ class type_encoder
     using write_proxy = typename Stream::write_proxy;
     static constexpr int var_uint_max_size = 9;
 
+    static constexpr int inline_value_max = 23;
+
 public:
     template <typename T>
-    static inline void encode_integer(Stream &ctx, T const value)
+    static inline auto var_uint_size_of(T const value) noexcept -> std::size_t
     {
-        auto writeLease = ctx.write(var_uint_max_size);
+        return 1 + !(value <= inline_value_max) +
+               !detail::fits_storage<std::uint8_t>(value) +
+               !detail::fits_storage<std::uint16_t>(value) * 2 +
+               !detail::fits_storage<std::uint32_t>(value) * 4;
+    }
+
+    template <typename T>
+    static inline void integer(Stream &ctx, T const value)
+    {
         if constexpr (std::is_signed_v<T>)
         {
             using uvalue_type = std::make_unsigned_t<T>;
@@ -38,26 +48,107 @@ public:
                 static_cast<uvalue_type>(value >> (valueDigits - 1));
             uvalue_type const uvalue = signmask ^ value; // complement negatives
 
-            auto const byteSize =
-                type_encoder::encode_var_uint(writeLease, uvalue);
-
-            std::ranges::data(writeLease)[0] |=
+            std::byte const category =
                 static_cast<std::byte>(signmask) & std::byte{0b001'00000};
-
-            writeLease.shrink(byteSize);
+            type_encoder::encode_type_info(ctx, category, uvalue);
         }
         else
         {
-            auto const byteSize =
-                type_encoder::encode_var_uint(writeLease, value);
+            auto writeLease = ctx.write(var_uint_max_size);
+            auto const byteSize = type_encoder::encode_uint(writeLease, value);
             writeLease.shrink(byteSize);
         }
     }
 
+    template <typename T>
+    static inline void binary(Stream &ctx, T const byteSize)
+    {
+        type_encoder::encode_type_info(
+            ctx, to_byte(type_code::binary), byteSize);
+    }
+    template <typename T>
+    static inline void u8string(Stream &ctx, T const numCodeUnits)
+    {
+        type_encoder::encode_type_info(
+            ctx, to_byte(type_code::text), numCodeUnits);
+    }
+    template <typename T>
+    static inline void array(Stream &ctx, T const numElements)
+    {
+        type_encoder::encode_type_info(
+            ctx, to_byte(type_code::array), numElements);
+    }
+    template <typename T>
+    static inline void map(Stream &ctx, T const numKeyValuePairs)
+    {
+        type_encoder::encode_type_info(
+            ctx, to_byte(type_code::map), numKeyValuePairs);
+    }
+    static inline void tag(Stream &ctx, std::uint_least64_t const tagValue)
+    {
+        type_encoder::encode_type_info(ctx, to_byte(type_code::tag), tagValue);
+    }
+
+    static inline void boolean(Stream &ctx, bool const value)
+    {
+        auto writeLease = ctx.write(1);
+        std::ranges::data(writeLease)[0] |=
+            to_byte(type_code::bool_false) |
+            std::byte{static_cast<std::uint8_t>(value)};
+    }
+    static inline void float_half(Stream &ctx, std::uint16_t const bytes)
+    {
+        auto writeLease = ctx.write(1 + sizeof(bytes));
+        auto const out = std::ranges::data(writeLease);
+        out[0] |= to_byte(type_code::float_half);
+        std::memcpy(out + 1, &bytes, sizeof(bytes));
+    }
+    static inline void float_single(Stream &ctx, float const value)
+    {
+        auto writeLease = ctx.write(1 + sizeof(value));
+        auto const out = std::ranges::data(writeLease);
+        out[0] |= to_byte(type_code::float_single);
+        detail::store(out + 1, value);
+    }
+    static inline void float_double(Stream &ctx, double const value)
+    {
+        auto writeLease = ctx.write(1 + sizeof(value));
+        auto const out = std::ranges::data(writeLease);
+        out[0] |= to_byte(type_code::float_double);
+        detail::store(out + 1, value);
+    }
+    static inline void null(Stream &ctx)
+    {
+        auto writeLease = ctx.write(1);
+        std::ranges::data(writeLease)[0] |= to_byte(type_code::null);
+    }
+    static inline void undefined(Stream &ctx)
+    {
+        auto writeLease = ctx.write(1);
+        std::ranges::data(writeLease)[0] |= to_byte(type_code::undefined);
+    }
+    static inline void
+    stop(Stream &ctx) // #TODO resolve naming inconsistency with type_code
+    {
+        auto writeLease = ctx.write(1);
+        std::ranges::data(writeLease)[0] |= to_byte(type_code::special_break);
+    }
+
 private:
+    template <typename T>
+    static inline void
+    encode_type_info(Stream &ctx, std::byte const category, T const value)
+    {
+        auto writeLease = ctx.write(var_uint_max_size);
+        auto const byteSize = type_encoder::encode_uint(writeLease, value);
+
+        std::ranges::data(writeLease)[0] |= category;
+        writeLease.shrink(byteSize);
+    }
+
     template <typename T> // #conceptify
-    static inline auto encode_var_uint(write_proxy &writeLease,
-                                       T const value) noexcept -> int
+    static inline auto encode_uint(write_proxy &writeLease,
+                                   T const value) noexcept -> int
     {
         static_assert(std::is_unsigned_v<T>);
 
