@@ -113,6 +113,8 @@ if (BUILD_TESTING)
         "tests/deeppack-tests.main.cpp"
         "tests/boost-test.hpp"
         "tests/cpp.hint"
+
+        "tests/test_output_stream.hpp"
     )
 
     target_link_libraries(deeppack-tests PRIVATE
