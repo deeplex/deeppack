@@ -7,6 +7,7 @@ UseTab: Never
 
 ---
 Language: Cpp
+Standard: c++20
 
 # modifier formatting
 DerivePointerAlignment: false
@@ -15,12 +16,15 @@ PointerAlignment: Right
 # indendation
 IndentCaseLabels: false
 AccessModifierOffset: -4
-NamespaceIndentation: All
 
 # csv configs
 AlwaysBreakTemplateDeclarations: Yes
 BreakInheritanceList: BeforeComma
 BreakConstructorInitializers: BeforeComma
+AllowAllArgumentsOnNextLine: true
+BinPackArguments: false
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackParameters: false
 
 # block configs
 BreakBeforeBraces: Allman
