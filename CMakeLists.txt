@@ -81,6 +81,7 @@ target_sources(deeppack PRIVATE
 set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
 )
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
@@ -115,7 +116,8 @@ if (BUILD_TESTING)
         "tests/cpp.hint"
 
         "tests/test_output_stream.hpp"
-    )
+        "tests/test_utils.hpp"
+     )
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack

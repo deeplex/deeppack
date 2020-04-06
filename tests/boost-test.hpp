@@ -9,7 +9,8 @@
 
 #include <cstddef>
 
-#include <fmt/printf.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 namespace boost::test_tools::tt_detail::impl
 {
