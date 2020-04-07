@@ -18,7 +18,12 @@ namespace dp_tests
 
 BOOST_AUTO_TEST_SUITE(type_encoder)
 
-BOOST_AUTO_TEST_SUITE(integer)
+struct integer_encoding_fixture
+{
+    test_output_stream<> encodingBuffer{};
+};
+
+BOOST_FIXTURE_TEST_SUITE(integer, integer_encoding_fixture)
 
 using boost::mp11::mp_append;
 using boost::mp11::mp_copy_if;
@@ -54,13 +59,6 @@ using mp_u4B_test_types =
               mp_transform<std::make_unsigned_t, mp_s4B_test_types>>;
 using mp_u8B_test_types = mp_transform<std::make_unsigned_t, mp_s8B_test_types>;
 
-using test_encoder = dplx::dp::type_encoder<test_output_stream<>>;
-
-struct integer_encoding_fixture
-{
-    test_output_stream<> encodingBuffer{};
-};
-
 enum class type_prefix_byte : std::uint8_t
 {
     pint_cat = 0b000'00000,
@@ -88,7 +86,130 @@ inline auto boost_test_print_type(std::ostream &s, type_prefix_byte c)
     return s;
 }
 
-BOOST_FIXTURE_TEST_SUITE(encoding, integer_encoding_fixture)
+using test_encoder = dplx::dp::type_encoder<test_output_stream<>>;
+
+#pragma region Appendix A.Examples
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_1_0x00, T, mp_u1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x00);
+
+    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0x00});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_2_0x01, T, mp_u1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x01);
+
+    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0x01});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_3_0x0a, T, mp_u1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x0a);
+
+    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0x0a});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_6_0x19, T, mp_u1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x19);
+
+    BOOST_TEST(encodingBuffer.size() == 2);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint08);
+
+    auto const encoded = make_byte_array(0x19);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_7_0x64, T, mp_u1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x64);
+
+    BOOST_TEST(encodingBuffer.size() == 2);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint08);
+
+    auto const encoded = make_byte_array(0x64);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_8_0x03e8, T, mp_u2B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x03e8);
+
+    BOOST_TEST(encodingBuffer.size() == 3);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint16);
+
+    auto const encoded = make_byte_array(0x03, 0xe8);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_9_0x000f_4240, T, mp_u4B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x000f'4240);
+
+    BOOST_TEST(encodingBuffer.size() == 5);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint32);
+
+    auto const encoded = make_byte_array(0x00, 0x0f, 0x42, 0x40);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_10_0x0000_00e8_d4a5_1000,
+                              T,
+                              mp_u8B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, 0x0000'00e8'd4a5'1000);
+
+    BOOST_TEST(encodingBuffer.size() == 9);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint64);
+
+    auto const encoded =
+        make_byte_array(0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_16, T, mp_s1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, -10);
+
+    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0x29});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_17, T, mp_s1B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, -100);
+
+    BOOST_TEST(encodingBuffer.size() == 2);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::nint08);
+
+    auto const encoded = make_byte_array(0x63);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(example_18, T, mp_s2B_test_types)
+{
+    test_encoder::integer<T>(encodingBuffer, -1000);
+
+    BOOST_TEST(encodingBuffer.size() == 3);
+    BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::nint16);
+
+    auto const encoded = make_byte_array(0x03, 0xe7);
+    BOOST_TEST(std::span(encodingBuffer).subspan(1) == encoded,
+               boost::test_tools::per_element{});
+}
+
+#pragma endregion
 
 #pragma region signed
 
@@ -96,8 +217,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_8B_negative_lower_bound,
                               T,
                               mp_s8B_test_types)
 {
-    test_encoder::integer<T>(encodingBuffer,
-                                    -1 - 0x7fff'ffff'ffff'ffffll);
+    test_encoder::integer<T>(encodingBuffer, -1 - 0x7fff'ffff'ffff'ffffll);
 
     BOOST_TEST(encodingBuffer.size() == 9);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::nint64);
@@ -354,14 +474,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_8B_positive_upper_bound,
 
 #pragma region unsigned
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(unsigned_inline, T, mp_u1B_test_types)
-{
-    test_encoder::integer<T>(encodingBuffer, 0x00);
-
-    BOOST_TEST(encodingBuffer.size() == 1);
-    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0x00});
-}
-
 BOOST_AUTO_TEST_CASE_TEMPLATE(unsigned_inline_upper_bound, T, mp_u1B_test_types)
 {
     test_encoder::integer<T>(encodingBuffer, 0x17);
@@ -471,8 +583,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(unsigned_8B_upper_bound, T, mp_u8B_test_types)
 }
 
 #pragma endregion
-
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -122,7 +122,8 @@ if (BUILD_TESTING)
         "tests/test_utils.hpp"
 
         "tests/type_encoder.integer.test.cpp"
-     )
+        "tests/type_encoder.test.cpp"
+      )
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack
