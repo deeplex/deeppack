@@ -18,6 +18,7 @@
 namespace dplx::dp
 {
 
+// #TODO evaluate whether type_encoder can be made stream agnostic in a clean way
 template <typename Stream> // #conceptify
 class type_encoder
 {

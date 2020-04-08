@@ -81,11 +81,14 @@ target_sources(deeppack PRIVATE
 set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/fwd.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
+
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_encoder.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
-)
+ )
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES
@@ -123,7 +126,9 @@ if (BUILD_TESTING)
 
         "tests/type_encoder.integer.test.cpp"
         "tests/type_encoder.test.cpp"
-      )
+
+        "tests/encoder.test.cpp"
+    )
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack
