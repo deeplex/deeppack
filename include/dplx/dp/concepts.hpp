@@ -69,4 +69,18 @@ concept encodeable
         };
 // clang-format on
 
+// clang-format off
+template <typename T>
+concept pair_like
+    = requires(T &&t)
+    {
+        typename std::tuple_size<T>::type;
+        requires std::derived_from<std::tuple_size<T>, std::integral_constant<std::size_t, 2>>;
+        typename std::tuple_element<0, T>::type;
+        typename std::tuple_element<1, T>::type;
+        { get<0>(t) } -> std::convertible_to<std::tuple_element_t<0, T> &>;
+        { get<1>(t) } -> std::convertible_to<std::tuple_element_t<1, T> &>;
+    };
+// clang-format on
+
 } // namespace dplx::dp

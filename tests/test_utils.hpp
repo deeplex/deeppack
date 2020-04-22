@@ -30,7 +30,7 @@ template <typename... Ts>
 constexpr auto make_byte_array(Ts... ts) noexcept
     -> std::array<std::byte, sizeof...(Ts)>
 {
-    static_assert((... && std::is_integral_v<Ts>));
+    static_assert((... && (std::is_integral_v<Ts> || std::is_enum_v<Ts>)));
     return {static_cast<std::byte>(ts)...};
 }
 
