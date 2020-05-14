@@ -59,9 +59,11 @@ inline constexpr encode_t encode{};
 struct encode_array_t final
 {
     // encodes value arguments into a CBOR array data item.
+    // clang-format off
     template <output_stream Stream, typename... Ts>
+        requires (... && encodeable<Stream, std::remove_cvref_t<Ts>>)
     void operator()(Stream &outStream, Ts &&... values) const
-        requires(... &&encodeable<Stream, std::remove_cvref_t<Ts>>)
+    // clang-format on
     {
         basic_encoder<Stream, mp_varargs<std::remove_cvref_t<Ts>...>>{
             outStream}(static_cast<Ts &&>(values)...);
@@ -96,9 +98,11 @@ inline constexpr encode_array_t encode_array{};
 
 struct encode_map_t final
 {
+    // clang-format off
     template <output_stream Stream, typename... Ps>
+        requires (... && pair_like<std::remove_reference_t<Ps>>)
     void operator()(Stream &outStream, Ps &&... ps) const
-        requires(... &&pair_like<std::remove_reference_t<Ps>>)
+    // clang-format on
     {
         type_encoder<Stream>::map(outStream, sizeof...(Ps));
 
@@ -294,6 +298,7 @@ public:
 template <output_stream Stream, iec559_floating_point T>
 class basic_encoder<Stream, T>
 {
+    static_assert(std::numeric_limits<T>::is_iec559);
     Stream *mOutStream;
 
 public:

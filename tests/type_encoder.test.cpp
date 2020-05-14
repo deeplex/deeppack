@@ -13,7 +13,7 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
-template dplx::dp::type_encoder<dp_tests::test_output_stream<>>;
+template class dplx::dp::type_encoder<dp_tests::test_output_stream<>>;
 
 namespace dp_tests
 {
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(bool_false)
 {
     test_encoder::boolean(encodingBuffer, false);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10100});
 }
 
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(bool_true)
 {
     test_encoder::boolean(encodingBuffer, true);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10101});
 }
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(null)
 {
     test_encoder::null(encodingBuffer);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10110});
 }
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(undefined)
 {
     test_encoder::undefined(encodingBuffer);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10111});
 }
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(stop)
 {
     test_encoder::stop(encodingBuffer);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0xff});
 }
 

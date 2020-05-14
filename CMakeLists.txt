@@ -55,6 +55,11 @@ if (CL_COMPATIBLE)
         /WX # treat warnings as errors
         # with the following exceptions
     )
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        add_compile_options(
+            -Wno-delete-non-abstract-non-virtual-dtor
+        )
+    endif()
 elseif (GXX_COMPATIBLE)
     add_compile_options(
         -Wall # easily avoidable code smells
@@ -62,6 +67,7 @@ elseif (GXX_COMPATIBLE)
         -pedantic # ISO C++ conformance warnings
         -Werror # treat warnings as errors
         # with the following exceptions
+        -Wno-delete-non-abstract-non-virtual-dtor
     )
 endif()
 

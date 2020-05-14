@@ -26,6 +26,8 @@ inline auto boost_test_print_type(std::ostream &s, type_code c)
 namespace dp_tests
 {
 
+using byte_span = std::span<std::byte>;
+
 template <typename... Ts>
 constexpr auto make_byte_array(Ts... ts) noexcept
     -> std::array<std::byte, sizeof...(Ts)>

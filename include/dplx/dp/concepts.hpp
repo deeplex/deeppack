@@ -16,12 +16,12 @@ namespace dplx::dp::detail
 {
 
 template <typename T, typename... Ts>
-concept any_of = (... || std::is_same_v<T, Ts>);
+concept any_of = (std::same_as<T, Ts> ||...);
 
 template <typename T, typename... Ts>
-concept none_of = (... && !std::is_same_v<T, Ts>);
+concept none_of = (!std::same_as<T, Ts> && ...);
 
-}
+} // namespace dplx::dp::detail
 
 namespace dplx::dp
 {
@@ -35,10 +35,11 @@ concept integer = std::integral<T> &&detail::none_of<std::remove_cv_t<T>,
                                                      char16_t,
                                                      char32_t>;
 
+// clang-format off
 template <typename T>
 concept iec559_floating_point = std::is_floating_point_v<T> &&
-                                    std::numeric_limits<T>::is_iec559 &&
-                                (sizeof(T) == 4 || sizeof(T) == 8);
+    (sizeof(T) == 4 || sizeof(T) == 8);
+// clang-format on
 
 // clang-format off
 template <typename T>
@@ -50,7 +51,7 @@ concept output_stream
         requires std::same_as<
             std::ranges::range_value_t<typename T::write_proxy>,
             std::byte>;
-        {stream.write(n)} -> typename T::write_proxy;
+        {stream.write(n)} -> std::same_as<typename T::write_proxy>;
         proxy.shrink(n);
     };
 // clang-format on

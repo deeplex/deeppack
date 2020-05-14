@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(simple_dispatch)
 
     dplx::dp::encode(encodingBuffer, testValue);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == testValue.value);
 }
 BOOST_AUTO_TEST_CASE(simple_bind_dispatch)
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(simple_bind_dispatch)
 
     dplx::dp::encode.bind(encodingBuffer)(testValue);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == testValue.value);
 }
 BOOST_AUTO_TEST_CASE(simple_bind_type)
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(simple_bind_type)
     dplx::dp::encode.bind<simple_encodeable_unmoveable>(encodingBuffer)(
         testValue);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == testValue.value);
 }
 
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(varargs_0)
 {
     dplx::dp::encode_varargs(encodingBuffer);
 
-    BOOST_TEST(encodingBuffer.size() == 0);
+    BOOST_TEST(encodingBuffer.size() == 0u);
 }
 BOOST_AUTO_TEST_CASE(varargs_1)
 {
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(varargs_0_bind)
 {
     dplx::dp::encode_varargs.bind(encodingBuffer)();
 
-    BOOST_TEST(encodingBuffer.size() == 0);
+    BOOST_TEST(encodingBuffer.size() == 0u);
 }
 BOOST_AUTO_TEST_CASE(varargs_1_bind)
 {
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(bool_false)
     using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, bool>;
     test_encoder{encodingBuffer}(false);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::bool_false);
 }
 BOOST_AUTO_TEST_CASE(bool_true)
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(bool_true)
     using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, bool>;
     test_encoder{encodingBuffer}(true);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::bool_true);
 }
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(null_value)
         dplx::dp::basic_encoder<test_output_stream<>, dplx::dp::null_type>;
     test_encoder{encodingBuffer}(dplx::dp::null_value);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::null);
 }
 
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(void_dispatch_api)
     using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, void>;
     test_encoder{encodingBuffer}(dplx::dp::null_value);
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::null);
 }
 
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(vararg_dispatch_0)
         dplx::dp::basic_encoder<test_output_stream<>, dplx::dp::mp_varargs<>>;
     test_encoder{encodingBuffer}();
 
-    BOOST_TEST(encodingBuffer.size() == 1);
+    BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::array);
 }
 BOOST_AUTO_TEST_CASE(vararg_dispatch_1)
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(vararg_dispatch_1)
                                 dplx::dp::mp_varargs<dplx::dp::null_type>>;
     test_encoder{encodingBuffer}(dplx::dp::null_value);
 
-    BOOST_TEST(encodingBuffer.size() == 2);
+    BOOST_TEST(encodingBuffer.size() == 2u);
     BOOST_TEST(encodingBuffer.data()[0] ==
                (to_byte(dplx::dp::type_code::array) | std::byte{1}));
     BOOST_TEST(encodingBuffer.data()[1] == dplx::dp::type_code::null);
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(vararg_dispatch_2)
                                 dplx::dp::mp_varargs<dplx::dp::null_type, int>>;
     test_encoder{encodingBuffer}(dplx::dp::null_value, 0);
 
-    BOOST_TEST(encodingBuffer.size() == 3);
+    BOOST_TEST(encodingBuffer.size() == 3u);
     BOOST_TEST(encodingBuffer.data()[0] ==
                (to_byte(dplx::dp::type_code::array) | std::byte{2}));
     BOOST_TEST(encodingBuffer.data()[1] == dplx::dp::type_code::null);
