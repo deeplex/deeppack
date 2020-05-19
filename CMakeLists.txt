@@ -93,8 +93,9 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_encoder.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
- )
+)
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES
@@ -134,6 +135,7 @@ if (BUILD_TESTING)
         "tests/type_encoder.test.cpp"
 
         "tests/encoder.test.cpp"
+        "tests/encoder.range.test.cpp"
     )
 
     target_link_libraries(deeppack-tests PRIVATE

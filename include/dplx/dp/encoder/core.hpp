@@ -15,6 +15,11 @@
 
 #pragma once
 
+#include <concepts>
+#include <ranges>
+#include <span>
+#include <type_traits>
+
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/type_encoder.hpp>
@@ -320,6 +325,78 @@ public:
             type_encoder<Stream>::float_double(*mOutStream, value);
         }
     }
+};
+
+// clang-format off
+template <output_stream Stream, std::ranges::input_range T>
+    requires std::ranges::range<T>
+          && encodeable<Stream, std::ranges::range_value_t<T>>
+class basic_encoder<Stream, T>
+// clang-format on
+{
+    using wrapped_value_type = std::ranges::range_value_t<T>;
+    using wrapped_encoder = basic_encoder<Stream, wrapped_value_type>;
+
+    Stream *mOutStream;
+
+public:
+    using value_type = T;
+
+    explicit basic_encoder(Stream &outStream)
+        : mOutStream(&outStream)
+    {
+    }
+
+    void operator()(value_type const &value) const
+    {
+        if constexpr (enable_indefinite_encoding<T>)
+        {
+            type_encoder<Stream>::array_indefinite(*mOutStream);
+
+            for (auto &&part : value)
+            {
+                wrapped_encoder{*mOutStream}(static_cast<decltype(part)>(part));
+            }
+
+            type_encoder<Stream>::stop(*mOutStream);
+        }
+        else if constexpr (std::ranges::sized_range<T>)
+        {
+            type_encoder<Stream>::array(*mOutStream, std::ranges::size(value));
+
+            for (auto &&part : value)
+            {
+                wrapped_encoder{*mOutStream}(static_cast<decltype(part)>(part));
+            }
+        }
+        else
+        {
+            auto begin = std::ranges::begin(value);
+            auto const end = std::ranges::end(value);
+            auto const size =
+                static_cast<std::size_t>(std::distance(begin, end));
+            type_encoder<Stream>::array(*mOutStream, size);
+
+            for (; begin != end; ++begin)
+            {
+                wrapped_encoder{*mOutStream}(*begin);
+            }
+        }
+    }
+};
+
+// clang-format off
+template <output_stream Stream, typename T, std::size_t N>
+    requires encodeable<Stream, T>
+class basic_encoder<Stream, T[N]> : basic_encoder<Stream, std::span<T const>>
+// clang-format on
+{
+    using wrapped_encoder = basic_encoder<Stream, std::span<T const>>;
+
+public:
+    using value_type = T[N];
+    using basic_encoder<Stream, std::span<T const>>::basic_encoder;
+    using wrapped_encoder::operator();
 };
 
 } // namespace dplx::dp

@@ -70,6 +70,11 @@ concept encodeable
         };
 // clang-format on
 
+template <typename Range>
+static inline constexpr bool enable_indefinite_encoding =
+    std::ranges::input_range<Range> && !std::ranges::sized_range<Range> &&
+    !std::ranges::forward_range<Range>;
+
 // clang-format off
 template <typename T>
 concept pair_like

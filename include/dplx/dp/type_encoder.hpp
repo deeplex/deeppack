@@ -79,11 +79,19 @@ public:
         type_encoder::encode_type_info(
             ctx, to_byte(type_code::array), numElements);
     }
+    static inline void array_indefinite(Stream &ctx)
+    {
+        type_encoder::encode_indefinite_type(ctx, to_byte(type_code::array));
+    }
     template <typename T>
     static inline void map(Stream &ctx, T const numKeyValuePairs)
     {
         type_encoder::encode_type_info(
             ctx, to_byte(type_code::map), numKeyValuePairs);
+    }
+    static inline void map_indefinite(Stream &ctx)
+    {
+        type_encoder::encode_indefinite_type(ctx, to_byte(type_code::map));
     }
     static inline void tag(Stream &ctx, std::uint_least64_t const tagValue)
     {
@@ -136,6 +144,13 @@ public:
     }
 
 private:
+    static inline void encode_indefinite_type(Stream &ctx,
+                                              std::byte const category)
+    {
+        auto writeLease = ctx.write(1);
+        std::ranges::data(writeLease)[0] = category | std::byte{0b000'11111};
+    }
+
     template <typename T>
     static inline void
     encode_type_info(Stream &ctx, std::byte const category, T const value)
