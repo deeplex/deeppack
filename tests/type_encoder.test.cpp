@@ -132,9 +132,9 @@ BOOST_AUTO_TEST_CASE(undefined)
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10111});
 }
 
-BOOST_AUTO_TEST_CASE(stop)
+BOOST_AUTO_TEST_CASE(break_)
 {
-    test_encoder::stop(encodingBuffer);
+    test_encoder::break_(encodingBuffer);
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0xff});

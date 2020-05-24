@@ -234,7 +234,7 @@ public:
     {
     }
 
-    void operator()(detail::deduce_proper_param_type<TArgs> const... args)
+    void operator()(detail::select_proper_param_type<TArgs> const... args)
     {
         type_encoder<Stream>::array(*mOutStream, sizeof...(TArgs));
         (...,
@@ -358,7 +358,7 @@ public:
                 wrapped_encoder{*mOutStream}(static_cast<decltype(part)>(part));
             }
 
-            type_encoder<Stream>::stop(*mOutStream);
+            type_encoder<Stream>::break_(*mOutStream);
         }
         else if constexpr (std::ranges::sized_range<T>)
         {

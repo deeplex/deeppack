@@ -40,18 +40,7 @@ constexpr auto fits_storage(Source value) -> bool
     return value <= std::numeric_limits<Target>::max();
 }
 
-template <class U1, class U2>
-inline constexpr int unsigned_digit_distance_v =
-    std::numeric_limits<U1>::digits - std::numeric_limits<U2>::digits;
-
 template <typename T>
-using deduce_proper_param_type_impl =
-    std::conditional_t<std::is_trivially_copyable_v<T> && sizeof(T) <= 32,
-                       T,
-                       T &> const;
-
-template <typename T>
-using deduce_proper_param_type =
-    deduce_proper_param_type_impl<std::remove_reference_t<T>>;
+inline constexpr int digits_v = std::numeric_limits<T>::digits;
 
 } // namespace dplx::dp::detail

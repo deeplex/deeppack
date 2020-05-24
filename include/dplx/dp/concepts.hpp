@@ -12,11 +12,13 @@
 #include <ranges>
 #include <type_traits>
 
+static_assert(CHAR_BIT == 8);
+
 namespace dplx::dp::detail
 {
 
 template <typename T, typename... Ts>
-concept any_of = (std::same_as<T, Ts> ||...);
+concept any_of = (std::same_as<T, Ts> || ...);
 
 template <typename T, typename... Ts>
 concept none_of = (!std::same_as<T, Ts> && ...);
@@ -59,6 +61,10 @@ concept output_stream
 template <output_stream Stream, typename T>
 class basic_encoder;
 
+template <typename T>
+inline constexpr bool enable_pass_by_value = std::is_trivially_copyable_v<T> &&
+                                             sizeof(T) <= 32;
+
 // clang-format off
 template <typename Stream, typename T>
 concept encodeable                            
@@ -71,7 +77,7 @@ concept encodeable
 // clang-format on
 
 template <typename Range>
-static inline constexpr bool enable_indefinite_encoding =
+inline constexpr bool enable_indefinite_encoding =
     std::ranges::input_range<Range> && !std::ranges::sized_range<Range> &&
     !std::ranges::forward_range<Range>;
 
@@ -90,3 +96,14 @@ concept pair_like
 // clang-format on
 
 } // namespace dplx::dp
+
+namespace dplx::dp::detail
+{
+
+template <typename T>
+using select_proper_param_type =
+    std::conditional_t<enable_pass_by_value<std::remove_cvref_t<T>>,
+                       std::remove_reference_t<T>,
+                       T &> const;
+
+} // namespace dplx::dp::detail
