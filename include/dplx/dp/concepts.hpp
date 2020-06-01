@@ -12,6 +12,8 @@
 #include <ranges>
 #include <type_traits>
 
+#include <dplx/dp/utils.hpp>
+
 static_assert(CHAR_BIT == 8);
 
 namespace dplx::dp::detail
@@ -95,6 +97,17 @@ concept pair_like
     };
 // clang-format on
 
+template <typename T>
+inline constexpr bool disable_associative_range = false;
+
+// clang-format off
+template <typename T>
+concept associative_range
+    = std::ranges::range<T> &&
+        pair_like<std::ranges::range_value_t<T>> &&
+        !disable_associative_range<T>;
+// clang-format on
+
 } // namespace dplx::dp
 
 namespace dplx::dp::detail
@@ -105,5 +118,88 @@ using select_proper_param_type =
     std::conditional_t<enable_pass_by_value<std::remove_cvref_t<T>>,
                        std::remove_reference_t<T>,
                        T &> const;
+
+template <typename... Ts>
+struct mp_list
+{
+};
+
+template <typename T, template <typename...> typename U>
+struct mp_rename
+{
+};
+template <template <typename...> typename T,
+          template <typename...>
+          typename U,
+          typename... Ts>
+struct mp_rename<T<Ts...>, U>
+{
+    using type = U<Ts...>;
+};
+template <typename T, template <typename...> typename U>
+using mp_rename_t = typename mp_rename<T, U>::type;
+
+template <typename T>
+concept tuple_sized = requires
+{
+    typename std::tuple_size<T>::type;
+};
+
+template <typename T, typename IS>
+struct tuple_element_list_deducer
+{
+};
+template <typename T, std::size_t... Is>
+struct tuple_element_list_deducer<T, std::index_sequence<Is...>>
+{
+    using type = mp_list<std::tuple_element_t<Is, T>...>;
+};
+template <typename T>
+struct tuple_element_list
+{
+};
+template <tuple_sized T>
+struct tuple_element_list<T>
+{
+    using type = typename tuple_element_list_deducer<
+        T,
+        std::make_index_sequence<std::tuple_size_v<T>>>::type;
+};
+
+template <typename T>
+using tuple_element_list_t = typename tuple_element_list<T>::type;
+
+struct arg_sink
+{
+    template <typename... T>
+    void operator()(T &&...) noexcept
+    {
+    }
+};
+
+// clang-format off
+template <typename T>
+concept tuple_like
+    = !std::ranges::range<T> && tuple_sized<T> &&
+        requires(T && t)
+        {
+            typename tuple_element_list<T>::type;
+            ::dplx::dp::detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
+        };
+// clang-format on
+
+template <output_stream Stream, typename T>
+struct are_tuple_elements_encodeable : std::false_type
+{
+};
+template <output_stream Stream, typename... Ts>
+struct are_tuple_elements_encodeable<Stream, mp_list<Ts...>>
+    : std::bool_constant<(encodeable<Stream, Ts> && ...)>
+{
+};
+
+template <typename Stream, typename T>
+concept encodeable_tuple_like = tuple_like<T> &&output_stream<Stream>
+    &&are_tuple_elements_encodeable<Stream, tuple_element_list_t<T>>::value;
 
 } // namespace dplx::dp::detail

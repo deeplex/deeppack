@@ -5,6 +5,8 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
+#pragma once
+
 #include <array>
 #include <span>
 
@@ -40,7 +42,8 @@ public:
 
             auto const absoluteSize =
                 std::distance(mOwner.mBuffer.data(), data()) + actualSize;
-            static_cast<std::span<std::byte> &>(*this) = first(actualSize);
+            std::span<std::byte>::operator=(
+                std::span<std::byte>::first(actualSize));
 
             mOwner.mCurrentSize = mInitSize = absoluteSize;
         }
@@ -100,4 +103,4 @@ struct default_encoding_fixture
     test_output_stream<> encodingBuffer;
 };
 
-} // namespace dplx::dp::test_utils
+} // namespace dp_tests

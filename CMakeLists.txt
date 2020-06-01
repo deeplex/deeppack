@@ -58,6 +58,8 @@ if (CL_COMPATIBLE)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         add_compile_options(
             -Wno-delete-non-abstract-non-virtual-dtor
+            -Wmissing-declarations
+            -Wredundant-decls
         )
     endif()
 elseif (GXX_COMPATIBLE)
@@ -66,6 +68,12 @@ elseif (GXX_COMPATIBLE)
         -Wextra # more code smell warnings
         -pedantic # ISO C++ conformance warnings
         -Werror # treat warnings as errors
+        -Wdeprecated
+        -Wextra-semi
+        -Wcast-align
+        -Wconversion
+        -Wmissing-declarations
+        -Wredundant-decls
         # with the following exceptions
         -Wno-delete-non-abstract-non-virtual-dtor
     )
@@ -137,7 +145,10 @@ if (BUILD_TESTING)
         "tests/type_encoder.test.cpp"
 
         "tests/encoder.test.cpp"
+        "tests/encoder.test_utils.hpp"
+        "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
+        "tests/encoder.tuple.test.cpp"
     )
 
     target_link_libraries(deeppack-tests PRIVATE

@@ -328,9 +328,8 @@ public:
 };
 
 // clang-format off
-template <output_stream Stream, std::ranges::input_range T>
-    requires std::ranges::range<T>
-          && encodeable<Stream, std::ranges::range_value_t<T>>
+template <output_stream Stream, std::ranges::range T>
+    requires encodeable<Stream, std::ranges::range_value_t<T>>
 class basic_encoder<Stream, T>
 // clang-format on
 {
@@ -397,6 +396,98 @@ public:
     using value_type = T[N];
     using basic_encoder<Stream, std::span<T const>>::basic_encoder;
     using wrapped_encoder::operator();
+};
+
+// clang-format off
+template <output_stream Stream, typename T>
+    requires detail::encodeable_tuple_like<Stream, T>
+class basic_encoder<Stream, T>
+// clang-format on
+{
+    using tuple_encoder = basic_encoder<
+        Stream,
+        detail::mp_rename_t<detail::tuple_element_list_t<T>, mp_varargs>>;
+
+    Stream *mOutStream;
+
+public:
+    using value_type = T;
+
+    explicit basic_encoder(Stream &outStream)
+        : mOutStream(&outStream)
+    {
+    }
+
+    void operator()(value_type const &value)
+    {
+        detail::apply_simply(tuple_encoder(*mOutStream), value);
+    }
+};
+
+// clang-format off
+template <output_stream Stream, associative_range T>
+    requires encodeable<Stream, std::ranges::range_value_t<T>>
+class basic_encoder<Stream, T>
+// clang-format on
+{
+    using pair_like = std::ranges::range_value_t<T>;
+    using key_encoder =
+        basic_encoder<Stream,
+                      std::remove_cvref_t<std::tuple_element_t<0, pair_like>>>;
+    using value_encoder =
+        basic_encoder<Stream,
+                      std::remove_cvref_t<std::tuple_element_t<1, pair_like>>>;
+
+    Stream *mOutStream;
+
+public:
+    using value_type = T;
+
+    explicit basic_encoder(Stream &outStream)
+        : mOutStream(&outStream)
+    {
+    }
+
+    void operator()(value_type const &value)
+    {
+        if constexpr (enable_indefinite_encoding<T>)
+        {
+            type_encoder<Stream>::map_indefinite(*mOutStream);
+
+            for (auto &&[k, v] : value)
+            {
+                key_encoder{*mOutStream}(k);
+                value_encoder{*mOutStream}(v);
+            }
+
+            type_encoder<Stream>::break_(*mOutStream);
+        }
+        else if constexpr (std::ranges::sized_range<T>)
+        {
+            type_encoder<Stream>::map(*mOutStream, std::ranges::size(value));
+
+            for (auto &&[k, v] : value)
+            {
+                key_encoder{*mOutStream}(k);
+                value_encoder {*mOutStream}(v);
+            }
+        }
+        else
+        {
+            auto begin = std::ranges::begin(value);
+            auto const end = std::ranges::end(value);
+            auto const size =
+                static_cast<std::size_t>(std::distance(begin, end));
+            type_encoder<Stream>::map(*mOutStream, size);
+
+            for (; begin != end; ++begin)
+            {
+                auto &&[k, v] = *begin;
+                key_encoder{*mOutStream}(k);
+                value_encoder{*mOutStream}(v);
+            }
+        }
+    }
 };
 
 } // namespace dplx::dp

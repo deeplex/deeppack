@@ -13,37 +13,7 @@
 #include <vector>
 
 #include "boost-test.hpp"
-#include "test_output_stream.hpp"
-#include "test_utils.hpp"
-
-namespace
-{
-struct simple_encodeable
-{
-    std::byte value;
-};
-} // namespace
-
-namespace dplx::dp
-{
-template <typename Stream>
-class basic_encoder<Stream, simple_encodeable>
-{
-    Stream *mOutStream;
-
-public:
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
-    {
-    }
-
-    void operator()(simple_encodeable x)
-    {
-        auto writeLease = mOutStream->write(1);
-        std::ranges::data(writeLease)[0] = x.value;
-    }
-};
-} // namespace dplx::dp
+#include "encoder.test_utils.hpp"
 
 namespace dp_tests
 {
