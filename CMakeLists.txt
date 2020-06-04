@@ -86,11 +86,12 @@ add_library(deeppack)
 add_library(Deeplex::deeppack ALIAS deeppack)
 target_include_directories(deeppack PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/outcome/include>
     $<INSTALL_INTERFACE:include>
 )
 
 target_sources(deeppack PRIVATE
-    src/placeholder.cpp
+    "src/disappointment.cpp"
 )
 set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
@@ -101,6 +102,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_encoder.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
 
