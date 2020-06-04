@@ -12,6 +12,8 @@
 #include <ranges>
 #include <type_traits>
 
+#include <dplx/dp/tag_invoke.hpp>
+#include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/utils.hpp>
 
 static_assert(CHAR_BIT == 8);
