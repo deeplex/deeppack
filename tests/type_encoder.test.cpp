@@ -66,7 +66,7 @@ constexpr value_sample<float> float_single_samples[] = {
 BOOST_DATA_TEST_CASE(float_single,
                      boost::unit_test::data::make(float_single_samples))
 {
-    test_encoder::float_single(encodingBuffer, sample.value);
+    DPLX_TEST_RESULT(test_encoder::float_single(encodingBuffer, sample.value));
 
     BOOST_TEST_REQUIRE(encodingBuffer.size() ==
                        sample.encoded_value.size() + 1);
@@ -86,11 +86,10 @@ constexpr value_sample<double> float_double_samples[] = {
     {-std::numeric_limits<double>::infinity(),
      make_byte_array(0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)}};
 
-
 BOOST_DATA_TEST_CASE(float_double,
                      boost::unit_test::data::make(float_double_samples))
 {
-    test_encoder::float_double(encodingBuffer, sample.value);
+    DPLX_TEST_RESULT(test_encoder::float_double(encodingBuffer, sample.value));
 
     BOOST_TEST_REQUIRE(encodingBuffer.size() ==
                        sample.encoded_value.size() + 1);
@@ -102,7 +101,7 @@ BOOST_DATA_TEST_CASE(float_double,
 
 BOOST_AUTO_TEST_CASE(bool_false)
 {
-    test_encoder::boolean(encodingBuffer, false);
+    DPLX_TEST_RESULT(test_encoder::boolean(encodingBuffer, false));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10100});
@@ -110,7 +109,7 @@ BOOST_AUTO_TEST_CASE(bool_false)
 
 BOOST_AUTO_TEST_CASE(bool_true)
 {
-    test_encoder::boolean(encodingBuffer, true);
+    DPLX_TEST_RESULT(test_encoder::boolean(encodingBuffer, true));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10101});
@@ -118,7 +117,7 @@ BOOST_AUTO_TEST_CASE(bool_true)
 
 BOOST_AUTO_TEST_CASE(null)
 {
-    test_encoder::null(encodingBuffer);
+    DPLX_TEST_RESULT(test_encoder::null(encodingBuffer));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10110});
@@ -126,7 +125,7 @@ BOOST_AUTO_TEST_CASE(null)
 
 BOOST_AUTO_TEST_CASE(undefined)
 {
-    test_encoder::undefined(encodingBuffer);
+    DPLX_TEST_RESULT(test_encoder::undefined(encodingBuffer));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10111});
@@ -134,7 +133,7 @@ BOOST_AUTO_TEST_CASE(undefined)
 
 BOOST_AUTO_TEST_CASE(break_)
 {
-    test_encoder::break_(encodingBuffer);
+    DPLX_TEST_RESULT(test_encoder::break_(encodingBuffer));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0xff});

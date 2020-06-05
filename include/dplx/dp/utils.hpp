@@ -45,22 +45,22 @@ template <typename T>
 inline constexpr int digits_v = std::numeric_limits<T>::digits;
 
 template <typename F, typename T, std::size_t... Is>
-constexpr void
+constexpr decltype(auto)
 apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
     noexcept(std::forward<F>(f)(get<Is>(std::forward<T>(t))...)))
 {
-    std::forward<F>(f)(get<Is>(std::forward<T>(t))...);
+    return std::forward<F>(f)(get<Is>(std::forward<T>(t))...);
 }
 // a poor man's std::apply() which however uses unqualified get<I>()
 // instead of std::get<I>(). This allows it to cope with custom tuple types.
 template <typename F, typename T>
-constexpr void
+constexpr decltype(auto)
 apply_simply(F &&f, T &&t) noexcept(noexcept(dp::detail::apply_simply_impl(
     std::forward<F>(f),
     std::forward<T>(t),
     std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<T>>>())))
 {
-    ::dplx::dp::detail::apply_simply_impl<F, T>(
+    return ::dplx::dp::detail::apply_simply_impl<F, T>(
         std::forward<F>(f),
         std::forward<T>(t),
         std::make_index_sequence<

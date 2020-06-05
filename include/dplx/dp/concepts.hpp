@@ -14,6 +14,7 @@
 
 #include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/stream.hpp>
 #include <dplx/dp/utils.hpp>
 
 static_assert(CHAR_BIT == 8);
@@ -47,20 +48,6 @@ concept iec559_floating_point = std::is_floating_point_v<T> &&
     (sizeof(T) == 4 || sizeof(T) == 8);
 // clang-format on
 
-// clang-format off
-template <typename T>
-concept output_stream
-    = requires(T &stream, typename T::write_proxy proxy, std::size_t const n)
-    {
-        typename T::write_proxy;
-        requires std::ranges::contiguous_range<typename T::write_proxy>;
-        requires std::same_as<
-            std::ranges::range_value_t<typename T::write_proxy>,
-            std::byte>;
-        {stream.write(n)} -> std::same_as<typename T::write_proxy>;
-        proxy.shrink(n);
-    };
-// clang-format on
 
 template <output_stream Stream, typename T>
 class basic_encoder;

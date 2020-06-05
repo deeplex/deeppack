@@ -18,8 +18,6 @@ using tag_t = std::decay_t<decltype(Tag)>;
 namespace detail::cpo_impl
 {
 
-void tag_invoke() = delete;
-
 struct tag_invoke_fn
 {
     template <typename T, typename... TArgs>
@@ -38,7 +36,9 @@ struct tag_invoke_fn
     }
 };
 
-} // namespace cpo_impl
+void tag_invoke() = delete;
+
+} // namespace detail::cpo_impl
 
 inline namespace cpo
 {

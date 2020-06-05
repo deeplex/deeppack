@@ -79,7 +79,7 @@ BOOST_DATA_TEST_CASE(vector_with, boost::unit_test::data::make(vector_samples))
     }
 
     test_stream ctx{};
-    test_encoder{ctx}(vs);
+    DPLX_TEST_RESULT(test_encoder{ctx}(vs));
 
     BOOST_TEST(
         prefix_span(ctx).first(sample.prefix_length) ==
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(c_array_2)
     using test_encoder =
         dplx::dp::basic_encoder<test_output_stream<>, simple_encodeable[2]>;
 
-    test_encoder{encodingBuffer}(values);
+    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(values));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(std_array_2)
         dplx::dp::basic_encoder<test_output_stream<>,
                                 std::array<simple_encodeable const, 2>>;
 
-    test_encoder{encodingBuffer}(values);
+    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(values));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(std_span_2)
         dplx::dp::basic_encoder<test_output_stream<>,
                                 std::span<simple_encodeable const, 2>>;
 
-    test_encoder{encodingBuffer}(values_span);
+    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(values_span));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(indefinite_range_2)
     using test_encoder = dplx::dp::basic_encoder<test_output_stream<>,
                                                  decltype(indefiniteRange)>;
 
-    test_encoder{encodingBuffer}(indefiniteRange);
+    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(indefiniteRange));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(unsized_input_view_2)
     using test_encoder =
         dplx::dp::basic_encoder<test_output_stream<>, view_type>;
 
-    test_encoder{encodingBuffer}(unsizedInputView);
+    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(unsizedInputView));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/type_code.hpp>
 
 #include "boost-test.hpp"
@@ -35,5 +36,22 @@ constexpr auto make_byte_array(Ts... ts) noexcept
     static_assert((... && (std::is_integral_v<Ts> || std::is_enum_v<Ts>)));
     return {static_cast<std::byte>(ts)...};
 }
+
+template <typename R>
+inline auto check_result(dplx::dp::result<R> const &rx)
+    -> boost::test_tools::predicate_result
+{
+    bool const succeeded = !rx.has_failure();
+    boost::test_tools::predicate_result prx{succeeded};
+    if (!succeeded)
+    {
+        prx.message() << rx.assume_error();
+    }
+    return prx;
+}
+
+#define DPLX_TEST_RESULT(...) BOOST_TEST((::dp_tests::check_result((__VA_ARGS__))))
+#define DPLX_REQUIRE_RESULT(...)                                               \
+    BOOST_TEST_REQUIRE((::dp_tests::check_result((__VA_ARGS__))))
 
 } // namespace dp_tests

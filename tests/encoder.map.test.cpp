@@ -73,7 +73,7 @@ BOOST_DATA_TEST_CASE(std_map_with, boost::unit_test::data::make(map_samples))
     }
 
     test_stream ctx{};
-    test_encoder{ctx}(vs);
+    DPLX_TEST_RESULT(test_encoder{ctx}(vs));
 
     BOOST_TEST(
         prefix_span(ctx).first(sample.prefix_length) ==
@@ -97,7 +97,7 @@ BOOST_DATA_TEST_CASE(std_unordered_map_with,
     }
 
     test_stream ctx{};
-    test_encoder{ctx}(vs);
+    DPLX_TEST_RESULT(test_encoder{ctx}(vs));
 
     BOOST_TEST(
         prefix_span(ctx).first(sample.prefix_length) ==
@@ -121,7 +121,7 @@ BOOST_DATA_TEST_CASE(boost_unordered_map_with,
     }
 
     test_stream ctx{};
-    test_encoder{ctx}(vs);
+    DPLX_TEST_RESULT(test_encoder{ctx}(vs));
 
     BOOST_TEST(
         prefix_span(ctx).first(sample.prefix_length) ==
@@ -158,7 +158,7 @@ BOOST_DATA_TEST_CASE(indefinite_map_with,
         dplx::dp::indefinite_range<test_map::const_iterator>>;
 
     test_stream ctx{};
-    test_encoder{ctx}(indefiniteMap);
+    DPLX_TEST_RESULT(test_encoder{ctx}(indefiniteMap));
 
     BOOST_TEST(
         prefix_span(ctx).first(sample.prefix_length) ==

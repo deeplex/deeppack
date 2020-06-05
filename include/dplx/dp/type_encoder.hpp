@@ -14,6 +14,8 @@
 #include <type_traits>
 
 #include <dplx/dp/detail/bit.hpp>
+#include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/stream.hpp>
 #include <dplx/dp/type_code.hpp>
 #include <dplx/dp/utils.hpp>
 
@@ -182,11 +184,12 @@ public:
     static inline auto var_uint_encoded_size(T const value) noexcept
         -> std::size_t
     {
-        return static_cast<std::size_t>(detail::var_uint_encoded_size<T>(value));
+        return static_cast<std::size_t>(
+            detail::var_uint_encoded_size<T>(value));
     }
 
     template <typename T>
-    static inline void integer(Stream &ctx, T const value)
+    static inline auto integer(Stream &outStream, T const value) -> result<void>
     {
         if constexpr (std::is_signed_v<T>)
         {
@@ -197,113 +200,153 @@ public:
 
             std::byte const category =
                 static_cast<std::byte>(signmask) & std::byte{0b001'00000};
-            type_encoder::encode_type_info(ctx, uvalue, category);
+            return type_encoder::encode_type_info(outStream, uvalue, category);
         }
         else
         {
-            type_encoder::encode_type_info(
-                ctx, value, to_byte(type_code::posint));
+            return type_encoder::encode_type_info(
+                outStream, value, to_byte(type_code::posint));
         }
     }
 
     template <typename T>
-    static inline void binary(Stream &ctx, T const byteSize)
+    static inline auto binary(Stream &outStream, T const byteSize)
+        -> result<void>
     {
-        type_encoder::encode_type_info(
-            ctx, byteSize, to_byte(type_code::binary));
+        return type_encoder::encode_type_info(
+            outStream, byteSize, to_byte(type_code::binary));
     }
     template <typename T>
-    static inline void u8string(Stream &ctx, T const numCodeUnits)
+    static inline auto u8string(Stream &outStream, T const numCodeUnits)
+        -> result<void>
     {
-        type_encoder::encode_type_info(
-            ctx, numCodeUnits, to_byte(type_code::text));
+        return type_encoder::encode_type_info(
+            outStream, numCodeUnits, to_byte(type_code::text));
     }
     template <typename T>
-    static inline void array(Stream &ctx, T const numElements)
+    static inline auto array(Stream &outStream, T const numElements)
+        -> result<void>
     {
-        type_encoder::encode_type_info(
-            ctx, numElements, to_byte(type_code::array));
+        return type_encoder::encode_type_info(
+            outStream, numElements, to_byte(type_code::array));
     }
-    static inline void array_indefinite(Stream &ctx)
+    static inline auto array_indefinite(Stream &outStream) -> result<void>
     {
-        type_encoder::encode_indefinite_type(ctx, to_byte(type_code::array));
+        return type_encoder::encode_indefinite_type(outStream,
+                                                    to_byte(type_code::array));
     }
     template <typename T>
-    static inline void map(Stream &ctx, T const numKeyValuePairs)
+    static inline auto map(Stream &outStream, T const numKeyValuePairs)
+        -> result<void>
     {
-        type_encoder::encode_type_info(
-            ctx, numKeyValuePairs, to_byte(type_code::map));
+        return type_encoder::encode_type_info(
+            outStream, numKeyValuePairs, to_byte(type_code::map));
     }
-    static inline void map_indefinite(Stream &ctx)
+    static inline auto map_indefinite(Stream &outStream) -> result<void>
     {
-        type_encoder::encode_indefinite_type(ctx, to_byte(type_code::map));
+        return type_encoder::encode_indefinite_type(outStream,
+                                                    to_byte(type_code::map));
     }
-    static inline void tag(Stream &ctx, std::uint_least64_t const tagValue)
+    static inline auto tag(Stream &outStream,
+                           std::uint_least64_t const tagValue) -> result<void>
     {
-        type_encoder::encode_type_info(ctx, tagValue, to_byte(type_code::tag));
+        return type_encoder::encode_type_info(
+            outStream, tagValue, to_byte(type_code::tag));
     }
 
-    static inline void boolean(Stream &ctx, bool const value)
+    static inline auto boolean(Stream &outStream, bool const value)
+        -> result<void>
     {
-        auto writeLease = ctx.write(1);
+        DPLX_TRY(writeLease, write(outStream, 1));
+
         std::ranges::data(writeLease)[0] =
             to_byte(type_code::bool_false) |
             std::byte{static_cast<std::uint8_t>(value)};
+
+        return success();
     }
-    static inline void float_half(Stream &ctx, std::uint16_t const bytes)
+    static inline auto float_half(Stream &outStream, std::uint16_t const bytes)
+        -> result<void>
     {
-        auto writeLease = ctx.write(1 + sizeof(bytes));
+        DPLX_TRY(writeLease, write(outStream, 1 + sizeof(bytes)));
+
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_half);
         std::memcpy(out + 1, &bytes, sizeof(bytes));
+
+        return success();
     }
-    static inline void float_single(Stream &ctx, float const value)
+    static inline auto float_single(Stream &outStream, float const value)
+        -> result<void>
     {
-        auto writeLease = ctx.write(1 + sizeof(value));
+        DPLX_TRY(writeLease, write(outStream, 1 + sizeof(value)));
+
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_single);
         detail::store(out + 1, value);
+
+        return success();
     }
-    static inline void float_double(Stream &ctx, double const value)
+    static inline auto float_double(Stream &outStream, double const value)
+        -> result<void>
     {
-        auto writeLease = ctx.write(1 + sizeof(value));
+        DPLX_TRY(writeLease, write(outStream, 1 + sizeof(value)));
+
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_double);
         detail::store(out + 1, value);
+
+        return success();
     }
-    static inline void null(Stream &ctx)
+    static inline auto null(Stream &outStream) -> result<void>
     {
-        auto writeLease = ctx.write(1);
+        DPLX_TRY(writeLease, write(outStream, 1));
+
         std::ranges::data(writeLease)[0] = to_byte(type_code::null);
+
+        return success();
     }
-    static inline void undefined(Stream &ctx)
+    static inline auto undefined(Stream &outStream) -> result<void>
     {
-        auto writeLease = ctx.write(1);
+        DPLX_TRY(writeLease, write(outStream, 1));
+
         std::ranges::data(writeLease)[0] = to_byte(type_code::undefined);
+
+        return success();
     }
-    static inline void break_(Stream &ctx)
+    static inline auto break_(Stream &outStream) -> result<void>
     {
-        auto writeLease = ctx.write(1);
+        DPLX_TRY(writeLease, write(outStream, 1));
+
         std::ranges::data(writeLease)[0] = to_byte(type_code::special_break);
+
+        return success();
     }
 
 private:
-    static inline void encode_indefinite_type(Stream &ctx,
+    static inline auto encode_indefinite_type(Stream &outStream,
                                               std::byte const category)
+        -> result<void>
     {
-        auto writeLease = ctx.write(1);
+        DPLX_TRY(writeLease, write(outStream, 1));
+
         std::ranges::data(writeLease)[0] = category | std::byte{0b000'11111};
+
+        return success();
     }
 
     template <typename T>
-    static inline void
-    encode_type_info(Stream &ctx, T const value, std::byte const category)
+    static inline auto
+    encode_type_info(Stream &outStream, T const value, std::byte const category)
+        -> result<void>
     {
-        auto writeLease = ctx.write(detail::var_uint_max_size);
+        DPLX_TRY(writeLease, write(outStream, detail::var_uint_max_size));
+
         auto const byteSize = detail::store_var_uint(
             std::ranges::data(writeLease), value, category);
 
-        writeLease.shrink(byteSize);
+        DPLX_TRY(writeLease.commit(byteSize));
+        return success();
     }
 };
 

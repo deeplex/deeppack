@@ -35,7 +35,8 @@ public:
         {
         }
 
-        void shrink(std::size_t const actualSize) noexcept
+        auto commit(std::size_t const actualSize) noexcept
+            -> dplx::dp::result<void>
         {
             BOOST_TEST_REQUIRE(mInitSize == mOwner.mCurrentSize);
             BOOST_TEST_REQUIRE(actualSize <= size());
@@ -46,6 +47,7 @@ public:
                 std::span<std::byte>::first(actualSize));
 
             mOwner.mCurrentSize = mInitSize = absoluteSize;
+            return dplx::dp::success();
         }
 
     private:
@@ -70,12 +72,29 @@ public:
         return std::ranges::begin(mBuffer) + mCurrentSize;
     }
 
-    auto write(std::size_t const amount) -> write_proxy
+    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::write>,
+                                  test_output_stream &self,
+                                  std::size_t const amount)
+        -> dplx::dp::result<write_proxy>
     {
-        auto start = mCurrentSize;
-        mCurrentSize += amount;
-        BOOST_TEST_REQUIRE(mCurrentSize <= std::ranges::size(mBuffer));
-        return write_proxy({mBuffer.data() + start, amount}, *this, ctag{});
+        auto start = self.mCurrentSize;
+        self.mCurrentSize += amount;
+        BOOST_TEST_REQUIRE(start + amount <= std::ranges::size(self.mBuffer));
+        return write_proxy({self.mBuffer.data() + start, amount}, self, ctag{});
+    }
+    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::write>,
+                                  test_output_stream &self,
+                                  std::byte const *bytes,
+                                  std::size_t const amount)
+        -> dplx::dp::result<void>
+    {
+        BOOST_TEST_REQUIRE(self.mCurrentSize + amount <=
+                           std::ranges::size(self.mBuffer));
+
+        std::memcpy(
+            std::ranges::data(self.mBuffer) + self.mCurrentSize, bytes, amount);
+
+        return dplx::dp::success();
     }
 
     auto data() noexcept -> std::byte *
