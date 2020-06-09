@@ -58,23 +58,23 @@ namespace dp_tests
 
 BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
 
-static_assert(!dplx::dp::encodeable<test_output_stream<>, volatile int>);
-static_assert(!dplx::dp::encodeable<test_output_stream<>, volatile int const>);
-static_assert(!dplx::dp::encodeable<test_output_stream<>, char>);
+static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int>);
+static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int const>);
+static_assert(!dplx::dp::encodable<test_output_stream<>, char>);
 
 // the integer encoder template just forwards to typ_encoder::integer()
 // which is already covered by the type_encoder test suite
-static_assert(dplx::dp::encodeable<test_output_stream<>, signed char>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, short>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, int>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, long>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, long long>);
+static_assert(dplx::dp::encodable<test_output_stream<>, signed char>);
+static_assert(dplx::dp::encodable<test_output_stream<>, short>);
+static_assert(dplx::dp::encodable<test_output_stream<>, int>);
+static_assert(dplx::dp::encodable<test_output_stream<>, long>);
+static_assert(dplx::dp::encodable<test_output_stream<>, long long>);
 
-static_assert(dplx::dp::encodeable<test_output_stream<>, unsigned char>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, unsigned short>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, unsigned int>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, unsigned long>);
-static_assert(dplx::dp::encodeable<test_output_stream<>, unsigned long long>);
+static_assert(dplx::dp::encodable<test_output_stream<>, unsigned char>);
+static_assert(dplx::dp::encodable<test_output_stream<>, unsigned short>);
+static_assert(dplx::dp::encodable<test_output_stream<>, unsigned int>);
+static_assert(dplx::dp::encodable<test_output_stream<>, unsigned long>);
+static_assert(dplx::dp::encodable<test_output_stream<>, unsigned long long>);
 
 BOOST_AUTO_TEST_SUITE(encode_api)
 

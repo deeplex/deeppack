@@ -54,7 +54,7 @@ struct encode_t final
     }
     template <typename T, output_stream Stream>
     static auto bind(Stream &outStream)
-        -> bound_type<Stream, T> requires encodeable<Stream, T>
+        -> bound_type<Stream, T> requires encodable<Stream, T>
     {
         return bound_type<Stream, T>{outStream};
     }
@@ -66,7 +66,7 @@ struct encode_array_t final
     // encodes value arguments into a CBOR array data item.
     // clang-format off
     template <output_stream Stream, typename... Ts>
-        requires (... && encodeable<Stream, std::remove_cvref_t<Ts>>)
+        requires (... && encodable<Stream, std::remove_cvref_t<Ts>>)
     auto operator()(Stream &outStream, Ts &&... values) const -> result<void>
     // clang-format on
     {
@@ -354,7 +354,7 @@ public:
 
 // clang-format off
 template <output_stream Stream, std::ranges::range T>
-    requires encodeable<Stream, std::ranges::range_value_t<T>>
+    requires encodable<Stream, std::ranges::range_value_t<T>>
 class basic_encoder<Stream, T>
 // clang-format on
 {
@@ -418,7 +418,7 @@ public:
 
 // clang-format off
 template <output_stream Stream, typename T, std::size_t N>
-    requires encodeable<Stream, T>
+    requires encodable<Stream, T>
 class basic_encoder<Stream, T[N]> : basic_encoder<Stream, std::span<T const>>
 // clang-format on
 {
@@ -458,7 +458,7 @@ public:
 
 // clang-format off
 template <output_stream Stream, associative_range T>
-    requires encodeable<Stream, std::ranges::range_value_t<T>>
+    requires encodable<Stream, std::ranges::range_value_t<T>>
 class basic_encoder<Stream, T>
 // clang-format on
 {

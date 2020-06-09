@@ -25,9 +25,9 @@ BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
 
 BOOST_AUTO_TEST_SUITE(map)
 
-static_assert(dplx::dp::encodeable<test_output_stream<>,
+static_assert(dplx::dp::encodable<test_output_stream<>,
                                    std::map<int, simple_encodeable>>);
-static_assert(dplx::dp::encodeable<test_output_stream<>,
+static_assert(dplx::dp::encodable<test_output_stream<>,
                                    std::unordered_map<int, simple_encodeable>>);
 
 struct map_sample

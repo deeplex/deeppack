@@ -25,12 +25,12 @@ BOOST_AUTO_TEST_SUITE(range)
 static_assert(std::ranges::range<dplx::dp::indefinite_range<int *>>);
 static_assert(std::ranges::view<dplx::dp::indefinite_range<int *>>);
 
-static_assert(dplx::dp::encodeable<test_output_stream<>,
+static_assert(dplx::dp::encodable<test_output_stream<>,
                                    std::array<simple_encodeable, 5>>);
 static_assert(
-    dplx::dp::encodeable<test_output_stream<>, std::list<simple_encodeable>>);
+    dplx::dp::encodable<test_output_stream<>, std::list<simple_encodeable>>);
 static_assert(
-    dplx::dp::encodeable<test_output_stream<>, std::vector<simple_encodeable>>);
+    dplx::dp::encodable<test_output_stream<>, std::vector<simple_encodeable>>);
 
 struct range_sample
 {

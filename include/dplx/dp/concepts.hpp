@@ -12,9 +12,9 @@
 #include <ranges>
 #include <type_traits>
 
-#include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
+#include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/utils.hpp>
 
 static_assert(CHAR_BIT == 8);
@@ -48,7 +48,6 @@ concept iec559_floating_point = std::is_floating_point_v<T> &&
     (sizeof(T) == 4 || sizeof(T) == 8);
 // clang-format on
 
-
 template <output_stream Stream, typename T>
 class basic_encoder;
 
@@ -58,7 +57,7 @@ inline constexpr bool enable_pass_by_value = std::is_trivially_copyable_v<T> &&
 
 // clang-format off
 template <typename Stream, typename T>
-concept encodeable                            
+concept encodable
     = output_stream<Stream> &&
         requires(Stream &ctx, T &&t)
         {
@@ -183,7 +182,7 @@ struct are_tuple_elements_encodeable : std::false_type
 };
 template <output_stream Stream, typename... Ts>
 struct are_tuple_elements_encodeable<Stream, mp_list<Ts...>>
-    : std::bool_constant<(encodeable<Stream, Ts> && ...)>
+    : std::bool_constant<(encodable<Stream, Ts> && ...)>
 {
 };
 
