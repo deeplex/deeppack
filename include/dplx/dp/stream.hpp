@@ -29,7 +29,7 @@ inline constexpr struct write_fn
         noexcept(nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<write_fn, Stream &, std::size_t const>
     {
-        return ::dplx::dp::tag_invoke(*this, stream, size);
+        return ::dplx::dp::cpo::tag_invoke(*this, stream, size);
     }
 
     // bulk transfer variant (for payload data like strings)
@@ -50,9 +50,11 @@ inline constexpr struct write_fn
                                    std::byte const *,
                                    std::size_t const>
     {
-        return ::dplx::dp::tag_invoke(*this, stream, bytes, numBytes);
+        return ::dplx::dp::cpo::tag_invoke(*this, stream, bytes, numBytes);
     }
 } write{};
+
+inline constexpr unsigned int minimum_guaranteed_write_size = 32;
 
 inline constexpr struct commit_fn
 {
@@ -69,7 +71,7 @@ inline constexpr struct commit_fn
                                    typename WriteProxy::stream_type &,
                                    WriteProxy &>
     {
-        return ::dplx::dp::tag_invoke(*this, stream, proxy);
+        return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy);
     }
 
     template <typename Stream, typename WriteProxy>
@@ -87,7 +89,7 @@ inline constexpr struct commit_fn
                                    WriteProxy &,
                                    std::size_t const>
     {
-        return ::dplx::dp::tag_invoke(*this, stream, proxy, size);
+        return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy, size);
     }
 } commit;
 

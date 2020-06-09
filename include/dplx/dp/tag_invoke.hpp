@@ -40,7 +40,7 @@ void tag_invoke() = delete;
 
 } // namespace detail::cpo_impl
 
-inline namespace cpo
+namespace cpo
 {
 
 inline constexpr detail::cpo_impl::tag_invoke_fn tag_invoke = {};
