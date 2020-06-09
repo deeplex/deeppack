@@ -18,7 +18,7 @@ struct simple_encodeable
 {
     std::byte value;
 };
-}
+} // namespace dp_tests
 
 namespace dplx::dp
 {
@@ -37,6 +37,12 @@ public:
     {
         DPLX_TRY(writeLease, dplx::dp::write(*mOutStream, 1));
         std::ranges::data(writeLease)[0] = x.value;
+
+        if constexpr (dplx::dp::lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(*mOutStream, writeLease));
+        }
         return success();
     }
 };

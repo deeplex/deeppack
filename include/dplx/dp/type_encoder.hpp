@@ -263,6 +263,10 @@ public:
             to_byte(type_code::bool_false) |
             std::byte{static_cast<std::uint8_t>(value)};
 
+        if constexpr (lazy_write_proxy<std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
     static inline auto float_half(Stream &outStream, std::uint16_t const bytes)
@@ -274,6 +278,11 @@ public:
         out[0] = to_byte(type_code::float_half);
         std::memcpy(out + 1, &bytes, sizeof(bytes));
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
     static inline auto float_single(Stream &outStream, float const value)
@@ -285,6 +294,11 @@ public:
         out[0] = to_byte(type_code::float_single);
         detail::store(out + 1, value);
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
     static inline auto float_double(Stream &outStream, double const value)
@@ -296,6 +310,11 @@ public:
         out[0] = to_byte(type_code::float_double);
         detail::store(out + 1, value);
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
     static inline auto null(Stream &outStream) -> result<void>
@@ -304,6 +323,11 @@ public:
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::null);
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
     static inline auto undefined(Stream &outStream) -> result<void>
@@ -312,6 +336,11 @@ public:
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::undefined);
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
     static inline auto break_(Stream &outStream) -> result<void>
@@ -320,6 +349,11 @@ public:
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::special_break);
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
 
@@ -332,6 +366,11 @@ private:
 
         std::ranges::data(writeLease)[0] = category | std::byte{0b000'11111};
 
+        if constexpr (lazy_write_proxy<
+                          std::remove_reference_t<decltype(writeLease)>>)
+        {
+            DPLX_TRY(commit(outStream, writeLease));
+        }
         return success();
     }
 
@@ -345,7 +384,7 @@ private:
         auto const byteSize = detail::store_var_uint(
             std::ranges::data(writeLease), value, category);
 
-        DPLX_TRY(writeLease.commit(byteSize));
+        DPLX_TRY(commit(outStream, writeLease, byteSize));
         return success();
     }
 };
