@@ -32,8 +32,7 @@ public:
         DPLX_TRY(writeLease, dplx::dp::write(outStream, 1));
         std::ranges::data(writeLease)[0] = x.value;
 
-        if constexpr (dplx::dp::lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }

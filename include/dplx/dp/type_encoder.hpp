@@ -263,7 +263,7 @@ public:
             to_byte(type_code::bool_false) |
             std::byte{static_cast<std::uint8_t>(value)};
 
-        if constexpr (lazy_write_proxy<std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -278,8 +278,7 @@ public:
         out[0] = to_byte(type_code::float_half);
         std::memcpy(out + 1, &bytes, sizeof(bytes));
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -294,8 +293,7 @@ public:
         out[0] = to_byte(type_code::float_single);
         detail::store(out + 1, value);
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -310,8 +308,7 @@ public:
         out[0] = to_byte(type_code::float_double);
         detail::store(out + 1, value);
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -323,8 +320,7 @@ public:
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::null);
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -336,8 +332,7 @@ public:
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::undefined);
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -349,8 +344,7 @@ public:
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::special_break);
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }
@@ -366,8 +360,7 @@ private:
 
         std::ranges::data(writeLease)[0] = category | std::byte{0b000'11111};
 
-        if constexpr (lazy_write_proxy<
-                          std::remove_reference_t<decltype(writeLease)>>)
+        if constexpr (lazy_output_stream<Stream>)
         {
             DPLX_TRY(commit(outStream, writeLease));
         }

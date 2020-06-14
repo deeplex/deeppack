@@ -167,8 +167,7 @@ public:
         return mCommitCounter;
     }
 };
-static_assert(dplx::dp::output_stream<test_output_stream<>>);
-static_assert(dplx::dp::lazy_write_proxy<test_output_stream<>::write_proxy>);
+static_assert(dplx::dp::lazy_output_stream<test_output_stream<>>);
 static_assert(std::ranges::contiguous_range<test_output_stream<>>);
 
 struct default_encoding_fixture
