@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include <system_error>
+#include <type_traits>
+
 #include <outcome/outcome.hpp>
 
 namespace dplx::dp
@@ -17,11 +20,13 @@ namespace oc = OUTCOME_V2_NAMESPACE;
 template <typename R, typename EC = std::error_code>
 using result = oc::result<R, EC>;
 
-using oc::success;
 using oc::failure;
+using oc::success;
 
 enum class errc
 {
+    nothing = 0, // to be removed
+    end_of_stream,
 };
 auto error_category() noexcept -> std::error_category const &;
 
@@ -30,7 +35,17 @@ inline auto make_error_code(errc value) -> std::error_code
     return std::error_code(static_cast<int>(value), error_category());
 }
 
-}
+} // namespace dplx::dp
+
+namespace std
+{
+
+template <>
+struct is_error_code_enum<dplx::dp::errc> : std::true_type
+{
+};
+
+} // namespace std
 
 #ifndef DPLX_TRY
 #define DPLX_TRY(...) OUTCOME_TRY(__VA_ARGS__)

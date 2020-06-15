@@ -109,6 +109,8 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tag_invoke.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_input_stream.hpp>
+
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
  )
 
@@ -155,7 +157,9 @@ if (BUILD_TESTING)
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.tuple.test.cpp"
-    )
+
+        "tests/memory_input_stream.test.cpp"
+     )
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack
