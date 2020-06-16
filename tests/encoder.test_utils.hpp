@@ -22,26 +22,20 @@ struct simple_encodeable
 
 namespace dplx::dp
 {
-template <typename Stream>
+template <output_stream Stream>
 class basic_encoder<Stream, dp_tests::simple_encodeable>
 {
-    Stream *mOutStream;
-
 public:
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
+    auto operator()(Stream &outStream, dp_tests::simple_encodeable x)
+        -> result<void>
     {
-    }
-
-    auto operator()(dp_tests::simple_encodeable x) -> result<void>
-    {
-        DPLX_TRY(writeLease, dplx::dp::write(*mOutStream, 1));
+        DPLX_TRY(writeLease, dplx::dp::write(outStream, 1));
         std::ranges::data(writeLease)[0] = x.value;
 
         if constexpr (dplx::dp::lazy_write_proxy<
                           std::remove_reference_t<decltype(writeLease)>>)
         {
-            DPLX_TRY(commit(*mOutStream, writeLease));
+            DPLX_TRY(commit(outStream, writeLease));
         }
         return success();
     }

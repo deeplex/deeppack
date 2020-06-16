@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include <dplx/dp/concepts.hpp>
+#include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/type_encoder.hpp>
 
@@ -35,33 +36,104 @@ class basic_encoder<Stream, T const volatile>;
 
 // the encode APIs are not meant to participate in ADL and are therefore
 // niebloids
-struct encode_t final
+inline constexpr struct encode_fn final
 {
     template <output_stream Stream, typename T>
     auto operator()(Stream &outStream, T &&value) const -> result<void>
     {
-        return basic_encoder<Stream, std::remove_cvref_t<T>>{outStream}(
-            static_cast<T &&>(value));
+        return basic_encoder<Stream, std::remove_cvref_t<T>>()(
+            outStream, static_cast<T &&>(value));
     }
 
     template <output_stream Stream, typename T = void>
-    using bound_type = basic_encoder<Stream, T>;
+    class bound_type
+    {
+        Stream *mOutStream;
+
+    public:
+        explicit bound_type(Stream &outStream) noexcept
+            : mOutStream(&outStream)
+        {
+        }
+
+        auto operator()(detail::select_proper_param_type<T> value) const
+            -> result<void>
+        {
+            return basic_encoder<Stream, std::remove_cvref_t<T>>()(*mOutStream,
+                                                                   value);
+        }
+    };
+    template <output_stream Stream>
+    class bound_type<Stream, void>
+    {
+        Stream *mOutStream;
+
+    public:
+        explicit bound_type(Stream &outStream) noexcept
+            : mOutStream(&outStream)
+        {
+        }
+
+        template <typename T>
+        auto operator()(T &&value) const -> result<void>
+        {
+            return basic_encoder<Stream, std::remove_cvref_t<T>>()(*mOutStream,
+                                                                   value);
+        }
+    };
 
     template <output_stream Stream>
     static auto bind(Stream &outStream) -> bound_type<Stream>
     {
-        return bound_type<Stream>{outStream};
+        return bound_type<Stream>(outStream);
     }
     template <typename T, output_stream Stream>
-    static auto bind(Stream &outStream)
-        -> bound_type<Stream, T> requires encodable<Stream, T>
+    static auto bind(Stream &outStream) -> bound_type<Stream, T>
     {
-        return bound_type<Stream, T>{outStream};
+        return bound_type<Stream, T>(outStream);
+    }
+} encode;
+
+namespace detail
+{
+template <output_stream Stream, typename T>
+class arg_list_encoder;
+
+template <output_stream Stream, typename... TArgs>
+class arg_list_encoder<Stream, mp_list<TArgs...>>
+{
+    Stream *mOutStream;
+
+public:
+    explicit inline arg_list_encoder(Stream &outStream) noexcept
+        : mOutStream(&outStream)
+    {
+    }
+
+    static inline auto encode(Stream &outStream,
+                              select_proper_param_type<TArgs>... values)
+        -> result<void>
+    {
+        DPLX_TRY(type_encoder<Stream>::array(outStream, sizeof...(TArgs)));
+
+        result<void> rx = success();
+
+        [[maybe_unused]] bool failed =
+            (... || (rx = basic_encoder<Stream, TArgs>()(outStream, values))
+                        .has_failure());
+
+        return rx;
+    }
+
+    auto inline operator()(select_proper_param_type<TArgs>... values) const
+        -> result<void>
+    {
+        return encode(*mOutStream, values...);
     }
 };
-inline constexpr encode_t encode{};
+} // namespace detail
 
-struct encode_array_t final
+inline constexpr struct encode_array_fn final
 {
     // encodes value arguments into a CBOR array data item.
     // clang-format off
@@ -70,12 +142,26 @@ struct encode_array_t final
     auto operator()(Stream &outStream, Ts &&... values) const -> result<void>
     // clang-format on
     {
-        return basic_encoder<Stream, mp_varargs<std::remove_cvref_t<Ts>...>>{
-            outStream}(static_cast<Ts &&>(values)...);
+        return detail::arg_list_encoder<
+            Stream,
+            detail::mp_list<std::remove_cvref_t<Ts>...>>::
+            encode(outStream, static_cast<Ts &&>(values)...);
     }
 
-    template <output_stream Stream>
+    template <output_stream Stream, typename... TArgs>
     class bound_type
+        : detail::arg_list_encoder<Stream, std::remove_cvref_t<TArgs>...>
+    {
+        using impl_type =
+            detail::arg_list_encoder<Stream, std::remove_cvref_t<TArgs>...>;
+
+    public:
+        using impl_type::impl_type;
+        using impl_type::operator();
+    };
+
+    template <output_stream Stream>
+    class bound_type<Stream>
     {
         Stream *mOutStream;
 
@@ -88,21 +174,21 @@ struct encode_array_t final
         template <typename... Ts>
         auto operator()(Ts &&... values) const -> result<void>
         {
-            return basic_encoder<Stream,
-                                 mp_varargs<std::remove_cvref_t<Ts>...>>{
-                *mOutStream}(static_cast<Ts &&>(values)...);
+            using impl = detail::arg_list_encoder<
+                Stream,
+                detail::mp_list<std::remove_cvref_t<Ts>...>>;
+            return impl::encode(*mOutStream, static_cast<Ts &&>(values)...);
         }
     };
 
-    template <output_stream Stream>
-    static auto bind(Stream &outStream) -> bound_type<Stream>
+    template <typename... TArgs, output_stream Stream>
+    static auto bind(Stream &outStream) -> bound_type<Stream, TArgs...>
     {
-        return bound_type<Stream>(outStream);
+        return bound_type<Stream, std::remove_cvref_t<TArgs>...>(outStream);
     }
-};
-inline constexpr encode_array_t encode_array{};
+} encode_array;
 
-struct encode_map_t final
+inline constexpr struct encode_map_t final
 {
     // clang-format off
     template <output_stream Stream, typename... Ps>
@@ -114,8 +200,10 @@ struct encode_map_t final
 
         result<void> rx = success();
 
-        ((rx = this->encode_pair<Stream>(outStream, static_cast<Ps &&>(ps))) &&
-         ...);
+        [[maybe_unused]] bool failed =
+            (... ||
+             (rx = this->encode_pair<Stream>(outStream, static_cast<Ps &&>(ps)))
+                 .has_failure());
 
         return rx;
     }
@@ -138,9 +226,10 @@ struct encode_map_t final
 
             result<void> rx = success();
 
-            ((rx = encode_map_t::encode_pair<Stream>(*mOutStream,
-                                                     static_cast<Ps &&>(ps))) &&
-             ...);
+            [[maybe_unused]] bool failed =
+                (... || (rx = encode_map_t::encode_pair<Stream>(
+                             *mOutStream, static_cast<Ps &&>(ps)))
+                            .has_failure());
 
             return rx;
         }
@@ -164,14 +253,16 @@ private:
         using value_type =
             std::remove_cvref_t<std::tuple_element_t<1, pair_type>>;
 
-        DPLX_TRY((basic_encoder<Stream, key_type>{stream}(get<0>(p))));
-        DPLX_TRY((basic_encoder<Stream, value_type>{stream}(get<1>(p))));
+        DPLX_TRY((basic_encoder<Stream, key_type>()(stream, get<0>(p))));
+        DPLX_TRY((basic_encoder<Stream, value_type>()(stream, get<1>(p))));
         return success();
     }
-};
-inline constexpr encode_map_t encode_map{};
+} encode_map;
 
-struct encode_varargs_t final
+// does not output anything if called without value arguments
+// encodes a single value argument directly without an enclosing array
+// encodes multiple value arguments into a CBOR array data item.
+inline constexpr struct encode_varargs_t final
 {
     template <output_stream Stream, typename... Ts>
     auto operator()([[maybe_unused]] Stream &outStream,
@@ -183,14 +274,15 @@ struct encode_varargs_t final
         }
         else if constexpr (sizeof...(Ts) == 1)
         {
-            return basic_encoder<Stream, std::remove_cvref_t<Ts>...>{outStream}(
-                static_cast<Ts &&>(values)...);
+            return basic_encoder<Stream, std::remove_cvref_t<Ts>...>()(
+                outStream, static_cast<Ts &&>(values)...);
         }
         else if constexpr (sizeof...(Ts) > 1)
         {
-            return basic_encoder<Stream,
-                                 mp_varargs<std::remove_cvref_t<Ts>...>>{
-                outStream}(static_cast<Ts &&>(values)...);
+            return detail::arg_list_encoder<
+                Stream,
+                detail::mp_list<std::remove_cvref_t<Ts>...>>::
+                encode(outStream, static_cast<Ts &&>(values)...);
         }
     }
 
@@ -217,111 +309,67 @@ struct encode_varargs_t final
     {
         return bound_type<Stream>(outStream);
     }
-};
-// does not output anything if called without value arguments
-// encodes a single value argument directly without an enclosing array
-// encodes multiple value arguments into a CBOR array data item.
-inline constexpr encode_varargs_t encode_varargs{};
+} encode_varargs;
 
 template <output_stream Stream>
 class basic_encoder<Stream, null_type>
 {
-    Stream *mOutStream;
-
 public:
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
+    auto operator()(Stream &outStream, null_type) -> result<void>
     {
-    }
-
-    auto operator()(null_type) -> result<void>
-    {
-        return type_encoder<Stream>::null(*mOutStream);
+        return type_encoder<Stream>::null(outStream);
     }
 };
 
 template <output_stream Stream, typename... TArgs>
 class basic_encoder<Stream, mp_varargs<TArgs...>>
 {
-    Stream *mOutStream;
+    using impl = detail::arg_list_encoder<
+        Stream,
+        detail::mp_list<std::remove_cvref_t<TArgs>...>>;
 
 public:
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
-    {
-    }
-
-    auto operator()(detail::select_proper_param_type<TArgs> const... args)
+    auto operator()(Stream &outStream,
+                    detail::select_proper_param_type<TArgs>... args) const
         -> result<void>
     {
-        DPLX_TRY(type_encoder<Stream>::array(*mOutStream, sizeof...(TArgs)));
-
-        result<void> rx = success();
-
-        [[maybe_unused]] bool succeeded =
-            (... &&
-             static_cast<bool>(
-                 rx = basic_encoder<Stream, std::remove_reference_t<TArgs>>{
-                     *mOutStream}(args)));
-
-        return rx;
+        return impl::encode(outStream, args...);
     }
 };
 
 template <output_stream Stream>
 class basic_encoder<Stream, void>
 {
-    Stream *mOutStream;
-
 public:
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
-    {
-    }
-
     template <typename T>
-    auto operator()(T &&value) -> result<void>
+    auto operator()(Stream &outStream, T &&value) -> result<void>
     {
-        return basic_encoder<Stream, std::remove_cvref_t<T>>{*mOutStream}(
-            static_cast<T &&>(value));
+        return basic_encoder<Stream, std::remove_cvref_t<T>>()(
+            outStream, static_cast<T &&>(value));
     }
 };
 
 template <output_stream Stream>
 class basic_encoder<Stream, bool>
 {
-    Stream *mOutStream;
-
 public:
     using value_type = bool;
 
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
+    auto operator()(Stream &outStream, value_type value) -> result<void>
     {
-    }
-
-    auto operator()(value_type value) -> result<void>
-    {
-        return type_encoder<Stream>::boolean(*mOutStream, value);
+        return type_encoder<Stream>::boolean(outStream, value);
     }
 };
 
 template <output_stream Stream, integer T>
 class basic_encoder<Stream, T>
 {
-    Stream *mOutStream;
-
 public:
     using value_type = T;
 
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
+    auto operator()(Stream &outStream, value_type value) -> result<void>
     {
-    }
-
-    auto operator()(value_type value) -> result<void>
-    {
-        return type_encoder<Stream>::integer(*mOutStream, value);
+        return type_encoder<Stream>::integer(outStream, value);
     }
 };
 
@@ -329,25 +377,19 @@ template <output_stream Stream, iec559_floating_point T>
 class basic_encoder<Stream, T>
 {
     static_assert(std::numeric_limits<T>::is_iec559);
-    Stream *mOutStream;
 
 public:
     using value_type = T;
 
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
-    {
-    }
-
-    auto operator()(value_type value) -> result<void>
+    auto operator()(Stream &outStream, value_type value) -> result<void>
     {
         if constexpr (sizeof(value) == 4)
         {
-            return type_encoder<Stream>::float_single(*mOutStream, value);
+            return type_encoder<Stream>::float_single(outStream, value);
         }
         else if constexpr (sizeof(value) == 8)
         {
-            return type_encoder<Stream>::float_double(*mOutStream, value);
+            return type_encoder<Stream>::float_double(outStream, value);
         }
     }
 };
@@ -361,39 +403,33 @@ class basic_encoder<Stream, T>
     using wrapped_value_type = std::ranges::range_value_t<T>;
     using wrapped_encoder = basic_encoder<Stream, wrapped_value_type>;
 
-    Stream *mOutStream;
-
 public:
     using value_type = T;
 
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
-    {
-    }
-
-    auto operator()(value_type const &value) const -> result<void>
+    auto operator()(Stream &outStream, value_type const &value) const
+        -> result<void>
     {
         if constexpr (enable_indefinite_encoding<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::array_indefinite(*mOutStream));
+            DPLX_TRY(type_encoder<Stream>::array_indefinite(outStream));
 
             for (auto &&part : value)
             {
-                DPLX_TRY(wrapped_encoder{*mOutStream}(
-                    static_cast<decltype(part)>(part)));
+                DPLX_TRY(wrapped_encoder()(outStream,
+                                           static_cast<decltype(part)>(part)));
             }
 
-            return type_encoder<Stream>::break_(*mOutStream);
+            return type_encoder<Stream>::break_(outStream);
         }
         else if constexpr (std::ranges::sized_range<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::array(*mOutStream,
+            DPLX_TRY(type_encoder<Stream>::array(outStream,
                                                  std::ranges::size(value)));
 
             for (auto &&part : value)
             {
-                DPLX_TRY(wrapped_encoder{*mOutStream}(
-                    static_cast<decltype(part)>(part)));
+                DPLX_TRY(wrapped_encoder()(outStream,
+                                           static_cast<decltype(part)>(part)));
             }
 
             return success();
@@ -404,11 +440,11 @@ public:
             auto const end = std::ranges::end(value);
             auto const size =
                 static_cast<std::size_t>(std::distance(begin, end));
-            DPLX_TRY(type_encoder<Stream>::array(*mOutStream, size));
+            DPLX_TRY(type_encoder<Stream>::array(outStream, size));
 
             for (; begin != end; ++begin)
             {
-                DPLX_TRY(wrapped_encoder{*mOutStream}(*begin));
+                DPLX_TRY(wrapped_encoder()(outStream, *begin));
             }
 
             return success();
@@ -436,23 +472,19 @@ template <output_stream Stream, typename T>
 class basic_encoder<Stream, T>
 // clang-format on
 {
-    using tuple_encoder = basic_encoder<
+    using impl = detail::arg_list_encoder<
         Stream,
-        detail::mp_rename_t<detail::tuple_element_list_t<T>, mp_varargs>>;
-
-    Stream *mOutStream;
+        detail::mp_transform_t<std::remove_cvref_t,
+                               detail::mp_rename_t<T, detail::mp_list>>>;
 
 public:
     using value_type = T;
 
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
+    auto operator()(Stream &outStream,
+                    detail::select_proper_param_type<value_type> value) const
+        -> result<void>
     {
-    }
-
-    auto operator()(value_type const &value) -> result<void>
-    {
-        return detail::apply_simply(tuple_encoder(*mOutStream), value);
+        return detail::apply_simply(impl(outStream), value);
     }
 };
 
@@ -470,39 +502,32 @@ class basic_encoder<Stream, T>
         basic_encoder<Stream,
                       std::remove_cvref_t<std::tuple_element_t<1, pair_like>>>;
 
-    Stream *mOutStream;
-
 public:
     using value_type = T;
 
-    explicit basic_encoder(Stream &outStream)
-        : mOutStream(&outStream)
-    {
-    }
-
-    auto operator()(value_type const &value) -> result<void>
+    auto operator()(Stream &outStream, value_type const &value) -> result<void>
     {
         if constexpr (enable_indefinite_encoding<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::map_indefinite(*mOutStream));
+            DPLX_TRY(type_encoder<Stream>::map_indefinite(outStream));
 
             for (auto &&[k, v] : value)
             {
-                DPLX_TRY(key_encoder{*mOutStream}(k));
-                DPLX_TRY(value_encoder{*mOutStream}(v));
+                DPLX_TRY(key_encoder()(outStream, k));
+                DPLX_TRY(value_encoder()(outStream, v));
             }
 
-            return type_encoder<Stream>::break_(*mOutStream);
+            return type_encoder<Stream>::break_(outStream);
         }
         else if constexpr (std::ranges::sized_range<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::map(*mOutStream,
-                                               std::ranges::size(value)));
+            DPLX_TRY(
+                type_encoder<Stream>::map(outStream, std::ranges::size(value)));
 
             for (auto &&[k, v] : value)
             {
-                DPLX_TRY(key_encoder{*mOutStream}(k));
-                DPLX_TRY(value_encoder{*mOutStream}(v));
+                DPLX_TRY(key_encoder()(outStream, k));
+                DPLX_TRY(value_encoder()(outStream, v));
             }
 
             return success();
@@ -513,13 +538,13 @@ public:
             auto const end = std::ranges::end(value);
             auto const size =
                 static_cast<std::size_t>(std::distance(begin, end));
-            DPLX_TRY(type_encoder<Stream>::map(*mOutStream, size));
+            DPLX_TRY(type_encoder<Stream>::map(outStream, size));
 
             for (; begin != end; ++begin)
             {
                 auto &&[k, v] = *begin;
-                DPLX_TRY(key_encoder{*mOutStream}(k));
-                DPLX_TRY(value_encoder{*mOutStream}(v));
+                DPLX_TRY(key_encoder()(outStream, k));
+                DPLX_TRY(value_encoder()(outStream, v));
             }
 
             return success();

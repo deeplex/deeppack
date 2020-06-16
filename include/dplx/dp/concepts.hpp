@@ -52,18 +52,22 @@ template <output_stream Stream, typename T>
 class basic_encoder;
 
 template <typename T>
-inline constexpr bool enable_pass_by_value = std::is_trivially_copyable_v<T> &&
-                                             sizeof(T) <= 32;
+inline constexpr bool
+    enable_pass_by_value = std::is_trivially_copy_constructible_v<T> &&
+                               std::is_trivially_copyable_v<T> &&
+                           sizeof(T) <= 32;
 
 // clang-format off
 template <typename Stream, typename T>
 concept encodable
-    = output_stream<Stream> &&
-        requires(Stream &ctx, T &&t)
-        {
-            typename basic_encoder<Stream, T>;
-            basic_encoder<Stream, T>{ctx}(std::forward<T>(t));
-        };
+    = output_stream<Stream>
+    && !std::is_reference_v<T>
+    && !std::is_pointer_v<T>
+    && requires(Stream &ctx, T const &t)
+    {
+        typename basic_encoder<Stream, T>;
+        basic_encoder<Stream, T>()(ctx, t);
+    };
 // clang-format on
 
 template <typename Range>
@@ -102,10 +106,12 @@ namespace dplx::dp::detail
 {
 
 template <typename T>
+using select_proper_param_type_impl =
+    std::conditional_t<enable_pass_by_value<T>, T const, T const &>;
+
+template <typename T>
 using select_proper_param_type =
-    std::conditional_t<enable_pass_by_value<std::remove_cvref_t<T>>,
-                       std::remove_reference_t<T>,
-                       T &> const;
+    select_proper_param_type_impl<std::remove_cvref_t<T>>;
 
 template <typename... Ts>
 struct mp_list
@@ -126,6 +132,21 @@ struct mp_rename<T<Ts...>, U>
 };
 template <typename T, template <typename...> typename U>
 using mp_rename_t = typename mp_rename<T, U>::type;
+
+template <template <typename> typename Fn, typename T>
+struct mp_transform
+{
+};
+template <template <typename> typename Fn,
+          template <typename...>
+          typename L,
+          typename... TArgs>
+struct mp_transform<Fn, L<TArgs...>>
+{
+    using type = L<Fn<TArgs>...>;
+};
+template <template <typename> typename Fn, typename T>
+using mp_transform_t = typename mp_transform<Fn, T>::type;
 
 template <typename T>
 concept tuple_sized = requires

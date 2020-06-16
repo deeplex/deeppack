@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(std_pair)
     using test_encoder =
         dplx::dp::basic_encoder<test_output_stream<>, value_type>;
 
-    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(values));
+    DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(std_tuple_2)
     using test_encoder =
         dplx::dp::basic_encoder<test_output_stream<>, value_type>;
 
-    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(values));
+    DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(std_tuple_3)
     using test_encoder =
         dplx::dp::basic_encoder<test_output_stream<>, value_type>;
 
-    DPLX_TEST_RESULT(test_encoder{encodingBuffer}(values));
+    DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
