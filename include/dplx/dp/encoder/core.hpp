@@ -23,6 +23,7 @@
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
+#include <dplx/dp/map_pair.hpp>
 #include <dplx/dp/type_encoder.hpp>
 
 namespace dplx::dp

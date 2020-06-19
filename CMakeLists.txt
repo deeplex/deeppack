@@ -105,11 +105,12 @@ target_sources(deeppack PUBLIC
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/map_pair.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tag_invoke.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
-)
+ )
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES

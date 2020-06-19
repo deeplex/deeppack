@@ -129,6 +129,30 @@ BOOST_DATA_TEST_CASE(boost_unordered_map_with,
         boost::test_tools::per_element{});
 }
 
+BOOST_DATA_TEST_CASE(map_pair_range_with,
+                     boost::unit_test::data::make(map_samples))
+{
+    using test_map = std::vector<dplx::dp::map_pair<std::size_t, simple_encodeable>>;
+    using test_stream = test_output_stream<1024>;
+    using test_encoder = dplx::dp::basic_encoder<test_stream, test_map>;
+    using prefix_span = std::span<std::byte const>;
+
+    test_map vs{};
+    for (std::size_t i = 0; i < sample.num; ++i)
+    {
+        std::byte v = static_cast<std::byte>(i + 1);
+        vs.push_back({i, simple_encodeable{v}});
+    }
+
+    test_stream ctx{};
+    DPLX_TEST_RESULT(test_encoder()(ctx, vs));
+
+    BOOST_TEST(
+        prefix_span(ctx).first(sample.prefix_length) ==
+            prefix_span(sample.expected_prefix).first(sample.prefix_length),
+        boost::test_tools::per_element{});
+}
+
 constexpr map_sample indefinite_map_samples[] = {
     {0, 1, make_byte_array(0b101'11111, 0xFF, 0, 0, 0, 0, 0, 0)},
     {1, 3, make_byte_array(0b101'11111, 0, 1, 0xFF, 0, 0, 0, 0)},

@@ -55,6 +55,10 @@ namespace dp_tests
 
 BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
 
+static_assert(dplx::dp::pair_like<dplx::dp::map_pair<int, int>>);
+static_assert(std::is_trivial_v<dplx::dp::map_pair<int, int>>);
+
+
 static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int>);
 static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int const>);
 static_assert(!dplx::dp::encodable<test_output_stream<>, char>);
@@ -144,7 +148,7 @@ BOOST_AUTO_TEST_CASE(map_dispatch)
 
     std::pair<simple_encodeable_unmoveable, dplx::dp::null_type> lvalue{};
     DPLX_TEST_RESULT(dplx::dp::encode_map(
-        encodingBuffer, lvalue, std::pair{1, dplx::dp::null_value}));
+        encodingBuffer, lvalue, dplx::dp::map_pair{1, dplx::dp::null_value}));
 
     BOOST_TEST(std::span(encodingBuffer) == encoded,
                boost::test_tools::per_element{});
