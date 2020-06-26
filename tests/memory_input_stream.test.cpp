@@ -17,6 +17,7 @@
 
 static_assert(dplx::dp::input_stream<dplx::dp::memory_input_stream>);
 static_assert(!dplx::dp::lazy_input_stream<dplx::dp::memory_input_stream>);
+static_assert(dplx::dp::is_zero_copy_capable_v<dplx::dp::memory_input_stream>);
 
 namespace dp_tests
 {

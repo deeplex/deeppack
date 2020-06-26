@@ -12,6 +12,7 @@
 #include <concepts>
 #include <ranges>
 #include <span>
+#include <type_traits>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/tag_invoke.hpp>
@@ -221,6 +222,10 @@ inline constexpr struct available_input_size_fn
 template <typename Proxy, typename Stream>
 concept read_proxy
     = std::ranges::contiguous_range<Proxy>
+    && std::is_nothrow_default_constructible_v<Proxy>
+    && std::is_nothrow_move_constructible_v<Proxy>
+    && std::is_nothrow_move_assignable_v<Proxy>
+    && std::is_trivially_destructible_v<Proxy>
     && std::convertible_to<Proxy, std::span<std::byte const>>
     && requires (Stream &stream, Proxy &proxy, std::size_t const actualSize)
     {
@@ -240,7 +245,6 @@ concept available_input_size_result
     = oc::concepts::basic_result<T> && std::convertible_to<typename T::value_type, std::size_t>;
 // clang-format on
 
-
 // clang-format off
 template <typename Stream>
 concept input_stream
@@ -252,6 +256,9 @@ concept input_stream
             -> available_input_size_result;
     };
 // clang-format on
+
+template <input_stream Stream>
+using read_proxy_t = typename decltype(::dplx::dp::read(std::declval<Stream &>(), std::declval<std::size_t>()))::value_type;
 
 // clang-format off
 template <typename Proxy, typename Stream>
@@ -278,6 +285,21 @@ concept lazy_input_stream
     {
         { ::dplx::dp::read(stream, size) } -> lazy_read_result<Stream>;
     };
-// clang-format on
+// clang-format on     
+
+template <typename Stream>
+struct is_zero_copy_capable;
+
+template <input_stream Stream>
+struct is_zero_copy_capable<Stream> : std::bool_constant<
+    !lazy_input_stream<Stream>
+    && std::same_as<read_proxy_t<Stream>, std::span<std::byte const>>
+>
+{
+};
+
+template <typename Stream>
+inline constexpr bool is_zero_copy_capable_v
+    = is_zero_copy_capable<Stream>::value;
 
 } // namespace dplx::dp
