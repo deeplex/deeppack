@@ -27,6 +27,7 @@ enum class errc
 {
     nothing = 0, // to be removed
     end_of_stream,
+    invalid_additional_information,
 };
 auto error_category() noexcept -> std::error_category const &;
 

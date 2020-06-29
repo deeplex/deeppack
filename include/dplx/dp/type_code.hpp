@@ -50,3 +50,11 @@ inline constexpr auto to_byte(type_code v) -> std::byte
 }
 
 }
+
+namespace dplx::dp::detail
+{
+
+inline constexpr int var_uint_max_size = 9;
+inline constexpr unsigned int inline_value_max = 23;
+
+} // namespace dplx::dp::detail

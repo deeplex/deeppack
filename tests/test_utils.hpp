@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include <array>
+#include <cstddef>
+
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/type_code.hpp>
 
@@ -35,6 +38,29 @@ constexpr auto make_byte_array(Ts... ts) noexcept
 {
     static_assert((... && (std::is_integral_v<Ts> || std::is_enum_v<Ts>)));
     return {static_cast<std::byte>(ts)...};
+}
+
+template <std::size_t N, typename T>
+constexpr auto make_byte_array(std::initializer_list<T> vs,
+                               std::byte const fill = std::byte{0xFE}) noexcept
+    -> std::array<std::byte, N>
+{
+    std::array<std::byte, N> bs;
+    auto last = std::transform(vs.begin(), vs.end(), bs.data(), [](auto v) {
+        return static_cast<std::byte>(v);
+    });
+    std::fill(last, bs.data() + N, fill);
+    return bs;
+}
+
+template <typename T>
+auto make_byte_vector(std::initializer_list<T> vs) noexcept -> std::vector<std::byte>
+{
+    std::vector<std::byte> bs(vs.size());
+    std::transform(vs.begin(), vs.end(), bs.begin(), [](auto v) {
+        return static_cast<std::byte>(v);
+    });
+    return bs;
 }
 
 template <typename R>

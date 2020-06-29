@@ -22,9 +22,6 @@
 namespace dplx::dp::detail
 {
 
-inline constexpr int var_uint_max_size = 9;
-inline constexpr unsigned int inline_value_max = 23;
-
 #if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
 
 template <typename T>
