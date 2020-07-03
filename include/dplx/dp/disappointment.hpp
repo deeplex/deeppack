@@ -28,6 +28,8 @@ enum class errc
     nothing = 0, // to be removed
     end_of_stream,
     invalid_additional_information,
+    item_type_mismatch,
+    item_value_out_of_range,
 };
 auto error_category() noexcept -> std::error_category const &;
 

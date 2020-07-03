@@ -51,6 +51,26 @@ inline constexpr bool enable_indefinite_encoding =
     std::ranges::input_range<Range> && !std::ranges::sized_range<Range> &&
     !std::ranges::forward_range<Range>;
 
+template <input_stream Stream, typename T>
+class basic_decoder;
+
+// clang-format off
+template <typename Stream, typename T>
+concept decodable
+    = input_stream<Stream>
+    && !std::is_reference_v<T>
+    && !std::is_pointer_v<T>
+    && std::is_nothrow_default_constructible_v<T>
+    && std::is_nothrow_constructible_v<T>
+    && std::is_nothrow_assignable_v<T>
+    && requires(Stream &stream, T &dest)
+    {
+        typename basic_decoder<Stream, T>;
+        { basic_decoder<Stream, T>()(stream, dest) }
+            -> oc::concepts::basic_result;
+    };
+// clang-format on
+
 template <typename T>
 inline constexpr bool disable_associative_range = false;
 

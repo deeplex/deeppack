@@ -17,6 +17,9 @@ static_assert(CHAR_BIT == 8);
 template <output_stream Stream, typename T>
 class basic_encoder;
 
+template <input_stream Stream, typename T>
+class basic_decoder;
+
 template <typename... TArgs>
 class mp_varargs
 {
@@ -26,5 +29,13 @@ struct null_type
 {
 };
 inline constexpr null_type null_value{};
+
+template <typename T>
+struct as_value_t
+{
+    explicit constexpr as_value_t() noexcept = default;
+};
+template <typename T>
+inline constexpr as_value_t<T> as_value;
 
 } // namespace dplx::dp

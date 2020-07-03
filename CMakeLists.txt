@@ -105,6 +105,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
@@ -165,6 +166,8 @@ if (BUILD_TESTING)
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.tuple.test.cpp"
+
+        "tests/decoder.test.cpp"
 
         "tests/memory_input_stream.test.cpp"
     )
