@@ -143,6 +143,7 @@ if (BUILD_TESTING)
         "tests/boost-test.hpp"
         "tests/cpp.hint"
 
+        "tests/test_input_stream.hpp"
         "tests/test_output_stream.hpp"
         "tests/test_utils.hpp"
 
