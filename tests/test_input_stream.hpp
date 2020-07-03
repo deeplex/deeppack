@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <span>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
@@ -23,21 +24,20 @@ namespace dp_tests
 
 class test_input_stream // #TODO use a validating readproxy
 {
-    std::vector<std::byte> mBuffer;
+    std::span<std::byte const> mBuffer;
     std::vector<std::byte> mReadBuffer;
     std::size_t mStreamPosition;
     int mReadCounter;
     int mCommitCounter;
 
 public:
-    explicit test_input_stream(std::vector<std::byte> bs)
-        : mBuffer(std::move(bs))
+    explicit test_input_stream(std::span<std::byte const> bs)
+        : mBuffer(bs)
         , mReadBuffer()
         , mStreamPosition(0)
         , mReadCounter(0)
         , mCommitCounter(0)
     {
-        mBuffer.reserve(mBuffer.size() + 64);
     }
 
     friend inline auto
@@ -85,7 +85,7 @@ public:
     friend inline auto
     tag_invoke(dplx::dp::tag_t<dplx::dp::consume>,
                test_input_stream &self,
-               [[maybe_unused]] std::span<std::byte const> proxy) noexcept
+               [[maybe_unused]] std::span<std::byte const> const proxy) noexcept
         -> dplx::dp::result<void>
     {
         BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
