@@ -159,7 +159,7 @@ if (BUILD_TESTING)
         "tests/encoder.tuple.test.cpp"
 
         "tests/memory_input_stream.test.cpp"
-     )
+    )
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack
