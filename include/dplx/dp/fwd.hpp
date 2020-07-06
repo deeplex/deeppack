@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020
+// Copyright Henrik Steffen Gaßmann 2020.
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include <dplx/dp/concepts.hpp>
+#include <dplx/dp/stream.hpp>
 
 namespace dplx::dp
 {
+
 static_assert(CHAR_BIT == 8);
 
 template <output_stream Stream, typename T>

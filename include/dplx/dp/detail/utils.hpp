@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020
+// Copyright Henrik Steffen Gaßmann 2020.
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -55,28 +55,5 @@ constexpr auto fits_storage(Source value) -> bool
 
 template <typename T>
 inline constexpr int digits_v = std::numeric_limits<T>::digits;
-
-template <typename F, typename T, std::size_t... Is>
-constexpr decltype(auto)
-apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
-    noexcept(std::forward<F>(f)(get<Is>(std::forward<T>(t))...)))
-{
-    return std::forward<F>(f)(get<Is>(std::forward<T>(t))...);
-}
-// a poor man's std::apply() which however uses unqualified get<I>()
-// instead of std::get<I>(). This allows it to cope with custom tuple types.
-template <typename F, typename T>
-constexpr decltype(auto)
-apply_simply(F &&f, T &&t) noexcept(noexcept(dp::detail::apply_simply_impl(
-    std::forward<F>(f),
-    std::forward<T>(t),
-    std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<T>>>())))
-{
-    return ::dplx::dp::detail::apply_simply_impl<F, T>(
-        std::forward<F>(f),
-        std::forward<T>(t),
-        std::make_index_sequence<
-            std::tuple_size_v<std::remove_reference_t<T>>>());
-}
 
 } // namespace dplx::dp::detail

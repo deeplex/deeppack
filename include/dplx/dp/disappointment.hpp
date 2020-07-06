@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020
+// Copyright Henrik Steffen Gaßmann 2020.
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -18,7 +18,7 @@ namespace dplx::dp
 namespace oc = OUTCOME_V2_NAMESPACE;
 
 template <typename R, typename EC = std::error_code>
-using result = oc::result<R, EC>;
+using result = oc::basic_result<R, EC, oc::policy::default_policy<R, EC, void>>;
 
 using oc::failure;
 using oc::success;

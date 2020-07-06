@@ -14,7 +14,7 @@
 
 #include <boost/predef/compiler.h>
 
-#include <dplx/dp/utils.hpp>
+#include <dplx/dp/detail/utils.hpp>
 
 #if defined BOOST_COMP_MSVC_AVAILABLE
 #include <intrin.h>

@@ -14,10 +14,10 @@
 #include <type_traits>
 
 #include <dplx/dp/detail/bit.hpp>
+#include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
 #include <dplx/dp/type_code.hpp>
-#include <dplx/dp/utils.hpp>
 
 namespace dplx::dp::detail
 {

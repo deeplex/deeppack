@@ -100,6 +100,8 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/stream.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/arg_list.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_encoder.hpp>
 
@@ -107,12 +109,14 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/map_pair.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tag_invoke.hpp>
-    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/utils.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_input_stream.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
- )
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/mp_lite.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/type_utils.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/utils.hpp>
+)
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES
