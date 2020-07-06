@@ -103,7 +103,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/arg_list.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
-    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_encoder.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
@@ -153,8 +153,8 @@ if (BUILD_TESTING)
         "tests/test_output_stream.hpp"
         "tests/test_utils.hpp"
 
-        "tests/type_encoder.integer.test.cpp"
-        "tests/type_encoder.test.cpp"
+        "tests/item_emitter.integer.test.cpp"
+        "tests/item_emitter.test.cpp"
 
         "tests/encoder.test.cpp"
         "tests/encoder.test_utils.hpp"

@@ -65,7 +65,7 @@ static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int const>);
 static_assert(!dplx::dp::encodable<test_output_stream<>, char>);
 
 // the integer encoder template just forwards to typ_encoder::integer()
-// which is already covered by the type_encoder test suite
+// which is already covered by the item_emitter test suite
 static_assert(dplx::dp::encodable<test_output_stream<>, signed char>);
 static_assert(dplx::dp::encodable<test_output_stream<>, short>);
 static_assert(dplx::dp::encodable<test_output_stream<>, int>);

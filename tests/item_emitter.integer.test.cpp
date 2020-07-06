@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/type_encoder.hpp>
+#include <dplx/dp/item_emitter.hpp>
 
 #include <boost/mp11.hpp>
 
@@ -16,7 +16,7 @@
 namespace dp_tests
 {
 
-BOOST_AUTO_TEST_SUITE(type_encoder)
+BOOST_AUTO_TEST_SUITE(item_emitter)
 
 struct integer_encoding_fixture
 {
@@ -86,7 +86,7 @@ inline auto boost_test_print_type(std::ostream &s, type_prefix_byte c)
     return s;
 }
 
-using test_encoder = dplx::dp::type_encoder<test_output_stream<>>;
+using test_encoder = dplx::dp::item_emitter<test_output_stream<>>;
 
 #pragma region Appendix A.Examples
 

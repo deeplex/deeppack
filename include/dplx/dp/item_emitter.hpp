@@ -172,10 +172,10 @@ inline auto var_uint_encoded_size(T const value) -> int
 namespace dplx::dp
 {
 
-// #TODO evaluate whether type_encoder can be made stream agnostic in a clean
+// #TODO evaluate whether item_emitter can be made stream agnostic in a clean
 // way
 template <typename Stream> // #conceptify
-class type_encoder
+class item_emitter
 {
     using write_proxy = typename Stream::write_proxy;
 
@@ -200,11 +200,11 @@ public:
 
             std::byte const category =
                 static_cast<std::byte>(signmask) & std::byte{0b001'00000};
-            return type_encoder::encode_type_info(outStream, uvalue, category);
+            return item_emitter::encode_type_info(outStream, uvalue, category);
         }
         else
         {
-            return type_encoder::encode_type_info(
+            return item_emitter::encode_type_info(
                 outStream, value, to_byte(type_code::posint));
         }
     }
@@ -213,44 +213,44 @@ public:
     static inline auto binary(Stream &outStream, T const byteSize)
         -> result<void>
     {
-        return type_encoder::encode_type_info(
+        return item_emitter::encode_type_info(
             outStream, byteSize, to_byte(type_code::binary));
     }
     template <typename T>
     static inline auto u8string(Stream &outStream, T const numCodeUnits)
         -> result<void>
     {
-        return type_encoder::encode_type_info(
+        return item_emitter::encode_type_info(
             outStream, numCodeUnits, to_byte(type_code::text));
     }
     template <typename T>
     static inline auto array(Stream &outStream, T const numElements)
         -> result<void>
     {
-        return type_encoder::encode_type_info(
+        return item_emitter::encode_type_info(
             outStream, numElements, to_byte(type_code::array));
     }
     static inline auto array_indefinite(Stream &outStream) -> result<void>
     {
-        return type_encoder::encode_indefinite_type(outStream,
+        return item_emitter::encode_indefinite_type(outStream,
                                                     to_byte(type_code::array));
     }
     template <typename T>
     static inline auto map(Stream &outStream, T const numKeyValuePairs)
         -> result<void>
     {
-        return type_encoder::encode_type_info(
+        return item_emitter::encode_type_info(
             outStream, numKeyValuePairs, to_byte(type_code::map));
     }
     static inline auto map_indefinite(Stream &outStream) -> result<void>
     {
-        return type_encoder::encode_indefinite_type(outStream,
+        return item_emitter::encode_indefinite_type(outStream,
                                                     to_byte(type_code::map));
     }
     static inline auto tag(Stream &outStream,
                            std::uint_least64_t const tagValue) -> result<void>
     {
-        return type_encoder::encode_type_info(
+        return item_emitter::encode_type_info(
             outStream, tagValue, to_byte(type_code::tag));
     }
 

@@ -10,8 +10,8 @@
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/fwd.hpp>
+#include <dplx/dp/item_emitter.hpp>
 #include <dplx/dp/stream.hpp>
-#include <dplx/dp/type_encoder.hpp>
 
 namespace dplx::dp::detail
 {
@@ -34,7 +34,7 @@ public:
                               select_proper_param_type<TArgs>... values)
         -> result<void>
     {
-        DPLX_TRY(type_encoder<Stream>::array(outStream, sizeof...(TArgs)));
+        DPLX_TRY(item_emitter<Stream>::array(outStream, sizeof...(TArgs)));
 
         result<void> rx = success();
 

@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/type_encoder.hpp>
+#include <dplx/dp/item_emitter.hpp>
 
 #include <boost/mp11.hpp>
 
@@ -13,12 +13,12 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
-template class dplx::dp::type_encoder<dp_tests::test_output_stream<>>;
+template class dplx::dp::item_emitter<dp_tests::test_output_stream<>>;
 
 namespace dp_tests
 {
 
-BOOST_AUTO_TEST_SUITE(type_encoder)
+BOOST_AUTO_TEST_SUITE(item_emitter)
 
 struct misc_encoding_fixture
 {
@@ -27,7 +27,7 @@ struct misc_encoding_fixture
 
 BOOST_FIXTURE_TEST_SUITE(misc, misc_encoding_fixture)
 
-using test_encoder = dplx::dp::type_encoder<test_output_stream<>>;
+using test_encoder = dplx::dp::item_emitter<test_output_stream<>>;
 
 #pragma region Appendix A.Examples
 

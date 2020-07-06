@@ -25,8 +25,8 @@
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/arg_list.hpp>
 #include <dplx/dp/fwd.hpp>
+#include <dplx/dp/item_emitter.hpp>
 #include <dplx/dp/map_pair.hpp>
-#include <dplx/dp/type_encoder.hpp>
 
 namespace dplx::dp
 {
@@ -43,7 +43,7 @@ class basic_encoder<Stream, null_type>
 public:
     auto operator()(Stream &outStream, null_type) -> result<void>
     {
-        return type_encoder<Stream>::null(outStream);
+        return item_emitter<Stream>::null(outStream);
     }
 };
 
@@ -83,7 +83,7 @@ public:
 
     auto operator()(Stream &outStream, value_type value) -> result<void>
     {
-        return type_encoder<Stream>::boolean(outStream, value);
+        return item_emitter<Stream>::boolean(outStream, value);
     }
 };
 
@@ -95,7 +95,7 @@ public:
 
     auto operator()(Stream &outStream, value_type value) -> result<void>
     {
-        return type_encoder<Stream>::integer(outStream, value);
+        return item_emitter<Stream>::integer(outStream, value);
     }
 };
 
@@ -111,11 +111,11 @@ public:
     {
         if constexpr (sizeof(value) == 4)
         {
-            return type_encoder<Stream>::float_single(outStream, value);
+            return item_emitter<Stream>::float_single(outStream, value);
         }
         else if constexpr (sizeof(value) == 8)
         {
-            return type_encoder<Stream>::float_double(outStream, value);
+            return item_emitter<Stream>::float_double(outStream, value);
         }
     }
 };
@@ -137,7 +137,7 @@ public:
     {
         if constexpr (enable_indefinite_encoding<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::array_indefinite(outStream));
+            DPLX_TRY(item_emitter<Stream>::array_indefinite(outStream));
 
             for (auto &&part : value)
             {
@@ -145,11 +145,11 @@ public:
                                            static_cast<decltype(part)>(part)));
             }
 
-            return type_encoder<Stream>::break_(outStream);
+            return item_emitter<Stream>::break_(outStream);
         }
         else if constexpr (std::ranges::sized_range<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::array(outStream,
+            DPLX_TRY(item_emitter<Stream>::array(outStream,
                                                  std::ranges::size(value)));
 
             for (auto &&part : value)
@@ -166,7 +166,7 @@ public:
             auto const end = std::ranges::end(value);
             auto const size =
                 static_cast<std::size_t>(std::distance(begin, end));
-            DPLX_TRY(type_encoder<Stream>::array(outStream, size));
+            DPLX_TRY(item_emitter<Stream>::array(outStream, size));
 
             for (; begin != end; ++begin)
             {
@@ -235,7 +235,7 @@ public:
     {
         if constexpr (enable_indefinite_encoding<T>)
         {
-            DPLX_TRY(type_encoder<Stream>::map_indefinite(outStream));
+            DPLX_TRY(item_emitter<Stream>::map_indefinite(outStream));
 
             for (auto &&[k, v] : value)
             {
@@ -243,12 +243,12 @@ public:
                 DPLX_TRY(value_encoder()(outStream, v));
             }
 
-            return type_encoder<Stream>::break_(outStream);
+            return item_emitter<Stream>::break_(outStream);
         }
         else if constexpr (std::ranges::sized_range<T>)
         {
             DPLX_TRY(
-                type_encoder<Stream>::map(outStream, std::ranges::size(value)));
+                item_emitter<Stream>::map(outStream, std::ranges::size(value)));
 
             for (auto &&[k, v] : value)
             {
@@ -264,7 +264,7 @@ public:
             auto const end = std::ranges::end(value);
             auto const size =
                 static_cast<std::size_t>(std::distance(begin, end));
-            DPLX_TRY(type_encoder<Stream>::map(outStream, size));
+            DPLX_TRY(item_emitter<Stream>::map(outStream, size));
 
             for (; begin != end; ++begin)
             {

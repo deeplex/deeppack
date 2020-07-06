@@ -142,7 +142,7 @@ inline constexpr struct encode_map_t final
     auto operator()(Stream &outStream, Ps &&... ps) const -> result<void>
     // clang-format on
     {
-        DPLX_TRY(type_encoder<Stream>::map(outStream, sizeof...(Ps)));
+        DPLX_TRY(item_emitter<Stream>::map(outStream, sizeof...(Ps)));
 
         result<void> rx = success();
 
@@ -168,7 +168,7 @@ inline constexpr struct encode_map_t final
         template <typename... Ps>
         auto operator()(Ps &&... ps) const -> result<void>
         {
-            DPLX_TRY(type_encoder<Stream>::map(*mOutStream, sizeof...(Ps)));
+            DPLX_TRY(item_emitter<Stream>::map(*mOutStream, sizeof...(Ps)));
 
             result<void> rx = success();
 
