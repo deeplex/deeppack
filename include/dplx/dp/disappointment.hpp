@@ -30,6 +30,13 @@ enum class errc
     invalid_additional_information,
     item_type_mismatch,
     item_value_out_of_range,
+    unknown_property,
+    too_many_properties,
+    object_version_property_missing,
+    required_object_property_missing,
+    not_enough_memory,
+    missing_data,
+    invalid_indefinite_subitem,
 };
 auto error_category() noexcept -> std::error_category const &;
 

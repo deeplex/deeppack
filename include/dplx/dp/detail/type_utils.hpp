@@ -89,6 +89,91 @@ namespace dplx::dp::detail
 {
 
 template <typename T>
+struct member_object_pointer_type_traits
+{
+};
+
+template <typename T, typename C>
+struct member_object_pointer_type_traits<T C::*>
+{
+    using type = T C::*;
+    using value_type = T;
+    using class_type = C;
+};
+
+template <typename T>
+using member_object_pointer_value_type =
+    typename member_object_pointer_type_traits<T>::value_type;
+
+template <typename T>
+using member_object_pointer_class_type =
+    typename member_object_pointer_type_traits<T>::class_type;
+
+template <std::size_t N, typename = std::make_index_sequence<N>>
+struct nth_param_type_impl;
+
+template <std::size_t N, std::size_t... Is>
+struct nth_param_type_impl<N, std::index_sequence<Is...>>
+{
+    template <typename T>
+    static T deduce(std::void_t<decltype(Is)> *..., T *, ...);
+};
+
+template <std::size_t N, typename... Params>
+using nth_param_t = typename decltype(nth_param_type_impl<N>::deduce(
+    static_cast<std::type_identity<Params> *>(nullptr)...))::type;
+
+#if !defined(_MSC_VER) // || 1
+
+template <typename>
+struct discarder
+{
+    template <typename T>
+    constexpr discarder(T &&) noexcept
+    {
+    }
+};
+
+template <std::size_t N, typename = std::make_index_sequence<N>>
+struct nth_param_value_impl;
+
+template <std::size_t N, std::size_t... Is>
+struct nth_param_value_impl<N, std::index_sequence<Is...>>
+{
+    template <typename T>
+    static constexpr decltype(auto)
+    access(discarder<decltype(Is)>..., T &&t, ...) noexcept
+    {
+        return static_cast<T &&>(t);
+    }
+};
+
+template <std::size_t N, decltype(auto)... Vs>
+inline constexpr decltype(auto)
+    nth_param_v = nth_param_value_impl<N>::access(Vs...);
+
+#else
+
+template <std::size_t N, auto... Vs>
+struct nth_param_value_impl;
+
+template <auto V0, auto... Vs>
+struct nth_param_value_impl<0, V0, Vs...>
+{
+    static constexpr auto value = V0;
+};
+
+template <std::size_t N, auto V0, auto... Vs>
+struct nth_param_value_impl<N, V0, Vs...> : nth_param_value_impl<N - 1, Vs...>
+{
+};
+
+template <std::size_t N, auto... Vs>
+inline constexpr auto nth_param_v = nth_param_value_impl<N, Vs...>::value;
+
+#endif
+
+template <typename T>
 concept tuple_sized = requires
 {
     typename std::tuple_size<T>::type;

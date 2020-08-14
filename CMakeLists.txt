@@ -31,7 +31,6 @@ if (BUILD_TESTING)
     option(BUILD_TESTING "Add test targets" BUILD_TESTING)
 endif()
 
-
 ########################################################################
 # dependencies
 
@@ -107,6 +106,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
@@ -164,13 +164,15 @@ if (BUILD_TESTING)
 
         "tests/item_parser.test.cpp"
 
+        "tests/decoder.test.cpp"
+        # clang currently doesn't support class type NTTPs
+        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/decoder.object_utils.test.cpp>
+
         "tests/encoder.test.cpp"
         "tests/encoder.test_utils.hpp"
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.tuple.test.cpp"
-
-        "tests/decoder.test.cpp"
 
         "tests/memory_input_stream.test.cpp"
 
