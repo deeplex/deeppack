@@ -75,7 +75,7 @@ elseif (GXX_COMPATIBLE)
         -Wmissing-declarations
         -Wredundant-decls
         # with the following exceptions
-        -Wno-delete-non-abstract-non-virtual-dtor
+        -Wno-unknown-pragmas # pragma region is not supported :(
     )
 endif()
 
@@ -116,7 +116,9 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_input_stream.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/hash.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/mp_lite.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/perfect_hash.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/type_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/utils.hpp>
 )
@@ -170,6 +172,8 @@ if (BUILD_TESTING)
         "tests/decoder.test.cpp"
 
         "tests/memory_input_stream.test.cpp"
+
+        "tests/perfect_hash.test.cpp"
     )
 
     target_link_libraries(deeppack-tests PRIVATE
@@ -177,9 +181,6 @@ if (BUILD_TESTING)
 
         Boost::unit_test_framework
         fmt::fmt
-    )
-    set_target_properties(deeppack-tests PROPERTIES
-        CXX_EXTENSIONS OFF
     )
 
     add_test(NAME deeppack-tests COMMAND deeppack-tests)

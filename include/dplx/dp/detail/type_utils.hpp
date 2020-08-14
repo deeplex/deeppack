@@ -38,6 +38,12 @@ concept integer = std::integral<T> &&detail::none_of<std::remove_cv_t<T>,
                                                      char16_t,
                                                      char32_t>;
 
+template <typename T>
+concept signed_integer = integer<T> &&std::is_signed_v<T>;
+
+template <typename T>
+concept unsigned_integer = integer<T> && !signed_integer<T>;
+
 // clang-format off
 template <typename T>
 concept iec559_floating_point
@@ -57,6 +63,11 @@ concept iec559_floating_point
 #endif
     };
 // clang-format on
+
+// gcc 10.1 is a bit too eager looking up get and needs a little assurance
+// that everything is alrighty
+template <std::size_t>
+void get(...) noexcept = delete;
 
 // clang-format off
 template <typename T>
@@ -148,5 +159,18 @@ concept tuple_like
             ::dplx::dp::detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
         };
 // clang-format on
+
+template <dp::unsigned_integer T>
+constexpr T div_ceil(T dividend, T divisor)
+{
+    return dividend / divisor + (dividend % divisor != 0);
+}
+template <dp::unsigned_integer T, dp::unsigned_integer U>
+constexpr auto div_ceil(T dividend, U divisor) -> std::common_type_t<T, U>
+{
+    using common_t = std::common_type_t<T, U>;
+    return detail::div_ceil<common_t>(static_cast<common_t>(dividend),
+                                      static_cast<common_t>(divisor));
+}
 
 } // namespace dplx::dp::detail
