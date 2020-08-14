@@ -86,8 +86,9 @@ public:
             BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
             BOOST_TEST_REQUIRE(actualSize <= self.size());
 
-            auto const absoluteSize =
-                std::distance(owner.mBuffer.data(), self.data()) + actualSize;
+            auto const absoluteSize = static_cast<std::size_t>(std::distance(
+                                          owner.mBuffer.data(), self.data())) +
+                                      actualSize;
             static_cast<std::span<std::byte> &>(self) = self.first(actualSize);
 
             owner.mCurrentSize = absoluteSize;

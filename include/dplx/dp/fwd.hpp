@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <climits>
+
 #include <dplx/dp/stream.hpp>
 
 namespace dplx::dp

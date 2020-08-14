@@ -35,7 +35,8 @@ inline auto store_var_uint_impl(std::byte *dest,
         return 1;
     }
 
-    unsigned int const lastSetBitIndex = detail::find_last_set_bit(value);
+    auto const lastSetBitIndex =
+        static_cast<unsigned int>(detail::find_last_set_bit(value));
     int const bytePowerP2 = detail::find_last_set_bit(lastSetBitIndex);
 
     dest[0] = category | static_cast<std::byte>(24 + bytePowerP2 - 2);
@@ -193,7 +194,9 @@ public:
             using uvalue_type = std::make_unsigned_t<T>;
             auto const signmask = static_cast<uvalue_type>(
                 value >> (detail::digits_v<uvalue_type> - 1));
-            uvalue_type const uvalue = signmask ^ value; // complement negatives
+            // complement negatives
+            uvalue_type const uvalue =
+                signmask ^ static_cast<uvalue_type>(value);
 
             std::byte const category =
                 static_cast<std::byte>(signmask) & std::byte{0b001'00000};
@@ -374,7 +377,8 @@ private:
         auto const byteSize = detail::store_var_uint(
             std::ranges::data(writeLease), value, category);
 
-        DPLX_TRY(commit(outStream, writeLease, byteSize));
+        DPLX_TRY(
+            commit(outStream, writeLease, static_cast<std::size_t>(byteSize)));
         return success();
     }
 };

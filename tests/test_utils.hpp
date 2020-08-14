@@ -10,10 +10,34 @@
 #include <array>
 #include <cstddef>
 
+#include <string>
+
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/type_code.hpp>
 
 #include "boost-test.hpp"
+
+#if defined(BOOST_COMP_GNUC_AVAILABLE)
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#endif
+
+namespace boost::test_tools::tt_detail::impl
+{
+template <>
+inline auto boost_test_print_type<char8_t>(std::ostream &s, char8_t const &c)
+    -> std::ostream &
+{
+    fmt::print(s, "\\x{:02x}", static_cast<std::uint8_t>(c));
+    return s;
+}
+inline auto boost_test_print_type(std::ostream &s, std::u8string const &c)
+    -> std::ostream &
+{
+    std::string_view conv{reinterpret_cast<char const *>(c.data()), c.size()};
+    s << conv;
+    return s;
+}
+}
 
 namespace dplx::dp
 {
@@ -49,12 +73,17 @@ constexpr auto make_byte_array(std::initializer_list<T> vs,
     auto last = std::transform(vs.begin(), vs.end(), bs.data(), [](auto v) {
         return static_cast<std::byte>(v);
     });
-    std::fill(last, bs.data() + N, fill);
+    // std::fill(last, bs.data() + N, fill);
+    for (auto const bsEnd = bs.data() + N; last != bsEnd; ++last)
+    {
+        *last = fill;
+    }
     return bs;
 }
 
 template <typename T>
-auto make_byte_vector(std::initializer_list<T> vs) noexcept -> std::vector<std::byte>
+auto make_byte_vector(std::initializer_list<T> vs) noexcept
+    -> std::vector<std::byte>
 {
     std::vector<std::byte> bs(vs.size());
     std::transform(vs.begin(), vs.end(), bs.begin(), [](auto v) {
@@ -76,7 +105,8 @@ inline auto check_result(dplx::dp::result<R> const &rx)
     return prx;
 }
 
-#define DPLX_TEST_RESULT(...) BOOST_TEST((::dp_tests::check_result((__VA_ARGS__))))
+#define DPLX_TEST_RESULT(...)                                                  \
+    BOOST_TEST((::dp_tests::check_result((__VA_ARGS__))))
 #define DPLX_REQUIRE_RESULT(...)                                               \
     BOOST_TEST_REQUIRE((::dp_tests::check_result((__VA_ARGS__))))
 

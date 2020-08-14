@@ -80,7 +80,8 @@ public:
         else
         {
             // ensure type == posint or negint
-            if ((info.type & to_byte(type_code::negint)) != info.type)
+            if ((info.type & static_cast<std::uint8_t>(type_code::negint)) !=
+                info.type)
             {
                 return errc::item_type_mismatch;
             }
