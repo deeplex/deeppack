@@ -107,6 +107,7 @@ target_sources(deeppack PUBLIC
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_container.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_string.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
 
@@ -166,6 +167,7 @@ if (BUILD_TESTING)
         "tests/item_parser.test.cpp"
 
         "tests/decoder.test.cpp"
+        "tests/decoder.std_container.test.cpp"
         "tests/decoder.std_string.test.cpp"
         # clang currently doesn't support class type NTTPs
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/decoder.object_utils.test.cpp>

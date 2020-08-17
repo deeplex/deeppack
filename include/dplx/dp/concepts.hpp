@@ -60,9 +60,6 @@ concept decodable
     = input_stream<Stream>
     && !std::is_reference_v<T>
     && !std::is_pointer_v<T>
-    && std::is_nothrow_default_constructible_v<T>
-    && std::is_nothrow_constructible_v<T>
-    && std::is_nothrow_assignable_v<T>
     && requires(Stream &stream, T &dest)
     {
         typename basic_decoder<Stream, T>;
