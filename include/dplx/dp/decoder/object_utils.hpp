@@ -248,7 +248,7 @@ class decode_object_property_fn
     static constexpr auto ids = descriptor.ids;
     static constexpr std::size_t const num_prop_ids = descriptor.ids.size();
 
-#if !BOOST_PREDEF_TESTED_AT(BOOST_COMP_GNUC, 10, 1, 0)
+#if !BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
 
@@ -311,7 +311,7 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
     using id_type = typename descriptor_type::id_type;
     static constexpr descriptor_type const &descriptor = Descriptor;
 
-#if !BOOST_PREDEF_TESTED_AT(BOOST_COMP_GNUC, 10, 1, 0)
+#if !BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
     static_assert(detail::digits_v<id_type> <= 64);

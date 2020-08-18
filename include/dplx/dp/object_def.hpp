@@ -19,7 +19,7 @@
 #include <boost/predef/compiler.h>
 #include <boost/predef/other/workaround.h>
 
-#if BOOST_PREDEF_TESTED_AT(BOOST_COMP_GNUC, 10, 1, 0)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
 // gcc has a problem with the defaulted <=> over structs containing arrays
 // therefore we need to use std::u8string as runtime string type
 #include <string>
@@ -168,7 +168,7 @@ public:
 template <std::uint32_t Id, auto M>
 using property_def = basic_property_def<Id, M>;
 
-#if BOOST_PREDEF_TESTED_AT(BOOST_COMP_GNUC, 10, 1, 0)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
 
 template <fixed_u8string Id, auto M>
 using named_property_def = basic_property_def<Id, M, std::u8string>;
