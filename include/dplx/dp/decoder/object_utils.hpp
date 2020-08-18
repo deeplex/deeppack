@@ -17,11 +17,13 @@
 
 #include <boost/mp11/algorithm.hpp>
 
-#include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/decoder/std_string.hpp>
+#include <dplx/dp/decoder/utils.hpp>
 #include <dplx/dp/detail/hash.hpp>
 #include <dplx/dp/detail/perfect_hash.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
+#include <dplx/dp/fwd.hpp>
+#include <dplx/dp/layout_descriptor.hpp>
 #include <dplx/dp/object_def.hpp>
 #include <dplx/dp/tag_invoke.hpp>
 
@@ -144,30 +146,6 @@ template <auto const &descriptor>
 inline constexpr auto
     required_prop_mask_for = detail::compress_optional_props(descriptor);
 
-namespace mp11 = boost::mp11;
-
-template <typename Stream, typename T, auto const &descriptor>
-struct decode_value_fn
-{
-    Stream &inStream;
-    T &dest;
-
-    template <std::size_t I>
-    auto operator()(mp11::mp_size_t<I>) -> result<std::size_t>
-    {
-        constexpr decltype(auto) propertyDef =
-            descriptor.template property<I>();
-
-        using property_decoder =
-            dp::basic_decoder<Stream,
-                              typename decltype(
-                                  propertyDef.decl_value())::type>;
-
-        DPLX_TRY(property_decoder()(inStream, propertyDef.access(dest)));
-        return I;
-    }
-};
-
 inline constexpr std::size_t unknown_property_id = ~static_cast<std::size_t>(0);
 
 template <typename IdType, std::size_t NumIds, bool use_perfect_hash>
@@ -263,7 +241,7 @@ class decode_object_property_fn
                                            false>
         lookup{descriptor.ids};
 
-    using decode_value = decode_value_fn<Stream, T, descriptor>;
+    using decode_value_fn = mp_decode_value_fn<Stream, T, descriptor>;
 
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<std::size_t>
@@ -277,8 +255,8 @@ public:
             return errc::unknown_property;
         }
 
-        return mp11::mp_with_index<num_prop_ids>(idx,
-                                                 decode_value{inStream, dest});
+        return boost::mp11::mp_with_index<num_prop_ids>(
+            idx, decode_value_fn{inStream, dest});
     }
 };
 
@@ -337,12 +315,12 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
     static constexpr property_id_lookup_fn<id_type, id_map_size, false> lookup{
         large_ids};
 
-    using decode_value = decode_value_fn<Stream, T, descriptor>;
+    using decode_value_fn = mp_decode_value_fn<Stream, T, descriptor>;
 
-    struct decode_prop_small_id_fn : decode_value
+    struct decode_prop_small_id_fn : decode_value_fn
     {
         template <std::size_t I>
-        auto operator()(mp11::mp_size_t<I>) -> result<std::size_t>
+        auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
         {
             constexpr std::size_t propPos = static_cast<std::size_t>(
                 std::find(descriptor.ids.data(),
@@ -356,18 +334,19 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
             }
             else
             {
-                return decode_value::operator()(mp11::mp_size_t<propPos>{});
+                return decode_value_fn::operator()(
+                    boost::mp11::mp_size_t<propPos>{});
             }
         }
     };
 
-    struct decode_prop_large_id_fn : public decode_value
+    struct decode_prop_large_id_fn : public decode_value_fn
     {
         template <std::size_t I>
-        auto operator()(mp11::mp_size_t<I>) -> result<std::size_t>
+        auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
         {
-            return decode_value::operator()(
-                mp11::mp_size_t<I + small_ids_end>{});
+            return decode_value_fn::operator()(
+                boost::mp11::mp_size_t<I + small_ids_end>{});
         }
     };
 
@@ -392,7 +371,7 @@ public:
             }
             else
             {
-                return mp11::mp_with_index<small_id_limit>(
+                return boost::mp11::mp_with_index<small_id_limit>(
                     static_cast<std::size_t>(idInfo.value),
                     decode_prop_small_id_fn{inStream, dest});
             }
@@ -411,7 +390,7 @@ public:
                     return errc::unknown_property;
                 }
 
-                return mp11::mp_with_index<id_map_size>(
+                return boost::mp11::mp_with_index<id_map_size>(
                     idx, decode_prop_large_id_fn{inStream, dest});
             }
         }
@@ -551,7 +530,7 @@ inline auto decode_object_properties(Stream &stream,
     return success();
 }
 
-template <input_stream Stream, packable T>
+template <input_stream Stream, packable_object T>
 class basic_decoder<Stream, T>
 {
     static constexpr auto descriptor =

@@ -199,44 +199,21 @@ struct object_def
     template <std::size_t N>
     static constexpr decltype(auto) property() noexcept
     {
+        static_assert(N < num_properties);
         return detail::nth_param_v<N, Properties...>;
     }
 };
 
-// #TODO we can provide a better object_def_like
-template <typename T>
-concept object_def_like = requires(T &&t)
+template <typename>
+struct is_object_def : std::false_type
 {
-    t.ids[0];
-    t.template property<0>();
+};
+template <auto... Properties>
+struct is_object_def<object_def<Properties...>> : std::true_type
+{
 };
 
-inline constexpr struct layout_descriptor_for_fn
-{
-    template <typename T>
-    requires tag_invocable<layout_descriptor_for_fn,
-                           std::type_identity<T>> constexpr auto
-    operator()(std::type_identity<T>) const noexcept(
-        nothrow_tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>)
-        -> tag_invoke_result_t<layout_descriptor_for_fn, std::type_identity<T>>
-    {
-        return ::dplx::dp::cpo::tag_invoke(*this, std::type_identity<T>{});
-    }
-
-    // clang-format off
-    template <typename T>
-    requires requires { { T::layout_descriptor } -> object_def_like; }
-    // clang-format on
-    friend constexpr decltype(auto) tag_invoke(layout_descriptor_for_fn,
-                                               std::type_identity<T>) noexcept
-    {
-        return T::layout_descriptor;
-    }
-
-} layout_descriptor_for;
-
 template <typename T>
-concept packable =
-    tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
+inline constexpr bool is_object_def_v = is_object_def<T>::value;
 
 } // namespace dplx::dp

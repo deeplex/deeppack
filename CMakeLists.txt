@@ -96,6 +96,7 @@ set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/fwd.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/layout_descriptor.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/object_def.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/stream.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
@@ -109,6 +110,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_container.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_string.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>

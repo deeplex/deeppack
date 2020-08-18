@@ -7,6 +7,7 @@
 
 #include <dplx/dp/decoder/object_utils.hpp>
 
+#include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/streams/memory_input_stream.hpp>
 
 #include "boost-test.hpp"
