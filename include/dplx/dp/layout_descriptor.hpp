@@ -9,6 +9,7 @@
 
 #include <dplx/dp/object_def.hpp>
 #include <dplx/dp/tag_invoke.hpp>
+#include <dplx/dp/tuple_def.hpp>
 
 namespace dplx::dp
 {
@@ -35,6 +36,16 @@ inline constexpr struct layout_descriptor_for_fn
         return T::layout_descriptor;
     }
 
+    // clang-format off
+    template <typename T>
+    requires is_tuple_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>
+    friend constexpr decltype(auto)
+            tag_invoke(layout_descriptor_for_fn, std::type_identity<T>) noexcept
+    // clang-format on
+    {
+        return T::layout_descriptor;
+    }
+
 } layout_descriptor_for;
 
 template <typename T>
@@ -44,5 +55,9 @@ concept packable =
 template <typename T>
 concept packable_object = packable<T>
     &&is_object_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>;
+
+template <typename T>
+concept packable_tuple = packable<T>
+    &&is_tuple_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>;
 
 } // namespace dplx::dp

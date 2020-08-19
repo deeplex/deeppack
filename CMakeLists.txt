@@ -99,6 +99,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/layout_descriptor.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/object_def.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/stream.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tuple_def.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
@@ -110,6 +111,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_container.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_string.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
 
@@ -173,6 +175,7 @@ if (BUILD_TESTING)
         "tests/decoder.std_string.test.cpp"
         # clang currently doesn't support class type NTTPs
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/decoder.object_utils.test.cpp>
+        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/decoder.tuple_utils.test.cpp>
 
         "tests/encoder.test.cpp"
         "tests/encoder.test_utils.hpp"
