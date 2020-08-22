@@ -125,6 +125,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/hash.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/mp_lite.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/mp_for_dots.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/perfect_hash.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/type_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/utils.hpp>
@@ -182,6 +183,7 @@ if (BUILD_TESTING)
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.tuple.test.cpp"
+        "tests/encoder.tuple_utils.test.cpp"
 
         "tests/memory_input_stream.test.cpp"
 

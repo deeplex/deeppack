@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 namespace dplx::dp::detail
 {
 
@@ -45,5 +47,8 @@ struct mp_transform<Fn, L<TArgs...>>
 };
 template <template <typename> typename Fn, typename T>
 using mp_transform_t = typename mp_transform<Fn, T>::type;
+
+template <std::size_t I>
+using mp_size_t = std::integral_constant<std::size_t, I>;
 
 }
