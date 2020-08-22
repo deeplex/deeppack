@@ -54,8 +54,6 @@ public:
 template <auto... Properties>
 struct tuple_def
 {
-    using param_0_type =
-        std::remove_cvref_t<decltype(detail::nth_param_v<0, Properties...>)>;
     using class_type = std::common_type_t<
         typename std::remove_cvref_t<decltype(Properties)>::class_type...>;
 

@@ -105,6 +105,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/arg_list.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
@@ -183,6 +184,7 @@ if (BUILD_TESTING)
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.tuple.test.cpp"
+        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.tuple_utils.test.cpp>
 
         "tests/memory_input_stream.test.cpp"
 
