@@ -175,8 +175,6 @@ namespace dplx::dp
 template <typename Stream> // #conceptify
 class item_emitter
 {
-    using write_proxy = typename Stream::write_proxy;
-
 public:
     template <typename T>
     static inline auto var_uint_encoded_size(T const value) noexcept

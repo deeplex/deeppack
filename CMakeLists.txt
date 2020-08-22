@@ -183,7 +183,6 @@ if (BUILD_TESTING)
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.tuple.test.cpp"
-        "tests/encoder.tuple_utils.test.cpp"
 
         "tests/memory_input_stream.test.cpp"
 
