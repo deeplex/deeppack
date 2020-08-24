@@ -1,0 +1,147 @@
+
+// Copyright Henrik Steffen Gaßmann 2020
+//
+// Distributed under the Boost Software License, Version 1.0.
+//         (See accompanying file LICENSE or copy at
+//           https://www.boost.org/LICENSE_1_0.txt)
+
+#pragma once
+
+#include <dplx/dp/concepts.hpp>
+#include <dplx/dp/detail/mp_for_dots.hpp>
+#include <dplx/dp/detail/mp_lite.hpp>
+#include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/item_emitter.hpp>
+#include <dplx/dp/layout_descriptor.hpp>
+#include <dplx/dp/object_def.hpp>
+#include <dplx/dp/stream.hpp>
+
+namespace dplx::dp::detail
+{
+
+template <auto const &descriptor, typename T, typename Stream>
+struct mp_encode_object_property_fn
+{
+    Stream &outStream;
+    T const &value;
+
+    template <std::size_t I>
+    inline auto operator()(mp_size_t<I>) -> result<void>
+    {
+        constexpr decltype(auto) propertyDef =
+            descriptor.template property<I>();
+
+        using key_encoder =
+            basic_encoder<Stream,
+                          std::remove_cvref_t<decltype(propertyDef.id)>>;
+        using value_encoder =
+            basic_encoder<Stream,
+                          typename decltype(propertyDef.decl_value())::type>;
+
+        DPLX_TRY(key_encoder()(outStream, propertyDef.id));
+        DPLX_TRY(value_encoder()(outStream, propertyDef.access(value)));
+        return success();
+    }
+};
+
+} // namespace dplx::dp::detail
+
+namespace dplx::dp
+{
+
+template <output_stream Stream, std::size_t N>
+class basic_encoder<Stream, fixed_u8string<N>>
+{
+public:
+    using value_type = fixed_u8string<N>;
+
+    auto operator()(Stream &outStream, value_type const &value) const
+        -> result<void>
+    {
+        DPLX_TRY(item_emitter<Stream>::u8string(outStream, value.size()));
+
+        DPLX_TRY(write(outStream,
+                       reinterpret_cast<std::byte const *>(value.data()),
+                       value.size()));
+
+        return success();
+    }
+};
+
+template <auto const &descriptor, typename T, output_stream Stream>
+inline auto encode_object(Stream &outStream, T const &value) -> result<void>
+{
+    using encode_property_fn =
+        detail::mp_encode_object_property_fn<descriptor, T, Stream>;
+
+    if constexpr (descriptor.version == null_def_version)
+    {
+        DPLX_TRY(
+            item_emitter<Stream>::map(outStream, descriptor.num_properties));
+    }
+    else
+    {
+        DPLX_TRY(item_emitter<Stream>::map(outStream,
+                                           descriptor.num_properties + 1));
+
+        DPLX_TRY(versionIdWriteProxy, write(outStream, 1));
+        std::ranges::data(versionIdWriteProxy)[0] = std::byte{};
+        if constexpr (lazy_output_stream<Stream>)
+        {
+            DPLX_TRY(consume(outStream, versionIdWriteProxy));
+        }
+
+        DPLX_TRY(item_emitter<Stream>::integer(outStream, descriptor.version));
+    }
+
+    DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
+        encode_property_fn{outStream, value}));
+
+    return success();
+}
+
+template <auto const &descriptor, typename T, output_stream Stream>
+inline auto encode_object(Stream &outStream,
+                          T const &value,
+                          std::uint32_t version) -> result<void>
+{
+    using encode_property_fn =
+        detail::mp_encode_object_property_fn<descriptor, T, Stream>;
+
+    DPLX_TRY(
+        item_emitter<Stream>::map(outStream, descriptor.num_properties + 1));
+
+    {
+        DPLX_TRY(versionIdWriteProxy, write(outStream, 1));
+        std::ranges::data(versionIdWriteProxy)[0] = std::byte{};
+
+        if constexpr (lazy_output_stream<Stream>)
+        {
+            DPLX_TRY(consume(outStream, versionIdWriteProxy));
+        }
+    }
+    DPLX_TRY(item_emitter<Stream>::integer(outStream, version));
+
+    DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
+        encode_property_fn{outStream, value}));
+
+    return success();
+}
+
+template <output_stream Stream, packable_object T>
+class basic_encoder<Stream, T>
+{
+    static constexpr auto descriptor =
+        layout_descriptor_for(std::type_identity<T>{});
+
+public:
+    using value_type = T;
+
+    auto operator()(Stream &outStream, value_type const &value) const
+        -> result<void>
+    {
+        return dp::encode_object<descriptor, T, Stream>(outStream, value);
+    }
+};
+
+} // namespace dplx::dp
