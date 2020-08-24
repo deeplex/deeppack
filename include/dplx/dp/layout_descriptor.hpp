@@ -53,11 +53,27 @@ concept packable =
     tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
 
 template <typename T>
-concept packable_object = packable<T>
-    &&is_object_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>;
+concept packable_object =
+    packable<T> &&is_object_def_v<std::remove_cvref_t<decltype(
+        layout_descriptor_for(std::type_identity<T>{}))>>;
 
 template <typename T>
-concept packable_tuple = packable<T>
-    &&is_tuple_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>;
+concept packable_tuple =
+    packable<T> &&is_tuple_def_v<std::remove_cvref_t<decltype(
+        layout_descriptor_for(std::type_identity<T>{}))>>;
+
+inline constexpr std::uint32_t null_def_version = 0xffff'ffffu;
 
 } // namespace dplx::dp
+
+namespace dplx::dp::detail
+{
+
+template <typename T>
+constexpr auto versioned_decoder_enabled(T const &descriptor) noexcept -> bool
+{
+    return descriptor.allow_versioned_auto_decoder ||
+           descriptor.version == null_def_version;
+}
+
+} // namespace dplx::dp::detail

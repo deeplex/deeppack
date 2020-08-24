@@ -196,6 +196,11 @@ struct object_def
         !(... && Properties.required);
     static constexpr std::array<id_type, num_properties> ids{Properties.id...};
 
+    std::uint32_t version = 0xffff'ffff;
+    bool allow_versioned_auto_decoder = false;
+
+    constexpr object_def() noexcept = default;
+
     template <std::size_t N>
     static constexpr decltype(auto) property() noexcept
     {

@@ -61,6 +61,9 @@ struct tuple_def
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
 
+    std::uint32_t version = 0xffff'ffff;
+    bool allow_versioned_auto_decoder = false;
+
     template <std::size_t N>
     static constexpr decltype(auto) property() noexcept
     {
