@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <boost/mp11/algorithm.hpp>
-
 #include <dplx/dp/decoder/utils.hpp>
+#include <dplx/dp/detail/mp_for_dots.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
@@ -86,11 +85,9 @@ inline auto decode_tuple_properties(Stream &stream,
         return errc::tuple_size_mismatch;
     }
 
-    for (std::size_t i = 0; i < descriptor.num_properties; ++i)
-    {
-        DPLX_TRY(boost::mp11::mp_with_index<descriptor.num_properties>(
-            i, decode_value_fn{stream, dest}));
-    }
+    DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
+        decode_value_fn{stream, dest}));
+
     return success();
 }
 
