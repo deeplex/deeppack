@@ -33,10 +33,23 @@ BOOST_AUTO_TEST_CASE(tuple_head_decode_unversioned)
 
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 7);
-    BOOST_TEST(version == 0u);
+    BOOST_TEST(version == dplx::dp::null_def_version);
 }
 
-BOOST_AUTO_TEST_CASE(tuple_head_decode_versioned)
+BOOST_AUTO_TEST_CASE(tuple_head_decode_versioned_00)
+{
+    auto bytes = make_byte_array<32>({0x8B, 0x00});
+    test_input_stream istream{bytes};
+
+    auto rx = dplx::dp::parse_tuple_head(istream, std::true_type{});
+    DPLX_REQUIRE_RESULT(rx);
+
+    auto const [numProps, version] = rx.assume_value();
+    BOOST_TEST(numProps == 0x0B - 1);
+    BOOST_TEST(version == 0x00u);
+}
+
+BOOST_AUTO_TEST_CASE(tuple_head_decode_versioned_ff)
 {
     auto bytes = make_byte_array<32>({0x8B, 0x18, 0xFF});
     test_input_stream istream{bytes};

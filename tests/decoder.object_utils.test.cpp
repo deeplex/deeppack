@@ -44,10 +44,22 @@ BOOST_AUTO_TEST_CASE(object_head_decode_unversioned)
     DPLX_REQUIRE_RESULT(rx);
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 3);
+    BOOST_TEST(version == dplx::dp::null_def_version);
+}
+
+BOOST_AUTO_TEST_CASE(object_head_decode_versioned_0)
+{
+    auto bytes = make_byte_array<32>({0xAB, 0, 0});
+    test_input_stream istream{bytes};
+
+    auto rx = dplx::dp::parse_object_head(istream, std::true_type{});
+    DPLX_REQUIRE_RESULT(rx);
+    auto const [numProps, version] = rx.assume_value();
+    BOOST_TEST(numProps == 0x0B - 1);
     BOOST_TEST(version == 0);
 }
 
-BOOST_AUTO_TEST_CASE(object_head_decode_versioned)
+BOOST_AUTO_TEST_CASE(object_head_decode_versioned_5)
 {
     auto bytes = make_byte_array<32>({0xAB, 0, 5});
     test_input_stream istream{bytes};

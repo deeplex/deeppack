@@ -421,7 +421,7 @@ inline auto parse_object_head(Stream &inStream,
     auto const indefinite = mapInfo.indefinite();
     if (!indefinite && mapInfo.value == 0)
     {
-        return object_head_info{0, 0u};
+        return object_head_info{0, null_def_version};
     }
 
     DPLX_TRY(remainingBytes, dp::available_input_size(inStream));
@@ -439,7 +439,7 @@ inline auto parse_object_head(Stream &inStream,
 
     if constexpr (!isVersioned)
     {
-        return object_head_info{numProps, 0u};
+        return object_head_info{numProps, null_def_version};
     }
     else
     {
@@ -449,7 +449,7 @@ inline auto parse_object_head(Stream &inStream,
         if (std::ranges::data(maybeVersionReadProxy)[0] != std::byte{})
         {
             DPLX_TRY(dp::consume(inStream, maybeVersionReadProxy, 0));
-            return object_head_info{numProps, 0};
+            return object_head_info{numProps, null_def_version};
         }
 
         if constexpr (dp::lazy_input_stream<Stream>)
@@ -462,7 +462,8 @@ inline auto parse_object_head(Stream &inStream,
         {
             return errc::item_type_mismatch;
         }
-        if (versionInfo.value > std::numeric_limits<std::uint32_t>::max())
+        // 0xffff'ffff => max() is reserved as null_def_version
+        if (versionInfo.value >= std::numeric_limits<std::uint32_t>::max())
         {
             return errc::item_value_out_of_range;
         }
@@ -531,7 +532,8 @@ inline auto decode_object_properties(Stream &stream,
 }
 
 template <input_stream Stream, packable_object T>
-class basic_decoder<Stream, T>
+requires(detail::versioned_decoder_enabled(layout_descriptor_for(
+    std::type_identity<T>{}))) class basic_decoder<Stream, T>
 {
     static constexpr auto descriptor =
         layout_descriptor_for(std::type_identity<T>{});
@@ -539,7 +541,18 @@ class basic_decoder<Stream, T>
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
     {
-        DPLX_TRY(headInfo, dp::parse_object_head<Stream, false>(inStream));
+        DPLX_TRY(headInfo,
+                 dp::parse_object_head<Stream,
+                                       descriptor.version != null_def_version>(
+                     inStream));
+
+        if constexpr (descriptor.version != null_def_version)
+        {
+            if (descriptor.version != headInfo.version)
+            {
+                return errc::item_version_mismatch;
+            }
+        }
 
         return dp::decode_object_properties<descriptor, T, Stream>(
             inStream, dest, headInfo.num_properties);
