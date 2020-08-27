@@ -77,7 +77,7 @@ inline auto decode_tuple_properties(Stream &stream,
                                     T &dest,
                                     std::int32_t numProperties) -> result<void>
 {
-    using decode_value_fn = detail::mp_decode_value_fn<Stream, T, descriptor>;
+    using decode_value_fn = detail::mp_decode_value_fn<descriptor, T, Stream>;
 
     constexpr std::size_t expectedNumProps = descriptor.num_properties;
     if (numProperties != expectedNumProps)
@@ -91,9 +91,9 @@ inline auto decode_tuple_properties(Stream &stream,
     return success();
 }
 
-template <input_stream Stream, packable_tuple T>
+template <packable_tuple T, input_stream Stream>
 requires(detail::versioned_decoder_enabled(layout_descriptor_for(
-    std::type_identity<T>{}))) class basic_decoder<Stream, T>
+    std::type_identity<T>{}))) class basic_decoder<T, Stream>
 {
     static constexpr auto descriptor =
         layout_descriptor_for(std::type_identity<T>{});

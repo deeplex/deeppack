@@ -32,11 +32,11 @@ struct mp_encode_object_property_fn
             descriptor.template property<I>();
 
         using key_encoder =
-            basic_encoder<Stream,
-                          std::remove_cvref_t<decltype(propertyDef.id)>>;
+            basic_encoder<std::remove_cvref_t<decltype(propertyDef.id)>,
+                          Stream>;
         using value_encoder =
-            basic_encoder<Stream,
-                          typename decltype(propertyDef.decl_value())::type>;
+            basic_encoder<typename decltype(propertyDef.decl_value())::type,
+                          Stream>;
 
         DPLX_TRY(key_encoder()(outStream, propertyDef.id));
         DPLX_TRY(value_encoder()(outStream, propertyDef.access(value)));
@@ -49,8 +49,8 @@ struct mp_encode_object_property_fn
 namespace dplx::dp
 {
 
-template <output_stream Stream, std::size_t N>
-class basic_encoder<Stream, fixed_u8string<N>>
+template <std::size_t N, output_stream Stream>
+class basic_encoder<fixed_u8string<N>, Stream>
 {
 public:
     using value_type = fixed_u8string<N>;
@@ -128,8 +128,8 @@ inline auto encode_object(Stream &outStream,
     return success();
 }
 
-template <output_stream Stream, packable_object T>
-class basic_encoder<Stream, T>
+template <packable_object T, output_stream Stream>
+class basic_encoder<T, Stream>
 {
     static constexpr auto descriptor =
         layout_descriptor_for(std::type_identity<T>{});

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(std_pair)
     value_type values = {{encoded[1]}, {encoded[2]}};
 
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>, value_type>;
+        dplx::dp::basic_encoder<value_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(std_tuple_2)
     value_type values = {{encoded[1]}, {encoded[2]}};
 
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>, value_type>;
+        dplx::dp::basic_encoder<value_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(std_tuple_3)
         {encoded[1]}, static_cast<unsigned int>(encoded[2]), {encoded[3]}};
 
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>, value_type>;
+        dplx::dp::basic_encoder<value_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 

@@ -170,8 +170,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
     auto bytes = make_byte_array<5>({0b100'00100, 0x13, 0x09, 0x15, 0x17});
     custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17};
 
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>,
-                                                 custom_with_layout_descriptor>;
+    using test_encoder = dplx::dp::basic_encoder<custom_with_layout_descriptor, test_output_stream<>>;
     test_output_stream<> ostream{};
     test_encoder subject{};
     auto rx = subject(ostream, t);

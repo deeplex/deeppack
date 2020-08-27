@@ -49,27 +49,27 @@ static_assert(dplx::dp::associative_container<boost::container::map<int, int>>);
 static_assert(
     dplx::dp::associative_container<boost::container::flat_map<int, int>>);
 
-static_assert(dplx::dp::decodable<test_input_stream, std::deque<int>>);
-static_assert(dplx::dp::decodable<test_input_stream, std::list<int>>);
-static_assert(dplx::dp::decodable<test_input_stream, std::vector<int>>);
+static_assert(dplx::dp::decodable<std::deque<int>, test_input_stream>);
+static_assert(dplx::dp::decodable<std::list<int>, test_input_stream>);
+static_assert(dplx::dp::decodable<std::vector<int>, test_input_stream>);
 static_assert(
-    dplx::dp::decodable<test_input_stream, boost::container::deque<int>>);
+    dplx::dp::decodable<boost::container::deque<int>, test_input_stream>);
 static_assert(
-    dplx::dp::decodable<test_input_stream, boost::container::list<int>>);
-static_assert(dplx::dp::decodable<test_input_stream,
-                                  boost::container::small_vector<int, 33>>);
-static_assert(dplx::dp::decodable<test_input_stream,
-                                  boost::container::static_vector<int, 37>>);
+    dplx::dp::decodable<boost::container::list<int>, test_input_stream>);
+static_assert(dplx::dp::decodable<boost::container::small_vector<int, 33>,
+                                  test_input_stream>);
+static_assert(dplx::dp::decodable<boost::container::static_vector<int, 37>,
+                                  test_input_stream>);
 static_assert(
-    dplx::dp::decodable<test_input_stream, boost::container::vector<int>>);
+    dplx::dp::decodable<boost::container::vector<int>, test_input_stream>);
 
-static_assert(dplx::dp::decodable<test_input_stream, std::map<int, int>>);
+static_assert(dplx::dp::decodable<std::map<int, int>, test_input_stream>);
 static_assert(
-    dplx::dp::decodable<test_input_stream, std::unordered_map<int, int>>);
+    dplx::dp::decodable<std::unordered_map<int, int>, test_input_stream>);
 static_assert(
-    dplx::dp::decodable<test_input_stream, boost::container::map<int, int>>);
-static_assert(dplx::dp::decodable<test_input_stream,
-                                  boost::container::flat_map<int, int>>);
+    dplx::dp::decodable<boost::container::map<int, int>, test_input_stream>);
+static_assert(dplx::dp::decodable<boost::container::flat_map<int, int>,
+                                  test_input_stream>);
 
 BOOST_AUTO_TEST_SUITE(std_container)
 
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(empty_array, T, uint_sequence_containers)
     auto serializedInput = make_byte_array<12>({0b100'00000});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(empty_indefinite_array,
     auto serializedInput = make_byte_array<12>({0b100'11111, 0xFF});
     test_input_stream stream{std::span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(single_item, T, uint_sequence_containers)
     auto serializedInput = make_byte_array<12>({0b100'00001, 0x15});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(single_indefinite_item,
     auto serializedInput = make_byte_array<12>({0b100'11111, 0x15, 0xFF});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiple_items, T, uint_sequence_containers)
         make_byte_array<12>({0b100'00000 | 3, 0x15, 0x04, 0x10});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiple_indefinite_items,
         make_byte_array<12>({0b100'11111, 0x15, 0x04, 0x10, 0xFF});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(reject_missing_data, T, uint_sequence_containers)
     auto serializedInput = make_byte_array<2>({0b100'00011, 0x15});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(reject_missing_items, T, uint_sequence_containers)
     auto serializedInput = make_byte_array<4>({0b100'00011, 0x19, 0x04, 0x10});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(reject_indefinite_item_missing_break,
     auto serializedInput = make_byte_array<4>({0b100'11111, 0x15, 0x04, 0x10});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(reject_invalid_subitems,
         make_byte_array<12>({0b100'11111, 0x15, 0x04, 0x10, 0b001'00000});
     test_input_stream stream{byte_span(serializedInput)};
 
-    using decoder_type = dplx::dp::basic_decoder<test_input_stream, T>;
+    using decoder_type = dplx::dp::basic_decoder<T, test_input_stream>;
 
     T out{};
     auto rx = decoder_type()(stream, out);

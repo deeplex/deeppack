@@ -35,9 +35,8 @@ struct mp_encode_value_fn
             descriptor.template property<I>();
 
         using property_encoder =
-            dp::basic_encoder<Stream,
-                              typename decltype(
-                                  propertyDef.decl_value())::type>;
+            dp::basic_encoder<typename decltype(propertyDef.decl_value())::type,
+                              Stream>;
 
         DPLX_TRY(property_encoder()(stream, propertyDef.access(value)));
         return success();
@@ -89,8 +88,8 @@ inline auto encode_tuple(Stream &outStream,
     return success();
 }
 
-template <output_stream Stream, packable_tuple T>
-class basic_encoder<Stream, T>
+template <packable_tuple T, output_stream Stream>
+class basic_encoder<T, Stream>
 {
     static constexpr auto descriptor =
         layout_descriptor_for(std::type_identity<T>{});

@@ -18,13 +18,13 @@ BOOST_AUTO_TEST_SUITE(decoder)
 
 struct std_string_dependencies
 {
-    dplx::dp::basic_decoder<test_input_stream, std::u8string> subject;
+    dplx::dp::basic_decoder<std::u8string, test_input_stream> subject;
     std::u8string out;
 };
 
 BOOST_FIXTURE_TEST_SUITE(std_string, std_string_dependencies)
 
-using test_encoder = dplx::dp::basic_decoder<test_input_stream, std::u8string>;
+using test_encoder = dplx::dp::basic_decoder<std::u8string, test_input_stream>;
 
 using namespace std::string_view_literals;
 

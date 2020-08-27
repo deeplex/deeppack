@@ -189,8 +189,8 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     auto bytes = make_byte_array<32>({0b100'00100, 0x13, 0x09, 0x15, 0x17});
     test_input_stream istream{bytes};
 
-    using test_decoder = dplx::dp::basic_decoder<test_input_stream,
-                                                 custom_with_layout_descriptor>;
+    using test_decoder = dplx::dp::basic_decoder<custom_with_layout_descriptor,
+                                                 test_input_stream>;
     test_decoder subject{};
     custom_with_layout_descriptor t{};
     auto rx = subject(istream, t);

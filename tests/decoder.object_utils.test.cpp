@@ -314,11 +314,12 @@ public:
     }
 };
 static_assert(dplx::dp::packable<custom_with_layout_descriptor>);
+static_assert(dplx::dp::packable_object<custom_with_layout_descriptor>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
 {
-    using test_encoder = dplx::dp::basic_decoder<test_input_stream,
-                                                 custom_with_layout_descriptor>;
+    using test_encoder = dplx::dp::basic_decoder<custom_with_layout_descriptor,
+                                                 test_input_stream>;
 
     test_encoder subject{};
 
@@ -382,8 +383,8 @@ static_assert(dplx::dp::packable<custom_with_named_layout_descriptor>);
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_decoding)
 {
     using test_encoder =
-        dplx::dp::basic_decoder<test_input_stream,
-                                custom_with_named_layout_descriptor>;
+        dplx::dp::basic_decoder<custom_with_named_layout_descriptor,
+                                test_input_stream>;
 
     test_encoder subject{};
 

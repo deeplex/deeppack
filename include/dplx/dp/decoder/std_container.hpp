@@ -45,7 +45,7 @@ concept associative_container = !disable_associative_container<T> &&
     t.insert(typename T::value_type{k, m});
 };
     // clang-format on
-                                                               
+
 #if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <=, 19, 28, 29115)
 namespace detail
 {
@@ -59,12 +59,12 @@ concept resizable_sequence_container = requires(T &&value)
 } // namespace detail
 #endif
 
-template <input_stream Stream, sequence_container T>
-requires decodable<Stream, typename T::value_type> class basic_decoder<Stream,
-                                                                       T>
+template <sequence_container T, input_stream Stream>
+requires decodable<typename T::value_type, Stream> class basic_decoder<T,
+                                                                       Stream>
 {
     using element_type = typename T::value_type;
-    using element_decoder = basic_decoder<Stream, element_type>;
+    using element_decoder = basic_decoder<element_type, Stream>;
 
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
@@ -140,15 +140,15 @@ public:
     }
 };
 
-template <input_stream Stream, associative_container T>
-requires decodable<Stream, typename T::key_type>
-    &&decodable<Stream, typename T::mapped_type> class basic_decoder<Stream, T>
+template <associative_container T, input_stream Stream>
+requires decodable<typename T::key_type, Stream>
+    &&decodable<typename T::mapped_type, Stream> class basic_decoder<T, Stream>
 {
     using value_type = typename T::value_type;
     using key_type = typename T::key_type;
-    using key_decoder = basic_decoder<Stream, key_type>;
+    using key_decoder = basic_decoder<key_type, Stream>;
     using mapped_type = typename T::mapped_type;
-    using mapped_decoder = basic_decoder<Stream, mapped_type>;
+    using mapped_decoder = basic_decoder<mapped_type, Stream>;
 
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>

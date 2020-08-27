@@ -98,12 +98,11 @@ public:
 };
 static_assert(dplx::dp::packable_object<custom_with_layout_descriptor>);
 static_assert(
-    dplx::dp::encodable<test_output_stream<>, custom_with_layout_descriptor>);
+    dplx::dp::encodable<custom_with_layout_descriptor, test_output_stream<>>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>,
-                                                 custom_with_layout_descriptor>;
+    using test_encoder = dplx::dp::basic_encoder<custom_with_layout_descriptor, test_output_stream<>>;
 
     auto bytes = make_byte_array<11>(
         {0b101'00000 | 4, 1, 0x13, 2, 7, 0x18, 26, 4, 0x18, 36, 0x14});
@@ -173,14 +172,12 @@ public:
     }
 };
 static_assert(dplx::dp::packable_object<custom_with_named_layout_descriptor>);
-static_assert(dplx::dp::encodable<test_output_stream<>,
-                                  custom_with_named_layout_descriptor>);
+static_assert(dplx::dp::encodable<custom_with_named_layout_descriptor, test_output_stream<>>);
 
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_encoding)
 {
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>,
-                                custom_with_named_layout_descriptor>;
+        dplx::dp::basic_encoder<custom_with_named_layout_descriptor, test_output_stream<>>;
     auto bytes = make_byte_array<17, int>({0b101'00000 | 4,
                                            0x61,
                                            'b',

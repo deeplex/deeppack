@@ -38,15 +38,15 @@ static_assert(std::is_same_v<simple_encodeable_unmoveable const &,
 
 namespace dplx::dp
 {
-template <typename Stream>
-class basic_encoder<Stream, simple_encodeable_unmoveable>
+template <output_stream Stream>
+class basic_encoder<simple_encodeable_unmoveable, Stream>
 {
 public:
     auto operator()(Stream &outStream, simple_encodeable_unmoveable const &x) const
         -> result<void>
     {
         using simple = dp_tests::simple_encodeable;
-        return basic_encoder<Stream, simple>()(outStream, simple{x.value});
+        return basic_encoder<simple, Stream>()(outStream, simple{x.value});
     }
 };
 } // namespace dplx::dp
@@ -60,23 +60,23 @@ static_assert(dplx::dp::pair_like<dplx::dp::map_pair<int, int>>);
 static_assert(std::is_trivial_v<dplx::dp::map_pair<int, int>>);
 
 
-static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int>);
-static_assert(!dplx::dp::encodable<test_output_stream<>, volatile int const>);
-static_assert(!dplx::dp::encodable<test_output_stream<>, char>);
+static_assert(!dplx::dp::encodable<volatile int, test_output_stream<>>);
+static_assert(!dplx::dp::encodable<volatile int const, test_output_stream<>>);
+static_assert(!dplx::dp::encodable<char, test_output_stream<>>);
 
 // the integer encoder template just forwards to typ_encoder::integer()
 // which is already covered by the item_emitter test suite
-static_assert(dplx::dp::encodable<test_output_stream<>, signed char>);
-static_assert(dplx::dp::encodable<test_output_stream<>, short>);
-static_assert(dplx::dp::encodable<test_output_stream<>, int>);
-static_assert(dplx::dp::encodable<test_output_stream<>, long>);
-static_assert(dplx::dp::encodable<test_output_stream<>, long long>);
+static_assert(dplx::dp::encodable<signed char, test_output_stream<>>);
+static_assert(dplx::dp::encodable<short, test_output_stream<>>);
+static_assert(dplx::dp::encodable<int, test_output_stream<>>);
+static_assert(dplx::dp::encodable<long, test_output_stream<>>);
+static_assert(dplx::dp::encodable<long long, test_output_stream<>>);
 
-static_assert(dplx::dp::encodable<test_output_stream<>, unsigned char>);
-static_assert(dplx::dp::encodable<test_output_stream<>, unsigned short>);
-static_assert(dplx::dp::encodable<test_output_stream<>, unsigned int>);
-static_assert(dplx::dp::encodable<test_output_stream<>, unsigned long>);
-static_assert(dplx::dp::encodable<test_output_stream<>, unsigned long long>);
+static_assert(dplx::dp::encodable<unsigned char, test_output_stream<>>);
+static_assert(dplx::dp::encodable<unsigned short, test_output_stream<>>);
+static_assert(dplx::dp::encodable<unsigned int, test_output_stream<>>);
+static_assert(dplx::dp::encodable<unsigned long, test_output_stream<>>);
+static_assert(dplx::dp::encodable<unsigned long long, test_output_stream<>>);
 
 BOOST_AUTO_TEST_SUITE(encode_api)
 
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_CASE(bool_false)
 {
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, bool>;
+    using test_encoder = dplx::dp::basic_encoder<bool, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,false));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(bool_false)
 }
 BOOST_AUTO_TEST_CASE(bool_true)
 {
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, bool>;
+    using test_encoder = dplx::dp::basic_encoder<bool, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,true));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(bool_true)
 BOOST_AUTO_TEST_CASE(null_value)
 {
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>, dplx::dp::null_type>;
+        dplx::dp::basic_encoder<dplx::dp::null_type, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,dplx::dp::null_value));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(null_value)
 
 BOOST_AUTO_TEST_CASE(float_api)
 {
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, float>;
+    using test_encoder = dplx::dp::basic_encoder<float, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,100000.0f));
 
     auto encodedValue = make_byte_array(0x47, 0xc3, 0x50, 0x00);
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(float_api)
 }
 BOOST_AUTO_TEST_CASE(double_api)
 {
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, double>;
+    using test_encoder = dplx::dp::basic_encoder<double, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,1.1));
 
     auto encodedValue =
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(double_api)
 
 BOOST_AUTO_TEST_CASE(void_dispatch_api)
 {
-    using test_encoder = dplx::dp::basic_encoder<test_output_stream<>, void>;
+    using test_encoder = dplx::dp::basic_encoder<void, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,dplx::dp::null_value));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(void_dispatch_api)
 BOOST_AUTO_TEST_CASE(vararg_dispatch_0)
 {
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>, dplx::dp::mp_varargs<>>;
+        dplx::dp::basic_encoder<dplx::dp::mp_varargs<>, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
@@ -324,8 +324,7 @@ BOOST_AUTO_TEST_CASE(vararg_dispatch_0)
 BOOST_AUTO_TEST_CASE(vararg_dispatch_1)
 {
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>,
-                                dplx::dp::mp_varargs<dplx::dp::null_type>>;
+        dplx::dp::basic_encoder<dplx::dp::mp_varargs<dplx::dp::null_type>, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,dplx::dp::null_value));
 
     BOOST_TEST(encodingBuffer.size() == 2u);
@@ -336,8 +335,7 @@ BOOST_AUTO_TEST_CASE(vararg_dispatch_1)
 BOOST_AUTO_TEST_CASE(vararg_dispatch_2)
 {
     using test_encoder =
-        dplx::dp::basic_encoder<test_output_stream<>,
-                                dplx::dp::mp_varargs<dplx::dp::null_type, int>>;
+        dplx::dp::basic_encoder<dplx::dp::mp_varargs<dplx::dp::null_type, int>, test_output_stream<>>;
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer,dplx::dp::null_value, 0));
 
     BOOST_TEST(encodingBuffer.size() == 3u);

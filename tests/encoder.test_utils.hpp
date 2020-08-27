@@ -23,7 +23,7 @@ struct simple_encodeable
 namespace dplx::dp
 {
 template <output_stream Stream>
-class basic_encoder<Stream, dp_tests::simple_encodeable>
+class basic_encoder<dp_tests::simple_encodeable, Stream>
 {
 public:
     auto operator()(Stream &outStream, dp_tests::simple_encodeable x)

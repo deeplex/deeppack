@@ -17,7 +17,7 @@ namespace dplx::dp
 {
 
 template <input_stream Stream>
-class basic_decoder<Stream, std::u8string>
+class basic_decoder<std::u8string, Stream>
 {
 public:
     auto operator()(Stream &inStream, std::u8string &value) const

@@ -16,7 +16,7 @@
 namespace dplx::dp::detail
 {
 
-template <input_stream Stream, typename T, auto const &descriptor>
+template <auto const &descriptor, typename T, input_stream Stream>
 struct mp_decode_value_fn
 {
     Stream &inStream;
@@ -29,9 +29,8 @@ struct mp_decode_value_fn
             descriptor.template property<I>();
 
         using property_decoder =
-            dp::basic_decoder<Stream,
-                              typename decltype(
-                                  propertyDef.decl_value())::type>;
+            dp::basic_decoder<typename decltype(propertyDef.decl_value())::type,
+                              Stream>;
 
         DPLX_TRY(property_decoder()(inStream, propertyDef.access(dest)));
         return I;

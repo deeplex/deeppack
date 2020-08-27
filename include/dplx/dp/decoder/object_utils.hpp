@@ -75,8 +75,8 @@ inline constexpr struct property_id_hash_fn
 
 } property_id_hash;
 
-template <input_stream Stream, std::size_t N>
-class basic_decoder<Stream, fixed_u8string<N>>
+template <std::size_t N, input_stream Stream>
+class basic_decoder<fixed_u8string<N>, Stream>
 {
 public:
     auto operator()(Stream &inStream, fixed_u8string<N> &out) const
@@ -219,7 +219,7 @@ public:
     }
 };
 
-template <typename Stream, typename T, auto const &Descriptor>
+template <auto const &Descriptor, typename T, input_stream Stream>
 class decode_object_property_fn
 {
     static constexpr auto const &descriptor = Descriptor;
@@ -230,18 +230,17 @@ class decode_object_property_fn
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
 
-    using odef_type = std::remove_cvref_t<
-        tag_invoke_result_t<layout_descriptor_for_fn, std::type_identity<T>>>;
+    using odef_type = std::remove_cvref_t<decltype(descriptor)>;
     using id_type = typename odef_type::id_type;
     using id_runtime_type = typename odef_type::id_runtime_type;
-    using id_decoder = basic_decoder<Stream, id_runtime_type>;
+    using id_decoder = basic_decoder<id_runtime_type, Stream>;
 
     static constexpr property_id_lookup_fn<id_type,
                                            descriptor.ids.size(),
                                            false>
         lookup{descriptor.ids};
 
-    using decode_value_fn = mp_decode_value_fn<Stream, T, descriptor>;
+    using decode_value_fn = mp_decode_value_fn<descriptor, T, Stream>;
 
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<std::size_t>
@@ -260,8 +259,8 @@ public:
     }
 };
 
-template <typename Stream, typename T, auto const &Descriptor>
-inline constexpr decode_object_property_fn<Stream, T, Descriptor>
+template <auto const &Descriptor, typename T, input_stream Stream>
+inline constexpr decode_object_property_fn<Descriptor, T, Stream>
     decode_object_property{};
 
 template <typename T>
@@ -279,11 +278,11 @@ constexpr auto index_of_limit(T const *elems,
     return num;
 }
 
-template <typename Stream, typename T, decltype(auto) Descriptor>
+template <typename T, decltype(auto) Descriptor, typename Stream>
 requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
-    Descriptor)>::id_type> class decode_object_property_fn<Stream,
+    Descriptor)>::id_type> class decode_object_property_fn<Descriptor,
                                                            T,
-                                                           Descriptor>
+                                                           Stream>
 {
     using descriptor_type = std::remove_cvref_t<decltype(Descriptor)>;
     using id_type = typename descriptor_type::id_type;
@@ -315,7 +314,7 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
     static constexpr property_id_lookup_fn<id_type, id_map_size, false> lookup{
         large_ids};
 
-    using decode_value_fn = mp_decode_value_fn<Stream, T, descriptor>;
+    using decode_value_fn = mp_decode_value_fn<descriptor, T, Stream>;
 
     struct decode_prop_small_id_fn : decode_value_fn
     {
@@ -476,7 +475,7 @@ template <auto const &descriptor, typename T, input_stream Stream>
 inline auto decode_object_property(Stream &stream, T &dest)
     -> result<std::size_t>
 {
-    return detail::decode_object_property<Stream, T, descriptor>(stream, dest);
+    return detail::decode_object_property<descriptor, T, Stream>(stream, dest);
 }
 
 template <auto const &descriptor, typename T, input_stream Stream>
@@ -485,7 +484,7 @@ inline auto decode_object_properties(Stream &stream,
                                      std::int32_t numProperties) -> result<void>
 {
     constexpr decltype(auto) decode_object_property =
-        detail::decode_object_property<Stream, T, descriptor>;
+        detail::decode_object_property<descriptor, T, Stream>;
 
     if constexpr (descriptor.has_optional_properties)
     {
@@ -531,9 +530,9 @@ inline auto decode_object_properties(Stream &stream,
     return success();
 }
 
-template <input_stream Stream, packable_object T>
+template <packable_object T, input_stream Stream>
 requires(detail::versioned_decoder_enabled(layout_descriptor_for(
-    std::type_identity<T>{}))) class basic_decoder<Stream, T>
+    std::type_identity<T>{}))) class basic_decoder<T, Stream>
 {
     static constexpr auto descriptor =
         layout_descriptor_for(std::type_identity<T>{});

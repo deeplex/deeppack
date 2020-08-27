@@ -20,8 +20,8 @@
 #include <span>
 #include <type_traits>
 
-#include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/concepts.hpp>
+#include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/arg_list.hpp>
 #include <dplx/dp/fwd.hpp>
@@ -32,31 +32,32 @@ namespace dplx::dp
 {
 
 // volatile types are not supported.
-template <output_stream Stream, typename T>
-class basic_encoder<Stream, T volatile>;
-template <output_stream Stream, typename T>
-class basic_encoder<Stream, T const volatile>;
+template <typename T, output_stream Stream>
+class basic_encoder<T volatile, Stream>;
+template <typename T, output_stream Stream>
+class basic_encoder<T const volatile, Stream>;
 
 template <output_stream Stream>
-class basic_encoder<Stream, null_type>
+class basic_encoder<null_type, Stream>
 {
 public:
-    auto operator()(Stream &outStream, null_type) -> result<void>
+    inline auto operator()(Stream &outStream, null_type) -> result<void>
     {
         return item_emitter<Stream>::null(outStream);
     }
 };
 
-template <output_stream Stream, typename... TArgs>
-class basic_encoder<Stream, mp_varargs<TArgs...>>
+template <typename... TArgs, output_stream Stream>
+class basic_encoder<mp_varargs<TArgs...>, Stream>
 {
-    using impl = detail::arg_list_encoder<
-        Stream,
-        detail::mp_list<std::remove_cvref_t<TArgs>...>>;
+    using impl =
+        detail::arg_list_encoder<detail::mp_list<std::remove_cvref_t<TArgs>...>,
+                                 Stream>;
 
 public:
-    auto operator()(Stream &outStream,
-                    detail::select_proper_param_type<TArgs>... args) const
+    inline auto
+    operator()(Stream &outStream,
+               detail::select_proper_param_type<TArgs>... args) const
         -> result<void>
     {
         return impl::encode(outStream, args...);
@@ -64,31 +65,31 @@ public:
 };
 
 template <output_stream Stream>
-class basic_encoder<Stream, void>
+class basic_encoder<void, Stream>
 {
 public:
     template <typename T>
-    auto operator()(Stream &outStream, T &&value) -> result<void>
+    inline auto operator()(Stream &outStream, T &&value) -> result<void>
     {
-        return basic_encoder<Stream, std::remove_cvref_t<T>>()(
+        return basic_encoder<std::remove_cvref_t<T>, Stream>()(
             outStream, static_cast<T &&>(value));
     }
 };
 
 template <output_stream Stream>
-class basic_encoder<Stream, bool>
+class basic_encoder<bool, Stream>
 {
 public:
     using value_type = bool;
 
-    auto operator()(Stream &outStream, value_type value) -> result<void>
+    inline auto operator()(Stream &outStream, value_type value) -> result<void>
     {
         return item_emitter<Stream>::boolean(outStream, value);
     }
 };
 
-template <output_stream Stream, integer T>
-class basic_encoder<Stream, T>
+template <integer T, output_stream Stream>
+class basic_encoder<T, Stream>
 {
 public:
     using value_type = T;
@@ -99,8 +100,8 @@ public:
     }
 };
 
-template <output_stream Stream, iec559_floating_point T>
-class basic_encoder<Stream, T>
+template <iec559_floating_point T, output_stream Stream>
+class basic_encoder<T, Stream>
 {
     static_assert(std::numeric_limits<T>::is_iec559);
 
@@ -121,13 +122,13 @@ public:
 };
 
 // clang-format off
-template <output_stream Stream, std::ranges::range T>
-    requires encodable<Stream, std::ranges::range_value_t<T>>
-class basic_encoder<Stream, T>
+template <std::ranges::range T, output_stream Stream>
+    requires encodable<std::ranges::range_value_t<T>, Stream>
+class basic_encoder<T, Stream>
 // clang-format on
 {
     using wrapped_value_type = std::ranges::range_value_t<T>;
-    using wrapped_encoder = basic_encoder<Stream, wrapped_value_type>;
+    using wrapped_encoder = basic_encoder<wrapped_value_type, Stream>;
 
 public:
     using value_type = T;
@@ -179,29 +180,29 @@ public:
 };
 
 // clang-format off
-template <output_stream Stream, typename T, std::size_t N>
-    requires encodable<Stream, T>
-class basic_encoder<Stream, T[N]> : basic_encoder<Stream, std::span<T const>>
+template <typename T, std::size_t N, output_stream Stream>
+    requires encodable<T, Stream>
+class basic_encoder<T[N], Stream> : basic_encoder<std::span<T const>, Stream>
 // clang-format on
 {
-    using wrapped_encoder = basic_encoder<Stream, std::span<T const>>;
+    using wrapped_encoder = basic_encoder<std::span<T const>, Stream>;
 
 public:
     using value_type = T[N];
-    using basic_encoder<Stream, std::span<T const>>::basic_encoder;
+    using basic_encoder<std::span<T const>, Stream>::basic_encoder;
     using wrapped_encoder::operator();
 };
 
 // clang-format off
-template <output_stream Stream, typename T>
-    requires detail::encodeable_tuple_like<Stream, T>
-class basic_encoder<Stream, T>
+template <typename T, output_stream Stream>
+    requires detail::encodable_tuple_like<T, Stream>
+class basic_encoder<T, Stream>
 // clang-format on
 {
     using impl = detail::arg_list_encoder<
-        Stream,
         detail::mp_transform_t<std::remove_cvref_t,
-                               detail::mp_rename_t<T, detail::mp_list>>>;
+                               detail::mp_rename_t<T, detail::mp_list>>,
+        Stream>;
 
 public:
     using value_type = T;
@@ -215,18 +216,18 @@ public:
 };
 
 // clang-format off
-template <output_stream Stream, associative_range T>
-    requires encodable<Stream, std::ranges::range_value_t<T>>
-class basic_encoder<Stream, T>
+template <associative_range T, output_stream Stream>
+    requires encodable<std::ranges::range_value_t<T>, Stream>
+class basic_encoder<T, Stream>
 // clang-format on
 {
     using pair_like = std::ranges::range_value_t<T>;
     using key_encoder =
-        basic_encoder<Stream,
-                      std::remove_cvref_t<std::tuple_element_t<0, pair_like>>>;
+        basic_encoder<std::remove_cvref_t<std::tuple_element_t<0, pair_like>>,
+                      Stream>;
     using value_encoder =
-        basic_encoder<Stream,
-                      std::remove_cvref_t<std::tuple_element_t<1, pair_like>>>;
+        basic_encoder<std::remove_cvref_t<std::tuple_element_t<1, pair_like>>,
+                      Stream>;
 
 public:
     using value_type = T;

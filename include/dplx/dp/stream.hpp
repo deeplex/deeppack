@@ -86,7 +86,7 @@ inline constexpr struct commit_fn
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy, size);
     }
-} commit;
+} commit{};
 
 // clang-format off
 template <typename Stream, typename T>
@@ -172,7 +172,7 @@ inline constexpr struct read_fn
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, data, size);
     }
-} read;
+} read{};
 
 inline constexpr struct consume_fn
 {
@@ -204,7 +204,7 @@ inline constexpr struct consume_fn
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy);
     }
-} consume;
+} consume{};
 
 inline constexpr struct available_input_size_fn
 {
@@ -216,7 +216,7 @@ inline constexpr struct available_input_size_fn
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream);
     }
-} available_input_size;
+} available_input_size{};
 
 // clang-format off
 template <typename Proxy, typename Stream>
@@ -258,7 +258,8 @@ concept input_stream
 // clang-format on
 
 template <input_stream Stream>
-using read_proxy_t = typename decltype(::dplx::dp::read(std::declval<Stream &>(), std::declval<std::size_t>()))::value_type;
+using read_proxy_t = typename decltype(::dplx::dp::read(
+    std::declval<Stream &>(), std::declval<std::size_t>()))::value_type;
 
 // clang-format off
 template <typename Proxy, typename Stream>
@@ -293,7 +294,7 @@ struct is_zero_copy_capable;
 template <input_stream Stream>
 struct is_zero_copy_capable<Stream> : std::bool_constant<
     !lazy_input_stream<Stream>
-    && std::same_as<read_proxy_t<Stream>, std::span<std::byte const>>
+    && std::is_same_v<read_proxy_t<Stream>, std::span<std::byte const>>
 >
 {
 };

@@ -24,7 +24,7 @@ static_assert(CHAR_BIT == 8);
 namespace dplx::dp
 {
 
-template <output_stream Stream, typename T>
+template <typename T, output_stream Stream>
 class basic_encoder;
 
 template <typename T>
@@ -34,15 +34,16 @@ inline constexpr bool
                            sizeof(T) <= 32;
 
 // clang-format off
-template <typename Stream, typename T>
+template <typename T, typename Stream>
 concept encodable
     = output_stream<Stream>
     && !std::is_reference_v<T>
     && !std::is_pointer_v<T>
-    && requires(Stream &ctx, T const &t)
+    && requires(Stream &outStream, T const &value)
     {
-        typename basic_encoder<Stream, T>;
-        basic_encoder<Stream, T>()(ctx, t);
+        typename basic_encoder<T, Stream>;
+        { basic_encoder<T, Stream>()(outStream, value) }
+            -> oc::concepts::basic_result;
     };
 // clang-format on
 
@@ -51,19 +52,19 @@ inline constexpr bool enable_indefinite_encoding =
     std::ranges::input_range<Range> && !std::ranges::sized_range<Range> &&
     !std::ranges::forward_range<Range>;
 
-template <input_stream Stream, typename T>
+template <typename T, input_stream Stream>
 class basic_decoder;
 
 // clang-format off
-template <typename Stream, typename T>
+template <typename T, typename Stream>
 concept decodable
     = input_stream<Stream>
     && !std::is_reference_v<T>
     && !std::is_pointer_v<T>
-    && requires(Stream &stream, T &dest)
+    && requires(Stream &inStream, T &dest)
     {
-        typename basic_decoder<Stream, T>;
-        { basic_decoder<Stream, T>()(stream, dest) }
+        typename basic_decoder<T, Stream>;
+        { basic_decoder<T, Stream>()(inStream, dest) }
             -> oc::concepts::basic_result;
     };
 // clang-format on
@@ -92,18 +93,25 @@ template <typename T>
 using select_proper_param_type =
     select_proper_param_type_impl<std::remove_cvref_t<T>>;
 
-template <output_stream Stream, typename T>
-struct are_tuple_elements_encodeable : std::false_type
+template <typename T, output_stream Stream>
+struct are_tuple_elements_encodable : std::false_type
 {
 };
-template <output_stream Stream, typename... Ts>
-struct are_tuple_elements_encodeable<Stream, mp_list<Ts...>>
-    : std::bool_constant<(encodable<Stream, Ts> && ...)>
+template <typename... Ts, output_stream Stream>
+struct are_tuple_elements_encodable<mp_list<Ts...>, Stream>
+    : std::bool_constant<(encodable<Ts, Stream> && ...)>
 {
 };
 
-template <typename Stream, typename T>
-concept encodeable_tuple_like = tuple_like<T> &&output_stream<Stream>
-    &&are_tuple_elements_encodeable<Stream, tuple_element_list_t<T>>::value;
+template <typename T, typename Stream>
+concept encodable_tuple_like = tuple_like<T> &&output_stream<Stream>
+    &&are_tuple_elements_encodable<tuple_element_list_t<T>, Stream>::value;
+
+template <typename T, typename Stream>
+concept encodable_pair_like = pair_like<T> &&output_stream<Stream>
+    &&encodable<std::remove_cvref_t<typename std::tuple_element<0, T>::type>,
+                Stream> &&
+        encodable<std::remove_cvref_t<typename std::tuple_element<1, T>::type>,
+                  Stream>;
 
 } // namespace dplx::dp::detail

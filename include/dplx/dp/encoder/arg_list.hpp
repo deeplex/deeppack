@@ -16,11 +16,11 @@
 namespace dplx::dp::detail
 {
 
-template <output_stream Stream, typename T>
+template <typename T, output_stream Stream>
 class arg_list_encoder;
 
 template <output_stream Stream, typename... TArgs>
-class arg_list_encoder<Stream, mp_list<TArgs...>>
+class arg_list_encoder<mp_list<TArgs...> , Stream>
 {
     Stream *mOutStream;
 
@@ -39,7 +39,7 @@ public:
         result<void> rx = success();
 
         [[maybe_unused]] bool failed =
-            (... || (rx = basic_encoder<Stream, TArgs>()(outStream, values))
+            (... || (rx = basic_encoder<TArgs, Stream>()(outStream, values))
                         .has_failure());
 
         return rx;

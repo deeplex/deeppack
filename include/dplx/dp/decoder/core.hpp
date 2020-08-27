@@ -26,37 +26,37 @@ namespace dplx::dp
 {
 
 // volatile types are not supported.
-template <input_stream Stream, class T>
-class basic_decoder<Stream, volatile T>;
-template <input_stream Stream, class T>
-class basic_decoder<Stream, volatile T const>;
+template <typename T, input_stream Stream>
+class basic_decoder<volatile T, Stream>;
+template <typename T, input_stream Stream>
+class basic_decoder<volatile T const, Stream>;
 
 // the decode APIs are not meant to participate in ADL and are therefore
 // niebloids
 inline constexpr struct decode_fn final
 {
     template <typename T, input_stream Stream>
-    requires decodable<Stream, T> auto operator()(Stream &inStream,
+    requires decodable<T, Stream> auto operator()(Stream &inStream,
                                                   T &dest) const -> result<void>
     {
-        DPLX_TRY((basic_decoder<Stream, T>()(inStream, dest)));
+        DPLX_TRY((basic_decoder<T, Stream>()(inStream, dest)));
         return success();
     }
 
     template <typename T, input_stream Stream>
-    requires decodable<Stream, T> auto operator()(as_value_t<T>,
+    requires decodable<T, Stream> auto operator()(as_value_t<T>,
                                                   Stream &inStream) const
         -> result<void>
     {
         T value;
-        DPLX_TRY((operator()<Stream, T>(inStream, value)));
+        DPLX_TRY((operator()<T, Stream>(inStream, value)));
         return success(value);
     }
 
-} decode;
+} decode{};
 
-template <input_stream Stream, integer T>
-class basic_decoder<Stream, T>
+template <integer T, input_stream Stream>
+class basic_decoder<T, Stream>
 {
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
@@ -109,8 +109,8 @@ public:
     }
 };
 
-template <input_stream Stream, iec559_floating_point T>
-class basic_decoder<Stream, T>
+template <iec559_floating_point T, input_stream Stream>
+class basic_decoder<T, Stream>
 {
     static_assert(std::numeric_limits<T>::is_iec559);
 
@@ -190,7 +190,7 @@ public:
 };
 
 template <input_stream Stream>
-class basic_decoder<Stream, bool>
+class basic_decoder<bool, Stream>
 {
 public:
     auto operator()(Stream &stream, bool &dest) const -> result<void>

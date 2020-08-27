@@ -16,10 +16,10 @@ namespace dplx::dp
 
 static_assert(CHAR_BIT == 8);
 
-template <output_stream Stream, typename T>
+template <typename T, output_stream Stream>
 class basic_encoder;
 
-template <input_stream Stream, typename T>
+template <typename T, input_stream Stream>
 class basic_decoder;
 
 template <typename... TArgs>
