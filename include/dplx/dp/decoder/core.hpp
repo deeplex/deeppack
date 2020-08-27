@@ -31,30 +31,6 @@ class basic_decoder<volatile T, Stream>;
 template <typename T, input_stream Stream>
 class basic_decoder<volatile T const, Stream>;
 
-// the decode APIs are not meant to participate in ADL and are therefore
-// niebloids
-inline constexpr struct decode_fn final
-{
-    template <typename T, input_stream Stream>
-    requires decodable<T, Stream> auto operator()(Stream &inStream,
-                                                  T &dest) const -> result<void>
-    {
-        DPLX_TRY((basic_decoder<T, Stream>()(inStream, dest)));
-        return success();
-    }
-
-    template <typename T, input_stream Stream>
-    requires decodable<T, Stream> auto operator()(as_value_t<T>,
-                                                  Stream &inStream) const
-        -> result<void>
-    {
-        T value;
-        DPLX_TRY((operator()<T, Stream>(inStream, value)));
-        return success(value);
-    }
-
-} decode{};
-
 template <integer T, input_stream Stream>
 class basic_decoder<T, Stream>
 {
