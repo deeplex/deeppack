@@ -182,22 +182,22 @@ concept tuple_sized = requires
 template <typename F, typename T, std::size_t... Is>
 constexpr decltype(auto)
 apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
-    noexcept(std::forward<F>(f)(get<Is>(std::forward<T>(t))...)))
+    noexcept(static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...)))
 {
-    return std::forward<F>(f)(get<Is>(std::forward<T>(t))...);
+    return static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...);
 }
 // a poor man's std::apply() which however uses unqualified get<I>()
 // instead of std::get<I>(). This allows it to cope with custom tuple types.
 template <typename F, typename T>
 requires tuple_sized<std::remove_cvref_t<T>> constexpr decltype(auto)
-apply_simply(F &&f, T &&t) noexcept(noexcept(dp::detail::apply_simply_impl(
-    std::forward<F>(f),
-    std::forward<T>(t),
+apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl(
+    static_cast<F &&>(f),
+    static_cast<T &&>(t),
     std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<T>>>())))
 {
-    return ::dplx::dp::detail::apply_simply_impl<F, T>(
-        std::forward<F>(f),
-        std::forward<T>(t),
+    return detail::apply_simply_impl<F, T>(
+        static_cast<F &&>(f),
+        static_cast<T &&>(t),
         std::make_index_sequence<
             std::tuple_size_v<std::remove_reference_t<T>>>());
 }

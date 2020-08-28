@@ -20,7 +20,7 @@ template <typename T, output_stream Stream>
 class arg_list_encoder;
 
 template <output_stream Stream, typename... TArgs>
-class arg_list_encoder<mp_list<TArgs...> , Stream>
+class arg_list_encoder<mp_list<TArgs...>, Stream>
 {
     Stream *mOutStream;
 
@@ -39,8 +39,8 @@ public:
         result<void> rx = success();
 
         [[maybe_unused]] bool failed =
-            (... || (rx = basic_encoder<TArgs, Stream>()(outStream, values))
-                        .has_failure());
+            (... || detail::try_extract_failure(
+                        basic_encoder<TArgs, Stream>()(outStream, values), rx));
 
         return rx;
     }

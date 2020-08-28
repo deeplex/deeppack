@@ -59,6 +59,31 @@ struct is_error_code_enum<dplx::dp::errc> : std::true_type
 
 } // namespace std
 
+namespace dplx::dp::detail
+{
+
+inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
+{
+    if (oc::try_operation_has_value(in))
+    {
+        return false;
+    }
+    out = oc::try_operation_return_as(std::move(in));
+    return true;
+}
+template <typename T>
+inline auto try_extract_failure(T &&in, result<void> &out) -> bool
+{
+    if (oc::try_operation_has_value(in))
+    {
+        return false;
+    }
+    out = oc::try_operation_return_as(static_cast<T &&>(in));
+    return true;
+}
+
+} // namespace dplx::dp::detail
+
 #ifndef DPLX_TRY
 #define DPLX_TRY(...) OUTCOME_TRY(__VA_ARGS__)
 #endif
