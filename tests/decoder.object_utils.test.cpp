@@ -380,6 +380,11 @@ public:
 };
 static_assert(dplx::dp::packable<custom_with_named_layout_descriptor>);
 
+//
+// if this test fails on GCC, but not on MSVC: please check whether the
+// WORKAROUND version range specified in <dplx/dp/object_def.hpp> applies
+// to your GCC version
+//
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_decoding)
 {
     using test_encoder =
