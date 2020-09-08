@@ -46,7 +46,7 @@ concept associative_container = !disable_associative_container<T> &&
 };
     // clang-format on
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <=, 19, 28, 29115)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 29, 0)
 namespace detail
 {
 
@@ -88,7 +88,7 @@ public:
             {
                 return errc::missing_data;
             }
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <=, 19, 28, 29115)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 29, 0)
             if constexpr (detail::resizable_sequence_container<T>)
 #else
             if constexpr (requires { value.reserve(std::size_t{}); })
