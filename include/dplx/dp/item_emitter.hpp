@@ -255,7 +255,7 @@ public:
     static inline auto boolean(Stream &outStream, bool const value)
         -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
         std::ranges::data(writeLease)[0] =
             to_byte(type_code::bool_false) |
@@ -270,7 +270,7 @@ public:
     static inline auto float_half(Stream &outStream, std::uint16_t const bytes)
         -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1 + sizeof(bytes)));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(bytes)));
 
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_half);
@@ -285,7 +285,7 @@ public:
     static inline auto float_single(Stream &outStream, float const value)
         -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1 + sizeof(value)));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(value)));
 
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_single);
@@ -300,7 +300,7 @@ public:
     static inline auto float_double(Stream &outStream, double const value)
         -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1 + sizeof(value)));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(value)));
 
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_double);
@@ -314,7 +314,7 @@ public:
     }
     static inline auto null(Stream &outStream) -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::null);
 
@@ -326,7 +326,7 @@ public:
     }
     static inline auto undefined(Stream &outStream) -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::undefined);
 
@@ -338,7 +338,7 @@ public:
     }
     static inline auto break_(Stream &outStream) -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
         std::ranges::data(writeLease)[0] = to_byte(type_code::special_break);
 
@@ -354,7 +354,7 @@ private:
                                               std::byte const category)
         -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, 1));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
         std::ranges::data(writeLease)[0] = category | std::byte{0b000'11111};
 
@@ -370,7 +370,7 @@ private:
     encode_type_info(Stream &outStream, T const value, std::byte const category)
         -> result<void>
     {
-        DPLX_TRY(writeLease, write(outStream, detail::var_uint_max_size));
+        DPLX_TRY(auto &&writeLease, write(outStream, detail::var_uint_max_size));
 
         auto const byteSize = detail::store_var_uint(
             std::ranges::data(writeLease), value, category);

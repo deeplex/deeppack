@@ -29,7 +29,7 @@ public:
     auto operator()(Stream &outStream, dp_tests::simple_encodeable x)
         -> result<void>
     {
-        DPLX_TRY(writeLease, dplx::dp::write(outStream, 1));
+        DPLX_TRY(auto &&writeLease, dplx::dp::write(outStream, 1));
         std::ranges::data(writeLease)[0] = x.value;
 
         if constexpr (lazy_output_stream<Stream>)

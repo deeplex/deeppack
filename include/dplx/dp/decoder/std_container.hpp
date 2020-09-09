@@ -69,7 +69,7 @@ requires decodable<typename T::value_type, Stream> class basic_decoder<T,
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        DPLX_TRY(arrayInfo, detail::parse_item_info(stream));
+        DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(stream));
 
         if (static_cast<std::byte>(arrayInfo.type & 0b111'00000) !=
             type_code::array)
@@ -83,7 +83,7 @@ public:
             {
                 return errc::not_enough_memory;
             }
-            DPLX_TRY(remainingInputSize, dp::available_input_size(stream));
+            DPLX_TRY(auto &&remainingInputSize, dp::available_input_size(stream));
             if (remainingInputSize < arrayInfo.value)
             {
                 return errc::missing_data;
@@ -117,7 +117,7 @@ public:
             for (;;)
             {
                 {
-                    DPLX_TRY(maybeStop, dp::read(stream, 1));
+                    DPLX_TRY(auto &&maybeStop, dp::read(stream, 1));
                     if (std::ranges::data(maybeStop)[0] ==
                         type_code::special_break)
                     {
@@ -153,7 +153,7 @@ requires decodable<typename T::key_type, Stream>
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        DPLX_TRY(mapInfo, detail::parse_item_info(stream));
+        DPLX_TRY(auto &&mapInfo, detail::parse_item_info(stream));
 
         if (static_cast<std::byte>(mapInfo.type & 0b111'00000) !=
             type_code::map)
@@ -167,7 +167,7 @@ public:
             {
                 return errc::not_enough_memory;
             }
-            DPLX_TRY(remainingInputSize, dp::available_input_size(stream));
+            DPLX_TRY(auto &&remainingInputSize, dp::available_input_size(stream));
             if (remainingInputSize < mapInfo.value)
             {
                 return errc::missing_data;
@@ -191,7 +191,7 @@ public:
             for (;;)
             {
                 {
-                    DPLX_TRY(maybeStop, dp::read(stream, 1));
+                    DPLX_TRY(auto &&maybeStop, dp::read(stream, 1));
                     if (std::ranges::data(maybeStop)[0] ==
                         type_code::special_break)
                     {

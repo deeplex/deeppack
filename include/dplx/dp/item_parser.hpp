@@ -99,7 +99,7 @@ inline auto parse_item_info_speculative(std::byte const *const encoded)
 template <typename Stream>
 inline auto parse_item_info_safe(Stream &stream) -> result<item_info>
 {
-    DPLX_TRY(indicatorProxy, dp::read(stream, 1));
+    DPLX_TRY(auto &&indicatorProxy, dp::read(stream, 1));
     std::byte const *const indicator = std::ranges::data(indicatorProxy);
 
     item_info info{
@@ -130,7 +130,7 @@ inline auto parse_item_info_safe(Stream &stream) -> result<item_info>
             // and we can't just repeat the shift, because MSVC starts crying
             // about extending a 32bit shift into a 64bit variable
             std::size_t const length = static_cast<std::size_t>(xlength);
-            DPLX_TRY(payloadProxy, dp::read(stream, length));
+            DPLX_TRY(auto &&payloadProxy, dp::read(stream, length));
 
             std::byte const *const payload = std::ranges::data(payloadProxy);
             switch (bytePower)

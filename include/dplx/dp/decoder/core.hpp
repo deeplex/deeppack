@@ -37,7 +37,7 @@ class basic_decoder<T, Stream>
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
     {
-        DPLX_TRY(info, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&info, detail::parse_item_info(inStream));
         if constexpr (std::is_unsigned_v<T>)
         {
             if (std::byte{info.type} != type_code::posint)
@@ -93,7 +93,7 @@ class basic_decoder<T, Stream>
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
     {
-        DPLX_TRY(info, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&info, detail::parse_item_info(inStream));
 
         // #TODO maybe use specialized parsing logic for floats
         if (std::byte{info.type} != type_code::special ||
@@ -173,7 +173,7 @@ public:
     {
         static constexpr auto boolPattern = to_byte(type_code::bool_false);
 
-        DPLX_TRY(readProxy, dp::read(stream, 1));
+        DPLX_TRY(auto &&readProxy, dp::read(stream, 1));
         auto const memory = std::ranges::data(readProxy);
         auto const value = *memory;
 

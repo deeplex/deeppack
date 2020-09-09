@@ -86,5 +86,5 @@ inline auto try_extract_failure(T &&in, result<void> &out) -> bool
 } // namespace dplx::dp::detail
 
 #ifndef DPLX_TRY
-#define DPLX_TRY(...) OUTCOME21_TRY(__VA_ARGS__)
+#define DPLX_TRY(...) OUTCOME_TRY(__VA_ARGS__)
 #endif

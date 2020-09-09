@@ -28,13 +28,13 @@ inline auto parse_tuple_head(Stream &inStream,
                              std::bool_constant<isVersioned> = {})
     -> result<tuple_head_info>
 {
-    DPLX_TRY(arrayInfo, detail::parse_item_info(inStream));
+    DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(inStream));
     if (std::byte{arrayInfo.type} != type_code::array)
     {
         return errc::item_type_mismatch;
     }
 
-    DPLX_TRY(remainingBytes, dp::available_input_size(inStream));
+    DPLX_TRY(auto &&remainingBytes, dp::available_input_size(inStream));
     if (arrayInfo.value > remainingBytes)
     {
         return errc::end_of_stream;
@@ -57,7 +57,7 @@ inline auto parse_tuple_head(Stream &inStream,
             return errc::item_version_property_missing;
         }
 
-        DPLX_TRY(versionInfo, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&versionInfo, detail::parse_item_info(inStream));
         if (std::byte{versionInfo.type} != type_code::posint)
         {
             return errc::item_version_property_missing;
@@ -104,7 +104,7 @@ public:
     inline auto operator()(Stream &inStream, value_type &dest) const
         -> result<void>
     {
-        DPLX_TRY(headInfo,
+        DPLX_TRY(auto &&headInfo,
                  dp::parse_tuple_head<Stream,
                                       descriptor.version != null_def_version>(
                      inStream));

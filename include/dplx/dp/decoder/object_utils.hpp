@@ -82,7 +82,7 @@ public:
     auto operator()(Stream &inStream, fixed_u8string<N> &out) const
         -> result<void>
     {
-        DPLX_TRY(strInfo, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&strInfo, detail::parse_item_info(inStream));
 
         if (std::byte{strInfo.type} != type_code::text)
         {
@@ -94,7 +94,7 @@ public:
         }
         out.mNumCodeUnits = static_cast<unsigned int>(strInfo.value);
 
-        DPLX_TRY(availableBytes, dp::available_input_size(inStream));
+        DPLX_TRY(auto &&availableBytes, dp::available_input_size(inStream));
         if (availableBytes < out.size())
         {
             return errc::missing_data;
@@ -352,7 +352,7 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<std::size_t>
     {
-        DPLX_TRY(idInfo, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&idInfo, detail::parse_item_info(inStream));
         if (std::byte{idInfo.type} != type_code::posint)
         {
             return errc::item_type_mismatch;
@@ -412,7 +412,7 @@ inline auto parse_object_head(Stream &inStream,
                               std::bool_constant<isVersioned> = {})
     -> result<object_head_info>
 {
-    DPLX_TRY(mapInfo, detail::parse_item_info(inStream));
+    DPLX_TRY(auto &&mapInfo, detail::parse_item_info(inStream));
     if (static_cast<std::byte>(mapInfo.type & 0b111'00000) != type_code::map)
     {
         return errc::item_type_mismatch;
@@ -423,7 +423,7 @@ inline auto parse_object_head(Stream &inStream,
         return object_head_info{0, null_def_version};
     }
 
-    DPLX_TRY(remainingBytes, dp::available_input_size(inStream));
+    DPLX_TRY(auto &&remainingBytes, dp::available_input_size(inStream));
     // every prop consists of two items each being at least 1B big
     if (mapInfo.value > (remainingBytes / 2))
     {
@@ -444,7 +444,7 @@ inline auto parse_object_head(Stream &inStream,
     {
         // the version property id is posint 0
         // and always encoded as a single byte
-        DPLX_TRY(maybeVersionReadProxy, dp::read(inStream, 1));
+        DPLX_TRY(auto &&maybeVersionReadProxy, dp::read(inStream, 1));
         if (std::ranges::data(maybeVersionReadProxy)[0] != std::byte{})
         {
             DPLX_TRY(dp::consume(inStream, maybeVersionReadProxy, 0));
@@ -456,7 +456,7 @@ inline auto parse_object_head(Stream &inStream,
             DPLX_TRY(dp::consume(inStream, maybeVersionReadProxy));
         }
 
-        DPLX_TRY(versionInfo, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&versionInfo, detail::parse_item_info(inStream));
         if (std::byte{versionInfo.type} != type_code::posint)
         {
             return errc::item_type_mismatch;
@@ -494,7 +494,7 @@ inline auto decode_object_properties(Stream &stream,
 
         for (std::int32_t i = 0; i < numProperties; ++i)
         {
-            DPLX_TRY(which, decode_object_property(stream, dest));
+            DPLX_TRY(auto &&which, decode_object_property(stream, dest));
 
             auto const offset = which / detail::digits_v<std::size_t>;
             auto const shift = which % detail::digits_v<std::size_t>;
@@ -540,7 +540,7 @@ requires(detail::versioned_decoder_enabled(layout_descriptor_for(
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
     {
-        DPLX_TRY(headInfo,
+        DPLX_TRY(auto &&headInfo,
                  dp::parse_object_head<Stream,
                                        descriptor.version != null_def_version>(
                      inStream));

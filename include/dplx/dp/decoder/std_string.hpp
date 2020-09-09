@@ -23,7 +23,7 @@ public:
     auto operator()(Stream &inStream, std::u8string &value) const
         -> result<void>
     {
-        DPLX_TRY(strInfo, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&strInfo, detail::parse_item_info(inStream));
 
         if (static_cast<std::byte>(strInfo.type & 0b111'00000) !=
             type_code::text)
@@ -34,7 +34,7 @@ public:
         if (!strInfo.indefinite())
             DPLX_ATTR_LIKELY
             {
-                DPLX_TRY(availableBytes, dp::available_input_size(inStream));
+                DPLX_TRY(auto &&availableBytes, dp::available_input_size(inStream));
                 if (availableBytes < strInfo.value)
                 {
                     return errc::missing_data;
@@ -62,7 +62,7 @@ public:
             value.resize(0);
             for (;;)
             {
-                DPLX_TRY(chunkInfo, detail::parse_item_info(inStream));
+                DPLX_TRY(auto &&chunkInfo, detail::parse_item_info(inStream));
 
                 if (chunkInfo.type == 0b111'00001)
                 {
@@ -74,7 +74,7 @@ public:
                     return errc::invalid_indefinite_subitem;
                 }
 
-                DPLX_TRY(availableBytes, dp::available_input_size(inStream));
+                DPLX_TRY(auto &&availableBytes, dp::available_input_size(inStream));
                 if (availableBytes < chunkInfo.value)
                 {
                     return errc::missing_data;
