@@ -96,6 +96,8 @@ target_sources(deeppack PRIVATE
 )
 set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp.hpp>
+
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/fwd.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/layout_descriptor.hpp>
