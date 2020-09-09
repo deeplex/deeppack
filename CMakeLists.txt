@@ -10,7 +10,7 @@
 #     http://creativecommons.org/publicdomain/zero/1.0/
 #
 ########################################################################
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(deeppack VERSION 0.0.0 LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
@@ -34,8 +34,11 @@ endif()
 ########################################################################
 # dependencies
 
+find_package(fmt CONFIG REQUIRED)
+
+find_package(outcome CONFIG REQUIRED)
+
 if (BUILD_TESTING)
-    find_package(fmt REQUIRED)
 
     set(DP_REQUIRE_UNIT_TEST_FRAMEWORK unit_test_framework)
 endif()
@@ -85,7 +88,6 @@ add_library(deeppack)
 add_library(Deeplex::deeppack ALIAS deeppack)
 target_include_directories(deeppack PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/outcome/include>
     $<INSTALL_INTERFACE:include>
 )
 
@@ -133,6 +135,8 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/type_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/utils.hpp>
 )
+
+target_link_libraries(deeppack PUBLIC outcome::outcome)
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES
