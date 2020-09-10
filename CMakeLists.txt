@@ -219,13 +219,15 @@ install(DIRECTORY include/ TYPE INCLUDE)
 install(TARGETS deeppack EXPORT deeppack-targets)
 install(EXPORT deeppack-targets
     NAMESPACE Deeplex::
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/deeppack"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/deeppack"
 )
 
 include(CMakePackageConfigHelpers)
-configure_file(tools/deeppack-config.cmake
+configure_package_config_file(tools/deeppack-config.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/deeppack-config.cmake"
-    COPYONLY
+
+    INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/deeppack"
+
 )
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/deeppack-config-version.cmake"
@@ -235,5 +237,5 @@ write_basic_package_version_file(
 install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/deeppack-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/deeppack-config-version.cmake"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/deeppack"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/deeppack"
 )

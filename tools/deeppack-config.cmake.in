@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(outcome)
+
+include("${CMAKE_CURRENT_LIST_DIR}/deeppack-targets.cmake")
+
+check_required_components(deeppack)
