@@ -189,8 +189,10 @@ if (BUILD_TESTING)
 
         "tests/encoder.test.cpp"
         "tests/encoder.test_utils.hpp"
+        "tests/encoder.blob.test.cpp"
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
+        "tests/encoder.string.test.cpp"
         "tests/encoder.tuple.test.cpp"
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.object_utils.test.cpp>
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.tuple_utils.test.cpp>

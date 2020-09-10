@@ -180,6 +180,47 @@ public:
 };
 
 // clang-format off
+template <std::ranges::contiguous_range T, output_stream Stream>
+    requires std::same_as<char8_t, std::ranges::range_value_t<T>>
+class basic_encoder<T, Stream>
+// clang-format on
+{
+public:
+    using value_type = T;
+
+    auto operator()(Stream &outStream, value_type const &value) -> result<void>
+    {
+        auto const size = std::ranges::size(value);
+        DPLX_TRY(item_emitter<Stream>::u8string(outStream, size));
+
+        DPLX_TRY(dp::write(
+            outStream,
+            reinterpret_cast<std::byte const *>(std::ranges::data(value)),
+            size));
+        return success();
+    }
+};
+
+// clang-format off
+template <std::ranges::contiguous_range T, output_stream Stream>
+    requires std::same_as<std::byte, std::ranges::range_value_t<T>>
+class basic_encoder<T, Stream>
+// clang-format on
+{
+public:
+    using value_type = T;
+
+    auto operator()(Stream &outStream, value_type const &value) -> result<void>
+    {
+        auto const size = std::ranges::size(value);
+        DPLX_TRY(item_emitter<Stream>::binary(outStream, size));
+
+        DPLX_TRY(dp::write(outStream, std::ranges::data(value), size));
+        return success();
+    }
+};
+
+// clang-format off
 template <typename T, std::size_t N, output_stream Stream>
     requires encodable<T, Stream>
 class basic_encoder<T[N], Stream> : basic_encoder<std::span<T const>, Stream>
