@@ -31,6 +31,8 @@ auto error_category_impl::message(int code) const -> std::string
     {
     case errc::nothing:
         return "no error/success"s;
+    case errc::bad:
+        return "an external API did not meet its operation contract"s;
     case errc::end_of_stream:
         return "the input stream is missing data"s;
     case errc::invalid_additional_information:

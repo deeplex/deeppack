@@ -27,6 +27,7 @@ using oc::success;
 enum class errc
 {
     nothing = 0, // to be removed
+    bad = 1,
     end_of_stream,
     invalid_additional_information,
     item_type_mismatch,

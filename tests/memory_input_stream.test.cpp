@@ -15,9 +15,14 @@
 #include "boost-test.hpp"
 #include "test_utils.hpp"
 
-static_assert(dplx::dp::input_stream<dplx::dp::memory_input_stream>);
-static_assert(!dplx::dp::lazy_input_stream<dplx::dp::memory_input_stream>);
-static_assert(dplx::dp::is_zero_copy_capable_v<dplx::dp::memory_input_stream>);
+static_assert(dplx::dp::input_stream<dplx::dp::byte_buffer_view>);
+static_assert(!dplx::dp::lazy_input_stream<dplx::dp::byte_buffer_view>);
+static_assert(dplx::dp::is_zero_copy_capable_v<dplx::dp::byte_buffer_view>);
+
+static_assert(dplx::dp::input_stream<dplx::dp::const_byte_buffer_view>);
+static_assert(!dplx::dp::lazy_input_stream<dplx::dp::const_byte_buffer_view>);
+static_assert(
+    dplx::dp::is_zero_copy_capable_v<dplx::dp::const_byte_buffer_view>);
 
 namespace dp_tests
 {
@@ -29,7 +34,7 @@ struct memory_input_stream_dependencies
     static constexpr std::size_t testSize = 67;
     std::vector<std::byte> memory{testSize};
 
-    dplx::dp::memory_input_stream subject{memory};
+    dplx::dp::const_byte_buffer_view subject{std::span<std::byte>(memory)};
 
     memory_input_stream_dependencies()
     {
@@ -41,8 +46,6 @@ struct memory_input_stream_dependencies
 };
 
 BOOST_FIXTURE_TEST_SUITE(memory_input_stream, memory_input_stream_dependencies)
-
-using dplx::dp::memory_input_stream;
 
 BOOST_AUTO_TEST_CASE(spans_whole_buffer)
 {
@@ -144,7 +147,6 @@ BOOST_AUTO_TEST_CASE(correctly_handles_mixed_reads)
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 64);
     BOOST_TEST(std::ranges::size(proxy) == 3u);
 
-    
     readRx = dplx::dp::read(subject, 1);
     BOOST_TEST_REQUIRE(readRx.has_error());
     BOOST_TEST(readRx.assume_error() == dplx::dp::errc::end_of_stream);

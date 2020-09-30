@@ -98,6 +98,7 @@ set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/byte_buffer.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/fwd.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/layout_descriptor.hpp>
@@ -128,6 +129,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tag_invoke.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_input_stream.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_output_stream.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/hash.hpp>
@@ -198,6 +200,7 @@ if (BUILD_TESTING)
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.tuple_utils.test.cpp>
 
         "tests/memory_input_stream.test.cpp"
+        "tests/memory_output_stream.test.cpp"
 
         "tests/perfect_hash.test.cpp"
     )
