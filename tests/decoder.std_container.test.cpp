@@ -232,11 +232,118 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(reject_invalid_subitems,
 
     T out{};
     auto rx = decoder_type()(stream, out);
-    BOOST_TEST(rx.has_error());
+    BOOST_TEST_REQUIRE(rx.has_error());
     BOOST_TEST(rx.assume_error() == dplx::dp::errc::item_type_mismatch);
 }
 
-// BOOST_AUTO_TEST_CASE()
+BOOST_AUTO_TEST_CASE(binary_empty)
+{
+    auto serializedInput = make_byte_array<1>({0b010'00000});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<std::byte>, test_input_stream>;
+
+    std::span<std::byte> empty{};
+    auto rx = decoder_type()(stream, empty);
+    DPLX_REQUIRE_RESULT(rx);
+}
+
+BOOST_AUTO_TEST_CASE(binary_empty_indefinite)
+{
+    auto serializedInput = make_byte_array<2>({0b010'11111, 0xff});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<std::byte>, test_input_stream>;
+
+    std::span<std::byte> empty{};
+    auto rx = decoder_type()(stream, empty);
+    DPLX_REQUIRE_RESULT(rx);
+}
+
+BOOST_AUTO_TEST_CASE(binary_one_element)
+{
+    auto serializedInput = make_byte_array<2>({0b010'00001, 0x01});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<std::byte>, test_input_stream>;
+
+    std::array<std::byte, 1> out{};
+    auto rx = decoder_type()(stream, out);
+    DPLX_REQUIRE_RESULT(rx);
+    BOOST_TEST(out[0] == serializedInput[1]);
+}
+
+BOOST_AUTO_TEST_CASE(binary_one_element_indefinite)
+{
+    auto serializedInput = make_byte_array<4>({0b010'11111, 0b010'00001, 0x01, 0xff});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<std::byte>, test_input_stream>;
+
+    std::array<std::byte, 1> out{};
+    auto rx = decoder_type()(stream, out);
+    DPLX_REQUIRE_RESULT(rx);
+    BOOST_TEST(out[0] == serializedInput[2]);
+}
+
+BOOST_AUTO_TEST_CASE(span_int_empty)
+{
+    auto serializedInput = make_byte_array<1>({0b100'00000});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<int>, test_input_stream>;
+
+    std::span<int> empty{};
+    auto rx = decoder_type()(stream, empty);
+    DPLX_REQUIRE_RESULT(rx);
+}
+
+BOOST_AUTO_TEST_CASE(span_int_empty_indefinite)
+{
+    auto serializedInput = make_byte_array<2>({0b100'11111, 0xff});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<int>, test_input_stream>;
+
+    std::span<int> empty{};
+    auto rx = decoder_type()(stream, empty);
+    DPLX_REQUIRE_RESULT(rx);
+}
+
+BOOST_AUTO_TEST_CASE(span_int_one_element)
+{
+    auto serializedInput = make_byte_array<2>({0b100'00001, 0x01});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<int>, test_input_stream>;
+
+    std::array<int, 1> out{};
+    auto rx = decoder_type()(stream, out);
+    DPLX_REQUIRE_RESULT(rx);
+    BOOST_TEST(out[0] == 1);
+}
+
+BOOST_AUTO_TEST_CASE(span_int_one_element_indefinite)
+{
+    auto serializedInput =
+        make_byte_array<3>({0b100'11111, 0x01, 0xff});
+    test_input_stream stream{byte_span(serializedInput)};
+
+    using decoder_type =
+        dplx::dp::basic_decoder<std::span<int>, test_input_stream>;
+
+    std::array<int, 1> out{};
+    auto rx = decoder_type()(stream, out);
+    DPLX_REQUIRE_RESULT(rx);
+    BOOST_TEST(out[0] == 1);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

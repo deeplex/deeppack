@@ -114,4 +114,9 @@ concept encodable_pair_like = pair_like<T> &&output_stream<Stream>
         encodable<std::remove_cvref_t<typename std::tuple_element<1, T>::type>,
                   Stream>;
 
+template <typename T, typename Stream>
+concept decodable_pair_like = pair_like<T> &&input_stream<Stream>
+    &&decodable<typename std::tuple_element<0, T>::type, Stream>
+        &&decodable<typename std::tuple_element<1, T>::type, Stream>;
+
 } // namespace dplx::dp::detail

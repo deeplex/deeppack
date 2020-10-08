@@ -11,6 +11,7 @@
 #include <cstddef>
 
 #include <string>
+#include <vector>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/type_code.hpp>
@@ -37,7 +38,7 @@ inline auto boost_test_print_type(std::ostream &s, std::u8string const &c)
     s << conv;
     return s;
 }
-}
+} // namespace boost::test_tools::tt_detail::impl
 
 namespace dplx::dp
 {
@@ -100,7 +101,13 @@ inline auto check_result(dplx::dp::result<R> const &rx)
     boost::test_tools::predicate_result prx{succeeded};
     if (!succeeded)
     {
-        prx.message() << rx.assume_error();
+        auto error = rx.assume_error();
+        auto const &cat = error.category();
+        prx.message()
+            << "[category: " << cat.name()
+            << "; value: " << error.value()
+            << "; message: " << error.message()
+            << "]";
     }
     return prx;
 }
