@@ -366,13 +366,17 @@ public:
 };
 
 template <typename T, std::size_t N, input_stream Stream>
-requires decodable<T, Stream> class basic_decoder<std::span<T, N>, Stream>
+requires(decodable<T, Stream> ||
+         std::same_as<std::remove_const_t<T>,
+                      std::byte>) class basic_decoder<std::span<T, N>, Stream>
     : public basic_decoder<std::span<T>, Stream>
 {
 };
 
 template <typename T, std::size_t N, input_stream Stream>
-requires decodable<T, Stream> class basic_decoder<std::array<T, N>, Stream>
+requires(decodable<T, Stream> ||
+         std::same_as<std::remove_const_t<T>,
+                      std::byte>) class basic_decoder<std::array<T, N>, Stream>
     : public basic_decoder<std::span<T>, Stream>
 {
 };
