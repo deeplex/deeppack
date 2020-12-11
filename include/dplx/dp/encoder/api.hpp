@@ -285,4 +285,16 @@ inline constexpr struct encode_varargs_t final
     }
 } encode_varargs{};
 
+inline constexpr struct encoded_size_of_fn
+{
+    template <typename T>
+    requires tag_invocable<encoded_size_of_fn, T &&> auto
+    operator()(T &&value) const
+        noexcept(nothrow_tag_invocable<encoded_size_of_fn, T &&>)
+            -> tag_invoke_result_t<encoded_size_of_fn, T &&>
+    {
+        return ::dplx::dp::cpo::tag_invoke(*this, static_cast<T &&>(value));
+    }
+} encoded_size_of{};
+
 } // namespace dplx::dp

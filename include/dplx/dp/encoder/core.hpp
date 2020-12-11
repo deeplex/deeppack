@@ -23,6 +23,7 @@
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/encoder/arg_list.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_emitter.hpp>
@@ -46,6 +47,11 @@ public:
         return item_emitter<Stream>::null(outStream);
     }
 };
+constexpr auto tag_invoke(encoded_size_of_fn, null_type const) noexcept
+    -> unsigned int
+{
+    return 1u;
+}
 
 template <typename... TArgs, output_stream Stream>
 class basic_encoder<mp_varargs<TArgs...>, Stream>
@@ -87,6 +93,17 @@ public:
         return item_emitter<Stream>::boolean(outStream, value);
     }
 };
+constexpr auto tag_invoke(encoded_size_of_fn, bool const) noexcept
+    -> unsigned int
+{
+    return 1u;
+}
+constexpr auto tag_invoke(encoded_size_of_fn, char8_t const) noexcept
+    -> unsigned int = delete;
+constexpr auto tag_invoke(encoded_size_of_fn, char16_t const) noexcept
+    -> unsigned int = delete;
+constexpr auto tag_invoke(encoded_size_of_fn, char32_t const) noexcept
+    -> unsigned int = delete;
 
 template <integer T, output_stream Stream>
 class basic_encoder<T, Stream>
@@ -99,6 +116,25 @@ public:
         return item_emitter<Stream>::integer(outStream, value);
     }
 };
+template <integer T>
+constexpr auto tag_invoke(encoded_size_of_fn, T const value) noexcept
+    -> unsigned int
+{
+    if constexpr (std::is_signed_v<T>)
+    {
+        using uvalue_type = std::make_unsigned_t<T>;
+        auto const signmask = static_cast<uvalue_type>(
+            value >> (detail::digits_v<uvalue_type> - 1));
+        // complement negatives
+        auto const uvalue = signmask ^ static_cast<uvalue_type>(value);
+
+        return detail::var_uint_encoded_size(uvalue);
+    }
+    else
+    {
+        return detail::var_uint_encoded_size(value);
+    }
+}
 
 template <iec559_floating_point T, output_stream Stream>
 class basic_encoder<T, Stream>
@@ -120,6 +156,19 @@ public:
         }
     }
 };
+template <iec559_floating_point T>
+constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept
+    -> unsigned int
+{
+    if constexpr (sizeof(T) == 4)
+    {
+        return 5u;
+    }
+    else if constexpr (sizeof(T) == 8)
+    {
+        return 9u;
+    }
+}
 
 // clang-format off
 template <std::ranges::range T, output_stream Stream>
@@ -178,6 +227,44 @@ public:
         }
     }
 };
+template <std::ranges::range T>
+requires tag_invocable<encoded_size_of_fn,
+                       std::ranges::range_reference_t<T>> constexpr auto
+tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+{
+    if constexpr (enable_indefinite_encoding<T>)
+    {
+        unsigned int accumulator = 1u + 1u;
+        for (auto &&part : value)
+        {
+            accumulator += encoded_size_of(static_cast<decltype(part)>(part));
+        }
+        return accumulator;
+    }
+    else if constexpr (std::ranges::sized_range<T>)
+    {
+        auto const size = std::ranges::size(value);
+        unsigned int accumulator = detail::var_uint_encoded_size(size);
+        for (auto &&part : value)
+        {
+            accumulator += encoded_size_of(static_cast<decltype(part)>(part));
+        }
+        return accumulator;
+    }
+    else
+    {
+        auto begin = std::ranges::begin(value);
+        auto const end = std::ranges::end(value);
+        auto const size = static_cast<std::size_t>(std::distance(begin, end));
+
+        unsigned int accumulator = detail::var_uint_encoded_size(size);
+        for (; begin != end; ++begin)
+        {
+            accumulator += encoded_size_of(*begin);
+        }
+        return accumulator;
+    }
+}
 
 // clang-format off
 template <std::ranges::contiguous_range T, output_stream Stream>
@@ -200,6 +287,13 @@ public:
         return success();
     }
 };
+template <std::ranges::contiguous_range T>
+requires std::same_as<char8_t, std::ranges::range_value_t<T>> constexpr auto
+tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+{
+    auto const size = std::ranges::size(value);
+    return detail::var_uint_encoded_size(size) + size;
+}
 
 // clang-format off
 template <std::ranges::contiguous_range T, output_stream Stream>
@@ -219,6 +313,13 @@ public:
         return success();
     }
 };
+template <std::ranges::contiguous_range T>
+requires std::same_as<std::byte, std::ranges::range_value_t<T>> constexpr auto
+tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+{
+    auto const size = std::ranges::size(value);
+    return detail::var_uint_encoded_size(size) + size;
+}
 
 // clang-format off
 template <typename T, std::size_t N, output_stream Stream>
@@ -255,6 +356,51 @@ public:
         return detail::apply_simply(impl(outStream), value);
     }
 };
+
+namespace detail
+{
+template <typename T>
+struct are_tuple_elements_size_ofable : std::false_type
+{
+};
+template <typename... Ts>
+struct are_tuple_elements_size_ofable<mp_list<Ts...>>
+    : std::bool_constant<(
+          tag_invocable<encoded_size_of_fn, std::remove_cvref_t<Ts> const &> &&
+          ...)>
+{
+};
+
+// #TODO think of a ~better~ name
+template <typename T>
+concept size_ofable_tuple_like = tuple_like<T>
+    &&are_tuple_elements_size_ofable<tuple_element_list_t<T>>::value;
+
+template <typename T>
+class encoded_size_of_tuple;
+
+template <typename... TArgs>
+class encoded_size_of_tuple<mp_list<TArgs...>>
+{
+public:
+    auto inline operator()(TArgs const &...values) const noexcept
+        -> unsigned int
+    {
+        return (detail::var_uint_encoded_size(sizeof...(TArgs)) + ... +
+                encoded_size_of(values));
+    }
+};
+} // namespace detail
+
+template <detail::size_ofable_tuple_like T>
+constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
+    -> unsigned int
+{
+    using impl = detail::encoded_size_of_tuple<
+        detail::mp_transform_t<std::remove_cvref_t,
+                               detail::mp_rename_t<T, detail::mp_list>>>;
+    return detail::apply_simply(impl{}, value);
+}
 
 // clang-format off
 template <associative_range T, output_stream Stream>
@@ -319,5 +465,48 @@ public:
         }
     }
 };
+
+template <associative_range T>
+requires tag_invocable<encoded_size_of_fn,
+                       std::ranges::range_reference_t<T>> constexpr auto
+tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+{
+    if constexpr (enable_indefinite_encoding<T>)
+    {
+        unsigned int accumulator = 1u + 1u;
+        for (auto &&[k, v] : value)
+        {
+            accumulator += encoded_size_of(static_cast<decltype(k)>(k));
+            accumulator += encoded_size_of(static_cast<decltype(v)>(v));
+        }
+        return accumulator;
+    }
+    else if constexpr (std::ranges::sized_range<T>)
+    {
+        auto const size = std::ranges::size(value);
+        unsigned int accumulator = detail::var_uint_encoded_size(size);
+        for (auto &&[k, v] : value)
+        {
+            accumulator += encoded_size_of(static_cast<decltype(k)>(k));
+            accumulator += encoded_size_of(static_cast<decltype(v)>(v));
+        }
+        return accumulator;
+    }
+    else
+    {
+        auto begin = std::ranges::begin(value);
+        auto const end = std::ranges::end(value);
+        auto const size = static_cast<std::size_t>(std::distance(begin, end));
+
+        unsigned int accumulator = detail::var_uint_encoded_size(size);
+        for (; begin != end; ++begin)
+        {
+            auto &&[k, v] = *begin;
+            accumulator += encoded_size_of(static_cast<decltype(k)>(k));
+            accumulator += encoded_size_of(static_cast<decltype(v)>(v));
+        }
+        return accumulator;
+    }
+}
 
 } // namespace dplx::dp

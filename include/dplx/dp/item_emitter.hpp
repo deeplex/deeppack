@@ -22,12 +22,10 @@
 namespace dplx::dp::detail
 {
 
-#if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
-
 template <typename T>
-inline auto store_var_uint_impl(std::byte *dest,
-                                T const value,
-                                std::byte const category) noexcept -> int
+inline auto store_var_uint_ct(std::byte *dest,
+                              T const value,
+                              std::byte const category) noexcept -> int
 {
     if (value <= inline_value_max)
     {
@@ -51,25 +49,23 @@ inline auto store_var_uint_impl(std::byte *dest,
 }
 
 template <typename T>
-inline auto var_uint_encoded_size_impl(T const value) -> int
+inline auto var_uint_encoded_size_ct(T const value) -> unsigned int
 {
     if (value <= inline_value_max)
     {
-        return 1;
+        return 1u;
     }
     unsigned int const lastSetBitIndex = detail::find_last_set_bit(value);
     unsigned int const bytePower =
         detail::find_last_set_bit(lastSetBitIndex) - 2;
 
-    return 1 + (1 << bytePower);
+    return 1u + (1u << bytePower);
 }
 
-#else
-
 template <typename T>
-inline auto store_var_uint_impl(std::byte *dest,
-                                T const value,
-                                std::byte const category) noexcept -> int
+inline auto store_var_uint_branching(std::byte *dest,
+                                     T const value,
+                                     std::byte const category) noexcept -> int
 {
     if (value <= inline_value_max)
     {
@@ -103,31 +99,29 @@ inline auto store_var_uint_impl(std::byte *dest,
 }
 
 template <typename T>
-inline auto var_uint_encoded_size_impl(T const value) -> int
+constexpr auto var_uint_encoded_size_branching(T const value) -> unsigned int
 {
     if (value <= inline_value_max)
     {
-        return 1;
+        return 1u;
     }
     if (value <= 0xff)
     {
-        return 2;
+        return 2u;
     }
     if (value <= 0xffff)
     {
-        return 3;
+        return 3u;
     }
     if (value <= 0xffff'ffff)
     {
-        return 5;
+        return 5u;
     }
     else
     {
-        return 9;
+        return 9u;
     }
 }
-
-#endif
 
 template <typename T>
 inline auto store_var_uint(std::byte *dest,
@@ -137,32 +131,53 @@ inline auto store_var_uint(std::byte *dest,
     static_assert(sizeof(T) <= 8);
     static_assert(std::is_unsigned_v<T>);
 
+#if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
+
     if constexpr (sizeof(T) <= 4)
     {
-        return store_var_uint_impl(
+        return store_var_uint_ct(
             dest, static_cast<std::uint32_t>(value), category);
     }
     else
     {
-        return store_var_uint_impl(
+        return store_var_uint_ct(
             dest, static_cast<std::uint64_t>(value), category);
     }
+
+#else
+
+    return store_var_uint_branching(dest, value, category);
+
+#endif
 }
 
 template <typename T>
-inline auto var_uint_encoded_size(T const value) -> int
+constexpr auto var_uint_encoded_size(T const value) -> unsigned int
 {
     static_assert(sizeof(T) <= 8);
     static_assert(std::is_unsigned_v<T>);
 
+#if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
+
+    if (std::is_constant_evaluated())
+    {
+        return var_uint_encoded_size_branching(value);
+    }
+
     if constexpr (sizeof(T) <= 4)
     {
-        return var_uint_encoded_size_impl(static_cast<std::uint32_t>(value));
+        return var_uint_encoded_size_ct(static_cast<std::uint32_t>(value));
     }
     else
     {
-        return var_uint_encoded_size_impl(static_cast<std::uint64_t>(value));
+        return var_uint_encoded_size_ct(static_cast<std::uint64_t>(value));
     }
+
+#else
+
+    return var_uint_encoded_size_branching(value);
+
+#endif
 }
 
 } // namespace dplx::dp::detail
@@ -170,9 +185,7 @@ inline auto var_uint_encoded_size(T const value) -> int
 namespace dplx::dp
 {
 
-// #TODO evaluate whether item_emitter can be made stream agnostic in a clean
-// way
-template <typename Stream> // #conceptify
+template <output_stream Stream>
 class item_emitter
 {
 public:
@@ -370,13 +383,93 @@ private:
     encode_type_info(Stream &outStream, T const value, std::byte const category)
         -> result<void>
     {
-        DPLX_TRY(auto &&writeLease, write(outStream, detail::var_uint_max_size));
+        if (auto maybeWriteLease = write(outStream, detail::var_uint_max_size);
+            oc::try_operation_has_value(maybeWriteLease))
+            DPLX_ATTR_LIKELY
+            {
+                auto &&writeLease =
+                    oc::try_operation_extract_value(std::move(maybeWriteLease));
+                auto const byteSize = detail::store_var_uint(
+                    std::ranges::data(writeLease), value, category);
 
-        auto const byteSize = detail::store_var_uint(
-            std::ranges::data(writeLease), value, category);
+                DPLX_TRY(commit(
+                    outStream, writeLease, static_cast<std::size_t>(byteSize)));
+                return success();
+            }
+        else
+        {
+            if (result<void> failure =
+                    oc::try_operation_return_as(std::move(maybeWriteLease));
+                failure.assume_error() != errc::end_of_stream)
+            {
+                return failure;
+            }
 
-        DPLX_TRY(
-            commit(outStream, writeLease, static_cast<std::size_t>(byteSize)));
+            return item_emitter::encode_type_info_recover_eos(
+                outStream, value, category);
+        }
+    }
+
+    template <typename T>
+    static auto encode_type_info_recover_eos(Stream &outStream,
+                                             T const value,
+                                             std::byte const category)
+        -> result<void>
+    {
+        if (value <= detail::inline_value_max)
+        {
+            DPLX_TRY(auto &&writeLease, write(outStream, 1));
+            auto out = std::ranges::data(writeLease);
+            out[0] = category | static_cast<std::byte>(value);
+
+            if constexpr (lazy_output_stream<Stream>)
+            {
+                DPLX_TRY(commit(outStream, writeLease));
+            }
+        }
+        else if (value <= 0xff)
+        {
+            DPLX_TRY(auto &&writeLease, write(outStream, 2));
+            auto out = std::ranges::data(writeLease);
+            out[0] = category | std::byte{25};
+            out[1] = static_cast<std::byte>(value);
+
+            if constexpr (lazy_output_stream<Stream>)
+            {
+                DPLX_TRY(commit(outStream, writeLease));
+            }
+        }
+        else if (value <= 0xffff)
+        {
+            DPLX_TRY(auto &&writeLease, write(outStream, 3));
+            auto out = std::ranges::data(writeLease);
+            out[0] = category | std::byte{26};
+            detail::store(out + 1, static_cast<std::uint16_t>(value));
+
+            if constexpr (lazy_output_stream<Stream>)
+            {
+                DPLX_TRY(commit(outStream, writeLease));
+            }
+        }
+        else if (value <= 0xffff'ffff)
+        {
+            DPLX_TRY(auto &&writeLease, write(outStream, 5));
+            auto out = std::ranges::data(writeLease);
+            out[0] = category | std::byte{27};
+            detail::store(out + 1, static_cast<std::uint32_t>(value));
+
+            if constexpr (lazy_output_stream<Stream>)
+            {
+                DPLX_TRY(commit(outStream, writeLease));
+            }
+        }
+        else
+        {
+            // we initially tried writing 9B and the value to be
+            // written would completely occupy them, therefore we
+            // reinstate the end of stream error
+            return errc::end_of_stream;
+        }
         return success();
     }
 };
