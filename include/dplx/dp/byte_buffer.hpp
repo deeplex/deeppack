@@ -57,9 +57,9 @@ public:
     }
 
     // clang-format off
-    template <typename U>
+    template <typename U, std::size_t Extent>
     requires(std::convertible_to<U (*)[], T (*)[]>)
-    explicit constexpr basic_byte_buffer_view(std::span<U> const &memory)
+    explicit constexpr basic_byte_buffer_view(std::span<U, Extent> const &memory)
         // clang-format on
         : basic_byte_buffer_view(
               memory.data(), static_cast<int>(memory.size_bytes()), 0)
