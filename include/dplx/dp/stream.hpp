@@ -177,6 +177,8 @@ inline constexpr struct read_fn
     }
 } read{};
 
+inline constexpr unsigned int minimum_guaranteed_read_size = 40;
+
 inline constexpr struct consume_fn
 {
     template <typename Stream, typename ReadProxy>
