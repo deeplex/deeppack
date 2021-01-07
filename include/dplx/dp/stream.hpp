@@ -92,7 +92,10 @@ inline constexpr struct commit_fn
 template <typename Stream, typename T>
 concept write_proxy
     = std::ranges::contiguous_range<T>
-    && std::convertible_to<T, std::span<std::byte>>
+    && std::ranges::sized_range<T>
+    && std::convertible_to<
+        std::remove_reference_t<std::ranges::range_reference_t<T>>(*)[],
+        std::byte (*)[]>
     && requires(Stream &stream, T &proxy, std::size_t const size)
     {
         { commit(stream, proxy, size) } -> oc::concepts::basic_result;
@@ -222,11 +225,14 @@ inline constexpr struct available_input_size_fn
 template <typename Proxy, typename Stream>
 concept read_proxy
     = std::ranges::contiguous_range<Proxy>
+    && std::ranges::sized_range<Proxy>
+    && std::convertible_to<
+        std::remove_reference_t<std::ranges::range_reference_t<Proxy>>(*)[],
+        std::byte const (*)[]>
     && std::is_nothrow_default_constructible_v<Proxy>
     && std::is_nothrow_move_constructible_v<Proxy>
     && std::is_nothrow_move_assignable_v<Proxy>
     && std::is_trivially_destructible_v<Proxy>
-    && std::convertible_to<Proxy, std::span<std::byte const>>
     && requires (Stream &stream, Proxy &proxy, std::size_t const actualSize)
     {
         { ::dplx::dp::consume(stream, proxy, actualSize) } -> oc::concepts::basic_result;
