@@ -292,7 +292,7 @@ requires std::same_as<char8_t, std::ranges::range_value_t<T>> constexpr auto
 tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
 {
     auto const size = std::ranges::size(value);
-    return detail::var_uint_encoded_size(size) + size;
+    return detail::var_uint_encoded_size(size) + static_cast<unsigned int>(size);
 }
 
 // clang-format off
