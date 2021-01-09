@@ -47,7 +47,7 @@ public:
         , mAllocationSize{}
     {
     }
-    explicit constexpr basic_byte_buffer_view(std::byte *memory,
+    explicit constexpr basic_byte_buffer_view(pointer memory,
                                               size_type allocationSize,
                                               difference_type consumed) noexcept
         : mWindowBegin(memory + consumed)

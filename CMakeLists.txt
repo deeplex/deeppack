@@ -128,6 +128,8 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/map_pair.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tag_invoke.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/chunked_input_stream.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/chunked_output_stream.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_input_stream.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/streams/memory_output_stream.hpp>
 
@@ -199,6 +201,8 @@ if (BUILD_TESTING)
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.object_utils.test.cpp>
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.tuple_utils.test.cpp>
 
+        "tests/chunked_input_stream.test.cpp"
+        "tests/chunked_output_stream.test.cpp"
         "tests/memory_input_stream.test.cpp"
         "tests/memory_output_stream.test.cpp"
 
