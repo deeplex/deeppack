@@ -9,8 +9,8 @@
 #include <dplx/dp/decoder/core.hpp>
 
 #include "boost-test.hpp"
-#include "test_utils.hpp"
 #include "test_input_stream.hpp"
+#include "test_utils.hpp"
 
 namespace dp_tests
 {
@@ -46,4 +46,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
-}
+} // namespace dp_tests

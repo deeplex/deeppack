@@ -21,15 +21,15 @@ namespace detail::cpo_impl
 struct tag_invoke_fn
 {
     template <typename T, typename... TArgs>
-    requires requires(T policy, TArgs &&... args)
+    requires requires(T policy, TArgs &&...args)
     {
         tag_invoke(static_cast<T &&>(policy), static_cast<TArgs &&>(args)...);
     }
-    constexpr auto operator()(T policy, TArgs &&... args) const
-        noexcept(noexcept(tag_invoke(static_cast<T &&>(policy),
-                                     static_cast<TArgs &&>(args)...)))
-            -> decltype(tag_invoke(static_cast<T &&>(policy),
-                                   static_cast<TArgs &&>(args)...))
+    constexpr auto operator()(T policy, TArgs &&...args) const
+            noexcept(noexcept(tag_invoke(static_cast<T &&>(policy),
+                                         static_cast<TArgs &&>(args)...)))
+                    -> decltype(tag_invoke(static_cast<T &&>(policy),
+                                           static_cast<TArgs &&>(args)...))
     {
         return tag_invoke(static_cast<T &&>(policy),
                           static_cast<TArgs &&>(args)...);
@@ -48,18 +48,19 @@ inline constexpr detail::cpo_impl::tag_invoke_fn tag_invoke = {};
 }
 
 template <typename Tag, typename... TArgs>
-concept tag_invocable = std::invocable<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
+concept tag_invocable
+        = std::invocable<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
 
 template <typename Tag, typename... TArgs>
-concept nothrow_tag_invocable = tag_invocable<Tag, TArgs...>
-    &&std::is_nothrow_invocable_v<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
+concept nothrow_tag_invocable = tag_invocable<Tag, TArgs...> &&std::
+        is_nothrow_invocable_v<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
 
 template <typename Tag, typename... TArgs>
-using tag_invoke_result =
-    std::invoke_result<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
+using tag_invoke_result
+        = std::invoke_result<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
 
 template <typename Tag, typename... TArgs>
-using tag_invoke_result_t =
-    std::invoke_result_t<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
+using tag_invoke_result_t
+        = std::invoke_result_t<detail::cpo_impl::tag_invoke_fn, Tag, TArgs...>;
 
-} // namespace dplx::dp::detail
+} // namespace dplx::dp

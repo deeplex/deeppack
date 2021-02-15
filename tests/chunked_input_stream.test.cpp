@@ -25,8 +25,8 @@ class test_chunked_input_stream final
 {
 public:
     friend class dplx::dp::chunked_input_stream_base<test_chunked_input_stream>;
-    using base_type =
-        dplx::dp::chunked_input_stream_base<test_chunked_input_stream>;
+    using base_type
+            = dplx::dp::chunked_input_stream_base<test_chunked_input_stream>;
 
     std::array<std::vector<std::byte>, 2> mChunks;
     unsigned int mNext = 0;
@@ -35,8 +35,8 @@ public:
         : base_type({}, streamSize)
         , mChunks()
     {
-        constexpr auto partition =
-            dplx::dp::minimum_guaranteed_read_size * 2 - 1;
+        constexpr auto partition
+                = dplx::dp::minimum_guaranteed_read_size * 2 - 1;
         assert(streamSize > partition);
 
         mChunks[0].resize(partition);
@@ -53,7 +53,7 @@ public:
 
 private:
     auto acquire_next_chunk_impl(std::uint64_t)
-        -> dplx::dp::result<dplx::dp::const_byte_buffer_view>
+            -> dplx::dp::result<dplx::dp::const_byte_buffer_view>
     {
         if (mNext >= mChunks.size())
         {
@@ -69,8 +69,8 @@ static_assert(dplx::dp::is_zero_copy_capable_v<test_chunked_input_stream>);
 
 struct chunked_input_stream_dependencies
 {
-    static constexpr std::size_t testSize =
-        dplx::dp::minimum_guaranteed_read_size * 3 - 1;
+    static constexpr std::size_t testSize
+            = dplx::dp::minimum_guaranteed_read_size * 3 - 1;
 
     test_chunked_input_stream subject;
 
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 0);
     BOOST_TEST(std::ranges::size(proxy) == 29u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29));
 
     readRx = dplx::dp::read(subject, 31);
     DPLX_REQUIRE_RESULT(readRx);
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 29);
     BOOST_TEST(std::ranges::size(proxy) == 31u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 31));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 31));
 
     readRx = dplx::dp::read(subject, 7);
     DPLX_REQUIRE_RESULT(readRx);
@@ -118,8 +118,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 60);
     BOOST_TEST(std::ranges::size(proxy) == 7u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 31 - 7));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 31 - 7));
 
     readRx = dplx::dp::read(subject, 52);
     DPLX_REQUIRE_RESULT(readRx);
@@ -127,8 +127,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     BOOST_TEST(std::ranges::size(proxy) == 51u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 31 - 7 - 51));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 31 - 7 - 51));
 
     readRx = dplx::dp::read(subject, 1);
     DPLX_REQUIRE_RESULT(readRx);
@@ -136,8 +136,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[1].data() + 39);
     BOOST_TEST(std::ranges::size(proxy) == 1u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 31 - 7 - 51 - 1));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 31 - 7 - 51 - 1));
 
     readRx = dplx::dp::read(subject, 1);
     BOOST_TEST_REQUIRE(readRx.has_error());

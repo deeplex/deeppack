@@ -48,7 +48,7 @@ public:
     }
 };
 constexpr auto tag_invoke(encoded_size_of_fn, null_type const) noexcept
-    -> unsigned int
+        -> unsigned int
 {
     return 1u;
 }
@@ -56,15 +56,15 @@ constexpr auto tag_invoke(encoded_size_of_fn, null_type const) noexcept
 template <typename... TArgs, output_stream Stream>
 class basic_encoder<mp_varargs<TArgs...>, Stream>
 {
-    using impl =
-        detail::arg_list_encoder<detail::mp_list<std::remove_cvref_t<TArgs>...>,
-                                 Stream>;
+    using impl = detail::arg_list_encoder<
+            detail::mp_list<std::remove_cvref_t<TArgs>...>,
+            Stream>;
 
 public:
     inline auto
     operator()(Stream &outStream,
                detail::select_proper_param_type<TArgs>... args) const
-        -> result<void>
+            -> result<void>
     {
         return impl::encode(outStream, args...);
     }
@@ -78,7 +78,7 @@ public:
     inline auto operator()(Stream &outStream, T &&value) -> result<void>
     {
         return basic_encoder<std::remove_cvref_t<T>, Stream>()(
-            outStream, static_cast<T &&>(value));
+                outStream, static_cast<T &&>(value));
     }
 };
 
@@ -94,16 +94,19 @@ public:
     }
 };
 constexpr auto tag_invoke(encoded_size_of_fn, bool const) noexcept
-    -> unsigned int
+        -> unsigned int
 {
     return 1u;
 }
 constexpr auto tag_invoke(encoded_size_of_fn, char8_t const) noexcept
-    -> unsigned int = delete;
+        -> unsigned int
+        = delete;
 constexpr auto tag_invoke(encoded_size_of_fn, char16_t const) noexcept
-    -> unsigned int = delete;
+        -> unsigned int
+        = delete;
 constexpr auto tag_invoke(encoded_size_of_fn, char32_t const) noexcept
-    -> unsigned int = delete;
+        -> unsigned int
+        = delete;
 
 template <integer T, output_stream Stream>
 class basic_encoder<T, Stream>
@@ -118,13 +121,13 @@ public:
 };
 template <integer T>
 constexpr auto tag_invoke(encoded_size_of_fn, T const value) noexcept
-    -> unsigned int
+        -> unsigned int
 {
     if constexpr (std::is_signed_v<T>)
     {
         using uvalue_type = std::make_unsigned_t<T>;
         auto const signmask = static_cast<uvalue_type>(
-            value >> (detail::digits_v<uvalue_type> - 1));
+                value >> (detail::digits_v<uvalue_type> - 1));
         // complement negatives
         auto const uvalue = signmask ^ static_cast<uvalue_type>(value);
 
@@ -157,8 +160,7 @@ public:
     }
 };
 template <iec559_floating_point T>
-constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept
-    -> unsigned int
+constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept -> unsigned int
 {
     if constexpr (sizeof(T) == 4)
     {
@@ -183,7 +185,7 @@ public:
     using value_type = T;
 
     auto operator()(Stream &outStream, value_type const &value) const
-        -> result<void>
+            -> result<void>
     {
         if constexpr (enable_indefinite_encoding<T>)
         {
@@ -214,8 +216,8 @@ public:
         {
             auto begin = std::ranges::begin(value);
             auto const end = std::ranges::end(value);
-            auto const size =
-                static_cast<std::size_t>(std::distance(begin, end));
+            auto const size
+                    = static_cast<std::size_t>(std::distance(begin, end));
             DPLX_TRY(item_emitter<Stream>::array(outStream, size));
 
             for (; begin != end; ++begin)
@@ -281,9 +283,9 @@ public:
         DPLX_TRY(item_emitter<Stream>::u8string(outStream, size));
 
         DPLX_TRY(dp::write(
-            outStream,
-            reinterpret_cast<std::byte const *>(std::ranges::data(value)),
-            size));
+                outStream,
+                reinterpret_cast<std::byte const *>(std::ranges::data(value)),
+                size));
         return success();
     }
 };
@@ -292,7 +294,8 @@ requires std::same_as<char8_t, std::ranges::range_value_t<T>> constexpr auto
 tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
 {
     auto const size = std::ranges::size(value);
-    return detail::var_uint_encoded_size(size) + static_cast<unsigned int>(size);
+    return detail::var_uint_encoded_size(size)
+         + static_cast<unsigned int>(size);
 }
 
 // clang-format off
@@ -342,16 +345,16 @@ class basic_encoder<T, Stream>
 // clang-format on
 {
     using impl = detail::arg_list_encoder<
-        detail::mp_transform_t<std::remove_cvref_t,
-                               detail::mp_rename_t<T, detail::mp_list>>,
-        Stream>;
+            detail::mp_transform_t<std::remove_cvref_t,
+                                   detail::mp_rename_t<T, detail::mp_list>>,
+            Stream>;
 
 public:
     using value_type = T;
 
     auto operator()(Stream &outStream,
                     detail::select_proper_param_type<value_type> value) const
-        -> result<void>
+            -> result<void>
     {
         return detail::apply_simply(impl(outStream), value);
     }
@@ -366,15 +369,15 @@ struct are_tuple_elements_size_ofable : std::false_type
 template <typename... Ts>
 struct are_tuple_elements_size_ofable<mp_list<Ts...>>
     : std::bool_constant<(
-          tag_invocable<encoded_size_of_fn, std::remove_cvref_t<Ts> const &> &&
-          ...)>
+              tag_invocable<encoded_size_of_fn,
+                            std::remove_cvref_t<Ts> const &> && ...)>
 {
 };
 
 // #TODO think of a ~better~ name
 template <typename T>
 concept size_ofable_tuple_like = tuple_like<T>
-    &&are_tuple_elements_size_ofable<tuple_element_list_t<T>>::value;
+        &&are_tuple_elements_size_ofable<tuple_element_list_t<T>>::value;
 
 template <typename T>
 class encoded_size_of_tuple;
@@ -384,21 +387,20 @@ class encoded_size_of_tuple<mp_list<TArgs...>>
 {
 public:
     auto inline operator()(TArgs const &...values) const noexcept
-        -> unsigned int
+            -> unsigned int
     {
-        return (detail::var_uint_encoded_size(sizeof...(TArgs)) + ... +
-                encoded_size_of(values));
+        return (detail::var_uint_encoded_size(sizeof...(TArgs)) + ...
+                + encoded_size_of(values));
     }
 };
 } // namespace detail
 
 template <detail::size_ofable_tuple_like T>
 constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
-    -> unsigned int
+        -> unsigned int
 {
-    using impl = detail::encoded_size_of_tuple<
-        detail::mp_transform_t<std::remove_cvref_t,
-                               detail::mp_rename_t<T, detail::mp_list>>>;
+    using impl = detail::encoded_size_of_tuple<detail::mp_transform_t<
+            std::remove_cvref_t, detail::mp_rename_t<T, detail::mp_list>>>;
     return detail::apply_simply(impl{}, value);
 }
 
@@ -409,12 +411,12 @@ class basic_encoder<T, Stream>
 // clang-format on
 {
     using pair_like = std::ranges::range_value_t<T>;
-    using key_encoder =
-        basic_encoder<std::remove_cvref_t<std::tuple_element_t<0, pair_like>>,
-                      Stream>;
-    using value_encoder =
-        basic_encoder<std::remove_cvref_t<std::tuple_element_t<1, pair_like>>,
-                      Stream>;
+    using key_encoder = basic_encoder<
+            std::remove_cvref_t<std::tuple_element_t<0, pair_like>>,
+            Stream>;
+    using value_encoder = basic_encoder<
+            std::remove_cvref_t<std::tuple_element_t<1, pair_like>>,
+            Stream>;
 
 public:
     using value_type = T;
@@ -435,8 +437,8 @@ public:
         }
         else if constexpr (std::ranges::sized_range<T>)
         {
-            DPLX_TRY(
-                item_emitter<Stream>::map(outStream, std::ranges::size(value)));
+            DPLX_TRY(item_emitter<Stream>::map(outStream,
+                                               std::ranges::size(value)));
 
             for (auto &&[k, v] : value)
             {
@@ -450,8 +452,8 @@ public:
         {
             auto begin = std::ranges::begin(value);
             auto const end = std::ranges::end(value);
-            auto const size =
-                static_cast<std::size_t>(std::distance(begin, end));
+            auto const size
+                    = static_cast<std::size_t>(std::distance(begin, end));
             DPLX_TRY(item_emitter<Stream>::map(outStream, size));
 
             for (; begin != end; ++begin)

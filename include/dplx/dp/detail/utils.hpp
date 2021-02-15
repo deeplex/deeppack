@@ -34,14 +34,14 @@ template <typename T>
 void store(std::byte *dest, T value)
 {
     boost::endian::endian_store<T, sizeof(T), boost::endian::order::big>(
-        reinterpret_cast<unsigned char *>(dest), value);
+            reinterpret_cast<unsigned char *>(dest), value);
 }
 
 template <typename T>
 auto load(std::byte const *src) noexcept -> T
 {
     return boost::endian::endian_load<T, sizeof(T), boost::endian::order::big>(
-        reinterpret_cast<unsigned char const *>(src));
+            reinterpret_cast<unsigned char const *>(src));
 }
 
 template <typename Target, typename Source>

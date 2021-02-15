@@ -31,12 +31,11 @@ struct mp_encode_value_fn
     template <std::size_t I>
     inline auto operator()(mp_size_t<I>) -> result<void>
     {
-        constexpr decltype(auto) propertyDef =
-            descriptor.template property<I>();
+        constexpr decltype(auto) propertyDef
+                = descriptor.template property<I>();
 
-        using property_encoder =
-            dp::basic_encoder<typename decltype(propertyDef.decl_value())::type,
-                              Stream>;
+        using property_encoder = dp::basic_encoder<
+                typename decltype(propertyDef.decl_value())::type, Stream>;
 
         DPLX_TRY(property_encoder()(stream, propertyDef.access(value)));
         return success();
@@ -55,8 +54,8 @@ inline auto encode_tuple(Stream &outStream, T const &value) -> result<void>
 
     if constexpr (descriptor.version == null_def_version)
     {
-        DPLX_TRY(
-            item_emitter<Stream>::array(outStream, descriptor.num_properties));
+        DPLX_TRY(item_emitter<Stream>::array(outStream,
+                                             descriptor.num_properties));
     }
     else
     {
@@ -66,7 +65,7 @@ inline auto encode_tuple(Stream &outStream, T const &value) -> result<void>
     }
 
     DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-        encode_value_fn{outStream, value}));
+            encode_value_fn{outStream, value}));
 
     return success();
 }
@@ -78,12 +77,12 @@ inline auto encode_tuple(Stream &outStream,
 {
     using encode_value_fn = detail::mp_encode_value_fn<descriptor, T, Stream>;
 
-    DPLX_TRY(
-        item_emitter<Stream>::array(outStream, descriptor.num_properties + 1));
+    DPLX_TRY(item_emitter<Stream>::array(outStream,
+                                         descriptor.num_properties + 1));
     DPLX_TRY(item_emitter<Stream>::integer(outStream, version));
 
     DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-        encode_value_fn{outStream, value}));
+            encode_value_fn{outStream, value}));
 
     return success();
 }
@@ -91,14 +90,14 @@ inline auto encode_tuple(Stream &outStream,
 template <packable_tuple T, output_stream Stream>
 class basic_encoder<T, Stream>
 {
-    static constexpr auto descriptor =
-        layout_descriptor_for(std::type_identity<T>{});
+    static constexpr auto descriptor
+            = layout_descriptor_for(std::type_identity<T>{});
 
 public:
     using value_type = T;
 
     auto operator()(Stream &outStream, value_type const &value) const
-        -> result<void>
+            -> result<void>
     {
         return dp::encode_tuple<descriptor, T, Stream>(outStream, value);
     }

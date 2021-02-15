@@ -25,12 +25,11 @@ struct mp_decode_value_fn
     template <std::size_t I>
     auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
     {
-        constexpr decltype(auto) propertyDef =
-            descriptor.template property<I>();
+        constexpr decltype(auto) propertyDef
+                = descriptor.template property<I>();
 
-        using property_decoder =
-            dp::basic_decoder<typename decltype(propertyDef.decl_value())::type,
-                              Stream>;
+        using property_decoder = dp::basic_decoder<
+                typename decltype(propertyDef.decl_value())::type, Stream>;
 
         DPLX_TRY(property_decoder()(inStream, propertyDef.access(dest)));
         return I;

@@ -49,7 +49,7 @@ inline constexpr auto to_byte(type_code v) -> std::byte
     return std::byte{static_cast<std::uint8_t>(v)};
 }
 
-}
+} // namespace dplx::dp
 
 namespace dplx::dp::detail
 {

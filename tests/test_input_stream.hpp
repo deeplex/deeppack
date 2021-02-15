@@ -11,8 +11,8 @@
 #include <cstdint>
 
 #include <algorithm>
-#include <vector>
 #include <span>
+#include <vector>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
@@ -43,14 +43,14 @@ public:
     friend inline auto
     tag_invoke(dplx::dp::tag_t<dplx::dp::available_input_size>,
                test_input_stream &self) noexcept
-        -> dplx::dp::result<std::size_t>
+            -> dplx::dp::result<std::size_t>
     {
         return self.mBuffer.size() - self.mStreamPosition;
     }
     friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::read>,
                                   test_input_stream &self,
                                   std::size_t const amount)
-        -> dplx::dp::result<std::span<std::byte const>>
+            -> dplx::dp::result<std::span<std::byte const>>
     {
         BOOST_TEST(self.mReadCounter == self.mCommitCounter);
         auto const start = self.mStreamPosition;
@@ -63,8 +63,8 @@ public:
         self.mStreamPosition += amount;
 
         self.mReadBuffer.resize(amount);
-        std::copy_n(
-            self.mBuffer.data() + start, amount, self.mReadBuffer.data());
+        std::copy_n(self.mBuffer.data() + start, amount,
+                    self.mReadBuffer.data());
 
         return std::span(self.mReadBuffer);
     }
@@ -72,7 +72,7 @@ public:
                                   test_input_stream &self,
                                   std::span<std::byte const> proxy,
                                   std::size_t const actualAmount) noexcept
-        -> dplx::dp::result<void>
+            -> dplx::dp::result<void>
     {
         BOOST_TEST(proxy.size() >= actualAmount);
         BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
@@ -86,7 +86,7 @@ public:
     tag_invoke(dplx::dp::tag_t<dplx::dp::consume>,
                test_input_stream &self,
                [[maybe_unused]] std::span<std::byte const> const proxy) noexcept
-        -> dplx::dp::result<void>
+            -> dplx::dp::result<void>
     {
         BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
         self.mCommitCounter += 1;
@@ -98,7 +98,7 @@ public:
                                   test_input_stream &self,
                                   std::byte *buffer,
                                   std::size_t const amount) noexcept
-        -> dplx::dp::result<void>
+            -> dplx::dp::result<void>
     {
         BOOST_TEST(self.mReadCounter == self.mCommitCounter);
         if (self.mStreamPosition + amount > self.mBuffer.size())
@@ -119,7 +119,7 @@ auto make_test_input_stream(Ts... ts) noexcept -> test_input_stream
 {
     static_assert((... && (std::is_integral_v<Ts> || std::is_enum_v<Ts>)));
     return test_input_stream(
-        std::vector<std::byte>{static_cast<std::byte>(ts)...});
+            std::vector<std::byte>{static_cast<std::byte>(ts)...});
 }
 
 } // namespace dp_tests

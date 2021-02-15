@@ -13,7 +13,6 @@
 static_assert(dplx::dp::output_stream<dplx::dp::byte_buffer_view>);
 static_assert(!dplx::dp::lazy_output_stream<dplx::dp::byte_buffer_view>);
 
-
 namespace dp_tests
 {
 
@@ -31,7 +30,8 @@ struct memory_output_stream_dependencies
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(memory_output_stream, memory_output_stream_dependencies)
+BOOST_FIXTURE_TEST_SUITE(memory_output_stream,
+                         memory_output_stream_dependencies)
 
 using dplx::dp::byte_buffer_view;
 
@@ -48,4 +48,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
-}
+} // namespace dp_tests

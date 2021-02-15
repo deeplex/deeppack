@@ -46,19 +46,19 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
 
     if constexpr (sizeof(T) <= sizeof(unsigned int))
     {
-        return (digits_v<unsigned int> - 1) ^
-               __builtin_clz(static_cast<unsigned int>(value));
+        return (digits_v<unsigned int> - 1)
+             ^ __builtin_clz(static_cast<unsigned int>(value));
     }
     else if constexpr (sizeof(T) <= sizeof(unsigned long))
     {
-        return (digits_v<unsigned long> - 1) ^
-               __builtin_clzl(static_cast<unsigned long>(value));
+        return (digits_v<unsigned long> - 1)
+             ^ __builtin_clzl(static_cast<unsigned long>(value));
     }
     else /*if constexpr (sizeof(T) <= sizeof(unsigned long long))
             see static_assert above */
     {
-        return (digits_v<unsigned long long> - 1) ^
-               __builtin_clzll(static_cast<unsigned long long>(value));
+        return (digits_v<unsigned long long> - 1)
+             ^ __builtin_clzll(static_cast<unsigned long long>(value));
     }
 
 #elif defined(BOOST_COMP_MSVC_AVAILABLE)
@@ -80,9 +80,8 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
 
         static_assert(sizeof(unsigned long) * 2 == sizeof(unsigned long long));
 
-        if (_BitScanReverse(
-                &result,
-                static_cast<unsigned long>(value >> digits_v<unsigned long>)))
+        if (_BitScanReverse(&result, static_cast<unsigned long>(
+                                             value >> digits_v<unsigned long>)))
         {
             return static_cast<int>(result + digits_v<unsigned long>);
         }
@@ -126,15 +125,15 @@ constexpr auto load(std::byte const *const src) -> T
             }
             if constexpr (sizeof(acc) >= 4)
             {
-                acc |= std::to_integer<uT>(src[2]) << 16 |
-                       std::to_integer<uT>(src[3]) << 24;
+                acc |= std::to_integer<uT>(src[2]) << 16
+                     | std::to_integer<uT>(src[3]) << 24;
             }
             if constexpr (sizeof(acc) == 8)
             {
-                acc |= std::to_integer<uT>(src[4]) << 32 |
-                       std::to_integer<uT>(src[5]) << 40 |
-                       std::to_integer<uT>(src[6]) << 48 |
-                       std::to_integer<uT>(src[7]) << 56;
+                acc |= std::to_integer<uT>(src[4]) << 32
+                     | std::to_integer<uT>(src[5]) << 40
+                     | std::to_integer<uT>(src[6]) << 48
+                     | std::to_integer<uT>(src[7]) << 56;
             }
             return static_cast<T>(acc);
         }
@@ -147,15 +146,15 @@ constexpr auto load(std::byte const *const src) -> T
             }
             if constexpr (sizeof(acc) >= 4)
             {
-                acc |= std::to_integer<uT>(src[2]) << 40 |
-                       std::to_integer<uT>(src[3]) << 32;
+                acc |= std::to_integer<uT>(src[2]) << 40
+                     | std::to_integer<uT>(src[3]) << 32;
             }
             if constexpr (sizeof(acc) == 8)
             {
-                acc |= std::to_integer<uT>(src[4]) << 24 |
-                       std::to_integer<uT>(src[5]) << 16 |
-                       std::to_integer<uT>(src[6]) << 8 |
-                       std::to_integer<uT>(src[7]);
+                acc |= std::to_integer<uT>(src[4]) << 24
+                     | std::to_integer<uT>(src[5]) << 16
+                     | std::to_integer<uT>(src[6]) << 8
+                     | std::to_integer<uT>(src[7]);
             }
             return static_cast<T>(acc >> (64 - digits_v<uT>));
         }
@@ -163,10 +162,10 @@ constexpr auto load(std::byte const *const src) -> T
     else
     {
         constexpr auto boostOrder = order == std::endian::little
-                                        ? boost::endian::order::little
-                                        : boost::endian::order::big;
+                                          ? boost::endian::order::little
+                                          : boost::endian::order::big;
         return boost::endian::endian_load<T, sizeof(T), boostOrder>(
-            reinterpret_cast<unsigned char const *>(src));
+                reinterpret_cast<unsigned char const *>(src));
         // T assembled;
         // std::memcpy(&assembled, src, sizeof(assembled));
         // return assembled;

@@ -103,11 +103,11 @@ struct member_object_pointer_type_traits<T C::*>
 
 template <typename T>
 using member_object_pointer_value_type =
-    typename member_object_pointer_type_traits<T>::value_type;
+        typename member_object_pointer_type_traits<T>::value_type;
 
 template <typename T>
 using member_object_pointer_class_type =
-    typename member_object_pointer_type_traits<T>::class_type;
+        typename member_object_pointer_type_traits<T>::class_type;
 
 template <std::size_t N, typename = std::make_index_sequence<N>>
 struct nth_param_type_impl;
@@ -121,7 +121,7 @@ struct nth_param_type_impl<N, std::index_sequence<Is...>>
 
 template <std::size_t N, typename... Params>
 using nth_param_t = typename decltype(nth_param_type_impl<N>::deduce(
-    static_cast<std::type_identity<Params> *>(nullptr)...))::type;
+        static_cast<std::type_identity<Params> *>(nullptr)...))::type;
 
 #if !defined(_MSC_VER) // || 1
 
@@ -149,8 +149,8 @@ struct nth_param_value_impl<N, std::index_sequence<Is...>>
 };
 
 template <std::size_t N, decltype(auto)... Vs>
-inline constexpr decltype(auto)
-    nth_param_v = nth_param_value_impl<N>::access(Vs...);
+inline constexpr decltype(auto) nth_param_v
+        = nth_param_value_impl<N>::access(Vs...);
 
 #else
 
@@ -182,7 +182,7 @@ concept tuple_sized = requires
 template <typename F, typename T, std::size_t... Is>
 constexpr decltype(auto)
 apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
-    noexcept(static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...)))
+        noexcept(static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...)))
 {
     return static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...);
 }
@@ -191,15 +191,15 @@ apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
 template <typename F, typename T>
 requires tuple_sized<std::remove_cvref_t<T>> constexpr decltype(auto)
 apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl(
-    static_cast<F &&>(f),
-    static_cast<T &&>(t),
-    std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<T>>>())))
-{
-    return detail::apply_simply_impl<F, T>(
         static_cast<F &&>(f),
         static_cast<T &&>(t),
         std::make_index_sequence<
-            std::tuple_size_v<std::remove_reference_t<T>>>());
+                std::tuple_size_v<std::remove_reference_t<T>>>())))
+{
+    return detail::apply_simply_impl<F, T>(
+            static_cast<F &&>(f), static_cast<T &&>(t),
+            std::make_index_sequence<
+                    std::tuple_size_v<std::remove_reference_t<T>>>());
 }
 
 template <typename T, typename IS>
@@ -219,8 +219,8 @@ template <tuple_sized T>
 struct tuple_element_list<T>
 {
     using type = typename tuple_element_list_deducer<
-        T,
-        std::make_index_sequence<std::tuple_size_v<T>>>::type;
+            T,
+            std::make_index_sequence<std::tuple_size_v<T>>>::type;
 };
 
 template <typename T>

@@ -25,9 +25,9 @@ class test_chunked_output_stream final
 {
 public:
     friend class dplx::dp::chunked_output_stream_base<
-        test_chunked_output_stream>;
-    using base_type =
-        dplx::dp::chunked_output_stream_base<test_chunked_output_stream>;
+            test_chunked_output_stream>;
+    using base_type
+            = dplx::dp::chunked_output_stream_base<test_chunked_output_stream>;
 
     std::array<std::vector<std::byte>, 2> mChunks;
     unsigned int mNext;
@@ -37,8 +37,8 @@ public:
         , mChunks()
     {
         constexpr auto invalidItem = std::byte{0xfeu};
-        constexpr auto partition =
-            dplx::dp::minimum_guaranteed_write_size * 2 - 1;
+        constexpr auto partition
+                = dplx::dp::minimum_guaranteed_write_size * 2 - 1;
         assert(streamSize > partition);
 
         mChunks[0].resize(partition);
@@ -51,8 +51,8 @@ public:
 
 struct chunked_output_stream_dependencies
 {
-    static constexpr unsigned int testSize =
-        dplx::dp::minimum_guaranteed_write_size * 4 - 1;
+    static constexpr unsigned int testSize
+            = dplx::dp::minimum_guaranteed_write_size * 4 - 1;
 
     test_chunked_output_stream subject;
 

@@ -25,10 +25,11 @@ requires std::sentinel_for<S, T> class indefinite_range
 public:
     template <std::ranges::input_range R>
     requires std::assignable_from<T &, std::ranges::iterator_t<R const>> &&
-        std::assignable_from<
-            S &,
-            std::ranges::sentinel_t<
-                R const>> constexpr explicit indefinite_range(R const &range)
+            std::assignable_from<
+                    S &,
+                    std::ranges::sentinel_t<
+                            R const>> constexpr explicit indefinite_range(R const &
+                                                                                  range)
         : mIt(std::ranges::begin(range))
         , mEnd(std::ranges::end(range))
     {
@@ -52,12 +53,12 @@ public:
 
 template <std::ranges::input_range R>
 explicit indefinite_range(R const &)
-    -> indefinite_range<std::ranges::iterator_t<R const>,
-                        std::ranges::sentinel_t<R const>>;
+        -> indefinite_range<std::ranges::iterator_t<R const>,
+                            std::ranges::sentinel_t<R const>>;
 
 template <typename T, typename S>
 static inline constexpr bool
-    enable_indefinite_encoding<indefinite_range<T, S>> = true;
+        enable_indefinite_encoding<indefinite_range<T, S>> = true;
 
 } // namespace dplx::dp
 
@@ -65,5 +66,5 @@ namespace std::ranges
 {
 template <typename T, typename S>
 static inline constexpr bool
-    enable_borrowed_range<::dplx::dp::indefinite_range<T, S>> = true;
+        enable_borrowed_range<::dplx::dp::indefinite_range<T, S>> = true;
 }

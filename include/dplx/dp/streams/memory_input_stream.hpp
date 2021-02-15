@@ -23,7 +23,7 @@ template <typename T>
 requires std::is_same_v<std::byte, std::remove_const_t<T>> inline auto
 tag_invoke(tag_t<dp::available_input_size>,
            basic_byte_buffer_view<T> &self) noexcept
-    -> dplx::dp::result<std::size_t>
+        -> dplx::dp::result<std::size_t>
 {
     return self.remaining_size();
 }
@@ -32,7 +32,7 @@ requires std::is_same_v<std::byte, std::remove_const_t<T>> inline auto
 tag_invoke(tag_t<dp::read>,
            basic_byte_buffer_view<T> &self,
            std::size_t const amount) noexcept
-    -> dplx::dp::result<std::span<std::byte const>>
+        -> dplx::dp::result<std::span<std::byte const>>
 {
     if (amount > static_cast<unsigned>(self.remaining_size()))
     {

@@ -27,8 +27,8 @@ inline constexpr struct write_fn
     // direct encoding variant
     template <typename Stream>
     requires tag_invocable<write_fn, Stream &, std::size_t const> auto
-    operator()(Stream &stream, std::size_t const size) const
-        noexcept(nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
+    operator()(Stream &stream, std::size_t const size) const noexcept(
+            nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<write_fn, Stream &, std::size_t const>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, size);
@@ -43,14 +43,14 @@ inline constexpr struct write_fn
     operator()(Stream &stream,
                std::byte const *bytes,
                std::size_t const numBytes) const
-        noexcept(nothrow_tag_invocable<write_fn,
-                                       Stream &,
-                                       std::byte const *,
-                                       std::size_t const>)
-            -> tag_invoke_result_t<write_fn,
-                                   Stream &,
-                                   std::byte const *,
-                                   std::size_t const>
+            noexcept(nothrow_tag_invocable<write_fn,
+                                           Stream &,
+                                           std::byte const *,
+                                           std::size_t const>)
+                    -> tag_invoke_result_t<write_fn,
+                                           Stream &,
+                                           std::byte const *,
+                                           std::size_t const>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, bytes, numBytes);
     }
@@ -63,8 +63,8 @@ inline constexpr struct commit_fn
     template <typename Stream, typename WriteProxy>
     requires tag_invocable<commit_fn, Stream &, WriteProxy &> auto
     operator()(Stream &stream, WriteProxy &proxy) const
-        noexcept(nothrow_tag_invocable<commit_fn, Stream &, WriteProxy &>)
-            -> tag_invoke_result_t<commit_fn, Stream &, WriteProxy &>
+            noexcept(nothrow_tag_invocable<commit_fn, Stream &, WriteProxy &>)
+                    -> tag_invoke_result_t<commit_fn, Stream &, WriteProxy &>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy);
     }
@@ -75,14 +75,14 @@ inline constexpr struct commit_fn
                            WriteProxy &,
                            std::size_t const> auto
     operator()(Stream &stream, WriteProxy &proxy, std::size_t const size) const
-        noexcept(nothrow_tag_invocable<commit_fn,
-                                       Stream &,
-                                       WriteProxy &,
-                                       std::size_t const>)
-            -> tag_invoke_result_t<commit_fn,
-                                   Stream &,
-                                   WriteProxy &,
-                                   std::size_t const>
+            noexcept(nothrow_tag_invocable<commit_fn,
+                                           Stream &,
+                                           WriteProxy &,
+                                           std::size_t const>)
+                    -> tag_invoke_result_t<commit_fn,
+                                           Stream &,
+                                           WriteProxy &,
+                                           std::size_t const>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy, size);
     }
@@ -151,8 +151,8 @@ inline constexpr struct read_fn
 {
     template <typename Stream>
     requires tag_invocable<read_fn, Stream &, std::size_t const> auto
-    operator()(Stream &stream, std::size_t const size) const
-        noexcept(nothrow_tag_invocable<read_fn, Stream &, std::size_t const>)
+    operator()(Stream &stream, std::size_t const size) const noexcept(
+            nothrow_tag_invocable<read_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<read_fn, Stream &, std::size_t const>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, size);
@@ -164,14 +164,14 @@ inline constexpr struct read_fn
                            std::byte *,
                            std::size_t const> auto
     operator()(Stream &stream, std::byte *data, std::size_t const size) const
-        noexcept(nothrow_tag_invocable<read_fn,
-                                       Stream &,
-                                       std::byte *,
-                                       std::size_t const>)
-            -> tag_invoke_result_t<read_fn,
-                                   Stream &,
-                                   std::byte *,
-                                   std::size_t const>
+            noexcept(nothrow_tag_invocable<read_fn,
+                                           Stream &,
+                                           std::byte *,
+                                           std::size_t const>)
+                    -> tag_invoke_result_t<read_fn,
+                                           Stream &,
+                                           std::byte *,
+                                           std::size_t const>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, data, size);
     }
@@ -189,14 +189,14 @@ inline constexpr struct consume_fn
     operator()(Stream &stream,
                ReadProxy &proxy,
                std::size_t const actualSize) const
-        noexcept(nothrow_tag_invocable<consume_fn,
-                                       Stream &,
-                                       ReadProxy &,
-                                       std::size_t const>)
-            -> tag_invoke_result_t<consume_fn,
-                                   Stream &,
-                                   ReadProxy &,
-                                   std::size_t const>
+            noexcept(nothrow_tag_invocable<consume_fn,
+                                           Stream &,
+                                           ReadProxy &,
+                                           std::size_t const>)
+                    -> tag_invoke_result_t<consume_fn,
+                                           Stream &,
+                                           ReadProxy &,
+                                           std::size_t const>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy, actualSize);
     }
@@ -204,8 +204,8 @@ inline constexpr struct consume_fn
     template <typename Stream, typename ReadProxy>
     requires tag_invocable<consume_fn, Stream &, ReadProxy &> auto
     operator()(Stream &stream, ReadProxy &proxy) const
-        noexcept(nothrow_tag_invocable<consume_fn, Stream &, ReadProxy &>)
-            -> tag_invoke_result_t<consume_fn, Stream &, ReadProxy &>
+            noexcept(nothrow_tag_invocable<consume_fn, Stream &, ReadProxy &>)
+                    -> tag_invoke_result_t<consume_fn, Stream &, ReadProxy &>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy);
     }
@@ -216,8 +216,8 @@ inline constexpr struct available_input_size_fn
     template <typename Stream>
     requires tag_invocable<available_input_size_fn, Stream &> auto
     operator()(Stream &stream) const
-        noexcept(nothrow_tag_invocable<available_input_size_fn, Stream &>)
-            -> tag_invoke_result_t<available_input_size_fn, Stream &>
+            noexcept(nothrow_tag_invocable<available_input_size_fn, Stream &>)
+                    -> tag_invoke_result_t<available_input_size_fn, Stream &>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, stream);
     }
@@ -267,7 +267,7 @@ concept input_stream
 
 template <input_stream Stream>
 using read_proxy_t = typename decltype(::dplx::dp::read(
-    std::declval<Stream &>(), std::declval<std::size_t>()))::value_type;
+        std::declval<Stream &>(), std::declval<std::size_t>()))::value_type;
 
 // clang-format off
 template <typename Proxy, typename Stream>

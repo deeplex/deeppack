@@ -30,10 +30,10 @@ using dplx::dp::property_def;
 static_assert(std::same_as<dplx::dp::fixed_u8string<5>,
                            decltype(dplx::dp::fixed_u8string(u8"hello"))>);
 
-static_assert(
-    std::same_as<dplx::dp::fixed_u8string<16>,
-                 typename std::common_type<dplx::dp::fixed_u8string<1>,
-                                           dplx::dp::fixed_u8string<5>>::type>);
+static_assert(std::same_as<
+              dplx::dp::fixed_u8string<16>,
+              typename std::common_type<dplx::dp::fixed_u8string<1>,
+                                        dplx::dp::fixed_u8string<5>>::type>);
 
 BOOST_AUTO_TEST_CASE(object_head_decode_unversioned)
 {
@@ -83,19 +83,19 @@ static_assert(!test_tuple_def_1.has_optional_properties);
 
 constexpr object_def<property_def<1, &test_tuple::ma>{},
                      property_def<23, &test_tuple::mb>{}>
-    test_tuple_def_2{};
+        test_tuple_def_2{};
 static_assert(!test_tuple_def_2.has_optional_properties);
 
 constexpr object_def<property_def<1, &test_tuple::ma>{},
                      property_def<23, &test_tuple::mb>{},
                      property_def<64, &test_tuple::mc>{}>
-    test_tuple_def_3{};
+        test_tuple_def_3{};
 static_assert(!test_tuple_def_3.has_optional_properties);
 
 constexpr object_def<property_def<1, &test_tuple::ma>{},
                      property_def<23, &test_tuple::mb>{false},
                      property_def<64, &test_tuple::mc>{}>
-    test_tuple_def_3_with_optional{};
+        test_tuple_def_3_with_optional{};
 static_assert(test_tuple_def_3_with_optional.has_optional_properties);
 
 BOOST_AUTO_TEST_CASE(prop_decode_1)
@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE(def_1)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_1>(istream, out, 1);
+    auto rx = dplx::dp::decode_object_properties<test_tuple_def_1>(istream, out,
+                                                                   1);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x17);
     BOOST_TEST(out.mb == 0);
@@ -177,8 +177,8 @@ BOOST_AUTO_TEST_CASE(def_2)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_2>(istream, out, 2);
+    auto rx = dplx::dp::decode_object_properties<test_tuple_def_2>(istream, out,
+                                                                   2);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0xEF);
@@ -187,25 +187,13 @@ BOOST_AUTO_TEST_CASE(def_2)
 
 BOOST_AUTO_TEST_CASE(def_3)
 {
-    auto bytes = make_byte_array<32>({23,
-                                      0x18,
-                                      0xEF,
-                                      1,
-                                      0x19,
-                                      0x48,
-                                      0xCF,
-                                      0x18,
-                                      64,
-                                      0x1A,
-                                      0xDE,
-                                      0xAD,
-                                      0xBE,
-                                      0xEF});
+    auto bytes = make_byte_array<32>({23, 0x18, 0xEF, 1, 0x19, 0x48, 0xCF, 0x18,
+                                      64, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF});
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_3>(istream, out, 3);
+    auto rx = dplx::dp::decode_object_properties<test_tuple_def_3>(istream, out,
+                                                                   3);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0xEF);
@@ -218,33 +206,20 @@ BOOST_AUTO_TEST_CASE(def_3_reject_missing_property)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_3>(istream, out, 2);
+    auto rx = dplx::dp::decode_object_properties<test_tuple_def_3>(istream, out,
+                                                                   2);
     BOOST_TEST(rx.error() == errc::required_object_property_missing);
 }
 
 BOOST_AUTO_TEST_CASE(def_3_with_optional_set)
 {
-    auto bytes = make_byte_array<32>({23,
-                                      0x18,
-                                      0xEF,
-                                      1,
-                                      0x19,
-                                      0x48,
-                                      0xCF,
-                                      0x18,
-                                      64,
-                                      0x1A,
-                                      0xDE,
-                                      0xAD,
-                                      0xBE,
-                                      0xEF});
+    auto bytes = make_byte_array<32>({23, 0x18, 0xEF, 1, 0x19, 0x48, 0xCF, 0x18,
+                                      64, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF});
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_3_with_optional>(
-            istream, out, 3);
+    auto rx = dplx::dp::decode_object_properties<
+            test_tuple_def_3_with_optional>(istream, out, 3);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0xEF);
@@ -254,13 +229,12 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_set)
 BOOST_AUTO_TEST_CASE(def_3_with_optional_not_set)
 {
     auto bytes = make_byte_array<32>(
-        {0x18, 64, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 1, 0x19, 0x48, 0xCF});
+            {0x18, 64, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 1, 0x19, 0x48, 0xCF});
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_3_with_optional>(
-            istream, out, 2);
+    auto rx = dplx::dp::decode_object_properties<
+            test_tuple_def_3_with_optional>(istream, out, 2);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0);
@@ -273,9 +247,8 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_reject_missing_property)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_object_properties<test_tuple_def_3_with_optional>(
-            istream, out, 2);
+    auto rx = dplx::dp::decode_object_properties<
+            test_tuple_def_3_with_optional>(istream, out, 2);
     BOOST_TEST(rx.error() == errc::required_object_property_missing);
 }
 
@@ -290,11 +263,11 @@ public:
     constexpr custom_with_layout_descriptor() noexcept = default;
 
     static constexpr object_def<
-        property_def<1, &custom_with_layout_descriptor::ma>{},
-        property_def<2, &custom_with_layout_descriptor::mb>{},
-        property_def<26, &custom_with_layout_descriptor::mc>{},
-        property_def<36, &custom_with_layout_descriptor::md>{}>
-        layout_descriptor{};
+            property_def<1, &custom_with_layout_descriptor::ma>{},
+            property_def<2, &custom_with_layout_descriptor::mb>{},
+            property_def<26, &custom_with_layout_descriptor::mc>{},
+            property_def<36, &custom_with_layout_descriptor::md>{}>
+            layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
     {
@@ -324,7 +297,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     test_encoder subject{};
 
     auto bytes = make_byte_array<32>(
-        {0b101'00000 | 4, 2, 7, 1, 0x13, 24, 26, 4, 24, 36, 0x14});
+            {0b101'00000 | 4, 2, 7, 1, 0x13, 24, 26, 4, 24, 36, 0x14});
     test_input_stream istream{bytes};
 
     custom_with_layout_descriptor t{};
@@ -349,17 +322,20 @@ public:
     constexpr custom_with_named_layout_descriptor() noexcept = default;
 
     static constexpr named_property_def<
-        u8"a",
-        &custom_with_named_layout_descriptor::ma>
-        pma{};
+            u8"a",
+            &custom_with_named_layout_descriptor::ma>
+            pma{};
 
     static constexpr object_def<
-        named_property_def<u8"b", &custom_with_named_layout_descriptor::mb>{},
-        named_property_def<u8"c", &custom_with_named_layout_descriptor::mc>{},
-        named_property_def<u8"d", &custom_with_named_layout_descriptor::md>{},
-        named_property_def<u8"nonce",
-                           &custom_with_named_layout_descriptor::ma>{}>
-        layout_descriptor{};
+            named_property_def<u8"b",
+                               &custom_with_named_layout_descriptor::mb>{},
+            named_property_def<u8"c",
+                               &custom_with_named_layout_descriptor::mc>{},
+            named_property_def<u8"d",
+                               &custom_with_named_layout_descriptor::md>{},
+            named_property_def<u8"nonce",
+                               &custom_with_named_layout_descriptor::ma>{}>
+            layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
     {
@@ -387,29 +363,15 @@ static_assert(dplx::dp::packable<custom_with_named_layout_descriptor>);
 //
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_decoding)
 {
-    using test_encoder =
-        dplx::dp::basic_decoder<custom_with_named_layout_descriptor,
-                                test_input_stream>;
+    using test_encoder
+            = dplx::dp::basic_decoder<custom_with_named_layout_descriptor,
+                                      test_input_stream>;
 
     test_encoder subject{};
 
-    auto bytes = make_byte_array<32, int>({0b101'00000 | 4,
-                                           0x61,
-                                           'b',
-                                           7,
-                                           0x65,
-                                           'n',
-                                           'o',
-                                           'n',
-                                           'c',
-                                           'e',
-                                           0x13,
-                                           0x61,
-                                           'c',
-                                           0x04,
-                                           0x61,
-                                           'd',
-                                           0x14});
+    auto bytes = make_byte_array<32, int>({0b101'00000 | 4, 0x61, 'b', 7, 0x65,
+                                           'n', 'o', 'n', 'c', 'e', 0x13, 0x61,
+                                           'c', 0x04, 0x61, 'd', 0x14});
     test_input_stream istream{bytes};
 
     custom_with_named_layout_descriptor t{};

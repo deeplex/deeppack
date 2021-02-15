@@ -15,7 +15,7 @@ namespace dplx::dp
 
 inline auto
 tag_invoke(write_fn, byte_buffer_view &self, std::size_t const size) noexcept
-    -> result<std::span<std::byte>>
+        -> result<std::span<std::byte>>
 {
     if (static_cast<std::size_t>(self.remaining_size()) < size)
     {

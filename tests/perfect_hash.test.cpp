@@ -26,7 +26,7 @@ struct test_hash
     template <dplx::dp::unsigned_integer T>
     constexpr auto operator()(T const value,
                               std::uint64_t const seed = 0) const noexcept
-        -> std::uint64_t
+            -> std::uint64_t
     {
         return dplx::dp::detail::xxhash3(value, seed);
     }
@@ -34,7 +34,7 @@ struct test_hash
 
 template <typename T, std::size_t N>
 constexpr auto failing_hash(std::array<T, N> const &spec) noexcept
-    -> std::size_t
+        -> std::size_t
 {
     perfect_hasher<T, N, test_hash> const ph{spec};
 
@@ -100,22 +100,8 @@ BOOST_AUTO_TEST_CASE(h_06_1)
 
 BOOST_AUTO_TEST_CASE(h_16_0)
 {
-    constexpr std::array subject{25u,
-                                 36u,
-                                 37u,
-                                 40u,
-                                 44u,
-                                 47u,
-                                 51u,
-                                 54u,
-                                 67u,
-                                 69u,
-                                 70u,
-                                 77u,
-                                 79u,
-                                 81u,
-                                 83u,
-                                 89u};
+    constexpr std::array subject{25u, 36u, 37u, 40u, 44u, 47u, 51u, 54u,
+                                 67u, 69u, 70u, 77u, 79u, 81u, 83u, 89u};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }

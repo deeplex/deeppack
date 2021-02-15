@@ -33,8 +33,8 @@ inline auto store_var_uint_ct(std::byte *dest,
         return 1;
     }
 
-    auto const lastSetBitIndex =
-        static_cast<unsigned int>(detail::find_last_set_bit(value));
+    auto const lastSetBitIndex
+            = static_cast<unsigned int>(detail::find_last_set_bit(value));
     int const bytePowerP2 = detail::find_last_set_bit(lastSetBitIndex);
 
     dest[0] = category | static_cast<std::byte>(24 + bytePowerP2 - 2);
@@ -56,8 +56,8 @@ inline auto var_uint_encoded_size_ct(T const value) -> unsigned int
         return 1u;
     }
     unsigned int const lastSetBitIndex = detail::find_last_set_bit(value);
-    unsigned int const bytePower =
-        detail::find_last_set_bit(lastSetBitIndex) - 2;
+    unsigned int const bytePower
+            = detail::find_last_set_bit(lastSetBitIndex) - 2;
 
     return 1u + (1u << bytePower);
 }
@@ -135,13 +135,13 @@ inline auto store_var_uint(std::byte *dest,
 
     if constexpr (sizeof(T) <= 4)
     {
-        return store_var_uint_ct(
-            dest, static_cast<std::uint32_t>(value), category);
+        return store_var_uint_ct(dest, static_cast<std::uint32_t>(value),
+                                 category);
     }
     else
     {
-        return store_var_uint_ct(
-            dest, static_cast<std::uint64_t>(value), category);
+        return store_var_uint_ct(dest, static_cast<std::uint64_t>(value),
+                                 category);
     }
 
 #else
@@ -191,10 +191,10 @@ class item_emitter
 public:
     template <typename T>
     static inline auto var_uint_encoded_size(T const value) noexcept
-        -> std::size_t
+            -> std::size_t
     {
         return static_cast<std::size_t>(
-            detail::var_uint_encoded_size<T>(value));
+                detail::var_uint_encoded_size<T>(value));
     }
 
     template <typename T>
@@ -204,42 +204,42 @@ public:
         {
             using uvalue_type = std::make_unsigned_t<T>;
             auto const signmask = static_cast<uvalue_type>(
-                value >> (detail::digits_v<uvalue_type> - 1));
+                    value >> (detail::digits_v<uvalue_type> - 1));
             // complement negatives
-            uvalue_type const uvalue =
-                signmask ^ static_cast<uvalue_type>(value);
+            uvalue_type const uvalue
+                    = signmask ^ static_cast<uvalue_type>(value);
 
-            std::byte const category =
-                static_cast<std::byte>(signmask) & std::byte{0b001'00000};
+            std::byte const category
+                    = static_cast<std::byte>(signmask) & std::byte{0b001'00000};
             return item_emitter::encode_type_info(outStream, uvalue, category);
         }
         else
         {
-            return item_emitter::encode_type_info(
-                outStream, value, to_byte(type_code::posint));
+            return item_emitter::encode_type_info(outStream, value,
+                                                  to_byte(type_code::posint));
         }
     }
 
     template <typename T>
     static inline auto binary(Stream &outStream, T const byteSize)
-        -> result<void>
+            -> result<void>
     {
-        return item_emitter::encode_type_info(
-            outStream, byteSize, to_byte(type_code::binary));
+        return item_emitter::encode_type_info(outStream, byteSize,
+                                              to_byte(type_code::binary));
     }
     template <typename T>
     static inline auto u8string(Stream &outStream, T const numCodeUnits)
-        -> result<void>
+            -> result<void>
     {
-        return item_emitter::encode_type_info(
-            outStream, numCodeUnits, to_byte(type_code::text));
+        return item_emitter::encode_type_info(outStream, numCodeUnits,
+                                              to_byte(type_code::text));
     }
     template <typename T>
     static inline auto array(Stream &outStream, T const numElements)
-        -> result<void>
+            -> result<void>
     {
-        return item_emitter::encode_type_info(
-            outStream, numElements, to_byte(type_code::array));
+        return item_emitter::encode_type_info(outStream, numElements,
+                                              to_byte(type_code::array));
     }
     static inline auto array_indefinite(Stream &outStream) -> result<void>
     {
@@ -248,10 +248,10 @@ public:
     }
     template <typename T>
     static inline auto map(Stream &outStream, T const numKeyValuePairs)
-        -> result<void>
+            -> result<void>
     {
-        return item_emitter::encode_type_info(
-            outStream, numKeyValuePairs, to_byte(type_code::map));
+        return item_emitter::encode_type_info(outStream, numKeyValuePairs,
+                                              to_byte(type_code::map));
     }
     static inline auto map_indefinite(Stream &outStream) -> result<void>
     {
@@ -261,18 +261,18 @@ public:
     static inline auto tag(Stream &outStream,
                            std::uint_least64_t const tagValue) -> result<void>
     {
-        return item_emitter::encode_type_info(
-            outStream, tagValue, to_byte(type_code::tag));
+        return item_emitter::encode_type_info(outStream, tagValue,
+                                              to_byte(type_code::tag));
     }
 
     static inline auto boolean(Stream &outStream, bool const value)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
-        std::ranges::data(writeLease)[0] =
-            to_byte(type_code::bool_false) |
-            std::byte{static_cast<std::uint8_t>(value)};
+        std::ranges::data(writeLease)[0]
+                = to_byte(type_code::bool_false)
+                | std::byte{static_cast<std::uint8_t>(value)};
 
         if constexpr (lazy_output_stream<Stream>)
         {
@@ -281,7 +281,7 @@ public:
         return success();
     }
     static inline auto float_half(Stream &outStream, std::uint16_t const bytes)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(bytes)));
 
@@ -296,7 +296,7 @@ public:
         return success();
     }
     static inline auto float_single(Stream &outStream, float const value)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(value)));
 
@@ -311,7 +311,7 @@ public:
         return success();
     }
     static inline auto float_double(Stream &outStream, double const value)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(value)));
 
@@ -365,7 +365,7 @@ public:
 private:
     static inline auto encode_indefinite_type(Stream &outStream,
                                               std::byte const category)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
@@ -381,32 +381,32 @@ private:
     template <typename T>
     static inline auto
     encode_type_info(Stream &outStream, T const value, std::byte const category)
-        -> result<void>
+            -> result<void>
     {
         if (auto maybeWriteLease = write(outStream, detail::var_uint_max_size);
             oc::try_operation_has_value(maybeWriteLease))
             DPLX_ATTR_LIKELY
             {
-                auto &&writeLease =
-                    oc::try_operation_extract_value(std::move(maybeWriteLease));
+                auto &&writeLease = oc::try_operation_extract_value(
+                        std::move(maybeWriteLease));
                 auto const byteSize = detail::store_var_uint(
-                    std::ranges::data(writeLease), value, category);
+                        std::ranges::data(writeLease), value, category);
 
-                DPLX_TRY(commit(
-                    outStream, writeLease, static_cast<std::size_t>(byteSize)));
+                DPLX_TRY(commit(outStream, writeLease,
+                                static_cast<std::size_t>(byteSize)));
                 return success();
             }
         else
         {
-            if (result<void> failure =
-                    oc::try_operation_return_as(std::move(maybeWriteLease));
+            if (result<void> failure
+                = oc::try_operation_return_as(std::move(maybeWriteLease));
                 failure.assume_error() != errc::end_of_stream)
             {
                 return failure;
             }
 
-            return item_emitter::encode_type_info_recover_eos(
-                outStream, value, category);
+            return item_emitter::encode_type_info_recover_eos(outStream, value,
+                                                              category);
         }
     }
 
@@ -414,7 +414,7 @@ private:
     static auto encode_type_info_recover_eos(Stream &outStream,
                                              T const value,
                                              std::byte const category)
-        -> result<void>
+            -> result<void>
     {
         if (value <= detail::inline_value_max)
         {

@@ -60,21 +60,21 @@ struct fixed_u8string
     constexpr fixed_u8string(fixed_u8string const &) noexcept = default;
     constexpr fixed_u8string(fixed_u8string &&) noexcept = default;
     constexpr auto operator=(fixed_u8string const &) noexcept
-        -> fixed_u8string & = default;
+            -> fixed_u8string & = default;
     constexpr auto operator=(fixed_u8string &&) noexcept
-        -> fixed_u8string & = default;
+            -> fixed_u8string & = default;
 
-    constexpr auto operator==(fixed_u8string const &) const noexcept
-        -> bool = default;
+    constexpr auto operator==(fixed_u8string const &) const noexcept -> bool
+            = default;
     constexpr auto operator<=>(fixed_u8string const &) const noexcept
-        -> std::strong_ordering = default;
+            -> std::strong_ordering = default;
 
     constexpr auto operator==(std::u8string_view str) const noexcept -> bool
     {
         return str == std::u8string_view(*this);
     }
     constexpr auto operator<=>(std::u8string_view str) const noexcept
-        -> std::strong_ordering
+            -> std::strong_ordering
     {
         return str <=> std::u8string_view(*this);
     }
@@ -120,7 +120,7 @@ template <std::size_t N1, std::size_t N2>
 struct common_type<dplx::dp::fixed_u8string<N1>, dplx::dp::fixed_u8string<N2>>
 {
     using type = dplx::dp::fixed_u8string<
-        dplx::dp::detail::div_ceil(N1 < N2 ? N2 : N1, 16u) * 16u>;
+            dplx::dp::detail::div_ceil(N1 < N2 ? N2 : N1, 16u) * 16u>;
 };
 
 } // namespace std
@@ -132,21 +132,21 @@ template <auto Id, auto M, typename IdRuntimeType = decltype(Id)>
 requires std::is_member_object_pointer_v<decltype(M)> struct basic_property_def
 {
 private:
-    using member_object_pointer_type_traits =
-        detail::member_object_pointer_type_traits<decltype(M)>;
+    using member_object_pointer_type_traits
+            = detail::member_object_pointer_type_traits<decltype(M)>;
 
 public:
     using id_type = decltype(Id);
     using id_runtime_type = IdRuntimeType;
     using value_type = typename member_object_pointer_type_traits::value_type;
     using class_type = std::remove_cvref_t<
-        typename member_object_pointer_type_traits::class_type>;
+            typename member_object_pointer_type_traits::class_type>;
 
     static constexpr id_type const &id = Id;
     bool required = true;
 
     static auto decl_value() noexcept
-        -> std::type_identity<std::remove_cvref_t<value_type>>;
+            -> std::type_identity<std::remove_cvref_t<value_type>>;
     static auto decl_class() noexcept -> std::type_identity<class_type>;
 
     static inline auto access(class_type &v) noexcept -> value_type &
@@ -154,15 +154,15 @@ public:
         return v.*M;
     }
     static inline auto access(class_type const &v) noexcept
-        -> value_type const &
+            -> value_type const &
     {
         return v.*M;
     }
 
-    constexpr auto operator==(basic_property_def const &) const noexcept
-        -> bool = default;
+    constexpr auto operator==(basic_property_def const &) const noexcept -> bool
+            = default;
     constexpr auto operator<=>(basic_property_def const &) const noexcept
-        -> std::strong_ordering = default;
+            -> std::strong_ordering = default;
 };
 
 template <std::uint32_t Id, auto M>
@@ -183,17 +183,18 @@ using named_property_def = basic_property_def<Id, M, decltype(Id)>;
 template <auto... Properties>
 struct object_def
 {
-    using param_0_type =
-        std::remove_cvref_t<decltype(detail::nth_param_v<0, Properties...>)>;
+    using param_0_type = std::remove_cvref_t<decltype(
+            detail::nth_param_v<0, Properties...>)>;
     using id_type = std::common_type_t<
-        typename std::remove_cvref_t<decltype(Properties)>::id_type...>;
-    using id_runtime_type = std::common_type_t<
-        typename std::remove_cvref_t<decltype(Properties)>::id_runtime_type...>;
+            typename std::remove_cvref_t<decltype(Properties)>::id_type...>;
+    using id_runtime_type
+            = std::common_type_t<typename std::remove_cvref_t<decltype(
+                    Properties)>::id_runtime_type...>;
     using class_type = typename param_0_type::class_type;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
-    static constexpr bool has_optional_properties =
-        !(... && Properties.required);
+    static constexpr bool has_optional_properties
+            = !(... && Properties.required);
     static constexpr std::array<id_type, num_properties> ids{Properties.id...};
 
     std::uint32_t version = 0xffff'ffff;

@@ -37,19 +37,19 @@ static_assert(!test_object_def_1.has_optional_properties);
 
 constexpr object_def<property_def<1, &test_object::ma>{},
                      property_def<23, &test_object::mb>{}>
-    test_object_def_2{};
+        test_object_def_2{};
 static_assert(!test_object_def_2.has_optional_properties);
 
 constexpr object_def<property_def<1, &test_object::ma>{},
                      property_def<23, &test_object::mb>{},
                      property_def<64, &test_object::mc>{}>
-    test_object_def_3{};
+        test_object_def_3{};
 static_assert(!test_object_def_3.has_optional_properties);
 
 constexpr object_def<property_def<1, &test_object::ma>{},
                      property_def<23, &test_object::mb>{false},
                      property_def<64, &test_object::mc>{}>
-    test_object_def_3_with_optional{};
+        test_object_def_3_with_optional{};
 static_assert(test_object_def_3_with_optional.has_optional_properties);
 
 class custom_with_layout_descriptor
@@ -73,11 +73,11 @@ public:
     }
 
     static constexpr object_def<
-        property_def<1, &custom_with_layout_descriptor::ma>{},
-        property_def<2, &custom_with_layout_descriptor::mb>{},
-        property_def<26, &custom_with_layout_descriptor::mc>{},
-        property_def<36, &custom_with_layout_descriptor::md>{}>
-        layout_descriptor{};
+            property_def<1, &custom_with_layout_descriptor::ma>{},
+            property_def<2, &custom_with_layout_descriptor::mb>{},
+            property_def<26, &custom_with_layout_descriptor::mc>{},
+            property_def<36, &custom_with_layout_descriptor::md>{}>
+            layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
     {
@@ -97,15 +97,16 @@ public:
     }
 };
 static_assert(dplx::dp::packable_object<custom_with_layout_descriptor>);
-static_assert(
-    dplx::dp::encodable<custom_with_layout_descriptor, test_output_stream<>>);
+static_assert(dplx::dp::encodable<custom_with_layout_descriptor,
+                                  test_output_stream<>>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
-    using test_encoder = dplx::dp::basic_encoder<custom_with_layout_descriptor, test_output_stream<>>;
+    using test_encoder = dplx::dp::basic_encoder<custom_with_layout_descriptor,
+                                                 test_output_stream<>>;
 
     auto bytes = make_byte_array<11>(
-        {0b101'00000 | 4, 1, 0x13, 2, 7, 0x18, 26, 4, 0x18, 36, 0x14});
+            {0b101'00000 | 4, 1, 0x13, 2, 7, 0x18, 26, 4, 0x18, 36, 0x14});
 
     test_encoder subject{};
 
@@ -142,17 +143,20 @@ public:
     }
 
     static constexpr named_property_def<
-        u8"a",
-        &custom_with_named_layout_descriptor::ma>
-        pma{};
+            u8"a",
+            &custom_with_named_layout_descriptor::ma>
+            pma{};
 
     static constexpr object_def<
-        named_property_def<u8"b", &custom_with_named_layout_descriptor::mb>{},
-        named_property_def<u8"c", &custom_with_named_layout_descriptor::mc>{},
-        named_property_def<u8"d", &custom_with_named_layout_descriptor::md>{},
-        named_property_def<u8"nonce",
-                           &custom_with_named_layout_descriptor::ma>{}>
-        layout_descriptor{};
+            named_property_def<u8"b",
+                               &custom_with_named_layout_descriptor::mb>{},
+            named_property_def<u8"c",
+                               &custom_with_named_layout_descriptor::mc>{},
+            named_property_def<u8"d",
+                               &custom_with_named_layout_descriptor::md>{},
+            named_property_def<u8"nonce",
+                               &custom_with_named_layout_descriptor::ma>{}>
+            layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
     {
@@ -172,29 +176,17 @@ public:
     }
 };
 static_assert(dplx::dp::packable_object<custom_with_named_layout_descriptor>);
-static_assert(dplx::dp::encodable<custom_with_named_layout_descriptor, test_output_stream<>>);
+static_assert(dplx::dp::encodable<custom_with_named_layout_descriptor,
+                                  test_output_stream<>>);
 
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_encoding)
 {
-    using test_encoder =
-        dplx::dp::basic_encoder<custom_with_named_layout_descriptor, test_output_stream<>>;
-    auto bytes = make_byte_array<17, int>({0b101'00000 | 4,
-                                           0x61,
-                                           'b',
-                                           7,
-                                           0x61,
-                                           'c',
-                                           0x04,
-                                           0x61,
-                                           'd',
-                                           0x14,
-                                           0x65,
-                                           'n',
-                                           'o',
-                                           'n',
-                                           'c',
-                                           'e',
-                                           0x13});
+    using test_encoder
+            = dplx::dp::basic_encoder<custom_with_named_layout_descriptor,
+                                      test_output_stream<>>;
+    auto bytes = make_byte_array<17, int>({0b101'00000 | 4, 0x61, 'b', 7, 0x61,
+                                           'c', 0x04, 0x61, 'd', 0x14, 0x65,
+                                           'n', 'o', 'n', 'c', 'e', 0x13});
 
     test_encoder subject{};
 

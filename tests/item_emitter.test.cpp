@@ -40,7 +40,7 @@ struct value_sample
 
 template <typename T>
 auto boost_test_print_type(std::ostream &s, value_sample<T> const &sample)
-    -> std::ostream &
+        -> std::ostream &
 {
     fmt::print(s, "value_sample{{.value={}, .encoded={{", sample.value);
     for (auto b : sample.encoded_value)
@@ -52,24 +52,24 @@ auto boost_test_print_type(std::ostream &s, value_sample<T> const &sample)
     return s;
 }
 
-constexpr value_sample<float> float_single_samples[] = {
-    {100000.0f, make_byte_array(0x47, 0xc3, 0x50, 0x00)},
-    {3.4028234663852886e+38f, make_byte_array(0x7f, 0x7f, 0xff, 0xff)},
-    {100000.0f, make_byte_array(0x47, 0xc3, 0x50, 0x00)},
-    {std::numeric_limits<float>::infinity(),
-     make_byte_array(0x7f, 0x80, 0x00, 0x00)},
-    {std::numeric_limits<float>::quiet_NaN(),
-     make_byte_array(0x7f, 0xc0, 0x00, 0x00)},
-    {-std::numeric_limits<float>::infinity(),
-     make_byte_array(0xff, 0x80, 0x00, 0x00)}};
+constexpr value_sample<float> float_single_samples[]
+        = {{100000.0f, make_byte_array(0x47, 0xc3, 0x50, 0x00)},
+           {3.4028234663852886e+38f, make_byte_array(0x7f, 0x7f, 0xff, 0xff)},
+           {100000.0f, make_byte_array(0x47, 0xc3, 0x50, 0x00)},
+           {std::numeric_limits<float>::infinity(),
+            make_byte_array(0x7f, 0x80, 0x00, 0x00)},
+           {std::numeric_limits<float>::quiet_NaN(),
+            make_byte_array(0x7f, 0xc0, 0x00, 0x00)},
+           {-std::numeric_limits<float>::infinity(),
+            make_byte_array(0xff, 0x80, 0x00, 0x00)}};
 
 BOOST_DATA_TEST_CASE(float_single,
                      boost::unit_test::data::make(float_single_samples))
 {
     DPLX_TEST_RESULT(test_encoder::float_single(encodingBuffer, sample.value));
 
-    BOOST_TEST_REQUIRE(encodingBuffer.size() ==
-                       sample.encoded_value.size() + 1);
+    BOOST_TEST_REQUIRE(encodingBuffer.size()
+                       == sample.encoded_value.size() + 1);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::float_single);
 
     BOOST_TEST(std::span(encodingBuffer).subspan(1) == sample.encoded_value,
@@ -77,22 +77,23 @@ BOOST_DATA_TEST_CASE(float_single,
 }
 
 constexpr value_sample<double> float_double_samples[] = {
-    {1.1, make_byte_array(0x3f, 0xf1, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a)},
-    {1.e+300, make_byte_array(0x7e, 0x37, 0xe4, 0x3c, 0x88, 0x00, 0x75, 0x9c)},
-    {std::numeric_limits<double>::infinity(),
-     make_byte_array(0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)},
-    {std::numeric_limits<double>::quiet_NaN(),
-     make_byte_array(0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)},
-    {-std::numeric_limits<double>::infinity(),
-     make_byte_array(0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)}};
+        {1.1, make_byte_array(0x3f, 0xf1, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a)},
+        {1.e+300,
+         make_byte_array(0x7e, 0x37, 0xe4, 0x3c, 0x88, 0x00, 0x75, 0x9c)},
+        {std::numeric_limits<double>::infinity(),
+         make_byte_array(0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)},
+        {std::numeric_limits<double>::quiet_NaN(),
+         make_byte_array(0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)},
+        {-std::numeric_limits<double>::infinity(),
+         make_byte_array(0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)}};
 
 BOOST_DATA_TEST_CASE(float_double,
                      boost::unit_test::data::make(float_double_samples))
 {
     DPLX_TEST_RESULT(test_encoder::float_double(encodingBuffer, sample.value));
 
-    BOOST_TEST_REQUIRE(encodingBuffer.size() ==
-                       sample.encoded_value.size() + 1);
+    BOOST_TEST_REQUIRE(encodingBuffer.size()
+                       == sample.encoded_value.size() + 1);
     BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::float_double);
 
     BOOST_TEST(std::span(encodingBuffer).subspan(1) == sample.encoded_value,

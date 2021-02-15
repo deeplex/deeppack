@@ -39,8 +39,8 @@ public:
     {
         std::size_t mInitSize;
 
-        static constexpr std::size_t invalidated_init_size =
-            ~static_cast<std::size_t>(0);
+        static constexpr std::size_t invalidated_init_size
+                = ~static_cast<std::size_t>(0);
 
     public:
         write_proxy(std::span<std::byte> mem, std::size_t currentSize, ctag)
@@ -54,7 +54,7 @@ public:
         friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::commit>,
                                       test_output_stream &stream,
                                       write_proxy &self)
-            -> dplx::dp::result<void>
+                -> dplx::dp::result<void>
         {
             return write_proxy::commit(stream, self);
         }
@@ -63,14 +63,14 @@ public:
                                       test_output_stream &stream,
                                       write_proxy &self,
                                       std::size_t const actualSize)
-            -> dplx::dp::result<void>
+                -> dplx::dp::result<void>
         {
             return write_proxy::commit(stream, self, actualSize);
         }
 
     private:
         static auto commit(test_output_stream &owner, write_proxy &self)
-            -> dplx::dp::result<void>
+                -> dplx::dp::result<void>
         {
             BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
             self.mInitSize = invalidated_init_size;
@@ -81,14 +81,15 @@ public:
         static auto commit(test_output_stream &owner,
                            write_proxy &self,
                            std::size_t const actualSize)
-            -> dplx::dp::result<void>
+                -> dplx::dp::result<void>
         {
             BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
             BOOST_TEST_REQUIRE(actualSize <= self.size());
 
-            auto const absoluteSize = static_cast<std::size_t>(std::distance(
-                                          owner.mBuffer.data(), self.data())) +
-                                      actualSize;
+            auto const absoluteSize
+                    = static_cast<std::size_t>(
+                              std::distance(owner.mBuffer.data(), self.data()))
+                    + actualSize;
             static_cast<std::span<std::byte> &>(self) = self.first(actualSize);
 
             owner.mCurrentSize = absoluteSize;
@@ -118,7 +119,7 @@ public:
     friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::write>,
                                   test_output_stream &self,
                                   std::size_t const amount)
-        -> dplx::dp::result<write_proxy>
+            -> dplx::dp::result<write_proxy>
     {
         BOOST_TEST_REQUIRE(self.mWriteCounter == self.mCommitCounter);
 
@@ -126,21 +127,21 @@ public:
         self.mCurrentSize += amount;
         BOOST_TEST_REQUIRE(start + amount <= std::ranges::size(self.mBuffer));
         self.mWriteCounter += 1;
-        return write_proxy(
-            {self.mBuffer.data() + start, amount}, self.mCurrentSize, ctag{});
+        return write_proxy({self.mBuffer.data() + start, amount},
+                           self.mCurrentSize, ctag{});
     }
     friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::write>,
                                   test_output_stream &self,
                                   std::byte const *bytes,
                                   std::size_t const amount)
-        -> dplx::dp::result<void>
+            -> dplx::dp::result<void>
     {
         BOOST_TEST_REQUIRE(self.mWriteCounter == self.mCommitCounter);
-        BOOST_TEST_REQUIRE(self.mCurrentSize + amount <=
-                           std::ranges::size(self.mBuffer));
+        BOOST_TEST_REQUIRE(self.mCurrentSize + amount
+                           <= std::ranges::size(self.mBuffer));
 
-        std::memcpy(
-            std::ranges::data(self.mBuffer) + self.mCurrentSize, bytes, amount);
+        std::memcpy(std::ranges::data(self.mBuffer) + self.mCurrentSize, bytes,
+                    amount);
         self.mCurrentSize += amount;
 
         return dplx::dp::success();

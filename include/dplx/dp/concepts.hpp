@@ -28,10 +28,9 @@ template <typename T, output_stream Stream>
 class basic_encoder;
 
 template <typename T>
-inline constexpr bool
-    enable_pass_by_value = std::is_trivially_copy_constructible_v<T> &&
-                               std::is_trivially_copyable_v<T> &&
-                           sizeof(T) <= 32;
+inline constexpr bool enable_pass_by_value
+        = std::is_trivially_copy_constructible_v<T> &&
+                  std::is_trivially_copyable_v<T> && sizeof(T) <= 32;
 
 // clang-format off
 template <typename T, typename Stream>
@@ -48,9 +47,9 @@ concept encodable
 // clang-format on
 
 template <typename Range>
-inline constexpr bool enable_indefinite_encoding =
-    std::ranges::input_range<Range> && !std::ranges::sized_range<Range> &&
-    !std::ranges::forward_range<Range>;
+inline constexpr bool enable_indefinite_encoding
+        = std::ranges::input_range<
+                  Range> && !std::ranges::sized_range<Range> && !std::ranges::forward_range<Range>;
 
 template <typename T, input_stream Stream>
 class basic_decoder;
@@ -86,12 +85,12 @@ namespace dplx::dp::detail
 {
 
 template <typename T>
-using select_proper_param_type_impl =
-    std::conditional_t<enable_pass_by_value<T>, T const, T const &>;
+using select_proper_param_type_impl
+        = std::conditional_t<enable_pass_by_value<T>, T const, T const &>;
 
 template <typename T>
-using select_proper_param_type =
-    select_proper_param_type_impl<std::remove_cvref_t<T>>;
+using select_proper_param_type
+        = select_proper_param_type_impl<std::remove_cvref_t<T>>;
 
 template <typename T, output_stream Stream>
 struct are_tuple_elements_encodable : std::false_type
@@ -105,18 +104,18 @@ struct are_tuple_elements_encodable<mp_list<Ts...>, Stream>
 
 template <typename T, typename Stream>
 concept encodable_tuple_like = tuple_like<T> &&output_stream<Stream>
-    &&are_tuple_elements_encodable<tuple_element_list_t<T>, Stream>::value;
+        &&are_tuple_elements_encodable<tuple_element_list_t<T>, Stream>::value;
 
 template <typename T, typename Stream>
-concept encodable_pair_like = pair_like<T> &&output_stream<Stream>
-    &&encodable<std::remove_cvref_t<typename std::tuple_element<0, T>::type>,
-                Stream> &&
+concept encodable_pair_like = pair_like<T> &&output_stream<Stream> &&encodable<
+        std::remove_cvref_t<typename std::tuple_element<0, T>::type>,
+        Stream> &&
         encodable<std::remove_cvref_t<typename std::tuple_element<1, T>::type>,
                   Stream>;
 
 template <typename T, typename Stream>
 concept decodable_pair_like = pair_like<T> &&input_stream<Stream>
-    &&decodable<typename std::tuple_element<0, T>::type, Stream>
-        &&decodable<typename std::tuple_element<1, T>::type, Stream>;
+        &&decodable<typename std::tuple_element<0, T>::type, Stream>
+                &&decodable<typename std::tuple_element<1, T>::type, Stream>;
 
 } // namespace dplx::dp::detail

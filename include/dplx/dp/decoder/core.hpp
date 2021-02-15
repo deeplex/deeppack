@@ -44,8 +44,8 @@ public:
             {
                 return errc::item_type_mismatch;
             }
-            if constexpr (std::numeric_limits<T>::max() <
-                          std::numeric_limits<std::uint64_t>::max())
+            if constexpr (std::numeric_limits<T>::max()
+                          < std::numeric_limits<std::uint64_t>::max())
             {
                 if (!(info.value <= std::numeric_limits<T>::max()))
                 {
@@ -56,8 +56,8 @@ public:
         else
         {
             // ensure type == posint or negint
-            if ((info.type & static_cast<std::uint8_t>(type_code::negint)) !=
-                info.type)
+            if ((info.type & static_cast<std::uint8_t>(type_code::negint))
+                != info.type)
             {
                 return errc::item_type_mismatch;
             }
@@ -72,11 +72,11 @@ public:
                 return errc::item_value_out_of_range;
             }
             std::uint64_t const signBit = static_cast<std::uint64_t>(info.type)
-                                          << 57;
-            std::int64_t const signExtended =
-                static_cast<std::int64_t>(signBit) >> 63;
-            std::uint64_t const xorpad =
-                static_cast<std::uint64_t>(signExtended);
+                                       << 57;
+            std::int64_t const signExtended
+                    = static_cast<std::int64_t>(signBit) >> 63;
+            std::uint64_t const xorpad
+                    = static_cast<std::uint64_t>(signExtended);
 
             info.value ^= xorpad;
         }
@@ -96,8 +96,8 @@ public:
         DPLX_TRY(auto &&info, detail::parse_item_info(inStream));
 
         // #TODO maybe use specialized parsing logic for floats
-        if (std::byte{info.type} != type_code::special ||
-            info.encoded_length < 3)
+        if (std::byte{info.type} != type_code::special
+            || info.encoded_length < 3)
         {
             return errc::item_type_mismatch;
         }
@@ -187,8 +187,8 @@ public:
             return errc::item_type_mismatch;
         }
 
-        dest =
-            static_cast<bool>(static_cast<std::uint8_t>(value & std::byte{1}));
+        dest = static_cast<bool>(
+                static_cast<std::uint8_t>(value & std::byte{1}));
         return success();
     }
 };

@@ -27,7 +27,7 @@ class basic_encoder<dp_tests::simple_encodeable, Stream>
 {
 public:
     auto operator()(Stream &outStream, dp_tests::simple_encodeable x)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&writeLease, dplx::dp::write(outStream, 1));
         std::ranges::data(writeLease)[0] = x.value;

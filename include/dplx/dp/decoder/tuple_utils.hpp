@@ -26,7 +26,7 @@ struct tuple_head_info
 template <input_stream Stream, bool isVersioned = false>
 inline auto parse_tuple_head(Stream &inStream,
                              std::bool_constant<isVersioned> = {})
-    -> result<tuple_head_info>
+        -> result<tuple_head_info>
 {
     DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(inStream));
     if (std::byte{arrayInfo.type} != type_code::array)
@@ -39,8 +39,8 @@ inline auto parse_tuple_head(Stream &inStream,
     {
         return errc::end_of_stream;
     }
-    if (arrayInfo.value >=
-        static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max()))
+    if (arrayInfo.value
+        >= static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max()))
     {
         return errc::too_many_properties;
     }
@@ -86,28 +86,28 @@ inline auto decode_tuple_properties(Stream &stream,
     }
 
     DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-        decode_value_fn{stream, dest}));
+            decode_value_fn{stream, dest}));
 
     return success();
 }
 
 template <packable_tuple T, input_stream Stream>
 requires(detail::versioned_decoder_enabled(layout_descriptor_for(
-    std::type_identity<T>{}))) class basic_decoder<T, Stream>
+        std::type_identity<T>{}))) class basic_decoder<T, Stream>
 {
-    static constexpr auto descriptor =
-        layout_descriptor_for(std::type_identity<T>{});
+    static constexpr auto descriptor
+            = layout_descriptor_for(std::type_identity<T>{});
 
 public:
     using value_type = T;
 
     inline auto operator()(Stream &inStream, value_type &dest) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&headInfo,
                  dp::parse_tuple_head<Stream,
                                       descriptor.version != null_def_version>(
-                     inStream));
+                         inStream));
 
         if constexpr (descriptor.version != null_def_version)
         {
@@ -118,7 +118,7 @@ public:
         }
 
         return dp::decode_tuple_properties<descriptor, T, Stream>(
-            inStream, dest, headInfo.num_properties);
+                inStream, dest, headInfo.num_properties);
     }
 };
 

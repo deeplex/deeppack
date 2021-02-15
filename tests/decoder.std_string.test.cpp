@@ -44,7 +44,7 @@ struct string_sample
     }
     friend inline auto boost_test_print_type(std::ostream &s,
                                              string_sample const &c)
-        -> std::ostream &
+            -> std::ostream &
     {
         std::string_view conv{reinterpret_cast<char const *>(c.expected.data()),
                               c.expected.size()};
@@ -53,14 +53,14 @@ struct string_sample
     }
 };
 
-constexpr string_sample rfc_samples[] = {
-    {u8""sv, 1, make_byte_array<12>({0x60})},
-    {u8"a"sv, 1, make_byte_array<12>({0x61})},
-    {u8"IETF"sv, 1, make_byte_array<12>({0x64})},
-    {u8"\"\\"sv, 1, make_byte_array<12>({0x62})},
-    {u8"\u00fc"sv, 1, make_byte_array<12>({0x62})},
-    {u8"\u6c34"sv, 1, make_byte_array<12>({0x63})},
-    {u8"\U00010151"sv, 1, make_byte_array<12>({0x64})}};
+constexpr string_sample rfc_samples[]
+        = {{u8""sv, 1, make_byte_array<12>({0x60})},
+           {u8"a"sv, 1, make_byte_array<12>({0x61})},
+           {u8"IETF"sv, 1, make_byte_array<12>({0x64})},
+           {u8"\"\\"sv, 1, make_byte_array<12>({0x62})},
+           {u8"\u00fc"sv, 1, make_byte_array<12>({0x62})},
+           {u8"\u6c34"sv, 1, make_byte_array<12>({0x63})},
+           {u8"\U00010151"sv, 1, make_byte_array<12>({0x64})}};
 
 BOOST_DATA_TEST_CASE(rfc_sample, boost::unit_test::data::make(rfc_samples))
 {
@@ -78,9 +78,9 @@ BOOST_AUTO_TEST_CASE(handles_indefinite_strings)
 {
     auto const expected = u8"tis nothing but a string"sv;
     auto sampleBytes = make_byte_array<28>(
-        {0x7f, 0x6A, 0x74, 0x69, 0x73, 0x20, 0x6E, 0x6F, 0x74, 0x68,
-         0x69, 0x6e, 0x6E, 0x67, 0x20, 0x62, 0x75, 0x74, 0x20, 0x61,
-         0x20, 0x73, 0x74, 0x72, 0x69, 0x6E, 0x67, 0xFF});
+            {0x7f, 0x6A, 0x74, 0x69, 0x73, 0x20, 0x6E, 0x6F, 0x74, 0x68,
+             0x69, 0x6e, 0x6E, 0x67, 0x20, 0x62, 0x75, 0x74, 0x20, 0x61,
+             0x20, 0x73, 0x74, 0x72, 0x69, 0x6E, 0x67, 0xFF});
     test_input_stream sampleStream{std::span(sampleBytes)};
 
     DPLX_REQUIRE_RESULT(subject(sampleStream, out));

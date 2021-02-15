@@ -26,10 +26,10 @@ struct mp_for_dots_impl<std::index_sequence<Is...>>
     {
         result<void> rx = success();
 
-        [[maybe_unused]] bool failed =
-            (... || detail::try_extract_failure(
-                         static_cast<F &&>(f)(mp_size_t<Is>{}), rx)
-                        );
+        [[maybe_unused]] bool failed
+                = (...
+                   || detail::try_extract_failure(
+                           static_cast<F &&>(f)(mp_size_t<Is>{}), rx));
 
         return rx;
     }
@@ -39,7 +39,7 @@ template <std::size_t N, typename F>
 constexpr auto mp_for_dots(F &&f) -> result<void>
 {
     return mp_for_dots_impl<std::make_index_sequence<N>>::invoke(
-        static_cast<F &&>(f));
+            static_cast<F &&>(f));
 }
 
 } // namespace dplx::dp::detail

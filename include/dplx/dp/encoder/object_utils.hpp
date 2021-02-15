@@ -28,15 +28,14 @@ struct mp_encode_object_property_fn
     template <std::size_t I>
     inline auto operator()(mp_size_t<I>) -> result<void>
     {
-        constexpr decltype(auto) propertyDef =
-            descriptor.template property<I>();
+        constexpr decltype(auto) propertyDef
+                = descriptor.template property<I>();
 
-        using key_encoder =
-            basic_encoder<std::remove_cvref_t<decltype(propertyDef.id)>,
-                          Stream>;
-        using value_encoder =
-            basic_encoder<typename decltype(propertyDef.decl_value())::type,
-                          Stream>;
+        using key_encoder
+                = basic_encoder<std::remove_cvref_t<decltype(propertyDef.id)>,
+                                Stream>;
+        using value_encoder = basic_encoder<
+                typename decltype(propertyDef.decl_value())::type, Stream>;
 
         DPLX_TRY(key_encoder()(outStream, propertyDef.id));
         DPLX_TRY(value_encoder()(outStream, propertyDef.access(value)));
@@ -56,7 +55,7 @@ public:
     using value_type = fixed_u8string<N>;
 
     auto operator()(Stream &outStream, value_type const &value) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(item_emitter<Stream>::u8string(outStream, value.size()));
 
@@ -71,13 +70,13 @@ public:
 template <auto const &descriptor, typename T, output_stream Stream>
 inline auto encode_object(Stream &outStream, T const &value) -> result<void>
 {
-    using encode_property_fn =
-        detail::mp_encode_object_property_fn<descriptor, T, Stream>;
+    using encode_property_fn
+            = detail::mp_encode_object_property_fn<descriptor, T, Stream>;
 
     if constexpr (descriptor.version == null_def_version)
     {
-        DPLX_TRY(
-            item_emitter<Stream>::map(outStream, descriptor.num_properties));
+        DPLX_TRY(item_emitter<Stream>::map(outStream,
+                                           descriptor.num_properties));
     }
     else
     {
@@ -95,7 +94,7 @@ inline auto encode_object(Stream &outStream, T const &value) -> result<void>
     }
 
     DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-        encode_property_fn{outStream, value}));
+            encode_property_fn{outStream, value}));
 
     return success();
 }
@@ -105,11 +104,11 @@ inline auto encode_object(Stream &outStream,
                           T const &value,
                           std::uint32_t version) -> result<void>
 {
-    using encode_property_fn =
-        detail::mp_encode_object_property_fn<descriptor, T, Stream>;
+    using encode_property_fn
+            = detail::mp_encode_object_property_fn<descriptor, T, Stream>;
 
-    DPLX_TRY(
-        item_emitter<Stream>::map(outStream, descriptor.num_properties + 1));
+    DPLX_TRY(item_emitter<Stream>::map(outStream,
+                                       descriptor.num_properties + 1));
 
     {
         DPLX_TRY(auto &&versionIdWriteProxy, write(outStream, 1));
@@ -123,7 +122,7 @@ inline auto encode_object(Stream &outStream,
     DPLX_TRY(item_emitter<Stream>::integer(outStream, version));
 
     DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-        encode_property_fn{outStream, value}));
+            encode_property_fn{outStream, value}));
 
     return success();
 }
@@ -131,14 +130,14 @@ inline auto encode_object(Stream &outStream,
 template <packable_object T, output_stream Stream>
 class basic_encoder<T, Stream>
 {
-    static constexpr auto descriptor =
-        layout_descriptor_for(std::type_identity<T>{});
+    static constexpr auto descriptor
+            = layout_descriptor_for(std::type_identity<T>{});
 
 public:
     using value_type = T;
 
     auto operator()(Stream &outStream, value_type const &value) const
-        -> result<void>
+            -> result<void>
     {
         return dp::encode_object<descriptor, T, Stream>(outStream, value);
     }

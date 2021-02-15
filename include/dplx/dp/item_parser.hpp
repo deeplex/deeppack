@@ -25,8 +25,8 @@ namespace dplx::dp::detail
 enum class decode_errc : std::uint8_t
 {
     nothing = 0,
-    invalid_additional_information =
-        static_cast<std::uint8_t>(errc::invalid_additional_information),
+    invalid_additional_information
+    = static_cast<std::uint8_t>(errc::invalid_additional_information),
 };
 
 struct item_info
@@ -51,13 +51,15 @@ static_assert(std::is_trivial_v<item_info>);
 static_assert(std::is_standard_layout_v<item_info>);
 
 inline auto parse_item_info_speculative(std::byte const *const encoded)
-    -> item_info
+        -> item_info
 {
     item_info info{
-        .code = decode_errc::nothing,
-        .type = static_cast<std::uint8_t>(*encoded & std::byte{0b111'00000}),
-        .encoded_length = 1,
-        .value = static_cast<std::uint64_t>(*encoded & std::byte{0b000'11111}),
+            .code = decode_errc::nothing,
+            .type
+            = static_cast<std::uint8_t>(*encoded & std::byte{0b111'00000}),
+            .encoded_length = 1,
+            .value
+            = static_cast<std::uint64_t>(*encoded & std::byte{0b000'11111}),
     };
 
     if (info.value < (inline_value_max + 1))
@@ -67,23 +69,23 @@ inline auto parse_item_info_speculative(std::byte const *const encoded)
     else if (info.value <= 27)
         DPLX_ATTR_LIKELY
         {
-            auto const sizeBytesPower =
-                static_cast<signed char>(info.value - (inline_value_max + 1));
+            auto const sizeBytesPower = static_cast<signed char>(
+                    info.value - (inline_value_max + 1));
             auto const encodedValue = detail::load<std::uint64_t>(encoded + 1);
 
             // 8B value => shift by  0 (0b00'0000)
             // 4B value => shift by 32 (0b10'0000)
             // 2B value => shift by 48 (0b11'0000)
             // 1B value => shift by 56 (0b11'1000)
-            unsigned char const varLenShift =
-                (0b0011'1000 << sizeBytesPower) & 63;
+            unsigned char const varLenShift
+                    = (0b0011'1000 << sizeBytesPower) & 63;
 
             info.encoded_length = 1 + (1 << sizeBytesPower);
             info.value = encodedValue >> varLenShift;
         }
-    else if (info.value == 31 &&
-             !((info.type & 0b110'00000) == 0 ||
-               info.type == static_cast<std::uint16_t>(type_code::tag)))
+    else if (info.value == 31
+             && !((info.type & 0b110'00000) == 0
+                  || info.type == static_cast<std::uint16_t>(type_code::tag)))
     {
         info.make_indefinite();
     }
@@ -103,11 +105,12 @@ inline auto parse_item_info_safe(Stream &stream) -> result<item_info>
     std::byte const *const indicator = std::ranges::data(indicatorProxy);
 
     item_info info{
-        .code = decode_errc::nothing,
-        .type = static_cast<std::uint8_t>(*indicator & std::byte{0b111'00000}),
-        .encoded_length = 1,
-        .value =
-            static_cast<std::uint64_t>(*indicator & std::byte{0b000'11111}),
+            .code = decode_errc::nothing,
+            .type
+            = static_cast<std::uint8_t>(*indicator & std::byte{0b111'00000}),
+            .encoded_length = 1,
+            .value
+            = static_cast<std::uint64_t>(*indicator & std::byte{0b000'11111}),
     };
 
     if constexpr (lazy_input_stream<Stream>)
@@ -154,9 +157,9 @@ inline auto parse_item_info_safe(Stream &stream) -> result<item_info>
                 DPLX_TRY(dp::consume(stream, payloadProxy));
             }
         }
-    else if (info.value == 31 &&
-             !((info.type & 0b110'00000) == 0 ||
-               info.type == static_cast<std::uint16_t>(type_code::tag)))
+    else if (info.value == 31
+             && !((info.type & 0b110'00000) == 0
+                  || info.type == static_cast<std::uint16_t>(type_code::tag)))
 
     {
         info.type |= 0b000'00001;
@@ -176,13 +179,13 @@ inline auto parse_item_info(Stream &stream) -> result<item_info>
         oc::try_operation_has_value(readRx))
         DPLX_ATTR_LIKELY
         {
-            auto &&readProxy =
-                oc::try_operation_extract_value(std::move(readRx));
+            auto &&readProxy
+                    = oc::try_operation_extract_value(std::move(readRx));
             std::byte const *const memory = std::ranges::data(readProxy);
             auto const info = dp::detail::parse_item_info_speculative(memory);
 
-            auto const consumedBytes =
-                static_cast<std::size_t>(info.encoded_length);
+            auto const consumedBytes
+                    = static_cast<std::size_t>(info.encoded_length);
             DPLX_TRY(dp::consume(stream, readProxy, consumedBytes));
             if (info.code == decode_errc::nothing)
             {

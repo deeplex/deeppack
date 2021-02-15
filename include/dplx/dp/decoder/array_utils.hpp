@@ -40,7 +40,7 @@ auto parse_array(Stream &stream,
                  T &value,
                  type_code expectedItemType,
                  DecodeElementFn &&decodeElement) -> result<void>
-    // clang-format off
+        // clang-format off
 requires requires
 {
     { decodeElement(stream, value) }
@@ -51,8 +51,8 @@ try
 {
     DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(stream));
 
-    if (static_cast<std::byte>(arrayInfo.type & 0b111'00000) !=
-        expectedItemType)
+    if (static_cast<std::byte>(arrayInfo.type & 0b111'00000)
+        != expectedItemType)
     {
         return errc::item_type_mismatch;
     }

@@ -21,12 +21,12 @@ class basic_decoder<std::u8string, Stream>
 {
 public:
     auto operator()(Stream &inStream, std::u8string &value) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&strInfo, detail::parse_item_info(inStream));
 
-        if (static_cast<std::byte>(strInfo.type & 0b111'00000) !=
-            type_code::text)
+        if (static_cast<std::byte>(strInfo.type & 0b111'00000)
+            != type_code::text)
         {
             return errc::item_type_mismatch;
         }
@@ -34,7 +34,8 @@ public:
         if (!strInfo.indefinite())
             DPLX_ATTR_LIKELY
             {
-                DPLX_TRY(auto &&availableBytes, dp::available_input_size(inStream));
+                DPLX_TRY(auto &&availableBytes,
+                         dp::available_input_size(inStream));
                 if (availableBytes < strInfo.value)
                 {
                     return errc::missing_data;
@@ -74,7 +75,8 @@ public:
                     return errc::invalid_indefinite_subitem;
                 }
 
-                DPLX_TRY(auto &&availableBytes, dp::available_input_size(inStream));
+                DPLX_TRY(auto &&availableBytes,
+                         dp::available_input_size(inStream));
                 if (availableBytes < chunkInfo.value)
                 {
                     return errc::missing_data;
@@ -85,8 +87,8 @@ public:
                     return errc::not_enough_memory;
                 }
                 auto const currentSize = value.size();
-                auto const chunkSize =
-                    static_cast<std::size_t>(chunkInfo.value);
+                auto const chunkSize
+                        = static_cast<std::size_t>(chunkInfo.value);
                 auto const newSize = currentSize + chunkSize;
                 if (currentSize > newSize)
                 {
@@ -104,8 +106,8 @@ public:
                 }
 
                 DPLX_TRY(dp::read(inStream,
-                                  reinterpret_cast<std::byte *>(value.data()) +
-                                      currentSize,
+                                  reinterpret_cast<std::byte *>(value.data())
+                                          + currentSize,
                                   chunkSize));
             }
         }

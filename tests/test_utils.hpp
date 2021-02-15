@@ -26,13 +26,13 @@ namespace boost::test_tools::tt_detail::impl
 {
 template <>
 inline auto boost_test_print_type<char8_t>(std::ostream &s, char8_t const &c)
-    -> std::ostream &
+        -> std::ostream &
 {
     fmt::print(s, "\\x{:02x}", static_cast<std::uint8_t>(c));
     return s;
 }
 inline auto boost_test_print_type(std::ostream &s, std::u8string const &c)
-    -> std::ostream &
+        -> std::ostream &
 {
     std::string_view conv{reinterpret_cast<char const *>(c.data()), c.size()};
     s << conv;
@@ -44,7 +44,7 @@ namespace dplx::dp
 {
 
 inline auto boost_test_print_type(std::ostream &s, type_code c)
-    -> std::ostream &
+        -> std::ostream &
 {
     fmt::print(s, FMT_STRING("{:2x}"), static_cast<std::uint8_t>(c));
     return s;
@@ -59,7 +59,7 @@ using byte_span = std::span<std::byte>;
 
 template <typename... Ts>
 constexpr auto make_byte_array(Ts... ts) noexcept
-    -> std::array<std::byte, sizeof...(Ts)>
+        -> std::array<std::byte, sizeof...(Ts)>
 {
     static_assert((... && (std::is_integral_v<Ts> || std::is_enum_v<Ts>)));
     return {static_cast<std::byte>(ts)...};
@@ -68,7 +68,7 @@ constexpr auto make_byte_array(Ts... ts) noexcept
 template <std::size_t N, typename T>
 constexpr auto make_byte_array(std::initializer_list<T> vs,
                                std::byte const fill = std::byte{0xFE}) noexcept
-    -> std::array<std::byte, N>
+        -> std::array<std::byte, N>
 {
     std::array<std::byte, N> bs;
     auto last = std::transform(vs.begin(), vs.end(), bs.data(), [](auto v) {
@@ -84,18 +84,17 @@ constexpr auto make_byte_array(std::initializer_list<T> vs,
 
 template <typename T>
 auto make_byte_vector(std::initializer_list<T> vs) noexcept
-    -> std::vector<std::byte>
+        -> std::vector<std::byte>
 {
     std::vector<std::byte> bs(vs.size());
-    std::transform(vs.begin(), vs.end(), bs.begin(), [](auto v) {
-        return static_cast<std::byte>(v);
-    });
+    std::transform(vs.begin(), vs.end(), bs.begin(),
+                   [](auto v) { return static_cast<std::byte>(v); });
     return bs;
 }
 
 template <typename R>
 inline auto check_result(dplx::dp::result<R> const &rx)
-    -> boost::test_tools::predicate_result
+        -> boost::test_tools::predicate_result
 {
     bool const succeeded = !rx.has_failure();
     boost::test_tools::predicate_result prx{succeeded};
@@ -103,11 +102,9 @@ inline auto check_result(dplx::dp::result<R> const &rx)
     {
         auto error = rx.assume_error();
         auto const &cat = error.category();
-        prx.message()
-            << "[category: " << cat.name()
-            << "; value: " << error.value()
-            << "; message: " << error.message()
-            << "]";
+        prx.message() << "[category: " << cat.name()
+                      << "; value: " << error.value()
+                      << "; message: " << error.message() << "]";
     }
     return prx;
 }

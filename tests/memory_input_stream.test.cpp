@@ -22,7 +22,7 @@ static_assert(dplx::dp::is_zero_copy_capable_v<dplx::dp::byte_buffer_view>);
 static_assert(dplx::dp::input_stream<dplx::dp::const_byte_buffer_view>);
 static_assert(!dplx::dp::lazy_input_stream<dplx::dp::const_byte_buffer_view>);
 static_assert(
-    dplx::dp::is_zero_copy_capable_v<dplx::dp::const_byte_buffer_view>);
+        dplx::dp::is_zero_copy_capable_v<dplx::dp::const_byte_buffer_view>);
 
 namespace dp_tests
 {
@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 0);
     BOOST_TEST(std::ranges::size(proxy) == 29u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29));
 
     readRx = dplx::dp::read(subject, 31);
     DPLX_REQUIRE_RESULT(readRx);
@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 29);
     BOOST_TEST(std::ranges::size(proxy) == 31u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 31));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 31));
 
     readRx = dplx::dp::read(subject, 7);
     DPLX_REQUIRE_RESULT(readRx);
@@ -93,33 +93,33 @@ BOOST_AUTO_TEST_CASE(correctly_handles_large_reads)
 {
     std::vector<std::byte> readBuffer1(23);
     DPLX_REQUIRE_RESULT(
-        dplx::dp::read(subject, readBuffer1.data(), readBuffer1.size()));
+            dplx::dp::read(subject, readBuffer1.data(), readBuffer1.size()));
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - readBuffer1.size()));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - readBuffer1.size()));
     BOOST_TEST(std::span(readBuffer1) == std::span(memory).subspan(0, 23),
                boost::test_tools::per_element());
 
     std::vector<std::byte> readBuffer2(37);
     DPLX_REQUIRE_RESULT(
-        dplx::dp::read(subject, readBuffer2.data(), readBuffer2.size()));
+            dplx::dp::read(subject, readBuffer2.data(), readBuffer2.size()));
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - readBuffer1.size() - readBuffer2.size()));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - readBuffer1.size() - readBuffer2.size()));
     BOOST_TEST(std::span(readBuffer2) == std::span(memory).subspan(23, 37),
                boost::test_tools::per_element());
 
     std::vector<std::byte> readBuffer3(7);
     DPLX_REQUIRE_RESULT(
-        dplx::dp::read(subject, readBuffer3.data(), readBuffer3.size()));
+            dplx::dp::read(subject, readBuffer3.data(), readBuffer3.size()));
 
     BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() == 0u);
     BOOST_TEST(std::span(readBuffer3) == std::span(memory).subspan(60, 7),
                boost::test_tools::per_element());
 
     std::vector<std::byte> readBuffer4(1);
-    auto readRx =
-        dplx::dp::read(subject, readBuffer4.data(), readBuffer4.size());
+    auto readRx
+            = dplx::dp::read(subject, readBuffer4.data(), readBuffer4.size());
     BOOST_TEST_REQUIRE(readRx.has_error());
     BOOST_TEST(readRx.assume_error() == dplx::dp::errc::end_of_stream);
 }
@@ -134,10 +134,10 @@ BOOST_AUTO_TEST_CASE(correctly_handles_mixed_reads)
 
     std::vector<std::byte> readBuffer2(47);
     DPLX_REQUIRE_RESULT(
-        dplx::dp::read(subject, readBuffer2.data(), readBuffer2.size()));
+            dplx::dp::read(subject, readBuffer2.data(), readBuffer2.size()));
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 17 - readBuffer2.size()));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 17 - readBuffer2.size()));
     BOOST_TEST(std::span(readBuffer2) == std::span(memory).subspan(17, 47),
                boost::test_tools::per_element());
 
@@ -160,13 +160,13 @@ BOOST_AUTO_TEST_CASE(correctly_handles_partial_reads)
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 0);
     BOOST_TEST(std::ranges::size(proxy) == 31u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 31));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 31));
 
     DPLX_REQUIRE_RESULT(dplx::dp::consume(subject, proxy, 29));
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29));
 
     readRx = dplx::dp::read(subject, 5);
     DPLX_REQUIRE_RESULT(readRx);
@@ -174,13 +174,13 @@ BOOST_AUTO_TEST_CASE(correctly_handles_partial_reads)
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 29);
     BOOST_TEST(std::ranges::size(proxy) == 5u);
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 5));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 5));
 
     DPLX_REQUIRE_RESULT(dplx::dp::consume(subject, proxy, 3));
 
-    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value() ==
-                       (testSize - 29 - 3));
+    BOOST_TEST_REQUIRE(dplx::dp::available_input_size(subject).value()
+                       == (testSize - 29 - 3));
 
     readRx = dplx::dp::read(subject, 35);
     DPLX_REQUIRE_RESULT(readRx);

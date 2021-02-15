@@ -37,11 +37,11 @@ struct string_sample
 };
 
 auto boost_test_print_type(std::ostream &s, string_sample const &sample)
-    -> std::ostream &
+        -> std::ostream &
 {
     std::string_view charView(
-        reinterpret_cast<char const *>(sample.content.data()),
-        sample.content.size());
+            reinterpret_cast<char const *>(sample.content.data()),
+            sample.content.size());
 
     fmt::print(s, "string_sample{{.content={}, .expected_prefix={{", charView);
     for (auto b : std::span(sample.expected_prefix).first(sample.prefix_length))
@@ -53,46 +53,46 @@ auto boost_test_print_type(std::ostream &s, string_sample const &sample)
     return s;
 }
 
-constexpr string_sample string_samples[] = {
-    {1, make_byte_array<8>({0b011'00000}), u8""sv},
-    {1,
-     make_byte_array<8, int>(
-         {0b011'00000 | 11, u8'h', u8'e', u8'l', u8'l', u8'o', u8' ', u8'w'}),
-     u8"hello world"sv}};
+constexpr string_sample string_samples[]
+        = {{1, make_byte_array<8>({0b011'00000}), u8""sv},
+           {1,
+            make_byte_array<8, int>({0b011'00000 | 11, u8'h', u8'e', u8'l',
+                                     u8'l', u8'o', u8' ', u8'w'}),
+            u8"hello world"sv}};
 
 BOOST_DATA_TEST_CASE(string_view_with,
                      boost::unit_test::data::make(string_samples))
 {
     using test_type = std::u8string_view;
-    using test_encoder =
-        dplx::dp::basic_encoder<test_type, test_output_stream<>>;
+    using test_encoder
+            = dplx::dp::basic_encoder<test_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, sample.content));
 
-    BOOST_TEST(byte_span(encodingBuffer).first(sample.prefix_length) ==
-                   byte_span(encodingBuffer).first(sample.prefix_length),
+    BOOST_TEST(byte_span(encodingBuffer).first(sample.prefix_length)
+                       == byte_span(encodingBuffer).first(sample.prefix_length),
                boost::test_tools::per_element{});
 
-    BOOST_TEST(byte_span(encodingBuffer).subspan(sample.prefix_length) ==
-                   as_bytes(std::span(sample.content)),
+    BOOST_TEST(byte_span(encodingBuffer).subspan(sample.prefix_length)
+                       == as_bytes(std::span(sample.content)),
                boost::test_tools::per_element{});
 }
 
 BOOST_DATA_TEST_CASE(string_with, boost::unit_test::data::make(string_samples))
 {
     using test_type = std::u8string;
-    using test_encoder =
-        dplx::dp::basic_encoder<test_type, test_output_stream<>>;
+    using test_encoder
+            = dplx::dp::basic_encoder<test_type, test_output_stream<>>;
 
     test_type content(sample.content);
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, content));
 
-    BOOST_TEST(byte_span(encodingBuffer).first(sample.prefix_length) ==
-                   byte_span(encodingBuffer).first(sample.prefix_length),
+    BOOST_TEST(byte_span(encodingBuffer).first(sample.prefix_length)
+                       == byte_span(encodingBuffer).first(sample.prefix_length),
                boost::test_tools::per_element{});
 
-    BOOST_TEST(byte_span(encodingBuffer).subspan(sample.prefix_length) ==
-                   as_bytes(std::span(sample.content)),
+    BOOST_TEST(byte_span(encodingBuffer).subspan(sample.prefix_length)
+                       == as_bytes(std::span(sample.content)),
                boost::test_tools::per_element{});
 }
 

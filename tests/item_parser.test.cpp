@@ -25,13 +25,11 @@ struct formatter<dplx::dp::detail::item_info>
     template <typename FormatCtx>
     auto format(dplx::dp::detail::item_info const &info, FormatCtx &ctx)
     {
-        return fmt::format_to(
-            ctx.out(),
-            "{{.code={}, .type={:#04x}, .encoded_length={}, .value={:#018x}}}",
-            info.code,
-            info.type,
-            info.encoded_length,
-            info.value);
+        return fmt::format_to(ctx.out(),
+                              "{{.code={}, .type={:#04x}, .encoded_length={}, "
+                              ".value={:#018x}}}",
+                              info.code, info.type, info.encoded_length,
+                              info.value);
     }
 };
 } // namespace fmt
@@ -39,13 +37,13 @@ struct formatter<dplx::dp::detail::item_info>
 namespace dplx::dp::detail
 {
 auto boost_test_print_type(std::ostream &s, item_info const &sample)
-    -> std::ostream &
+        -> std::ostream &
 {
     fmt::print(s, "item_info{{{}}}", sample);
     return s;
 }
 auto boost_test_print_type(std::ostream &s, decode_errc const code)
-    -> std::ostream &
+        -> std::ostream &
 {
     switch (code)
     {
@@ -75,35 +73,36 @@ struct parse_sample
 };
 
 auto boost_test_print_type(std::ostream &s, parse_sample const &sample)
-    -> std::ostream &
+        -> std::ostream &
 {
-    fmt::print(
-        s, "parse_sample{{.stream={{}}, .expected={}}}", sample.expected);
+    fmt::print(s, "parse_sample{{.stream={{}}, .expected={}}}",
+               sample.expected);
     return s;
 }
 
 constexpr parse_sample parse_samples[] = {
 
-    // Appendix A.Examples
+        // Appendix A.Examples
 
-    {make_byte_array<9>({0x00}), {decode_errc::nothing, 0, 1, 0}},
-    {make_byte_array<9>({0x01}), {decode_errc::nothing, 0, 1, 1}},
-    {make_byte_array<9>({0x0a}), {decode_errc::nothing, 0, 1, 0x0a}},
-    {make_byte_array<9>({0x18, 0x19}), {decode_errc::nothing, 0, 2, 0x19}},
-    {make_byte_array<9>({0x18, 0x64}), {decode_errc::nothing, 0, 2, 0x64}},
-    {make_byte_array<9>({0x19, 0x03, 0xe8}),
-     {decode_errc::nothing, 0, 3, 0x03e8}},
-    {make_byte_array<9>({0x1a, 0x00, 0x0f, 0x42, 0x40}),
-     {decode_errc::nothing, 0, 5, 0x000f'4240}},
-    {make_byte_array<9>({0x1b, 0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00}),
-     {decode_errc::nothing, 0, 9, 0x0000'00e8'd4a5'1000}},
+        {make_byte_array<9>({0x00}), {decode_errc::nothing, 0, 1, 0}},
+        {make_byte_array<9>({0x01}), {decode_errc::nothing, 0, 1, 1}},
+        {make_byte_array<9>({0x0a}), {decode_errc::nothing, 0, 1, 0x0a}},
+        {make_byte_array<9>({0x18, 0x19}), {decode_errc::nothing, 0, 2, 0x19}},
+        {make_byte_array<9>({0x18, 0x64}), {decode_errc::nothing, 0, 2, 0x64}},
+        {make_byte_array<9>({0x19, 0x03, 0xe8}),
+         {decode_errc::nothing, 0, 3, 0x03e8}},
+        {make_byte_array<9>({0x1a, 0x00, 0x0f, 0x42, 0x40}),
+         {decode_errc::nothing, 0, 5, 0x000f'4240}},
+        {make_byte_array<9>(
+                 {0x1b, 0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00}),
+         {decode_errc::nothing, 0, 9, 0x0000'00e8'd4a5'1000}},
 
-    {make_byte_array<9>({0x29}), {decode_errc::nothing, 0x20, 1, 9}},
-    {make_byte_array<9>({0x38, 0x63}), {decode_errc::nothing, 0x20, 2, 99}},
-    {make_byte_array<9>({0x39, 0x03, 0xe7}),
-     {decode_errc::nothing, 0x20, 3, 999}},
+        {make_byte_array<9>({0x29}), {decode_errc::nothing, 0x20, 1, 9}},
+        {make_byte_array<9>({0x38, 0x63}), {decode_errc::nothing, 0x20, 2, 99}},
+        {make_byte_array<9>({0x39, 0x03, 0xe7}),
+         {decode_errc::nothing, 0x20, 3, 999}},
 
-    // posint
+        // posint
 };
 
 BOOST_DATA_TEST_CASE(parse_speculative,
@@ -123,9 +122,9 @@ BOOST_DATA_TEST_CASE(parse_speculative,
 
 BOOST_DATA_TEST_CASE(parse_safe, boost::unit_test::data::make(parse_samples))
 {
-    test_input_stream stream(
-        std::span<std::byte const>(sample.stream)
-            .first(static_cast<std::size_t>(sample.expected.encoded_length)));
+    test_input_stream stream(std::span<std::byte const>(sample.stream)
+                                     .first(static_cast<std::size_t>(
+                                             sample.expected.encoded_length)));
     auto parseRx = dplx::dp::detail::parse_item_info(stream);
     DPLX_REQUIRE_RESULT(parseRx);
 

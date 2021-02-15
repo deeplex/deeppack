@@ -50,10 +50,11 @@ constexpr auto xxhash3_fixed_impl(std::uint64_t const val,
     constexpr std::uint64_t iv1 = 0xdb97'9083'e96d'd4de;
     constexpr std::uint64_t ivx = iv0 ^ iv1;
 
-    std::uint64_t const mixedSeed =
-        seed ^ (static_cast<std::uint64_t>(
-                    detail::byte_swap_u32(static_cast<std::uint32_t>(seed)))
-                << 32);
+    std::uint64_t const mixedSeed
+            = seed
+            ^ (static_cast<std::uint64_t>(
+                       detail::byte_swap_u32(static_cast<std::uint32_t>(seed)))
+               << 32);
 
     std::uint64_t const xorpad = ivx - mixedSeed;
     std::uint64_t const spread = val ^ xorpad;
@@ -75,8 +76,8 @@ constexpr auto xxhash3_fixed_impl(std::uint64_t const val,
 constexpr auto xxhash3_ui32(std::uint32_t const value,
                             std::uint64_t const seed) noexcept -> std::uint64_t
 {
-    std::uint64_t const stretched =
-        value | (static_cast<std::uint64_t>(value) << 32);
+    std::uint64_t const stretched
+            = value | (static_cast<std::uint64_t>(value) << 32);
     return xxhash3_fixed_impl(stretched, seed, 4u);
 }
 
@@ -89,7 +90,7 @@ constexpr auto xxhash3_ui64(std::uint64_t const value,
 
 template <unsigned_integer T>
 requires(sizeof(T) <= sizeof(std::uint64_t)) constexpr auto xxhash3(
-    T const value, std::uint64_t const seed) noexcept -> std::uint64_t
+        T const value, std::uint64_t const seed) noexcept -> std::uint64_t
 {
     if constexpr (sizeof(T) <= sizeof(std::uint32_t))
     {

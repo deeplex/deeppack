@@ -62,7 +62,7 @@ public:
     explicit constexpr basic_byte_buffer_view(std::span<U, Extent> const &memory)
         // clang-format on
         : basic_byte_buffer_view(
-              memory.data(), static_cast<int>(memory.size_bytes()), 0)
+                memory.data(), static_cast<int>(memory.size_bytes()), 0)
     {
     }
     // clang-format off
@@ -171,8 +171,8 @@ public:
     {
         if (mBuffer.data() != nullptr)
         {
-            allocator_traits::deallocate(
-                mAllocator, mBuffer.data(), mBuffer.size());
+            allocator_traits::deallocate(mAllocator, mBuffer.data(),
+                                         mBuffer.size());
         }
     }
 
@@ -194,7 +194,7 @@ public:
     {
         mBuffer = std::exchange(other.mBuffer, {});
         if constexpr (allocator_traits::propagate_on_container_move_assignment::
-                          value)
+                              value)
         {
             mAllocator = std::move(other.mAllocator);
         }
@@ -232,8 +232,8 @@ public:
         }
         if (mBuffer.data() != nullptr)
         {
-            allocator_traits::deallocate(
-                mAllocator, mBuffer.data(), mBuffer.size());
+            allocator_traits::deallocate(mAllocator, mBuffer.data(),
+                                         mBuffer.size());
 
             mBuffer = std::span<std::byte>();
         }
@@ -267,8 +267,8 @@ private:
         try
         {
             auto const bufferSizeT = static_cast<std::size_t>(bufferSize);
-            auto const memory =
-                allocator_traits::allocate(mAllocator, bufferSizeT);
+            auto const memory
+                    = allocator_traits::allocate(mAllocator, bufferSizeT);
 
             mBuffer = std::span<std::byte>(memory, bufferSizeT);
             return dp::success();

@@ -24,7 +24,7 @@ inline constexpr struct decode_fn final
     template <typename T, input_stream Stream>
     requires decodable<T, Stream> inline auto operator()(Stream &inStream,
                                                          T &dest) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY((basic_decoder<T, Stream>()(inStream, dest)));
         return success();
@@ -32,7 +32,7 @@ inline constexpr struct decode_fn final
 
     template <typename T, input_stream Stream>
     requires(decodable<T, Stream> &&std::is_default_constructible_v<T>
-                 &&std::is_move_constructible_v<T>) inline auto
+                     &&std::is_move_constructible_v<T>) inline auto
     operator()(as_value_t<T>, Stream &inStream) const -> result<T>
     {
         auto value = T();

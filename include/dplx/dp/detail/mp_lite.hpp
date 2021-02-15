@@ -51,4 +51,4 @@ using mp_transform_t = typename mp_transform<Fn, T>::type;
 template <std::size_t I>
 using mp_size_t = std::integral_constant<std::size_t, I>;
 
-}
+} // namespace dplx::dp::detail

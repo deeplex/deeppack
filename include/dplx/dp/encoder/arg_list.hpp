@@ -32,21 +32,23 @@ public:
 
     static inline auto encode(Stream &outStream,
                               select_proper_param_type<TArgs>... values)
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(item_emitter<Stream>::array(outStream, sizeof...(TArgs)));
 
         result<void> rx = success();
 
-        [[maybe_unused]] bool failed =
-            (... || detail::try_extract_failure(
-                        basic_encoder<TArgs, Stream>()(outStream, values), rx));
+        [[maybe_unused]] bool failed
+                = (...
+                   || detail::try_extract_failure(
+                           basic_encoder<TArgs, Stream>()(outStream, values),
+                           rx));
 
         return rx;
     }
 
     auto inline operator()(select_proper_param_type<TArgs>... values) const
-        -> result<void>
+            -> result<void>
     {
         return encode(*mOutStream, values...);
     }

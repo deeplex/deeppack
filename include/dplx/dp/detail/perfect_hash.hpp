@@ -110,15 +110,14 @@ public:
         for (std::size_t i = 0; i < N; ++i)
         {
             auto const &key = keys[i];
-            auto const flhash =
-                static_cast<std::size_t>(key_hash(key) % remap_size);
+            auto const flhash
+                    = static_cast<std::size_t>(key_hash(key) % remap_size);
             auto &pattern = remapPatterns[flhash];
             auto const pos = pattern.back()++;
             pattern[pos] = i;
         }
 
-        std::sort(remapPatterns.data(),
-                  remapPatterns.data() + remap_size,
+        std::sort(remapPatterns.data(), remapPatterns.data() + remap_size,
                   [](pattern_type const &l, pattern_type const &r) {
                       return l.back() > r.back();
                   });
@@ -138,12 +137,12 @@ public:
 
                 auto const slot = hash % values.size();
 
-                auto const slotPreviouslyAssigned =
-                    values[slot] != invalid_value;
+                auto const slotPreviouslyAssigned
+                        = values[slot] != invalid_value;
 
                 if (auto const slotsEnd = slots.data() + j;
-                    slotPreviouslyAssigned ||
-                    std::find(slots.data(), slotsEnd, slot) != slotsEnd)
+                    slotPreviouslyAssigned
+                    || std::find(slots.data(), slotsEnd, slot) != slotsEnd)
                 {
                     // current seed would generate a collision => reroll
                     j = 0;
@@ -158,8 +157,8 @@ public:
             }
 
             auto const &key = keys[pattern[0]];
-            auto const flhash =
-                static_cast<std::size_t>(key_hash(key) % remap_size);
+            auto const flhash
+                    = static_cast<std::size_t>(key_hash(key) % remap_size);
             remap[flhash] = seed;
 
             for (std::size_t j = 0; j < pattern.back(); ++j)
@@ -188,12 +187,13 @@ public:
             // gcc has a problem with the defaulted <=> over structs containing
             // arrays
             values[slot] = static_cast<std::size_t>(
-                std::find(keys.data(), keys.data() + keys.size(), key) -
-                keys.data());
+                    std::find(keys.data(), keys.data() + keys.size(), key)
+                    - keys.data());
 #else
             values[slot] = static_cast<std::size_t>(
-                std::lower_bound(keys.data(), keys.data() + keys.size(), key) -
-                keys.data());
+                    std::lower_bound(keys.data(), keys.data() + keys.size(),
+                                     key)
+                    - keys.data());
 #endif
         }
     }

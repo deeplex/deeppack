@@ -166,8 +166,8 @@ private:
         element_type e{};
         DPLX_TRY(element_decoder()(stream, e));
 
-        if (auto &&[it, inserted] =
-                value.emplace(static_cast<element_type &&>(e));
+        if (auto &&[it, inserted]
+            = value.emplace(static_cast<element_type &&>(e));
             !inserted)
         {
             return errc::duplicate_key;
@@ -178,8 +178,8 @@ private:
 
 template <map_like_associative_container T, input_stream Stream>
 requires(decodable<typename T::key_type, Stream>
-             &&decodable<typename T::mapped_type,
-                         Stream>) class basic_decoder<T, Stream>
+                 &&decodable<typename T::mapped_type,
+                             Stream>) class basic_decoder<T, Stream>
 {
     using key_type = typename T::key_type;
     using key_decoder = basic_decoder<key_type, Stream>;
@@ -201,8 +201,9 @@ private:
         mapped_type m{};
         DPLX_TRY(mapped_decoder()(stream, m));
 
-        if (auto &&[it, inserted] = value.emplace(
-                static_cast<key_type &&>(k), static_cast<mapped_type &&>(m));
+        if (auto &&[it, inserted]
+            = value.emplace(static_cast<key_type &&>(k),
+                            static_cast<mapped_type &&>(m));
             !inserted)
         {
             return errc::duplicate_key;
@@ -224,12 +225,12 @@ public:
     using value_type = std::span<std::byte>;
 
     inline auto operator()(Stream &inStream, value_type value) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&headInfo, detail::parse_item_info(inStream));
 
-        if (static_cast<std::byte>(headInfo.type & 0b111'00000) !=
-            type_code::binary)
+        if (static_cast<std::byte>(headInfo.type & 0b111'00000)
+            != type_code::binary)
         {
             return errc::item_type_mismatch;
         }
@@ -254,20 +255,19 @@ public:
                 {
                     return errc::tuple_size_mismatch;
                 }
-                if (static_cast<std::byte>(subItemInfo.type) !=
-                    type_code::binary)
+                if (static_cast<std::byte>(subItemInfo.type)
+                    != type_code::binary)
                 {
                     return errc::invalid_indefinite_subitem;
                 }
 
-                if (auto const remainingSpace =
-                        static_cast<std::size_t>(endPointer - writePointer);
+                if (auto const remainingSpace
+                    = static_cast<std::size_t>(endPointer - writePointer);
                     remainingSpace < subItemInfo.value)
                 {
                     return errc::tuple_size_mismatch;
                 }
-                DPLX_TRY(dp::read(inStream,
-                                  writePointer,
+                DPLX_TRY(dp::read(inStream, writePointer,
                                   static_cast<std::size_t>(subItemInfo.value)));
 
                 writePointer += static_cast<std::size_t>(subItemInfo.value);
@@ -290,11 +290,11 @@ public:
     using value_type = std::span<T>;
 
     inline auto operator()(Stream &inStream, value_type value) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&headInfo, detail::parse_item_info(inStream));
-        if (static_cast<std::byte>(headInfo.type & 0b111'00000) !=
-            type_code::array)
+        if (static_cast<std::byte>(headInfo.type & 0b111'00000)
+            != type_code::array)
         {
             return errc::item_type_mismatch;
         }
@@ -321,17 +321,17 @@ public:
 
 template <typename T, input_stream Stream>
 requires detail::
-    decodable_pair_like<T, Stream> class basic_decoder<std::span<T>, Stream>
+        decodable_pair_like<T, Stream> class basic_decoder<std::span<T>, Stream>
 {
 public:
     using value_type = std::span<T>;
 
     inline auto operator()(Stream &inStream, value_type &value) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&headInfo, detail::parse_item_info(inStream));
-        if (static_cast<std::byte>(headInfo.type & 0b111'00000) !=
-            type_code::map)
+        if (static_cast<std::byte>(headInfo.type & 0b111'00000)
+            != type_code::map)
         {
             return errc::item_type_mismatch;
         }
@@ -358,17 +358,21 @@ public:
 };
 
 template <typename T, std::size_t N, input_stream Stream>
-requires(decodable<T, Stream> ||
-         std::same_as<std::remove_const_t<T>,
-                      std::byte>) class basic_decoder<std::span<T, N>, Stream>
+requires(
+        decodable<
+                T,
+                Stream> || std::same_as<std::remove_const_t<T>, std::byte>) class
+        basic_decoder<std::span<T, N>, Stream>
     : public basic_decoder<std::span<T>, Stream>
 {
 };
 
 template <typename T, std::size_t N, input_stream Stream>
-requires(decodable<T, Stream> ||
-         std::same_as<std::remove_const_t<T>,
-                      std::byte>) class basic_decoder<std::array<T, N>, Stream>
+requires(
+        decodable<
+                T,
+                Stream> || std::same_as<std::remove_const_t<T>, std::byte>) class
+        basic_decoder<std::array<T, N>, Stream>
     : public basic_decoder<std::span<T>, Stream>
 {
 };

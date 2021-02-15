@@ -35,8 +35,8 @@ inline constexpr struct property_id_hash_fn
     template <typename T>
     requires tag_invocable<property_id_hash_fn, T const &> constexpr auto
     operator()(T const &value) const
-        noexcept(nothrow_tag_invocable<property_id_hash_fn, T const &>)
-            -> std::uint64_t
+            noexcept(nothrow_tag_invocable<property_id_hash_fn, T const &>)
+                    -> std::uint64_t
     {
         return ::dplx::dp::cpo::tag_invoke(*this, value);
     }
@@ -44,23 +44,24 @@ inline constexpr struct property_id_hash_fn
     requires tag_invocable<property_id_hash_fn,
                            T const &,
                            std::uint64_t> constexpr auto
-    operator()(T const &value, std::uint64_t seed) const noexcept(
-        nothrow_tag_invocable<property_id_hash_fn, T const &, std::uint64_t>)
-        -> std::uint64_t
+    operator()(T const &value, std::uint64_t seed) const
+            noexcept(nothrow_tag_invocable<property_id_hash_fn,
+                                           T const &,
+                                           std::uint64_t>) -> std::uint64_t
     {
         return ::dplx::dp::cpo::tag_invoke(*this, value, seed);
     }
 
     template <integer T>
     friend constexpr auto tag_invoke(property_id_hash_fn, T value) noexcept
-        -> std::uint64_t
+            -> std::uint64_t
     {
         return static_cast<std::uint64_t>(value);
     }
     template <integer T>
     friend constexpr auto
     tag_invoke(property_id_hash_fn, T value, std::uint64_t seed) noexcept
-        -> std::uint64_t
+            -> std::uint64_t
     {
         return detail::xxhash3(value, seed);
     }
@@ -68,7 +69,7 @@ inline constexpr struct property_id_hash_fn
     friend constexpr auto tag_invoke(property_id_hash_fn,
                                      std::u8string_view str,
                                      std::uint64_t const seed = 0) noexcept
-        -> std::uint64_t
+            -> std::uint64_t
     {
         return detail::fnvx_hash(str.data(), str.size(), seed);
     }
@@ -80,7 +81,7 @@ class basic_decoder<fixed_u8string<N>, Stream>
 {
 public:
     auto operator()(Stream &inStream, fixed_u8string<N> &out) const
-        -> result<void>
+            -> result<void>
     {
         DPLX_TRY(auto &&strInfo, detail::parse_item_info(inStream));
 
@@ -100,8 +101,8 @@ public:
             return errc::missing_data;
         }
 
-        DPLX_TRY(dp::read(
-            inStream, reinterpret_cast<std::byte *>(out.data()), out.size()));
+        DPLX_TRY(dp::read(inStream, reinterpret_cast<std::byte *>(out.data()),
+                          out.size()));
         return success();
     }
 };
@@ -139,12 +140,12 @@ constexpr auto
 compress_optional_props(ObjectDefLike<Properties...> const &) noexcept
 {
     return detail::compress_bitset<sizeof...(Properties)>(
-        {Properties.required...});
+            {Properties.required...});
 }
 
 template <auto const &descriptor>
-inline constexpr auto
-    required_prop_mask_for = detail::compress_optional_props(descriptor);
+inline constexpr auto required_prop_mask_for
+        = detail::compress_optional_props(descriptor);
 
 inline constexpr std::size_t unknown_property_id = ~static_cast<std::size_t>(0);
 
@@ -238,7 +239,7 @@ class decode_object_property_fn
     static constexpr property_id_lookup_fn<id_type,
                                            descriptor.ids.size(),
                                            false>
-        lookup{descriptor.ids};
+            lookup{descriptor.ids};
 
     using decode_value_fn = mp_decode_value_fn<descriptor, T, Stream>;
 
@@ -255,13 +256,13 @@ public:
         }
 
         return boost::mp11::mp_with_index<num_prop_ids>(
-            idx, decode_value_fn{inStream, dest});
+                idx, decode_value_fn{inStream, dest});
     }
 };
 
 template <auto const &Descriptor, typename T, input_stream Stream>
 inline constexpr decode_object_property_fn<Descriptor, T, Stream>
-    decode_object_property{};
+        decode_object_property{};
 
 template <typename T>
 constexpr auto index_of_limit(T const *elems,
@@ -280,9 +281,9 @@ constexpr auto index_of_limit(T const *elems,
 
 template <typename T, decltype(auto) Descriptor, typename Stream>
 requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
-    Descriptor)>::id_type> class decode_object_property_fn<Descriptor,
-                                                           T,
-                                                           Stream>
+        Descriptor)>::id_type> class decode_object_property_fn<Descriptor,
+                                                               T,
+                                                               Stream>
 {
     using descriptor_type = std::remove_cvref_t<decltype(Descriptor)>;
     using id_type = typename descriptor_type::id_type;
@@ -295,13 +296,13 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
 
     static constexpr id_type small_id_limit = detail::inline_value_max + 1;
     static constexpr auto small_ids_end = detail::index_of_limit(
-        descriptor.ids.data(), descriptor.ids.size(), small_id_limit);
+            descriptor.ids.data(), descriptor.ids.size(), small_id_limit);
 
-    static constexpr std::size_t id_map_size =
-        descriptor.ids.size() - small_ids_end;
+    static constexpr std::size_t id_map_size
+            = descriptor.ids.size() - small_ids_end;
 
     static constexpr auto copy_large_ids() noexcept
-        -> std::array<id_type, id_map_size>
+            -> std::array<id_type, id_map_size>
     {
         std::array<id_type, id_map_size> ids{};
         for (std::size_t i = 0; i < id_map_size; ++i)
@@ -312,7 +313,7 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
     }
     static constexpr auto large_ids = copy_large_ids();
     static constexpr property_id_lookup_fn<id_type, id_map_size, false> lookup{
-        large_ids};
+            large_ids};
 
     using decode_value_fn = mp_decode_value_fn<descriptor, T, Stream>;
 
@@ -322,10 +323,10 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
         auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
         {
             constexpr std::size_t propPos = static_cast<std::size_t>(
-                std::find(descriptor.ids.data(),
-                          descriptor.ids.data() + small_ids_end,
-                          static_cast<id_type>(I)) -
-                descriptor.ids.data());
+                    std::find(descriptor.ids.data(),
+                              descriptor.ids.data() + small_ids_end,
+                              static_cast<id_type>(I))
+                    - descriptor.ids.data());
 
             if constexpr (propPos == small_ids_end)
             {
@@ -334,7 +335,7 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
             else
             {
                 return decode_value_fn::operator()(
-                    boost::mp11::mp_size_t<propPos>{});
+                        boost::mp11::mp_size_t<propPos>{});
             }
         }
     };
@@ -345,7 +346,7 @@ requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
         auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
         {
             return decode_value_fn::operator()(
-                boost::mp11::mp_size_t<I + small_ids_end>{});
+                    boost::mp11::mp_size_t<I + small_ids_end>{});
         }
     };
 
@@ -371,8 +372,8 @@ public:
             else
             {
                 return boost::mp11::mp_with_index<small_id_limit>(
-                    static_cast<std::size_t>(idInfo.value),
-                    decode_prop_small_id_fn{inStream, dest});
+                        static_cast<std::size_t>(idInfo.value),
+                        decode_prop_small_id_fn{inStream, dest});
             }
         }
         else
@@ -390,7 +391,7 @@ public:
                 }
 
                 return boost::mp11::mp_with_index<id_map_size>(
-                    idx, decode_prop_large_id_fn{inStream, dest});
+                        idx, decode_prop_large_id_fn{inStream, dest});
             }
         }
     }
@@ -410,7 +411,7 @@ struct object_head_info
 template <input_stream Stream, bool isVersioned = true>
 inline auto parse_object_head(Stream &inStream,
                               std::bool_constant<isVersioned> = {})
-    -> result<object_head_info>
+        -> result<object_head_info>
 {
     DPLX_TRY(auto &&mapInfo, detail::parse_item_info(inStream));
     if (static_cast<std::byte>(mapInfo.type & 0b111'00000) != type_code::map)
@@ -430,7 +431,7 @@ inline auto parse_object_head(Stream &inStream,
         return errc::end_of_stream;
     }
     if (mapInfo.value >= static_cast<std::uint64_t>(
-                             std::numeric_limits<std::int32_t>::max() / 2))
+                std::numeric_limits<std::int32_t>::max() / 2))
     {
         return errc::too_many_properties;
     }
@@ -473,7 +474,7 @@ inline auto parse_object_head(Stream &inStream,
 
 template <auto const &descriptor, typename T, input_stream Stream>
 inline auto decode_object_property(Stream &stream, T &dest)
-    -> result<std::size_t>
+        -> result<std::size_t>
 {
     return detail::decode_object_property<descriptor, T, Stream>(stream, dest);
 }
@@ -483,14 +484,14 @@ inline auto decode_object_properties(Stream &stream,
                                      T &dest,
                                      std::int32_t numProperties) -> result<void>
 {
-    constexpr decltype(auto) decode_object_property =
-        detail::decode_object_property<descriptor, T, Stream>;
+    constexpr decltype(auto) decode_object_property
+            = detail::decode_object_property<descriptor, T, Stream>;
 
     if constexpr (descriptor.has_optional_properties)
     {
         std::array<std::size_t,
                    detail::required_prop_mask_for<descriptor>.size()>
-            foundProps{};
+                foundProps{};
 
         for (std::int32_t i = 0; i < numProperties; ++i)
         {
@@ -505,8 +506,8 @@ inline auto decode_object_properties(Stream &stream,
         std::size_t acc = 0;
         for (std::size_t i = 0; i < foundProps.size(); ++i)
         {
-            auto const requiredProps =
-                detail::required_prop_mask_for<descriptor>[i];
+            auto const requiredProps
+                    = detail::required_prop_mask_for<descriptor>[i];
 
             acc += (foundProps[i] & requiredProps) == requiredProps;
         }
@@ -532,10 +533,10 @@ inline auto decode_object_properties(Stream &stream,
 
 template <packable_object T, input_stream Stream>
 requires(detail::versioned_decoder_enabled(layout_descriptor_for(
-    std::type_identity<T>{}))) class basic_decoder<T, Stream>
+        std::type_identity<T>{}))) class basic_decoder<T, Stream>
 {
-    static constexpr auto descriptor =
-        layout_descriptor_for(std::type_identity<T>{});
+    static constexpr auto descriptor
+            = layout_descriptor_for(std::type_identity<T>{});
 
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
@@ -543,7 +544,7 @@ public:
         DPLX_TRY(auto &&headInfo,
                  dp::parse_object_head<Stream,
                                        descriptor.version != null_def_version>(
-                     inStream));
+                         inStream));
 
         if constexpr (descriptor.version != null_def_version)
         {
@@ -554,7 +555,7 @@ public:
         }
 
         return dp::decode_object_properties<descriptor, T, Stream>(
-            inStream, dest, headInfo.num_properties);
+                inStream, dest, headInfo.num_properties);
     }
 };
 

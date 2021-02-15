@@ -48,15 +48,15 @@ using mp_s2B_test_types = mp_copy_if<mp_int_type_list, mp_type_min_2B>;
 using mp_s4B_test_types = mp_copy_if<mp_int_type_list, mp_type_min_4B>;
 using mp_s8B_test_types = mp_copy_if<mp_int_type_list, mp_type_min_8B>;
 
-using mp_u1B_test_types =
-    mp_append<mp_s2B_test_types,
-              mp_transform<std::make_unsigned_t, mp_s1B_test_types>>;
-using mp_u2B_test_types =
-    mp_append<mp_s4B_test_types,
-              mp_transform<std::make_unsigned_t, mp_s2B_test_types>>;
-using mp_u4B_test_types =
-    mp_append<mp_s8B_test_types,
-              mp_transform<std::make_unsigned_t, mp_s4B_test_types>>;
+using mp_u1B_test_types
+        = mp_append<mp_s2B_test_types,
+                    mp_transform<std::make_unsigned_t, mp_s1B_test_types>>;
+using mp_u2B_test_types
+        = mp_append<mp_s4B_test_types,
+                    mp_transform<std::make_unsigned_t, mp_s2B_test_types>>;
+using mp_u4B_test_types
+        = mp_append<mp_s8B_test_types,
+                    mp_transform<std::make_unsigned_t, mp_s4B_test_types>>;
 using mp_u8B_test_types = mp_transform<std::make_unsigned_t, mp_s8B_test_types>;
 
 enum class type_prefix_byte : std::uint8_t
@@ -80,7 +80,7 @@ constexpr auto operator==(type_prefix_byte lhs, std::byte rhs) -> bool
 }
 
 inline auto boost_test_print_type(std::ostream &s, type_prefix_byte c)
-    -> std::ostream &
+        -> std::ostream &
 {
     fmt::print(s, FMT_STRING("{:2x}"), static_cast<std::uint8_t>(c));
     return s;
@@ -167,13 +167,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(example_10_0x0000_00e8_d4a5_1000,
                               mp_u8B_test_types)
 {
     DPLX_TEST_RESULT(
-        test_encoder::integer<T>(encodingBuffer, 0x0000'00e8'd4a5'1000));
+            test_encoder::integer<T>(encodingBuffer, 0x0000'00e8'd4a5'1000));
 
     BOOST_TEST(encodingBuffer.size() == 9u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint64);
 
-    auto const encoded =
-        make_byte_array(0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00);
+    auto const encoded
+            = make_byte_array(0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00);
     BOOST_TEST(byte_span(encodingBuffer).subspan(1) == encoded,
                boost::test_tools::per_element{});
 }
@@ -218,14 +218,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_8B_negative_lower_bound,
                               T,
                               mp_s8B_test_types)
 {
-    DPLX_TEST_RESULT(
-        test_encoder::integer<T>(encodingBuffer, -1 - 0x7fff'ffff'ffff'ffffll));
+    DPLX_TEST_RESULT(test_encoder::integer<T>(encodingBuffer,
+                                              -1 - 0x7fff'ffff'ffff'ffffll));
 
     BOOST_TEST(encodingBuffer.size() == 9u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::nint64);
 
-    auto const encoded =
-        make_byte_array(0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
+    auto const encoded
+            = make_byte_array(0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
     BOOST_TEST(byte_span(encodingBuffer).subspan(1) == encoded,
                boost::test_tools::per_element{});
 }
@@ -235,13 +235,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_8B_negative_upper_bound,
                               mp_s8B_test_types)
 {
     DPLX_TEST_RESULT(
-        test_encoder::integer<T>(encodingBuffer, -1 - 0x1'0000'0000ll));
+            test_encoder::integer<T>(encodingBuffer, -1 - 0x1'0000'0000ll));
 
     BOOST_TEST(encodingBuffer.size() == 9u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::nint64);
 
-    auto const encoded =
-        make_byte_array(0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00);
+    auto const encoded
+            = make_byte_array(0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00);
     BOOST_TEST(byte_span(encodingBuffer).subspan(1) == encoded,
                boost::test_tools::per_element{});
 }
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_4B_negative_lower_bound,
                               mp_s4B_test_types)
 {
     DPLX_TEST_RESULT(
-        test_encoder::integer<T>(encodingBuffer, -1 - 0x7fff'ffffll));
+            test_encoder::integer<T>(encodingBuffer, -1 - 0x7fff'ffffll));
 
     BOOST_TEST(encodingBuffer.size() == 5u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::nint32);
@@ -453,8 +453,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_8B_positive_lower_bound,
     BOOST_TEST(encodingBuffer.size() == 9u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint64);
 
-    auto const encoded =
-        make_byte_array(0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00);
+    auto const encoded
+            = make_byte_array(0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00);
     BOOST_TEST(byte_span(encodingBuffer).subspan(1) == encoded,
                boost::test_tools::per_element{});
 }
@@ -464,13 +464,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(signed_8B_positive_upper_bound,
                               mp_s8B_test_types)
 {
     DPLX_TEST_RESULT(
-        test_encoder::integer<T>(encodingBuffer, 0x7fff'ffff'ffff'ffff));
+            test_encoder::integer<T>(encodingBuffer, 0x7fff'ffff'ffff'ffff));
 
     BOOST_TEST(encodingBuffer.size() == 9u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint64);
 
-    auto const encoded =
-        make_byte_array(0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
+    auto const encoded
+            = make_byte_array(0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
     BOOST_TEST(byte_span(encodingBuffer).subspan(1) == encoded,
                boost::test_tools::per_element{});
 }
@@ -572,7 +572,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(unsigned_8B_lower_bound, T, mp_u8B_test_types)
 BOOST_AUTO_TEST_CASE_TEMPLATE(unsigned_8B_upper_bound, T, mp_u8B_test_types)
 {
     DPLX_TEST_RESULT(
-        test_encoder::integer<T>(encodingBuffer, 0xffff'ffff'ffff'ffff));
+            test_encoder::integer<T>(encodingBuffer, 0xffff'ffff'ffff'ffff));
 
     BOOST_TEST(encodingBuffer.size() == 9u);
     BOOST_TEST(encodingBuffer.data()[0] == type_prefix_byte::pint64);

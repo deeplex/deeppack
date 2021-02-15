@@ -24,8 +24,8 @@ class chunked_input_stream_base
     const_byte_buffer_view mReadArea;
     std::uint64_t mRemaining;
 
-    static constexpr unsigned int small_buffer_size =
-        2 * (minimum_guaranteed_read_size - 1);
+    static constexpr unsigned int small_buffer_size
+            = 2 * (minimum_guaranteed_read_size - 1);
     static constexpr int decommission_threshold = small_buffer_size / 2;
 
     std::int8_t mBufferStart;
@@ -33,8 +33,8 @@ class chunked_input_stream_base
 
 protected:
     explicit chunked_input_stream_base(
-        std::span<std::byte const> const initialReadArea,
-        std::uint64_t streamSize)
+            std::span<std::byte const> const initialReadArea,
+            std::uint64_t streamSize)
         : mReadArea(initialReadArea)
         , mRemaining(streamSize)
         , mBufferStart(-1)
@@ -57,15 +57,15 @@ private:
         return small_buffer_size - static_cast<unsigned int>(mBufferStart);
     }
     inline auto consume_buffer(std::size_t const amount) noexcept
-        -> std::span<std::byte const>
+            -> std::span<std::byte const>
     {
         // precondition:
         // 0 <= mBufferStart < decommission_threshold
         //     => buffered_amount() > minimum_guaranteed_read_size
 
         auto const remainingBuffered = buffered_amount();
-        auto const granted =
-            amount <= remainingBuffered ? amount : remainingBuffered;
+        auto const granted
+                = amount <= remainingBuffered ? amount : remainingBuffered;
 
         std::span<std::byte const> const readProxy(mSmallBuffer + mBufferStart,
                                                    granted);
@@ -92,14 +92,14 @@ private:
     }
 
     inline auto read(std::size_t const amount) noexcept
-        -> result<std::span<std::byte const>>
+            -> result<std::span<std::byte const>>
     {
-        if (mBufferStart < 0 &&
-            amount <= static_cast<unsigned int>(mReadArea.remaining_size()))
+        if (mBufferStart < 0
+            && amount <= static_cast<unsigned int>(mReadArea.remaining_size()))
         {
             mRemaining -= amount;
             return std::span<std::byte const>(
-                mReadArea.consume(static_cast<int>(amount)), amount);
+                    mReadArea.consume(static_cast<int>(amount)), amount);
         }
 
         if (amount > mRemaining)
@@ -109,24 +109,23 @@ private:
 
         if (mBufferStart < 0)
         {
-            auto const remainingChunk =
-                static_cast<unsigned int>(mReadArea.remaining_size());
+            auto const remainingChunk
+                    = static_cast<unsigned int>(mReadArea.remaining_size());
 
             if (remainingChunk >= minimum_guaranteed_read_size)
             {
                 mRemaining -= amount;
                 return std::span<std::byte const>(
-                    mReadArea.consume(remainingChunk), remainingChunk);
+                        mReadArea.consume(remainingChunk), remainingChunk);
             }
 
-            auto const bufferStart =
-                static_cast<int>(decommission_threshold - remainingChunk);
+            auto const bufferStart
+                    = static_cast<int>(decommission_threshold - remainingChunk);
 
             if (remainingChunk > 0)
             {
                 std::memcpy(mSmallBuffer + bufferStart,
-                            mReadArea.remaining_begin(),
-                            remainingChunk);
+                            mReadArea.remaining_begin(), remainingChunk);
             }
 
             DPLX_TRY(this->acquire_next_chunk());
@@ -134,12 +133,11 @@ private:
             if (remainingChunk > 0)
             {
                 auto const nextPart = std::min(
-                    minimum_guaranteed_read_size - 1,
-                    static_cast<unsigned int>(mReadArea.remaining_size()));
+                        minimum_guaranteed_read_size - 1,
+                        static_cast<unsigned int>(mReadArea.remaining_size()));
 
                 std::memcpy(mSmallBuffer + decommission_threshold,
-                            mReadArea.remaining_begin(),
-                            nextPart);
+                            mReadArea.remaining_begin(), nextPart);
 
                 mBufferStart = static_cast<int8_t>(bufferStart);
             }
@@ -178,7 +176,7 @@ private:
     }
 
     auto read(std::byte *data, std::size_t const amount) noexcept
-        -> result<void>
+            -> result<void>
     {
         // tag_invoke() checks mRemaining > amount
 
@@ -188,8 +186,8 @@ private:
                  remaining.size() > 0;)
             {
                 auto const chunk = std::min(
-                    remaining.size(),
-                    static_cast<std::size_t>(mReadArea.remaining_size()));
+                        remaining.size(),
+                        static_cast<std::size_t>(mReadArea.remaining_size()));
 
                 std::memcpy(remaining.data(), mReadArea.consume(chunk), chunk);
 
@@ -231,14 +229,14 @@ private:
 public:
     friend inline auto tag_invoke(tag_t<dp::available_input_size>,
                                   chunked_input_stream_base &self) noexcept
-        -> result<std::uint64_t>
+            -> result<std::uint64_t>
     {
         return self.mRemaining;
     }
     friend inline auto tag_invoke(tag_t<dp::read>,
                                   chunked_input_stream_base &self,
                                   std::size_t const amount) noexcept
-        -> result<std::span<std::byte const>>
+            -> result<std::span<std::byte const>>
     {
         return self.read(amount);
     }
@@ -246,7 +244,7 @@ public:
                                   chunked_input_stream_base &self,
                                   std::span<std::byte const> proxy,
                                   std::size_t const actualAmount) noexcept
-        -> result<void>
+            -> result<void>
     {
         return self.consume(proxy.size(), actualAmount);
     }
@@ -254,7 +252,7 @@ public:
                                   chunked_input_stream_base &self,
                                   std::byte *buffer,
                                   std::size_t const amount) noexcept
-        -> result<void>
+            -> result<void>
     {
         if (amount > self.mRemaining)
         {

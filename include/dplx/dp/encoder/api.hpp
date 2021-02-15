@@ -28,7 +28,7 @@ inline constexpr struct encode_fn final
     operator()(Stream &outStream, T &&value) const -> result<void>
     {
         return basic_encoder<std::remove_cvref_t<T>, Stream>()(
-            outStream, static_cast<T &&>(value));
+                outStream, static_cast<T &&>(value));
     }
 
     template <typename T, output_stream Stream>
@@ -43,7 +43,7 @@ inline constexpr struct encode_fn final
         }
 
         inline auto operator()(detail::select_proper_param_type<T> value) const
-            -> result<void>
+                -> result<void>
         {
             return basic_encoder<std::remove_cvref_t<T>, Stream>()(*mOutStream,
                                                                    value);
@@ -93,20 +93,20 @@ inline constexpr struct encode_array_fn final
     // clang-format on
     {
         return detail::arg_list_encoder<
-            detail::mp_list<std::remove_cvref_t<Ts>...>,
-            Stream>::encode(outStream, static_cast<Ts &&>(values)...);
+                detail::mp_list<std::remove_cvref_t<Ts>...>,
+                Stream>::encode(outStream, static_cast<Ts &&>(values)...);
     }
 
     template <output_stream Stream, typename... TArgs>
-    requires(
-        ... &&encodable<std::remove_cvref_t<TArgs>, Stream>) class bound_type
+    requires(... &&encodable<std::remove_cvref_t<TArgs>,
+                             Stream>) class bound_type
         : detail::arg_list_encoder<
-              detail::mp_list<std::remove_cvref_t<TArgs>...>,
-              Stream>
+                  detail::mp_list<std::remove_cvref_t<TArgs>...>,
+                  Stream>
     {
         using impl_type = detail::arg_list_encoder<
-            detail::mp_list<std::remove_cvref_t<TArgs>...>,
-            Stream>;
+                detail::mp_list<std::remove_cvref_t<TArgs>...>,
+                Stream>;
 
     public:
         using impl_type::impl_type;
@@ -126,11 +126,10 @@ inline constexpr struct encode_array_fn final
 
         template <typename... Ts>
         requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>) auto
-        operator()(Ts &&... values) const -> result<void>
+        operator()(Ts &&...values) const -> result<void>
         {
             using impl = detail::arg_list_encoder<
-                detail::mp_list<std::remove_cvref_t<Ts>...>,
-                Stream>;
+                    detail::mp_list<std::remove_cvref_t<Ts>...>, Stream>;
             return impl::encode(*mOutStream, static_cast<Ts &&>(values)...);
         }
     };
@@ -162,10 +161,11 @@ inline constexpr struct encode_map_t final
 
         result<void> rx = success();
 
-        [[maybe_unused]] bool failed =
-            (... || (rx = this->encode_pair<Ps, Stream>(outStream,
-                                                        static_cast<Ps &&>(ps)))
-                        .has_failure());
+        [[maybe_unused]] bool failed
+                = (...
+                   || (rx = this->encode_pair<Ps, Stream>(
+                               outStream, static_cast<Ps &&>(ps)))
+                              .has_failure());
 
         return rx;
     }
@@ -199,10 +199,11 @@ inline constexpr struct encode_map_t final
 
             result<void> rx = success();
 
-            [[maybe_unused]] bool failed =
-                (... || (rx = encode_map_t::encode_pair<Ps, Stream>(
-                             *mOutStream, static_cast<Ps &&>(ps)))
-                            .has_failure());
+            [[maybe_unused]] bool failed
+                    = (...
+                       || (rx = encode_map_t::encode_pair<Ps, Stream>(
+                                   *mOutStream, static_cast<Ps &&>(ps)))
+                                  .has_failure());
 
             return rx;
         }
@@ -221,10 +222,10 @@ private:
         using std::get;
 
         using pair_type = std::remove_cvref_t<P>;
-        using key_type =
-            std::remove_cvref_t<std::tuple_element_t<0, pair_type>>;
-        using value_type =
-            std::remove_cvref_t<std::tuple_element_t<1, pair_type>>;
+        using key_type
+                = std::remove_cvref_t<std::tuple_element_t<0, pair_type>>;
+        using value_type
+                = std::remove_cvref_t<std::tuple_element_t<1, pair_type>>;
 
         DPLX_TRY((basic_encoder<key_type, Stream>()(stream, get<0>(p))));
         DPLX_TRY((basic_encoder<value_type, Stream>()(stream, get<1>(p))));
@@ -240,7 +241,7 @@ inline constexpr struct encode_varargs_t final
     template <typename... Ts, output_stream Stream>
     requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>) inline auto
     operator()([[maybe_unused]] Stream &outStream,
-               [[maybe_unused]] Ts &&... values) const -> result<void>
+               [[maybe_unused]] Ts &&...values) const -> result<void>
     {
         if constexpr (sizeof...(Ts) == 0)
         {
@@ -249,13 +250,13 @@ inline constexpr struct encode_varargs_t final
         else if constexpr (sizeof...(Ts) == 1)
         {
             return basic_encoder<std::remove_cvref_t<Ts>..., Stream>()(
-                outStream, static_cast<Ts &&>(values)...);
+                    outStream, static_cast<Ts &&>(values)...);
         }
         else if constexpr (sizeof...(Ts) > 1)
         {
             return detail::arg_list_encoder<
-                detail::mp_list<std::remove_cvref_t<Ts>...>,
-                Stream>::encode(outStream, static_cast<Ts &&>(values)...);
+                    detail::mp_list<std::remove_cvref_t<Ts>...>,
+                    Stream>::encode(outStream, static_cast<Ts &&>(values)...);
         }
     }
 
@@ -272,7 +273,7 @@ inline constexpr struct encode_varargs_t final
 
         template <typename... Ts>
         requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>) inline auto
-        operator()(Ts &&... vs) const -> result<void>
+        operator()(Ts &&...vs) const -> result<void>
         {
             return encode_varargs_t{}(*mOutStream, static_cast<Ts &&>(vs)...);
         }
@@ -290,8 +291,8 @@ inline constexpr struct encoded_size_of_fn
     template <typename T>
     requires tag_invocable<encoded_size_of_fn, T &&> auto
     operator()(T &&value) const
-        noexcept(nothrow_tag_invocable<encoded_size_of_fn, T &&>)
-            -> tag_invoke_result_t<encoded_size_of_fn, T &&>
+            noexcept(nothrow_tag_invocable<encoded_size_of_fn, T &&>)
+                    -> tag_invoke_result_t<encoded_size_of_fn, T &&>
     {
         return ::dplx::dp::cpo::tag_invoke(*this, static_cast<T &&>(value));
     }

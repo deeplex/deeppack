@@ -84,9 +84,10 @@ private:
         using byte_span = std::span<std::byte>;
         DPLX_TRY(byte_span const nextChunk, impl()->acquire_next_chunk_impl());
 
-        mWriteArea = nextChunk.size() > mRemaining
-                         ? nextChunk.first(static_cast<std::size_t>(mRemaining))
-                         : nextChunk;
+        mWriteArea
+                = nextChunk.size() > mRemaining
+                        ? nextChunk.first(static_cast<std::size_t>(mRemaining))
+                        : nextChunk;
 
         mRemaining -= mWriteArea.size();
 
@@ -121,7 +122,7 @@ private:
     }
 
     auto commit(sbo_write_proxy &proxy, std::size_t const size) noexcept
-        -> result<void>
+            -> result<void>
     {
         if (!proxy.uses_small_buffer())
         {
@@ -157,7 +158,7 @@ private:
     }
 
     auto write(std::byte const *data, std::size_t const size) noexcept
-        -> result<void>
+            -> result<void>
     {
         if (mWriteArea.size() + mRemaining < size)
         {
@@ -187,7 +188,7 @@ public:
     friend inline auto tag_invoke(tag_t<dp::write>,
                                   chunked_output_stream_base &self,
                                   std::size_t const size) noexcept
-        -> result<sbo_write_proxy>
+            -> result<sbo_write_proxy>
     {
         return self.write(size);
     }
@@ -195,7 +196,7 @@ public:
     friend inline auto tag_invoke(tag_t<dp::commit>,
                                   chunked_output_stream_base &stream,
                                   sbo_write_proxy &proxy) noexcept
-        -> result<void>
+            -> result<void>
     {
         return stream.commit(proxy, proxy.size());
     }
@@ -203,7 +204,7 @@ public:
                                   chunked_output_stream_base &stream,
                                   sbo_write_proxy &proxy,
                                   std::size_t const actualSize) noexcept
-        -> result<void>
+            -> result<void>
     {
         return stream.commit(proxy, actualSize);
     }
@@ -212,7 +213,7 @@ public:
                                   chunked_output_stream_base &self,
                                   std::byte const *data,
                                   std::size_t const size) noexcept
-        -> result<void>
+            -> result<void>
     {
         return self.write(data, size);
     }

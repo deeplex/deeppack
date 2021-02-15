@@ -73,12 +73,12 @@ constexpr tuple_def<tuple_member_def<&test_tuple::ma>{}> test_tuple_def_1{};
 
 constexpr tuple_def<tuple_member_def<&test_tuple::ma>{},
                     tuple_member_def<&test_tuple::mb>{}>
-    test_tuple_def_2{};
+        test_tuple_def_2{};
 
 constexpr tuple_def<tuple_member_def<&test_tuple::ma>{},
                     tuple_member_def<&test_tuple::mb>{},
                     tuple_member_def<&test_tuple::mc>{}>
-    test_tuple_def_3{};
+        test_tuple_def_3{};
 
 BOOST_AUTO_TEST_CASE(decode_def_1)
 {
@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE(decode_def_1)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_tuple_properties<test_tuple_def_1>(istream, out, 1);
+    auto rx = dplx::dp::decode_tuple_properties<test_tuple_def_1>(istream, out,
+                                                                  1);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0xDEADBEEFu);
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE(decode_def_2)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_tuple_properties<test_tuple_def_2>(istream, out, 2);
+    auto rx = dplx::dp::decode_tuple_properties<test_tuple_def_2>(istream, out,
+                                                                  2);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x17u);
@@ -111,12 +111,12 @@ BOOST_AUTO_TEST_CASE(decode_def_2)
 BOOST_AUTO_TEST_CASE(decode_def_3)
 {
     auto bytes = make_byte_array<32>(
-        {0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 0x07, 0x19, 0xFE, 0xFE});
+            {0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 0x07, 0x19, 0xFE, 0xFE});
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_tuple_properties<test_tuple_def_3>(istream, out, 3);
+    auto rx = dplx::dp::decode_tuple_properties<test_tuple_def_3>(istream, out,
+                                                                  3);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0xDEADBEEFu);
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE(def_3_reject_missing_member)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_tuple_properties<test_tuple_def_3>(istream, out, 2);
+    auto rx = dplx::dp::decode_tuple_properties<test_tuple_def_3>(istream, out,
+                                                                  2);
     BOOST_TEST_REQUIRE(rx.has_error());
     BOOST_TEST(rx.assume_error() == dplx::dp::errc::tuple_size_mismatch);
 }
@@ -142,8 +142,8 @@ BOOST_AUTO_TEST_CASE(def_1_reject_too_many_members)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx =
-        dplx::dp::decode_tuple_properties<test_tuple_def_1>(istream, out, 2);
+    auto rx = dplx::dp::decode_tuple_properties<test_tuple_def_1>(istream, out,
+                                                                  2);
     BOOST_TEST_REQUIRE(rx.has_error());
     BOOST_TEST(rx.assume_error() == dplx::dp::errc::tuple_size_mismatch);
 }
@@ -159,11 +159,11 @@ public:
     constexpr custom_with_layout_descriptor() noexcept = default;
 
     static constexpr tuple_def<
-        tuple_member_def<&custom_with_layout_descriptor::mb>{},
-        tuple_member_def<&custom_with_layout_descriptor::ma>{},
-        tuple_member_def<&custom_with_layout_descriptor::mc>{},
-        tuple_member_def<&custom_with_layout_descriptor::md>{}>
-        layout_descriptor{};
+            tuple_member_def<&custom_with_layout_descriptor::mb>{},
+            tuple_member_def<&custom_with_layout_descriptor::ma>{},
+            tuple_member_def<&custom_with_layout_descriptor::mc>{},
+            tuple_member_def<&custom_with_layout_descriptor::md>{}>
+            layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
     {
