@@ -70,7 +70,7 @@ private:
         std::span<std::byte const> const readProxy(mSmallBuffer + mBufferStart,
                                                    granted);
 
-        mBufferStart += granted;
+        mBufferStart += static_cast<std::int8_t>(granted);
         mRemaining -= granted;
 
         return readProxy;
@@ -98,8 +98,8 @@ private:
             amount <= static_cast<unsigned int>(mReadArea.remaining_size()))
         {
             mRemaining -= amount;
-            return std::span<std::byte const>(mReadArea.consume(amount),
-                                              amount);
+            return std::span<std::byte const>(
+                mReadArea.consume(static_cast<int>(amount)), amount);
         }
 
         if (amount > mRemaining)
