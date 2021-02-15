@@ -59,6 +59,8 @@ auto error_category_impl::message(int code) const -> std::string
         return "the indefinite string/binary contained a non-string/binary subitem"s;
     case errc::tuple_size_mismatch:
         return "the tuple utils decoder expected a different number of items"s;
+    case errc::duplicate_key:
+        return "a key appeared a second time during associative container deserialization"s;
 
     default:
         return fmt::format(FMT_STRING("unknown code {}"), code);

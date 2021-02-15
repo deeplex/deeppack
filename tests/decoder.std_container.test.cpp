@@ -11,6 +11,7 @@
 #include <deque>
 #include <list>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -32,17 +33,22 @@ namespace dp_tests
 
 BOOST_AUTO_TEST_SUITE(decoder)
 
-static_assert(dplx::dp::sequence_container<std::deque<int>>);
-static_assert(dplx::dp::sequence_container<std::list<int>>);
-static_assert(dplx::dp::sequence_container<std::vector<int>>);
-static_assert(dplx::dp::sequence_container<boost::container::deque<int>>);
-static_assert(dplx::dp::sequence_container<boost::container::list<int>>);
-static_assert(
-    dplx::dp::sequence_container<boost::container::small_vector<int, 33>>);
-static_assert(
-    dplx::dp::sequence_container<boost::container::static_vector<int, 37>>);
-static_assert(dplx::dp::sequence_container<boost::container::vector<int>>);
 
+static_assert(dplx::dp::back_insertion_sequence_container<std::deque<int>>);
+static_assert(dplx::dp::back_insertion_sequence_container<std::list<int>>);
+static_assert(dplx::dp::back_insertion_sequence_container<std::vector<int>>);
+static_assert(
+    dplx::dp::back_insertion_sequence_container<boost::container::deque<int>>);
+static_assert(
+    dplx::dp::back_insertion_sequence_container<boost::container::list<int>>);
+static_assert(dplx::dp::back_insertion_sequence_container<
+              boost::container::small_vector<int, 33>>);
+static_assert(dplx::dp::back_insertion_sequence_container<
+              boost::container::static_vector<int, 37>>);
+static_assert(
+    dplx::dp::back_insertion_sequence_container<boost::container::vector<int>>);
+
+static_assert(dplx::dp::associative_container<std::set<int>>);
 static_assert(dplx::dp::associative_container<std::map<int, int>>);
 static_assert(dplx::dp::associative_container<std::unordered_map<int, int>>);
 static_assert(dplx::dp::associative_container<boost::container::map<int, int>>);
@@ -63,6 +69,7 @@ static_assert(dplx::dp::decodable<boost::container::static_vector<int, 37>,
 static_assert(
     dplx::dp::decodable<boost::container::vector<int>, test_input_stream>);
 
+static_assert(dplx::dp::decodable<std::set<int>, test_input_stream>);
 static_assert(dplx::dp::decodable<std::map<int, int>, test_input_stream>);
 static_assert(
     dplx::dp::decodable<std::unordered_map<int, int>, test_input_stream>);

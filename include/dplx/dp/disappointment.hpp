@@ -40,7 +40,8 @@ enum class errc
     not_enough_memory,
     missing_data,
     invalid_indefinite_subitem,
-    tuple_size_mismatch
+    tuple_size_mismatch,
+    duplicate_key,
 };
 auto error_category() noexcept -> std::error_category const &;
 

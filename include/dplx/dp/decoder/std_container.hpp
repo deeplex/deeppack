@@ -8,20 +8,20 @@
 #pragma once
 
 #include <array>
-#include <span>
-
 #include <concepts>
+#include <ranges>
+#include <span>
 
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/decoder/api.hpp>
+#include <dplx/dp/decoder/array_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
 #include <dplx/dp/stream.hpp>
 #include <dplx/dp/type_code.hpp>
 
-#include <boost/predef/other/workaround.h>
-
+// sequence container
 namespace dplx::dp
 {
 
@@ -29,39 +29,34 @@ template <typename T>
 inline constexpr bool disable_sequence_container = false;
 
 // clang-format off
-template <typename T>
-concept sequence_container = !disable_sequence_container<T> &&
-                             requires(T &&t, typename T::value_type &&v)
-{
-    t.push_back(v);
-    { t.back() } -> std::same_as<typename T::reference>;
-};
+template <typename X>
+concept sequence_container
+    = !disable_sequence_container<X> &&
+      std::ranges::range<X> &&
+      std::same_as<typename X::value_type, std::ranges::range_value_t<X>> &&
+      requires(X c,
+            std::ranges::sentinel_t<X> p)
+        {
+            typename X::value_type;
+            { c.emplace(p) }
+                -> std::same_as<std::ranges::iterator_t<X>>;
+        };
 // clang-format on
 
 template <typename T>
-inline constexpr bool disable_associative_container = false;
+inline constexpr bool disable_back_insertion_sequence_container = false;
 
 // clang-format off
-template <typename T>
-concept associative_container = !disable_associative_container<T> &&
-                                requires(T &&t, typename T::key_type &&k, typename T::mapped_type &&m)
-{
-    t.insert(typename T::value_type{k, m});
-};
-    // clang-format on
-
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 29, 0)
-namespace detail
-{
-
-template <typename T>
-concept resizable_sequence_container = requires(T &&value)
-{
-    value.reserve(std::size_t{});
-};
-
-} // namespace detail
-#endif
+template <typename X>
+concept back_insertion_sequence_container
+    = !disable_back_insertion_sequence_container<X> &&
+      sequence_container<X> &&
+      requires(X c)
+        {
+            c.emplace_back();
+            { c.back() } -> std::same_as<typename X::value_type &>;
+        };
+// clang-format on
 
 template <sequence_container T, input_stream Stream>
 requires decodable<typename T::value_type, Stream> class basic_decoder<T,
@@ -73,83 +68,119 @@ requires decodable<typename T::value_type, Stream> class basic_decoder<T,
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(stream));
+        return dp::parse_array(stream, value, type_code::array, decode_element);
+    }
 
-        if (static_cast<std::byte>(arrayInfo.type & 0b111'00000) !=
-            type_code::array)
+private:
+    static auto decode_element(Stream &stream, T &value) -> result<void>
+    {
+        element_type *e;
+        if constexpr (back_insertion_sequence_container<T>)
         {
-            return errc::item_type_mismatch;
-        }
-
-        if (!arrayInfo.indefinite())
-        {
-            if (arrayInfo.value > std::numeric_limits<std::size_t>::max())
-            {
-                return errc::not_enough_memory;
-            }
-            DPLX_TRY(auto &&remainingInputSize,
-                     dp::available_input_size(stream));
-            if (remainingInputSize < arrayInfo.value)
-            {
-                return errc::missing_data;
-            }
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 29, 0)
-            if constexpr (detail::resizable_sequence_container<T>)
-#else
-            if constexpr (requires { value.reserve(std::size_t{}); })
-#endif
-            {
-                try
-                {
-                    value.reserve(static_cast<std::size_t>(arrayInfo.value));
-                }
-                catch (std::bad_alloc const &)
-                {
-                    return errc::not_enough_memory;
-                }
-            }
-
-            for (std::size_t i = 0; i < arrayInfo.value; ++i)
-            {
-                value.push_back(element_type{});
-                DPLX_TRY(element_decoder()(stream, value.back()));
-            }
-
-            return success();
+            value.emplace_back();
+            e = &value.back();
         }
         else
         {
-            for (;;)
-            {
-                {
-                    DPLX_TRY(auto &&maybeStop, dp::read(stream, 1));
-                    if (std::ranges::data(maybeStop)[0] ==
-                        type_code::special_break)
-                    {
-                        if constexpr (lazy_input_stream<Stream>)
-                        {
-                            DPLX_TRY(dp::consume(stream, maybeStop));
-                        }
-                        break;
-                    }
-
-                    DPLX_TRY(dp::consume(stream, maybeStop, 0));
-                }
-
-                value.push_back(element_type{});
-                DPLX_TRY(element_decoder()(stream, value.back()));
-            }
-
-            return success();
+            auto it = value.emplace(std::ranges::end(value));
+            e = &(*it);
         }
+
+        DPLX_TRY(element_decoder()(stream, *e));
+        return oc::success();
     }
 };
 
-template <associative_container T, input_stream Stream>
-requires decodable<typename T::key_type, Stream>
-    &&decodable<typename T::mapped_type, Stream> class basic_decoder<T, Stream>
+} // namespace dplx::dp
+
+// associative containers
+namespace dplx::dp
 {
-    using value_type = typename T::value_type;
+
+template <typename T>
+inline constexpr bool disable_associative_container = false;
+
+namespace detail
+{
+
+// clang-format off
+template <typename T, typename Iterator>
+concept associative_container_emplacement_result
+    = pair_like<T> &&
+        std::same_as<typename std::tuple_element<0, T>::type, Iterator> &&
+        std::same_as<typename std::tuple_element<1, T>::type, bool>;
+// clang-format on
+
+} // namespace detail
+
+// clang-format off
+template <typename X>
+concept associative_container
+    = !disable_associative_container<X> &&
+      std::ranges::range<X> &&
+      std::same_as<typename X::value_type, std::ranges::range_value_t<X>> &&
+      std::default_initializable<typename X::value_type> &&
+      requires(X &&t, typename X::value_type v, std::ranges::iterator_t<X> hint)
+        {
+            typename X::value_type;
+            { t.emplace(static_cast<typename X::value_type &&>(v)) }
+                -> detail::associative_container_emplacement_result<
+                        std::ranges::iterator_t<X>>;
+        };
+// clang-format on
+
+// clang-format off
+template <typename X>
+concept map_like_associative_container
+    = associative_container<X> &&
+      pair_like<typename X::value_type> &&
+      std::default_initializable<typename X::key_type> &&
+      std::default_initializable<typename X::mapped_type> &&
+      requires(X &&t, typename X::key_type &&k, typename X::mapped_type &&m, std::ranges::iterator_t<X> hint)
+        {
+            typename X::key_type;
+            typename X::mapped_type;
+            { t.emplace(static_cast<typename X::key_type &&>(k),
+                        static_cast<typename X::mapped_type &&>(m)) }
+                -> detail::associative_container_emplacement_result<
+                        std::ranges::iterator_t<X>>;
+        };
+// clang-format on
+
+template <associative_container T, input_stream Stream>
+requires decodable<typename T::value_type, Stream> class basic_decoder<T,
+                                                                       Stream>
+{
+    using element_type = typename T::value_type;
+    using element_decoder = basic_decoder<element_type, Stream>;
+
+public:
+    auto operator()(Stream &stream, T &value) const -> result<void>
+    {
+        return dp::parse_array(stream, value, type_code::array, decode_element);
+    }
+
+private:
+    static auto decode_element(Stream &stream, T &value) -> result<void>
+    {
+        element_type e{};
+        DPLX_TRY(element_decoder()(stream, e));
+
+        if (auto &&[it, inserted] =
+                value.emplace(static_cast<element_type &&>(e));
+            !inserted)
+        {
+            return errc::duplicate_key;
+        }
+        return oc::success();
+    }
+};
+
+template <map_like_associative_container T, input_stream Stream>
+requires(decodable<typename T::key_type, Stream>
+             &&decodable<typename T::mapped_type,
+                         Stream>) class basic_decoder<T, Stream>
+{
     using key_type = typename T::key_type;
     using key_decoder = basic_decoder<key_type, Stream>;
     using mapped_type = typename T::mapped_type;
@@ -158,72 +189,33 @@ requires decodable<typename T::key_type, Stream>
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        DPLX_TRY(auto &&mapInfo, detail::parse_item_info(stream));
+        return dp::parse_array(stream, value, type_code::map, decode_element);
+    }
 
-        if (static_cast<std::byte>(mapInfo.type & 0b111'00000) !=
-            type_code::map)
+private:
+    static auto decode_element(Stream &stream, T &value) -> result<void>
+    {
+        key_type k{};
+        DPLX_TRY(key_decoder()(stream, k));
+
+        mapped_type m{};
+        DPLX_TRY(mapped_decoder()(stream, m));
+
+        if (auto &&[it, inserted] = value.emplace(
+                static_cast<key_type &&>(k), static_cast<mapped_type &&>(m));
+            !inserted)
         {
-            return errc::item_type_mismatch;
+            return errc::duplicate_key;
         }
-
-        if (!mapInfo.indefinite())
-        {
-            if (mapInfo.value > std::numeric_limits<std::size_t>::max())
-            {
-                return errc::not_enough_memory;
-            }
-            DPLX_TRY(auto &&remainingInputSize,
-                     dp::available_input_size(stream));
-            if (remainingInputSize < mapInfo.value)
-            {
-                return errc::missing_data;
-            }
-
-            for (std::size_t i = 0; i < mapInfo.value; ++i)
-            {
-                key_type k{};
-                DPLX_TRY(key_decoder()(stream, k));
-
-                mapped_type m{};
-                DPLX_TRY(mapped_decoder()(stream, m));
-
-                value.insert(value_type{k, m});
-            }
-
-            return success();
-        }
-        else
-        {
-            for (;;)
-            {
-                {
-                    DPLX_TRY(auto &&maybeStop, dp::read(stream, 1));
-                    if (std::ranges::data(maybeStop)[0] ==
-                        type_code::special_break)
-                    {
-                        if constexpr (lazy_input_stream<Stream>)
-                        {
-                            DPLX_TRY(dp::consume(stream, maybeStop));
-                        }
-                        break;
-                    }
-
-                    DPLX_TRY(dp::consume(stream, maybeStop, 0));
-                }
-
-                key_type k{};
-                DPLX_TRY(key_decoder()(stream, k));
-
-                mapped_type m{};
-                DPLX_TRY(mapped_decoder()(stream, m));
-
-                value.insert(value_type{k, m});
-            }
-
-            return success();
-        }
+        return oc::success();
     }
 };
+
+} // namespace dplx::dp
+
+// span<std::byte> & span<T>
+namespace dplx::dp
+{
 
 template <input_stream Stream>
 class basic_decoder<std::span<std::byte>, Stream>
@@ -350,8 +342,8 @@ public:
         }
         for (auto &subItem : value)
         {
-            DPLX_TRY(dp::decode(inStream, std::get<0>(subItem)));
-            DPLX_TRY(dp::decode(inStream, std::get<1>(subItem)));
+            DPLX_TRY(dp::decode(inStream, get<0>(subItem)));
+            DPLX_TRY(dp::decode(inStream, get<1>(subItem)));
         }
         if (headInfo.indefinite())
         {
