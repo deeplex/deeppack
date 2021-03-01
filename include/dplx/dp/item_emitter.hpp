@@ -431,7 +431,7 @@ private:
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 2));
             auto out = std::ranges::data(writeLease);
-            out[0] = category | std::byte{25};
+            out[0] = category | std::byte{24};
             out[1] = static_cast<std::byte>(value);
 
             if constexpr (lazy_output_stream<Stream>)
@@ -443,7 +443,7 @@ private:
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 3));
             auto out = std::ranges::data(writeLease);
-            out[0] = category | std::byte{26};
+            out[0] = category | std::byte{25};
             detail::store(out + 1, static_cast<std::uint16_t>(value));
 
             if constexpr (lazy_output_stream<Stream>)
@@ -455,7 +455,7 @@ private:
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 5));
             auto out = std::ranges::data(writeLease);
-            out[0] = category | std::byte{27};
+            out[0] = category | std::byte{26};
             detail::store(out + 1, static_cast<std::uint32_t>(value));
 
             if constexpr (lazy_output_stream<Stream>)
