@@ -144,7 +144,10 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/utils.hpp>
 )
 
-target_link_libraries(deeppack PUBLIC outcome::outcome)
+target_link_libraries(deeppack PUBLIC
+    fmt::fmt
+    outcome::outcome
+)
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES
