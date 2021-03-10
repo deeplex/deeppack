@@ -110,6 +110,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/arg_list.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/narrow_strings.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/object_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
