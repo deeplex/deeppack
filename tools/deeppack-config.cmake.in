@@ -1,6 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+find_dependency(Boost)
 find_dependency(fmt)
 find_dependency(outcome)
 
