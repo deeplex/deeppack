@@ -79,6 +79,14 @@ concept associative_range
         !disable_associative_range<T>;
 // clang-format on
 
+template <typename Enum>
+inline constexpr bool disable_enum_codec = false;
+template <>
+inline constexpr bool disable_enum_codec<std::byte> = true;
+
+template <typename Enum>
+concept codable_enum = std::is_enum_v<Enum> && !disable_enum_codec<Enum>;
+
 } // namespace dplx::dp
 
 namespace dplx::dp::detail

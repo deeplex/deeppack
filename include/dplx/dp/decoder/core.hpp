@@ -34,6 +34,8 @@ class basic_decoder<volatile T const, Stream>;
 template <integer T, input_stream Stream>
 class basic_decoder<T, Stream>
 {
+    using limits = std::numeric_limits<T>;
+
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
     {
@@ -44,10 +46,10 @@ public:
             {
                 return errc::item_type_mismatch;
             }
-            if constexpr (std::numeric_limits<T>::max()
+            if constexpr (limits::max()
                           < std::numeric_limits<std::uint64_t>::max())
             {
-                if (!(info.value <= std::numeric_limits<T>::max()))
+                if (!(info.value <= limits::max()))
                 {
                     return errc::item_value_out_of_range;
                 }
@@ -67,12 +69,12 @@ public:
             // information value is the same as the smallest one
             // e.g. a signed 8bit two's complement min() is -128 which
             // would be encoded as (-1 -[n=127])
-            if (!(info.value <= std::numeric_limits<T>::max()))
+            if (!(info.value <= limits::max()))
             {
                 return errc::item_value_out_of_range;
             }
             std::uint64_t const signBit = static_cast<std::uint64_t>(info.type)
-                                       << 57;
+                                       << 58;
             std::int64_t const signExtended
                     = static_cast<std::int64_t>(signBit) >> 63;
             std::uint64_t const xorpad
@@ -190,6 +192,25 @@ public:
         dest = static_cast<bool>(
                 static_cast<std::uint8_t>(value & std::byte{1}));
         return success();
+    }
+};
+
+template <codable_enum Enum, input_stream Stream>
+class basic_decoder<Enum, Stream>
+{
+    using underlying_type = std::underlying_type_t<Enum>;
+    using underlying_decoder = basic_decoder<underlying_type, Stream>;
+
+public:
+    using value_type = Enum;
+
+    auto operator()(Stream &stream, Enum &value) const -> result<void>
+    {
+        underlying_type bitRepresentation;
+        DPLX_TRY(underlying_decoder()(stream, bitRepresentation));
+
+        value = static_cast<Enum>(bitRepresentation);
+        return oc::success();
     }
 };
 

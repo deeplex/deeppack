@@ -184,7 +184,7 @@ if (BUILD_TESTING)
         "tests/item_emitter.test.cpp"
 
         "tests/item_parser.test.cpp"
-
+        
         "tests/decoder.test.cpp"
         "tests/decoder.std_container.test.cpp"
         "tests/decoder.std_string.test.cpp"
@@ -201,6 +201,8 @@ if (BUILD_TESTING)
         "tests/encoder.tuple.test.cpp"
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.object_utils.test.cpp>
         $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.tuple_utils.test.cpp>
+        
+        "tests/enum_codec.test.cpp"
 
         "tests/chunked_input_stream.test.cpp"
         "tests/chunked_output_stream.test.cpp"

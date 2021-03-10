@@ -22,7 +22,7 @@
 namespace dplx::dp
 {
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 29, 0)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
 namespace detail
 {
 
@@ -73,7 +73,7 @@ try
         }
 
         auto const numElements = static_cast<std::size_t>(arrayInfo.value);
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 29, 0)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
         if constexpr (detail::resizable_container<T>)
 #else
         if constexpr (requires { value.reserve(numElements); })

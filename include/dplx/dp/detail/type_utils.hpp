@@ -258,4 +258,11 @@ constexpr auto div_ceil(T dividend, U divisor) -> std::common_type_t<T, U>
                                       static_cast<common_t>(divisor));
 }
 
+template <typename Enum>
+constexpr auto to_underlying(Enum value) noexcept ->
+        typename std::underlying_type<Enum>::type
+{
+    return static_cast<std::underlying_type_t<Enum>>(value);
+}
+
 } // namespace dplx::dp::detail

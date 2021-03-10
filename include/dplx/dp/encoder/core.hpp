@@ -172,6 +172,26 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept -> unsigned int
     }
 }
 
+template <codable_enum Enum, output_stream Stream>
+class basic_encoder<Enum, Stream>
+{
+    using emit = item_emitter<Stream>;
+
+public:
+    using value_type = Enum;
+
+    auto operator()(Stream &outStream, value_type value) const -> result<void>
+    {
+        return emit::integer(outStream, detail::to_underlying(value));
+    }
+};
+template <codable_enum Enum>
+constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept
+        -> unsigned int
+{
+    return encoded_size_of(detail::to_underlying(value));
+}
+
 // clang-format off
 template <std::ranges::range T, output_stream Stream>
     requires encodable<std::ranges::range_value_t<T>, Stream>
