@@ -1,0 +1,19 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+    "name": "deeppack",
+    "version-string": "0.0.0",
+    "homepage": "https://github.com/deeplex-net/deeppack",
+    "dependencies": [
+        "boost-endian",
+        "boost-mp11",
+        "boost-predef",
+        "fmt",
+        "outcome"
+    ],
+    "features": {
+        "tests": {
+            "description": "Build the test suite",
+            "dependencies": ["boost-test"]
+        }
+    }
+}
