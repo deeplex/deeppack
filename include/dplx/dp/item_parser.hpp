@@ -13,6 +13,8 @@
 #include <ranges>
 #include <type_traits>
 
+#include <boost/container/small_vector.hpp>
+
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
@@ -206,13 +208,6 @@ inline auto parse_item_info(Stream &stream) -> result<item_info>
         }
         return rx;
     }
-}
-
-template <input_stream Stream>
-inline auto skip_item(Stream &stream) -> result<void>
-{
-    (void)stream;
-    return success(); // #TODO #NotImplemented
 }
 
 } // namespace dplx::dp::detail

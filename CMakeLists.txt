@@ -144,6 +144,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/skip_item.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
