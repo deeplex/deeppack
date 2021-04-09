@@ -232,6 +232,20 @@ inline constexpr struct consume_fn
     }
 } consume{};
 
+inline constexpr struct skip_bytes_fn
+{
+    template <typename Stream>
+    requires tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const> auto
+    operator()(Stream &stream, std::uint64_t const numBytes) const noexcept(
+            nothrow_tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>
+
+            )
+            -> tag_invoke_result_t<skip_bytes_fn, Stream &, std::uint64_t const>
+    {
+        return cpo::tag_invoke(*this, stream, numBytes);
+    }
+} skip_bytes{};
+
 inline constexpr struct available_input_size_fn
 {
     template <typename Stream>
@@ -280,6 +294,7 @@ concept input_stream
     {
         { read(stream, size) } -> detail::read_result<Stream>;
         { read(stream, buffer, size) } -> detail::tryable;
+        { skip_bytes(stream, numBytes) } -> detail::tryable;
         { available_input_size(stream) }
                 -> detail::tryable_result<std::size_t>;
     };

@@ -111,6 +111,19 @@ public:
 
         return dplx::dp::success();
     }
+    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::skip_bytes>,
+                                  test_input_stream &self,
+                                  std::uint64_t const numBytes) noexcept
+            -> dplx::dp::result<void>
+    {
+        BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
+        if (self.mStreamPosition + numBytes > self.mBuffer.size())
+        {
+            return dplx::dp::errc::end_of_stream;
+        }
+        self.mStreamPosition += numBytes;
+        return dplx::dp::oc::success();
+    }
 };
 static_assert(dplx::dp::lazy_input_stream<test_input_stream>);
 

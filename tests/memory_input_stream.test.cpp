@@ -192,6 +192,44 @@ BOOST_AUTO_TEST_CASE(correctly_handles_partial_reads)
     BOOST_TEST(readRx.assume_error() == dplx::dp::errc::end_of_stream);
 }
 
+BOOST_AUTO_TEST_CASE(properly_skips_bytes_at_beginning_1)
+{
+    auto skipRx = dplx::dp::skip_bytes(subject, 17);
+    DPLX_REQUIRE_RESULT(skipRx);
+
+    auto sreadRx = dplx::dp::read(subject, 50);
+    DPLX_REQUIRE_RESULT(sreadRx);
+    auto proxy = sreadRx.assume_value();
+    BOOST_TEST(std::ranges::data(proxy) == memory.data() + 17);
+    BOOST_TEST(std::ranges::size(proxy) == 50u);
+}
+
+BOOST_AUTO_TEST_CASE(skips_correctly_from_sbo_1)
+{
+    auto sreadRx = dplx::dp::read(subject, 17);
+    DPLX_REQUIRE_RESULT(sreadRx);
+    auto proxy = sreadRx.assume_value();
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 17u);
+
+    sreadRx = dplx::dp::read(subject, 40);
+    DPLX_REQUIRE_RESULT(sreadRx);
+    proxy = sreadRx.assume_value();
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40u);
+
+    auto consumeRx = dplx::dp::consume(subject, proxy, 20u);
+    DPLX_REQUIRE_RESULT(consumeRx);
+
+    auto skipRx = dplx::dp::skip_bytes(subject, 13u);
+    DPLX_REQUIRE_RESULT(skipRx);
+
+    sreadRx = dplx::dp::read(subject, 17u);
+    DPLX_REQUIRE_RESULT(sreadRx);
+    proxy = sreadRx.assume_value();
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 17u);
+    BOOST_TEST_REQUIRE(std::ranges::data(proxy)
+                       == memory.data() + 50);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

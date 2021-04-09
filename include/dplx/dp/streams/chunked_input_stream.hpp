@@ -227,6 +227,57 @@ private:
         }
     }
 
+    auto discard(std::uint64_t numBytes) noexcept -> result<void>
+    {
+        // precondition 0 < numBytes <= mRemaining
+
+        if (mBufferStart < 0)
+        {
+            do
+            {
+                auto const chunk = std::min(
+                        numBytes,
+                        static_cast<std::uint64_t>(mReadArea.remaining_size()));
+
+                numBytes -= chunk;
+                mReadArea.move_consumer(static_cast<int>(chunk));
+                mRemaining -= chunk;
+
+                if (mRemaining != 0 && mReadArea.remaining_size() == 0)
+                {
+                    DPLX_TRY(this->acquire_next_chunk());
+                }
+
+            } while (numBytes != 0);
+
+            return oc::success();
+        }
+        else if (mBufferStart < decommission_threshold)
+        {
+            auto const buffered = buffered_amount();
+            if (buffered >= numBytes)
+            {
+                mRemaining -= numBytes;
+                mBufferStart += static_cast<int8_t>(numBytes);
+                return oc::success();
+            }
+            else
+            {
+                auto const popped = static_cast<unsigned>(decommission_threshold
+                                                          - mBufferStart);
+                mRemaining -= popped;
+                mBufferStart = -1;
+
+                return discard(numBytes - popped);
+            }
+        }
+        else
+        {
+            decommission_buffer();
+            return discard(numBytes);
+        }
+    }
+
 public:
     friend inline auto tag_invoke(tag_t<dp::available_input_size>,
                                   chunked_input_stream_base &self) noexcept
@@ -261,6 +312,21 @@ public:
         }
 
         return self.read(buffer, amount);
+    }
+    friend inline auto tag_invoke(tag_t<dp::skip_bytes>,
+                                  chunked_input_stream_base &self,
+                                  std::uint64_t const numBytes) noexcept
+            -> result<void>
+    {
+        if (numBytes == 0)
+        {
+            return oc::success();
+        }
+        if (numBytes > self.mRemaining)
+        {
+            return dp::errc::end_of_stream;
+        }
+        return self.discard(numBytes);
     }
 };
 } // namespace dplx::dp

@@ -66,5 +66,18 @@ tag_invoke(tag_t<dp::read>,
     std::memcpy(buffer, self.consume(static_cast<int>(amount)), amount);
     return success();
 }
+template <typename T>
+requires std::is_same_v<std::byte, std::remove_const_t<T>> inline auto
+tag_invoke(tag_t<dp::skip_bytes>,
+           basic_byte_buffer_view<T> &self,
+           std::uint64_t const numBytes) noexcept -> dplx::dp::result<void>
+{
+    if (numBytes > static_cast<unsigned>(self.remaining_size()))
+    {
+        return errc::end_of_stream;
+    }
+    self.move_consumer(static_cast<int>(numBytes));
+    return oc::success();
+}
 
 } // namespace dplx::dp
