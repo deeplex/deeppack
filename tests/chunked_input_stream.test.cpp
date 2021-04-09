@@ -65,19 +65,13 @@ private:
 
 static_assert(dplx::dp::input_stream<test_chunked_input_stream>);
 static_assert(!dplx::dp::lazy_input_stream<test_chunked_input_stream>);
-static_assert(dplx::dp::is_zero_copy_capable_v<test_chunked_input_stream>);
 
 struct chunked_input_stream_dependencies
 {
     static constexpr std::size_t testSize
             = dplx::dp::minimum_guaranteed_read_size * 3 - 1;
 
-    test_chunked_input_stream subject;
-
-    chunked_input_stream_dependencies()
-        : subject(testSize)
-    {
-    }
+    test_chunked_input_stream subject{testSize};
 };
 
 BOOST_FIXTURE_TEST_SUITE(chunked_input_stream,

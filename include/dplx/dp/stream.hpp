@@ -17,10 +17,9 @@
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/tag_invoke.hpp>
 
+// output stream definitions & concepts
 namespace dplx::dp
 {
-
-// output stream definitions & concepts
 
 inline constexpr struct write_fn
 {
@@ -31,7 +30,7 @@ inline constexpr struct write_fn
             nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<write_fn, Stream &, std::size_t const>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, size);
+        return cpo::tag_invoke(*this, stream, size);
     }
 
     // bulk transfer variant (for payload data like strings)
@@ -52,11 +51,11 @@ inline constexpr struct write_fn
                                            std::byte const *,
                                            std::size_t const>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, bytes, numBytes);
+        return cpo::tag_invoke(*this, stream, bytes, numBytes);
     }
 } write{};
 
-inline constexpr unsigned int minimum_guaranteed_write_size = 40;
+inline constexpr unsigned minimum_guaranteed_write_size = 40;
 
 inline constexpr struct commit_fn
 {
@@ -66,7 +65,7 @@ inline constexpr struct commit_fn
             noexcept(nothrow_tag_invocable<commit_fn, Stream &, WriteProxy &>)
                     -> tag_invoke_result_t<commit_fn, Stream &, WriteProxy &>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy);
+        return cpo::tag_invoke(*this, stream, proxy);
     }
 
     template <typename Stream, typename WriteProxy>
@@ -84,9 +83,12 @@ inline constexpr struct commit_fn
                                            WriteProxy &,
                                            std::size_t const>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy, size);
+        return cpo::tag_invoke(*this, stream, proxy, size);
     }
 } commit{};
+
+namespace detail
+{
 
 // clang-format off
 template <typename Stream, typename T>
@@ -96,27 +98,40 @@ concept write_proxy
     && std::convertible_to<
         std::remove_reference_t<std::ranges::range_reference_t<T>>(*)[],
         std::byte (*)[]>
+    && std::is_nothrow_default_constructible_v<T>
+    && std::is_nothrow_move_constructible_v<T>
+    && std::is_nothrow_move_assignable_v<T>
+    && std::is_trivially_destructible_v<T>
     && requires(Stream &stream, T &proxy, std::size_t const size)
     {
-        { commit(stream, proxy, size) } -> oc::concepts::basic_result;
+        { commit(stream, proxy, size) } -> detail::tryable;
     };
 // clang-format on
 
 // clang-format off
 template <typename T, typename Stream>
 concept write_result
-    = oc::concepts::basic_result<T> && write_proxy<Stream, typename T::value_type>;
+    = detail::tryable<T> && write_proxy<Stream, detail::result_value_t<T>>;
 // clang-format on
+
+} // namespace detail
 
 // clang-format off
 template <typename Stream>
 concept output_stream
     = requires(Stream &stream, std::byte const *bytes, std::size_t const size)
     {
-        {::dplx::dp::write(stream, size)} -> write_result<Stream>;
-        {::dplx::dp::write(stream, bytes, size)} -> oc::concepts::basic_result;
+        { write(stream, size) } -> detail::write_result<Stream>;
+        { write(stream, bytes, size) } -> detail::tryable;
     };
 // clang-format on
+
+template <output_stream Stream>
+using write_proxy_t = detail::result_value_t<decltype(
+        write(std::declval<Stream &>(), std::declval<std::size_t>()))>;
+
+namespace detail
+{
 
 // clang-format off
 template <typename Stream, typename Proxy>
@@ -124,7 +139,7 @@ concept lazy_write_proxy
     = write_proxy<Stream, Proxy>
     && requires (Stream &stream, Proxy &proxy)
     {
-        { ::dplx::dp::commit(stream, proxy) } -> oc::concepts::basic_result;
+        { commit(stream, proxy) } -> detail::tryable;
     };
 // clang-format on
 
@@ -135,17 +150,23 @@ concept lazy_write_result
     && lazy_write_proxy<Stream, typename T::value_type>;
 // clang-format on
 
+} // namespace detail
+
 // clang-format off
 template <typename Stream>
 concept lazy_output_stream
     = output_stream<Stream>
     && requires (Stream &stream, std::size_t size)
     {
-        { ::dplx::dp::write(stream, size) } -> lazy_write_result<Stream>;
+        { write(stream, size) } -> detail::lazy_write_result<Stream>;
     };
 // clang-format on
 
+} // namespace dplx::dp
+
 // input stream definitions & concepts
+namespace dplx::dp
+{
 
 inline constexpr struct read_fn
 {
@@ -155,7 +176,7 @@ inline constexpr struct read_fn
             nothrow_tag_invocable<read_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<read_fn, Stream &, std::size_t const>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, size);
+        return cpo::tag_invoke(*this, stream, size);
     }
 
     template <typename Stream>
@@ -173,11 +194,11 @@ inline constexpr struct read_fn
                                            std::byte *,
                                            std::size_t const>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, data, size);
+        return cpo::tag_invoke(*this, stream, data, size);
     }
 } read{};
 
-inline constexpr unsigned int minimum_guaranteed_read_size = 40;
+inline constexpr unsigned minimum_guaranteed_read_size = 40;
 
 inline constexpr struct consume_fn
 {
@@ -198,7 +219,7 @@ inline constexpr struct consume_fn
                                            ReadProxy &,
                                            std::size_t const>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy, actualSize);
+        return cpo::tag_invoke(*this, stream, proxy, actualSize);
     }
 
     template <typename Stream, typename ReadProxy>
@@ -207,7 +228,7 @@ inline constexpr struct consume_fn
             noexcept(nothrow_tag_invocable<consume_fn, Stream &, ReadProxy &>)
                     -> tag_invoke_result_t<consume_fn, Stream &, ReadProxy &>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream, proxy);
+        return cpo::tag_invoke(*this, stream, proxy);
     }
 } consume{};
 
@@ -219,9 +240,12 @@ inline constexpr struct available_input_size_fn
             noexcept(nothrow_tag_invocable<available_input_size_fn, Stream &>)
                     -> tag_invoke_result_t<available_input_size_fn, Stream &>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, stream);
+        return cpo::tag_invoke(*this, stream);
     }
 } available_input_size{};
+
+namespace detail
+{
 
 // clang-format off
 template <typename Proxy, typename Stream>
@@ -237,37 +261,36 @@ concept read_proxy
     && std::is_trivially_destructible_v<Proxy>
     && requires (Stream &stream, Proxy &proxy, std::size_t const actualSize)
     {
-        { ::dplx::dp::consume(stream, proxy, actualSize) } -> oc::concepts::basic_result;
+        { consume(stream, proxy, actualSize) } -> detail::tryable;
     };
 // clang-format on
 
 // clang-format off
 template <typename T, typename Stream>
 concept read_result
-    = oc::concepts::basic_result<T> && read_proxy<typename T::value_type, Stream>;
+    = detail::tryable<T> && read_proxy<detail::result_value_t<T>, Stream>;
 // clang-format on
 
-// clang-format off
-template <typename T>
-concept available_input_size_result
-    = oc::concepts::basic_result<T> && std::convertible_to<typename T::value_type, std::size_t>;
-// clang-format on
+} // namespace detail
 
 // clang-format off
 template <typename Stream>
 concept input_stream
-    = requires(Stream &stream, std::byte *buffer, std::size_t const size)
+    = requires(Stream &stream, std::byte *buffer, std::size_t const size, std::uint64_t const numBytes)
     {
-        { ::dplx::dp::read(stream, size) } -> read_result<Stream>;
-        { ::dplx::dp::read(stream, buffer, size) } -> oc::concepts::basic_result;
-        { ::dplx::dp::available_input_size(stream) }
-            -> available_input_size_result;
+        { read(stream, size) } -> detail::read_result<Stream>;
+        { read(stream, buffer, size) } -> detail::tryable;
+        { available_input_size(stream) }
+                -> detail::tryable_result<std::size_t>;
     };
 // clang-format on
 
 template <input_stream Stream>
-using read_proxy_t = typename decltype(::dplx::dp::read(
-        std::declval<Stream &>(), std::declval<std::size_t>()))::value_type;
+using read_proxy_t = detail::result_value_t<decltype(
+        read(std::declval<Stream &>(), std::declval<std::size_t>()))>;
+
+namespace detail
+{
 
 // clang-format off
 template <typename Proxy, typename Stream>
@@ -275,7 +298,7 @@ concept lazy_read_proxy
     = read_proxy<Proxy, Stream>
     && requires (Stream &stream, Proxy &proxy)
     {
-        { ::dplx::dp::consume(stream, proxy) } -> oc::concepts::basic_result;
+        { consume(stream, proxy) } -> detail::tryable;
     };
 // clang-format on
 
@@ -283,8 +306,10 @@ concept lazy_read_proxy
 template <typename T, typename Stream>
 concept lazy_read_result
     = read_result<T, Stream>
-    && lazy_read_proxy<typename T::value_type, Stream>;
+    && lazy_read_proxy<detail::result_value_t<T>, Stream>;
 // clang-format on
+
+} // namespace detail
 
 // clang-format off
 template <typename Stream>
@@ -292,23 +317,8 @@ concept lazy_input_stream
     = input_stream<Stream>
     && requires (Stream &stream, std::size_t size)
     {
-        { ::dplx::dp::read(stream, size) } -> lazy_read_result<Stream>;
+        { read(stream, size) } -> detail::lazy_read_result<Stream>;
     };
-// clang-format on     
-
-template <typename Stream>
-struct is_zero_copy_capable;
-
-template <input_stream Stream>
-struct is_zero_copy_capable<Stream> : std::bool_constant<
-    !lazy_input_stream<Stream>
-    && std::is_same_v<read_proxy_t<Stream>, std::span<std::byte const>>
->
-{
-};
-
-template <typename Stream>
-inline constexpr bool is_zero_copy_capable_v
-    = is_zero_copy_capable<Stream>::value;
+// clang-format on
 
 } // namespace dplx::dp

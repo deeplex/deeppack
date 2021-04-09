@@ -43,6 +43,7 @@ public:
                 = ~static_cast<std::size_t>(0);
 
     public:
+        write_proxy() noexcept = default;
         write_proxy(std::span<std::byte> mem, std::size_t currentSize, ctag)
             : std::span<std::byte>(mem)
             , mInitSize(currentSize)

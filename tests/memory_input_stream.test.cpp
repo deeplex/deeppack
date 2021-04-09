@@ -17,12 +17,9 @@
 
 static_assert(dplx::dp::input_stream<dplx::dp::byte_buffer_view>);
 static_assert(!dplx::dp::lazy_input_stream<dplx::dp::byte_buffer_view>);
-static_assert(dplx::dp::is_zero_copy_capable_v<dplx::dp::byte_buffer_view>);
 
 static_assert(dplx::dp::input_stream<dplx::dp::const_byte_buffer_view>);
 static_assert(!dplx::dp::lazy_input_stream<dplx::dp::const_byte_buffer_view>);
-static_assert(
-        dplx::dp::is_zero_copy_capable_v<dplx::dp::const_byte_buffer_view>);
 
 namespace dp_tests
 {
