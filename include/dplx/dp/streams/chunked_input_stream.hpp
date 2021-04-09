@@ -170,7 +170,7 @@ private:
         }
         else
         {
-            mBufferStart -= unused;
+            mBufferStart -= static_cast<std::int8_t>(unused);
             return success();
         }
     }
@@ -178,7 +178,7 @@ private:
     auto read(std::byte *data, std::size_t const amount) noexcept
             -> result<void>
     {
-        // tag_invoke() checks mRemaining > amount
+        // precondition amount <= mRemaining
 
         if (mBufferStart < 0)
         {
@@ -189,12 +189,13 @@ private:
                         remaining.size(),
                         static_cast<std::size_t>(mReadArea.remaining_size()));
 
-                std::memcpy(remaining.data(), mReadArea.consume(chunk), chunk);
+                std::memcpy(remaining.data(),
+                            mReadArea.consume(static_cast<int>(chunk)), chunk);
 
                 remaining = remaining.subspan(chunk);
                 mRemaining -= chunk;
 
-                if (mReadArea.remaining_size() == 0)
+                if (mRemaining != 0 && mReadArea.remaining_size() == 0)
                 {
                     DPLX_TRY(this->acquire_next_chunk());
                 }
