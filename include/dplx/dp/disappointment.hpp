@@ -65,6 +65,38 @@ struct is_error_code_enum<dplx::dp::errc> : std::true_type
 namespace dplx::dp::detail
 {
 
+template <typename B>
+concept boolean_testable_impl = std::convertible_to<B, bool>;
+template <typename B>
+concept boolean_testable = boolean_testable_impl<B> &&requires(B &&b)
+{
+    {
+        !static_cast<B &&>(b)
+    }
+    ->boolean_testable_impl;
+};
+
+template <typename T>
+concept tryable = requires(T &&t)
+{
+    {
+        oc::try_operation_has_value(t)
+    }
+    ->boolean_testable;
+    {
+        oc::try_operation_return_as(static_cast<T &&>(t))
+    }
+    ->std::convertible_to<result<void>>;
+    oc::try_operation_extract_value(static_cast<T &&>(t));
+};
+
+template <tryable T>
+using result_value_t = std::remove_cvref_t<decltype(
+        oc::try_operation_extract_value(std::declval<T &&>()))>;
+
+template <typename T, typename R>
+concept tryable_result = tryable<T> &&std::convertible_to<result_value_t<T>, R>;
+
 inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
 {
     if (oc::try_operation_has_value(in))
@@ -74,7 +106,7 @@ inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
     out = oc::try_operation_return_as(std::move(in));
     return true;
 }
-template <typename T>
+template <tryable T>
 inline auto try_extract_failure(T &&in, result<void> &out) -> bool
 {
     if (oc::try_operation_has_value(in))
