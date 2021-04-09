@@ -187,7 +187,7 @@ public:
 };
 template <codable_enum Enum>
 constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept
-        -> unsigned int
+        -> int
 {
     return encoded_size_of(detail::to_underlying(value));
 }
