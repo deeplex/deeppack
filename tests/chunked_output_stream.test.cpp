@@ -21,7 +21,7 @@ namespace dp_tests
 BOOST_AUTO_TEST_SUITE(streams)
 
 class test_chunked_output_stream final
-    : dp::chunked_output_stream_base<test_chunked_output_stream>
+    : public dp::chunked_output_stream_base<test_chunked_output_stream>
 {
 public:
     friend class dp::chunked_output_stream_base<test_chunked_output_stream>;
@@ -45,7 +45,22 @@ public:
         mChunks[1].resize(streamSize - partition);
         std::fill(mChunks[1].begin(), mChunks[1].end(), invalidItem);
     }
+
+private:
+    auto acquire_next_chunk_impl(std::uint64_t) -> dp::result<byte_span>
+    {
+        if (mNext >= mChunks.size())
+        {
+            return dp::errc::end_of_stream;
+        }
+        return std::span(mChunks[mNext++]);
+    }
 };
+
+static_assert(dp::output_stream<test_chunked_output_stream>);
+static_assert(dp::lazy_output_stream<test_chunked_output_stream>);
+static_assert(dp::stream_traits<test_chunked_output_stream>::output);
+static_assert(dp::stream_traits<test_chunked_output_stream>::nothrow_output);
 
 struct chunked_output_stream_dependencies
 {

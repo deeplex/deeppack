@@ -63,6 +63,8 @@ private:
 
 static_assert(dp::input_stream<test_chunked_input_stream>);
 static_assert(!dp::lazy_input_stream<test_chunked_input_stream>);
+static_assert(dp::stream_traits<test_chunked_input_stream>::input);
+static_assert(dp::stream_traits<test_chunked_input_stream>::nothrow_input);
 
 struct chunked_input_stream_dependencies
 {

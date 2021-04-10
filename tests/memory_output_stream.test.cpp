@@ -15,6 +15,7 @@ namespace dp_tests
 
 static_assert(dp::output_stream<dp::byte_buffer_view>);
 static_assert(!dp::lazy_output_stream<dp::byte_buffer_view>);
+static_assert(dp::stream_traits<dp::byte_buffer_view>::nothrow_output);
 
 BOOST_AUTO_TEST_SUITE(streams)
 

@@ -164,6 +164,38 @@ concept lazy_output_stream
 
 } // namespace dplx::dp
 
+// output stream trait definitions for `stream_traits` further below
+namespace dplx::dp::detail
+{
+
+template <typename Stream>
+struct output_stream_traits
+{
+    static constexpr bool output = true;
+    static constexpr bool lazy_output = lazy_output_stream<Stream>;
+
+    static constexpr bool nothrow_write_direct
+            = nothrow_tag_invocable<write_fn, Stream &, std::size_t const>;
+    static constexpr bool nothrow_write_indirect
+            = nothrow_tag_invocable<write_fn,
+                                    Stream &,
+                                    std::byte const *,
+                                    std::size_t const>;
+    static constexpr bool nothrow_write
+            = nothrow_write_direct && nothrow_write_indirect;
+
+    static constexpr bool nothrow_commit
+            = nothrow_tag_invocable<
+                      commit_fn,
+                      Stream &,
+                      write_proxy_t<Stream> &,
+                      std::size_t const> && (!lazy_output || nothrow_tag_invocable<commit_fn, Stream &, write_proxy_t<Stream> &>);
+
+    static constexpr bool nothrow_output = nothrow_write && nothrow_commit;
+};
+
+} // namespace dplx::dp::detail
+
 // input stream definitions & concepts
 namespace dplx::dp
 {
@@ -335,5 +367,76 @@ concept lazy_input_stream
         { read(stream, size) } -> detail::lazy_read_result<Stream>;
     };
 // clang-format on
+
+} // namespace dplx::dp
+
+namespace dplx::dp::detail
+{
+
+template <typename Stream>
+struct input_stream_traits
+{
+    static constexpr bool input = true;
+    static constexpr bool lazy_input = lazy_input_stream<Stream>;
+
+    static constexpr bool nothrow_read_direct
+            = nothrow_tag_invocable<read_fn, Stream &, std::size_t const>;
+    static constexpr bool nothrow_read_indirect
+            = nothrow_tag_invocable<read_fn,
+                                    Stream &,
+                                    std::byte *,
+                                    std::size_t const>;
+    static constexpr bool nothrow_read
+            = nothrow_read_direct && nothrow_read_indirect;
+
+    static constexpr bool nothrow_consume
+            = nothrow_tag_invocable<
+                      consume_fn,
+                      Stream &,
+                      read_proxy_t<Stream> &,
+                      std::size_t const> && (!lazy_input || nothrow_tag_invocable<consume_fn, Stream &, read_proxy_t<Stream> &>);
+
+    static constexpr bool nothrow_skip_bytes
+            = nothrow_tag_invocable<skip_bytes_fn,
+                                    Stream &,
+                                    std::uint64_t const>;
+
+    static constexpr bool nothrow_available_input_bytes
+            = nothrow_tag_invocable<available_input_size_fn, Stream &>;
+
+    static constexpr bool nothrow_input = nothrow_read && nothrow_consume
+                                       && nothrow_skip_bytes
+                                       && nothrow_available_input_bytes;
+};
+
+} // namespace dplx::dp::detail
+
+namespace dplx::dp
+{
+
+template <typename T>
+struct stream_traits
+{
+};
+
+template <output_stream Stream>
+struct stream_traits<Stream> : detail::output_stream_traits<Stream>
+{
+    static constexpr bool input = false;
+};
+
+template <input_stream Stream>
+struct stream_traits<Stream> : detail::input_stream_traits<Stream>
+{
+    static constexpr bool output = false;
+};
+
+template <typename InOutStream>
+requires output_stream<InOutStream>
+        &&input_stream<InOutStream> struct stream_traits<InOutStream>
+    : detail::output_stream_traits<InOutStream>
+    , detail::input_stream_traits<InOutStream>
+{
+};
 
 } // namespace dplx::dp

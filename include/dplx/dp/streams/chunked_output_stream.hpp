@@ -24,6 +24,7 @@ class sbo_write_proxy final
     std::byte mBuffer[minimum_guaranteed_write_size];
 
 public:
+    constexpr sbo_write_proxy() noexcept = default;
     inline explicit sbo_write_proxy(std::size_t size) noexcept
         : mMemory(nullptr)
         , mSize(size)
