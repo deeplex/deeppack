@@ -86,7 +86,7 @@ inline auto boost_test_print_type(std::ostream &s, type_prefix_byte c)
     return s;
 }
 
-using test_encoder = dplx::dp::item_emitter<test_output_stream<>>;
+using test_encoder = dp::item_emitter<test_output_stream<>>;
 
 #pragma region Appendix A.Examples
 

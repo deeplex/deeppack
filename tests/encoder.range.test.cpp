@@ -22,15 +22,15 @@ BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
 
 BOOST_AUTO_TEST_SUITE(range)
 
-static_assert(std::ranges::range<dplx::dp::indefinite_range<int *>>);
-static_assert(std::ranges::view<dplx::dp::indefinite_range<int *>>);
+static_assert(std::ranges::range<dp::indefinite_range<int *>>);
+static_assert(std::ranges::view<dp::indefinite_range<int *>>);
 
-static_assert(dplx::dp::encodable<std::array<simple_encodeable, 5>,
-                                  test_output_stream<>>);
-static_assert(dplx::dp::encodable<std::list<simple_encodeable>,
-                                  test_output_stream<>>);
-static_assert(dplx::dp::encodable<std::vector<simple_encodeable>,
-                                  test_output_stream<>>);
+static_assert(
+        dp::encodable<std::array<simple_encodeable, 5>, test_output_stream<>>);
+static_assert(
+        dp::encodable<std::list<simple_encodeable>, test_output_stream<>>);
+static_assert(
+        dp::encodable<std::vector<simple_encodeable>, test_output_stream<>>);
 
 struct range_sample
 {
@@ -64,7 +64,7 @@ BOOST_DATA_TEST_CASE(vector_with, boost::unit_test::data::make(vector_samples))
 {
     using test_vector = std::vector<simple_encodeable>;
     using test_stream = test_output_stream<512>;
-    using test_encoder = dplx::dp::basic_encoder<test_vector, test_stream>;
+    using test_encoder = dp::basic_encoder<test_vector, test_stream>;
     using prefix_span = std::span<std::byte const>;
 
     std::vector<std::byte> bytes{};
@@ -92,14 +92,14 @@ BOOST_DATA_TEST_CASE(vector_with, boost::unit_test::data::make(vector_samples))
 
 BOOST_AUTO_TEST_CASE(c_array_2)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{2},
-            std::byte{0b1110'1001}, std::byte{0b1110'1001});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{2},
+                              std::byte{0b1110'1001}, std::byte{0b1110'1001});
 
     simple_encodeable const values[] = {{encoded[1]}, {encoded[2]}};
 
-    using test_encoder = dplx::dp::basic_encoder<simple_encodeable[2],
-                                                 test_output_stream<>>;
+    using test_encoder
+            = dp::basic_encoder<simple_encodeable[2], test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
@@ -109,16 +109,16 @@ BOOST_AUTO_TEST_CASE(c_array_2)
 
 BOOST_AUTO_TEST_CASE(std_array_2)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{2},
-            std::byte{0b1110'1001}, std::byte{0b1110'1001});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{2},
+                              std::byte{0b1110'1001}, std::byte{0b1110'1001});
 
     std::array<simple_encodeable const, 2> const values{
             simple_encodeable{encoded[1]}, simple_encodeable{encoded[2]}};
 
     using test_encoder
-            = dplx::dp::basic_encoder<std::array<simple_encodeable const, 2>,
-                                      test_output_stream<>>;
+            = dp::basic_encoder<std::array<simple_encodeable const, 2>,
+                                test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
@@ -128,9 +128,9 @@ BOOST_AUTO_TEST_CASE(std_array_2)
 
 BOOST_AUTO_TEST_CASE(std_span_2)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{2},
-            std::byte{0b1110'1001}, std::byte{0b1110'1001});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{2},
+                              std::byte{0b1110'1001}, std::byte{0b1110'1001});
 
     std::array const values{simple_encodeable{encoded[1]},
                             simple_encodeable{encoded[2]}};
@@ -138,8 +138,8 @@ BOOST_AUTO_TEST_CASE(std_span_2)
     std::span values_span(values);
 
     using test_encoder
-            = dplx::dp::basic_encoder<std::span<simple_encodeable const, 2>,
-                                      test_output_stream<>>;
+            = dp::basic_encoder<std::span<simple_encodeable const, 2>,
+                                test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values_span));
 
@@ -150,16 +150,16 @@ BOOST_AUTO_TEST_CASE(std_span_2)
 BOOST_AUTO_TEST_CASE(indefinite_range_2)
 {
     auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{31},
+            to_byte(dp::type_code::array) | std::byte{31},
             std::byte{0b1110'1001}, std::byte{0b1110'1001}, std::byte{0xFF});
 
     std::array<simple_encodeable, 2> const values{
             simple_encodeable{encoded[1]}, simple_encodeable{encoded[2]}};
 
-    dplx::dp::indefinite_range indefiniteRange(values);
+    dp::indefinite_range indefiniteRange(values);
 
-    using test_encoder = dplx::dp::basic_encoder<decltype(indefiniteRange),
-                                                 test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<decltype(indefiniteRange),
+                                           test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, indefiniteRange));
 
@@ -192,9 +192,9 @@ public:
 };
 BOOST_AUTO_TEST_CASE(unsized_input_view_2)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{2},
-            std::byte{0b1110'1001}, std::byte{0b1110'1001});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{2},
+                              std::byte{0b1110'1001}, std::byte{0b1110'1001});
 
     std::list<simple_encodeable> const values{simple_encodeable{encoded[1]},
                                               simple_encodeable{encoded[2]}};
@@ -202,11 +202,10 @@ BOOST_AUTO_TEST_CASE(unsized_input_view_2)
     unsized_input_view unsizedInputView(values.begin(), values.end());
 
     using view_type = decltype(unsizedInputView);
-    static_assert(!dplx::dp::enable_indefinite_encoding<view_type>);
+    static_assert(!dp::enable_indefinite_encoding<view_type>);
     static_assert(!std::ranges::sized_range<view_type>);
 
-    using test_encoder
-            = dplx::dp::basic_encoder<view_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<view_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, unsizedInputView));
 

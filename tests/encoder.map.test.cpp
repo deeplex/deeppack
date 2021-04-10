@@ -25,10 +25,10 @@ BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
 
 BOOST_AUTO_TEST_SUITE(map)
 
-static_assert(dplx::dp::encodable<std::map<int, simple_encodeable>,
-                                  test_output_stream<>>);
-static_assert(dplx::dp::encodable<std::unordered_map<int, simple_encodeable>,
-                                  test_output_stream<>>);
+static_assert(
+        dp::encodable<std::map<int, simple_encodeable>, test_output_stream<>>);
+static_assert(dp::encodable<std::unordered_map<int, simple_encodeable>,
+                            test_output_stream<>>);
 
 struct map_sample
 {
@@ -62,7 +62,7 @@ BOOST_DATA_TEST_CASE(std_map_with, boost::unit_test::data::make(map_samples))
 {
     using test_map = std::map<std::size_t, simple_encodeable>;
     using test_stream = test_output_stream<1024>;
-    using test_encoder = dplx::dp::basic_encoder<test_map, test_stream>;
+    using test_encoder = dp::basic_encoder<test_map, test_stream>;
     using prefix_span = std::span<std::byte const>;
 
     test_map vs{};
@@ -86,7 +86,7 @@ BOOST_DATA_TEST_CASE(std_unordered_map_with,
 {
     using test_map = std::unordered_map<std::size_t, simple_encodeable>;
     using test_stream = test_output_stream<1024>;
-    using test_encoder = dplx::dp::basic_encoder<test_map, test_stream>;
+    using test_encoder = dp::basic_encoder<test_map, test_stream>;
     // using prefix_span = std::span<std::byte const>;
 
     test_map vs{};
@@ -110,7 +110,7 @@ BOOST_DATA_TEST_CASE(boost_unordered_map_with,
 {
     using test_map = std::unordered_map<std::size_t, simple_encodeable>;
     using test_stream = test_output_stream<1024>;
-    using test_encoder = dplx::dp::basic_encoder<test_map, test_stream>;
+    using test_encoder = dp::basic_encoder<test_map, test_stream>;
     // using prefix_span = std::span<std::byte const>;
 
     test_map vs{};
@@ -132,10 +132,9 @@ BOOST_DATA_TEST_CASE(boost_unordered_map_with,
 BOOST_DATA_TEST_CASE(map_pair_range_with,
                      boost::unit_test::data::make(map_samples))
 {
-    using test_map
-            = std::vector<dplx::dp::map_pair<std::size_t, simple_encodeable>>;
+    using test_map = std::vector<dp::map_pair<std::size_t, simple_encodeable>>;
     using test_stream = test_output_stream<1024>;
-    using test_encoder = dplx::dp::basic_encoder<test_map, test_stream>;
+    using test_encoder = dp::basic_encoder<test_map, test_stream>;
     using prefix_span = std::span<std::byte const>;
 
     test_map vs{};
@@ -176,10 +175,11 @@ BOOST_DATA_TEST_CASE(indefinite_map_with,
         vs.insert({i, simple_encodeable{v}});
     }
 
-    dplx::dp::indefinite_range indefiniteMap(vs);
+    dp::indefinite_range indefiniteMap(vs);
 
-    using test_encoder = dplx::dp::basic_encoder<
-            dplx::dp::indefinite_range<test_map::const_iterator>, test_stream>;
+    using test_encoder
+            = dp::basic_encoder<dp::indefinite_range<test_map::const_iterator>,
+                                test_stream>;
 
     test_stream ctx{};
     DPLX_TEST_RESULT(test_encoder()(ctx, indefiniteMap));
@@ -189,7 +189,7 @@ BOOST_DATA_TEST_CASE(indefinite_map_with,
                                   .first(sample.prefix_length),
                boost::test_tools::per_element{});
     BOOST_TEST(prefix_span(ctx).back()
-               == to_byte(dplx::dp::type_code::special_break));
+               == to_byte(dp::type_code::special_break));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

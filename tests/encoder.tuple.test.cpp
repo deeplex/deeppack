@@ -23,15 +23,14 @@ BOOST_AUTO_TEST_SUITE(tuple)
 
 BOOST_AUTO_TEST_CASE(std_pair)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{2},
-            std::byte{0b1110'1000}, std::byte{0b1110'1001});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{2},
+                              std::byte{0b1110'1000}, std::byte{0b1110'1001});
 
     using value_type = std::pair<simple_encodeable, simple_encodeable>;
     value_type values = {{encoded[1]}, {encoded[2]}};
 
-    using test_encoder
-            = dplx::dp::basic_encoder<value_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<value_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
@@ -41,15 +40,14 @@ BOOST_AUTO_TEST_CASE(std_pair)
 
 BOOST_AUTO_TEST_CASE(std_tuple_2)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{2},
-            std::byte{0b1110'1000}, std::byte{0b1110'1001});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{2},
+                              std::byte{0b1110'1000}, std::byte{0b1110'1001});
 
     using value_type = std::tuple<simple_encodeable, simple_encodeable>;
     value_type values = {{encoded[1]}, {encoded[2]}};
 
-    using test_encoder
-            = dplx::dp::basic_encoder<value_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<value_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 
@@ -59,18 +57,17 @@ BOOST_AUTO_TEST_CASE(std_tuple_2)
 
 BOOST_AUTO_TEST_CASE(std_tuple_3)
 {
-    auto encoded = make_byte_array(
-            to_byte(dplx::dp::type_code::array) | std::byte{3},
-            std::byte{0b1110'1000}, std::byte{0b0000'1001},
-            std::byte{0b1110'1010});
+    auto encoded
+            = make_byte_array(to_byte(dp::type_code::array) | std::byte{3},
+                              std::byte{0b1110'1000}, std::byte{0b0000'1001},
+                              std::byte{0b1110'1010});
 
     using value_type
             = std::tuple<simple_encodeable, unsigned int, simple_encodeable>;
     value_type values = {
             {encoded[1]}, static_cast<unsigned int>(encoded[2]), {encoded[3]}};
 
-    using test_encoder
-            = dplx::dp::basic_encoder<value_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<value_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, values));
 

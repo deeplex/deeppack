@@ -21,30 +21,30 @@ BOOST_AUTO_TEST_SUITE(decoder)
 
 BOOST_AUTO_TEST_SUITE(object_utils)
 
-using dplx::dp::errc;
-using dplx::dp::fixed_u8string;
-using dplx::dp::named_property_def;
-using dplx::dp::object_def;
-using dplx::dp::property_def;
+using dp::errc;
+using dp::fixed_u8string;
+using dp::named_property_def;
+using dp::object_def;
+using dp::property_def;
 
-static_assert(std::same_as<dplx::dp::fixed_u8string<5>,
-                           decltype(dplx::dp::fixed_u8string(u8"hello"))>);
+static_assert(std::same_as<dp::fixed_u8string<5>,
+                           decltype(dp::fixed_u8string(u8"hello"))>);
 
-static_assert(std::same_as<
-              dplx::dp::fixed_u8string<16>,
-              typename std::common_type<dplx::dp::fixed_u8string<1>,
-                                        dplx::dp::fixed_u8string<5>>::type>);
+static_assert(
+        std::same_as<dp::fixed_u8string<16>,
+                     typename std::common_type<dp::fixed_u8string<1>,
+                                               dp::fixed_u8string<5>>::type>);
 
 BOOST_AUTO_TEST_CASE(object_head_decode_unversioned)
 {
     auto bytes = make_byte_array<32>({0xA3});
     test_input_stream istream{bytes};
 
-    auto rx = dplx::dp::parse_object_head(istream, std::false_type{});
+    auto rx = dp::parse_object_head(istream, std::false_type{});
     DPLX_REQUIRE_RESULT(rx);
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 3);
-    BOOST_TEST(version == dplx::dp::null_def_version);
+    BOOST_TEST(version == dp::null_def_version);
 }
 
 BOOST_AUTO_TEST_CASE(object_head_decode_versioned_0)
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(object_head_decode_versioned_0)
     auto bytes = make_byte_array<32>({0xAB, 0, 0});
     test_input_stream istream{bytes};
 
-    auto rx = dplx::dp::parse_object_head(istream, std::true_type{});
+    auto rx = dp::parse_object_head(istream, std::true_type{});
     DPLX_REQUIRE_RESULT(rx);
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 0x0B - 1);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(object_head_decode_versioned_5)
     auto bytes = make_byte_array<32>({0xAB, 0, 5});
     test_input_stream istream{bytes};
 
-    auto rx = dplx::dp::parse_object_head(istream, std::true_type{});
+    auto rx = dp::parse_object_head(istream, std::true_type{});
     DPLX_REQUIRE_RESULT(rx);
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 0x0B - 1);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(prop_decode_1)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_property<test_tuple_def_3>(istream, out);
+    auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 23u);
     BOOST_TEST(out.mb == 0);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(prop_decode_2)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_property<test_tuple_def_3>(istream, out);
+    auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0);
     BOOST_TEST(out.mb == 0xEF);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(prop_decode_3)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_property<test_tuple_def_3>(istream, out);
+    auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0);
     BOOST_TEST(out.mb == 0);
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(prop_decode_reject_unknown_prop)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_property<test_tuple_def_3>(istream, out);
+    auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     BOOST_TEST(rx.error() == errc::unknown_property);
 }
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(prop_decode_reject_invalid_id_type)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_property<test_tuple_def_3>(istream, out);
+    auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     BOOST_TEST(rx.error() == errc::item_type_mismatch);
 }
 
@@ -163,8 +163,7 @@ BOOST_AUTO_TEST_CASE(def_1)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<test_tuple_def_1>(istream, out,
-                                                                   1);
+    auto rx = dp::decode_object_properties<test_tuple_def_1>(istream, out, 1);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x17);
     BOOST_TEST(out.mb == 0);
@@ -177,8 +176,7 @@ BOOST_AUTO_TEST_CASE(def_2)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<test_tuple_def_2>(istream, out,
-                                                                   2);
+    auto rx = dp::decode_object_properties<test_tuple_def_2>(istream, out, 2);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0xEF);
@@ -192,8 +190,7 @@ BOOST_AUTO_TEST_CASE(def_3)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<test_tuple_def_3>(istream, out,
-                                                                   3);
+    auto rx = dp::decode_object_properties<test_tuple_def_3>(istream, out, 3);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0xEF);
@@ -206,8 +203,7 @@ BOOST_AUTO_TEST_CASE(def_3_reject_missing_property)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<test_tuple_def_3>(istream, out,
-                                                                   2);
+    auto rx = dp::decode_object_properties<test_tuple_def_3>(istream, out, 2);
     BOOST_TEST(rx.error() == errc::required_object_property_missing);
 }
 
@@ -218,8 +214,8 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_set)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<
-            test_tuple_def_3_with_optional>(istream, out, 3);
+    auto rx = dp::decode_object_properties<test_tuple_def_3_with_optional>(
+            istream, out, 3);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0xEF);
@@ -233,8 +229,8 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_not_set)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<
-            test_tuple_def_3_with_optional>(istream, out, 2);
+    auto rx = dp::decode_object_properties<test_tuple_def_3_with_optional>(
+            istream, out, 2);
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out.ma == 0x48CF);
     BOOST_TEST(out.mb == 0);
@@ -247,8 +243,8 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_reject_missing_property)
     test_input_stream istream{bytes};
 
     test_tuple out{};
-    auto rx = dplx::dp::decode_object_properties<
-            test_tuple_def_3_with_optional>(istream, out, 2);
+    auto rx = dp::decode_object_properties<test_tuple_def_3_with_optional>(
+            istream, out, 2);
     BOOST_TEST(rx.error() == errc::required_object_property_missing);
 }
 
@@ -286,13 +282,13 @@ public:
         return md;
     }
 };
-static_assert(dplx::dp::packable<custom_with_layout_descriptor>);
-static_assert(dplx::dp::packable_object<custom_with_layout_descriptor>);
+static_assert(dp::packable<custom_with_layout_descriptor>);
+static_assert(dp::packable_object<custom_with_layout_descriptor>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
 {
-    using test_encoder = dplx::dp::basic_decoder<custom_with_layout_descriptor,
-                                                 test_input_stream>;
+    using test_encoder = dp::basic_decoder<custom_with_layout_descriptor,
+                                           test_input_stream>;
 
     test_encoder subject{};
 
@@ -309,7 +305,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     BOOST_TEST(t.d() == 0x14);
 }
 
-// using namespace dplx::dp::string_literals;
+// using namespace dp::string_literals;
 
 class custom_with_named_layout_descriptor
 {
@@ -354,7 +350,7 @@ public:
         return md;
     }
 };
-static_assert(dplx::dp::packable<custom_with_named_layout_descriptor>);
+static_assert(dp::packable<custom_with_named_layout_descriptor>);
 
 //
 // if this test fails on GCC, but not on MSVC: please check whether the
@@ -363,9 +359,8 @@ static_assert(dplx::dp::packable<custom_with_named_layout_descriptor>);
 //
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_decoding)
 {
-    using test_encoder
-            = dplx::dp::basic_decoder<custom_with_named_layout_descriptor,
-                                      test_input_stream>;
+    using test_encoder = dp::basic_decoder<custom_with_named_layout_descriptor,
+                                           test_input_stream>;
 
     test_encoder subject{};
 

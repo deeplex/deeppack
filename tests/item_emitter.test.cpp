@@ -27,7 +27,7 @@ struct misc_encoding_fixture
 
 BOOST_FIXTURE_TEST_SUITE(misc, misc_encoding_fixture)
 
-using test_encoder = dplx::dp::item_emitter<test_output_stream<>>;
+using test_encoder = dp::item_emitter<test_output_stream<>>;
 
 #pragma region Appendix A.Examples
 
@@ -70,7 +70,7 @@ BOOST_DATA_TEST_CASE(float_single,
 
     BOOST_TEST_REQUIRE(encodingBuffer.size()
                        == sample.encoded_value.size() + 1);
-    BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::float_single);
+    BOOST_TEST(encodingBuffer.data()[0] == dp::type_code::float_single);
 
     BOOST_TEST(std::span(encodingBuffer).subspan(1) == sample.encoded_value,
                boost::test_tools::per_element{});
@@ -94,7 +94,7 @@ BOOST_DATA_TEST_CASE(float_double,
 
     BOOST_TEST_REQUIRE(encodingBuffer.size()
                        == sample.encoded_value.size() + 1);
-    BOOST_TEST(encodingBuffer.data()[0] == dplx::dp::type_code::float_double);
+    BOOST_TEST(encodingBuffer.data()[0] == dp::type_code::float_double);
 
     BOOST_TEST(std::span(encodingBuffer).subspan(1) == sample.encoded_value,
                boost::test_tools::per_element{});

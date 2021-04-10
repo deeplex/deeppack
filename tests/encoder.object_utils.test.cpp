@@ -20,10 +20,10 @@ BOOST_AUTO_TEST_SUITE(encoder)
 
 BOOST_AUTO_TEST_SUITE(object_utils)
 
-using dplx::dp::fixed_u8string;
-using dplx::dp::named_property_def;
-using dplx::dp::object_def;
-using dplx::dp::property_def;
+using dp::fixed_u8string;
+using dp::named_property_def;
+using dp::object_def;
+using dp::property_def;
 
 struct test_object
 {
@@ -96,14 +96,14 @@ public:
         return md;
     }
 };
-static_assert(dplx::dp::packable_object<custom_with_layout_descriptor>);
-static_assert(dplx::dp::encodable<custom_with_layout_descriptor,
-                                  test_output_stream<>>);
+static_assert(dp::packable_object<custom_with_layout_descriptor>);
+static_assert(
+        dp::encodable<custom_with_layout_descriptor, test_output_stream<>>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
-    using test_encoder = dplx::dp::basic_encoder<custom_with_layout_descriptor,
-                                                 test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<custom_with_layout_descriptor,
+                                           test_output_stream<>>;
 
     auto bytes = make_byte_array<11>(
             {0b101'00000 | 4, 1, 0x13, 2, 7, 0x18, 26, 4, 0x18, 36, 0x14});
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
                boost::test_tools::per_element{});
 }
 
-// using namespace dplx::dp::string_literals;
+// using namespace dp::string_literals;
 
 class custom_with_named_layout_descriptor
 {
@@ -175,15 +175,14 @@ public:
         return md;
     }
 };
-static_assert(dplx::dp::packable_object<custom_with_named_layout_descriptor>);
-static_assert(dplx::dp::encodable<custom_with_named_layout_descriptor,
-                                  test_output_stream<>>);
+static_assert(dp::packable_object<custom_with_named_layout_descriptor>);
+static_assert(dp::encodable<custom_with_named_layout_descriptor,
+                            test_output_stream<>>);
 
 BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_encoding)
 {
-    using test_encoder
-            = dplx::dp::basic_encoder<custom_with_named_layout_descriptor,
-                                      test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<custom_with_named_layout_descriptor,
+                                           test_output_stream<>>;
     auto bytes = make_byte_array<17, int>({0b101'00000 | 4, 0x61, 'b', 7, 0x61,
                                            'c', 0x04, 0x61, 'd', 0x14, 0x65,
                                            'n', 'o', 'n', 'c', 'e', 0x13});

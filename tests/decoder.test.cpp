@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(int_decode)
     test_input_stream istream(bytes);
 
     int out;
-    auto rx = dplx::dp::decode(istream, out);
+    auto rx = dp::decode(istream, out);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out == 0x16);
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(int_decode_value)
     auto bytes = make_byte_array<32>({0x16});
     test_input_stream istream(bytes);
 
-    auto rx = dplx::dp::decode(dplx::dp::as_value<int>, istream);
+    auto rx = dp::decode(dp::as_value<int>, istream);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(rx.assume_value() == 0x16);

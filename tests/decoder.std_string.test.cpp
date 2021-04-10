@@ -18,13 +18,13 @@ BOOST_AUTO_TEST_SUITE(decoder)
 
 struct std_string_dependencies
 {
-    dplx::dp::basic_decoder<std::u8string, test_input_stream> subject;
+    dp::basic_decoder<std::u8string, test_input_stream> subject;
     std::u8string out;
 };
 
 BOOST_FIXTURE_TEST_SUITE(std_string, std_string_dependencies)
 
-using test_encoder = dplx::dp::basic_decoder<std::u8string, test_input_stream>;
+using test_encoder = dp::basic_decoder<std::u8string, test_input_stream>;
 
 using namespace std::string_view_literals;
 
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(rejects_undersized_string_0)
 
     auto rx = subject(sampleStream, out);
     BOOST_TEST_REQUIRE(rx.has_error());
-    BOOST_TEST(rx.assume_error() == dplx::dp::errc::missing_data);
+    BOOST_TEST(rx.assume_error() == dp::errc::missing_data);
     BOOST_TEST(out.size() == 0u);
 }
 
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(rejects_undersized_string_1)
 
     auto rx = subject(sampleStream, out);
     BOOST_TEST_REQUIRE(rx.has_error());
-    BOOST_TEST(rx.assume_error() == dplx::dp::errc::missing_data);
+    BOOST_TEST(rx.assume_error() == dp::errc::missing_data);
     BOOST_TEST(out.size() == 0u);
 }
 
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(rejects_other_item_type)
 
     auto rx = subject(sampleStream, out);
     BOOST_TEST_REQUIRE(rx.has_error());
-    BOOST_TEST(rx.assume_error() == dplx::dp::errc::item_type_mismatch);
+    BOOST_TEST(rx.assume_error() == dp::errc::item_type_mismatch);
     BOOST_TEST(out.size() == 0u);
 }
 

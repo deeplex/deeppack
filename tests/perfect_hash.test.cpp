@@ -13,22 +13,23 @@
 #include <dplx/dp/detail/hash.hpp>
 
 #include "boost-test.hpp"
+#include "test_utils.hpp"
 
 namespace dp_tests
 {
 
 BOOST_AUTO_TEST_SUITE(perfect_hashing)
 
-using dplx::dp::detail::perfect_hasher;
+using dp::detail::perfect_hasher;
 
 struct test_hash
 {
-    template <dplx::dp::unsigned_integer T>
+    template <dp::unsigned_integer T>
     constexpr auto operator()(T const value,
                               std::uint64_t const seed = 0) const noexcept
             -> std::uint64_t
     {
-        return dplx::dp::detail::xxhash3(value, seed);
+        return dp::detail::xxhash3(value, seed);
     }
 };
 

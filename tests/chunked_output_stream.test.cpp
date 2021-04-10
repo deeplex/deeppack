@@ -21,13 +21,12 @@ namespace dp_tests
 BOOST_AUTO_TEST_SUITE(streams)
 
 class test_chunked_output_stream final
-    : dplx::dp::chunked_output_stream_base<test_chunked_output_stream>
+    : dp::chunked_output_stream_base<test_chunked_output_stream>
 {
 public:
-    friend class dplx::dp::chunked_output_stream_base<
-            test_chunked_output_stream>;
+    friend class dp::chunked_output_stream_base<test_chunked_output_stream>;
     using base_type
-            = dplx::dp::chunked_output_stream_base<test_chunked_output_stream>;
+            = dp::chunked_output_stream_base<test_chunked_output_stream>;
 
     std::array<std::vector<std::byte>, 2> mChunks;
     unsigned int mNext;
@@ -37,8 +36,7 @@ public:
         , mChunks()
     {
         constexpr auto invalidItem = std::byte{0xfeu};
-        constexpr auto partition
-                = dplx::dp::minimum_guaranteed_write_size * 2 - 1;
+        constexpr auto partition = dp::minimum_guaranteed_write_size * 2 - 1;
         assert(streamSize > partition);
 
         mChunks[0].resize(partition);
@@ -52,7 +50,7 @@ public:
 struct chunked_output_stream_dependencies
 {
     static constexpr unsigned int testSize
-            = dplx::dp::minimum_guaranteed_write_size * 4 - 1;
+            = dp::minimum_guaranteed_write_size * 4 - 1;
 
     test_chunked_output_stream subject;
 

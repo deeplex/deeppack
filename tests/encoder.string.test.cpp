@@ -27,11 +27,11 @@ BOOST_AUTO_TEST_SUITE(string)
 
 using namespace std::string_view_literals;
 
-static_assert(dplx::dp::encodable<std::u8string, test_output_stream<>>);
-static_assert(dplx::dp::encodable<std::u8string_view, test_output_stream<>>);
+static_assert(dp::encodable<std::u8string, test_output_stream<>>);
+static_assert(dp::encodable<std::u8string_view, test_output_stream<>>);
 
-static_assert(dplx::dp::encodable<std::string, test_output_stream<>>);
-static_assert(dplx::dp::encodable<std::string_view, test_output_stream<>>);
+static_assert(dp::encodable<std::string, test_output_stream<>>);
+static_assert(dp::encodable<std::string_view, test_output_stream<>>);
 
 template <typename Char>
 struct basic_string_sample
@@ -53,7 +53,8 @@ auto boost_test_print_type(std::ostream &s,
             sample.content.size());
 
     fmt::print(s, "string_sample{{.content={}, .expected_prefix={{", charView);
-    for (auto b : std::span<std::byte const>(sample.expected_prefix).first(sample.prefix_length))
+    for (auto b : std::span<std::byte const>(sample.expected_prefix)
+                          .first(sample.prefix_length))
     {
         fmt::print(s, "{:2x}", static_cast<std::uint8_t>(b));
     }
@@ -73,8 +74,7 @@ BOOST_DATA_TEST_CASE(u8string_view_with,
                      boost::unit_test::data::make(u8string_samples))
 {
     using test_type = std::u8string_view;
-    using test_encoder
-            = dplx::dp::basic_encoder<test_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<test_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, sample.content));
 
@@ -91,8 +91,7 @@ BOOST_DATA_TEST_CASE(u8string_with,
                      boost::unit_test::data::make(u8string_samples))
 {
     using test_type = std::u8string;
-    using test_encoder
-            = dplx::dp::basic_encoder<test_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<test_type, test_output_stream<>>;
 
     test_type content(sample.content);
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, content));
@@ -117,8 +116,7 @@ BOOST_DATA_TEST_CASE(string_view_with,
                      boost::unit_test::data::make(string_samples))
 {
     using test_type = std::string_view;
-    using test_encoder
-            = dplx::dp::basic_encoder<test_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<test_type, test_output_stream<>>;
 
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, sample.content));
 
@@ -134,8 +132,7 @@ BOOST_DATA_TEST_CASE(string_view_with,
 BOOST_DATA_TEST_CASE(string_with, boost::unit_test::data::make(string_samples))
 {
     using test_type = std::string;
-    using test_encoder
-            = dplx::dp::basic_encoder<test_type, test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<test_type, test_output_stream<>>;
 
     test_type content(sample.content);
     DPLX_TEST_RESULT(test_encoder()(encodingBuffer, content));

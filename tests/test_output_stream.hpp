@@ -13,6 +13,7 @@
 #include <dplx/dp/concepts.hpp>
 
 #include "boost-test.hpp"
+#include "test_utils.hpp"
 
 namespace dp_tests
 {
@@ -52,37 +53,35 @@ public:
 
         using stream_type = test_output_stream;
 
-        friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::commit>,
+        friend inline auto tag_invoke(dp::tag_t<dp::commit>,
                                       test_output_stream &stream,
-                                      write_proxy &self)
-                -> dplx::dp::result<void>
+                                      write_proxy &self) -> dp::result<void>
         {
             return write_proxy::commit(stream, self);
         }
 
-        friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::commit>,
+        friend inline auto tag_invoke(dp::tag_t<dp::commit>,
                                       test_output_stream &stream,
                                       write_proxy &self,
                                       std::size_t const actualSize)
-                -> dplx::dp::result<void>
+                -> dp::result<void>
         {
             return write_proxy::commit(stream, self, actualSize);
         }
 
     private:
         static auto commit(test_output_stream &owner, write_proxy &self)
-                -> dplx::dp::result<void>
+                -> dp::result<void>
         {
             BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
             self.mInitSize = invalidated_init_size;
             owner.mCommitCounter += 1;
-            return dplx::dp::success();
+            return dp::success();
         }
 
         static auto commit(test_output_stream &owner,
                            write_proxy &self,
-                           std::size_t const actualSize)
-                -> dplx::dp::result<void>
+                           std::size_t const actualSize) -> dp::result<void>
         {
             BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
             BOOST_TEST_REQUIRE(actualSize <= self.size());
@@ -96,7 +95,7 @@ public:
             owner.mCurrentSize = absoluteSize;
             owner.mCommitCounter += 1;
             self.mInitSize = invalidated_init_size;
-            return dplx::dp::success();
+            return dp::success();
         }
     };
 
@@ -117,10 +116,10 @@ public:
         return std::ranges::begin(mBuffer) + mCurrentSize;
     }
 
-    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::write>,
+    friend inline auto tag_invoke(dp::tag_t<dp::write>,
                                   test_output_stream &self,
                                   std::size_t const amount)
-            -> dplx::dp::result<write_proxy>
+            -> dp::result<write_proxy>
     {
         BOOST_TEST_REQUIRE(self.mWriteCounter == self.mCommitCounter);
 
@@ -131,11 +130,10 @@ public:
         return write_proxy({self.mBuffer.data() + start, amount},
                            self.mCurrentSize, ctag{});
     }
-    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::write>,
+    friend inline auto tag_invoke(dp::tag_t<dp::write>,
                                   test_output_stream &self,
                                   std::byte const *bytes,
-                                  std::size_t const amount)
-            -> dplx::dp::result<void>
+                                  std::size_t const amount) -> dp::result<void>
     {
         BOOST_TEST_REQUIRE(self.mWriteCounter == self.mCommitCounter);
         BOOST_TEST_REQUIRE(self.mCurrentSize + amount
@@ -145,7 +143,7 @@ public:
                     amount);
         self.mCurrentSize += amount;
 
-        return dplx::dp::success();
+        return dp::success();
     }
 
     auto data() noexcept -> std::byte *
@@ -170,7 +168,7 @@ public:
         return mCommitCounter;
     }
 };
-static_assert(dplx::dp::lazy_output_stream<test_output_stream<>>);
+static_assert(dp::lazy_output_stream<test_output_stream<>>);
 static_assert(std::ranges::contiguous_range<test_output_stream<>>);
 
 struct default_encoding_fixture

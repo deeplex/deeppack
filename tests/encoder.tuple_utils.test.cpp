@@ -20,8 +20,8 @@ BOOST_AUTO_TEST_SUITE(encoder)
 
 BOOST_AUTO_TEST_SUITE(tuple_utils)
 
-using dplx::dp::tuple_def;
-using dplx::dp::tuple_member_def;
+using dp::tuple_def;
+using dp::tuple_member_def;
 
 struct test_tuple
 {
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(encode_def_1)
     test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
 
     test_output_stream<> ostream{};
-    auto rx = dplx::dp::encode_tuple<test_tuple_def_1>(ostream, t);
+    auto rx = dp::encode_tuple<test_tuple_def_1>(ostream, t);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(byte_span(bytes) == byte_span(ostream),
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(encode_def_2)
     test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
 
     test_output_stream<> ostream{};
-    auto rx = dplx::dp::encode_tuple<test_tuple_def_2>(ostream, t);
+    auto rx = dp::encode_tuple<test_tuple_def_2>(ostream, t);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(byte_span(bytes) == byte_span(ostream),
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(encode_def_2_with_version)
     test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
 
     test_output_stream<> ostream{};
-    auto rx = dplx::dp::encode_tuple<test_tuple_def_2>(ostream, t, 0x0D);
+    auto rx = dp::encode_tuple<test_tuple_def_2>(ostream, t, 0x0D);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(byte_span(bytes) == byte_span(ostream),
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(encode_def_3_with_version)
     test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
 
     test_output_stream<> ostream{};
-    auto rx = dplx::dp::encode_tuple<test_tuple_def_3>(ostream, t);
+    auto rx = dp::encode_tuple<test_tuple_def_3>(ostream, t);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(byte_span(bytes) == byte_span(ostream),
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(encode_def_3)
     test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
 
     test_output_stream<> ostream{};
-    auto rx = dplx::dp::encode_tuple<test_tuple_def_3>(ostream, t, 0xFF);
+    auto rx = dp::encode_tuple<test_tuple_def_3>(ostream, t, 0xFF);
 
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(byte_span(bytes) == byte_span(ostream),
@@ -153,15 +153,15 @@ public:
         return md;
     }
 };
-static_assert(dplx::dp::packable_tuple<custom_with_layout_descriptor>);
+static_assert(dp::packable_tuple<custom_with_layout_descriptor>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
     auto bytes = make_byte_array<5>({0b100'00100, 0x13, 0x09, 0x15, 0x17});
     custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17};
 
-    using test_encoder = dplx::dp::basic_encoder<custom_with_layout_descriptor,
-                                                 test_output_stream<>>;
+    using test_encoder = dp::basic_encoder<custom_with_layout_descriptor,
+                                           test_output_stream<>>;
     test_output_stream<> ostream{};
     test_encoder subject{};
     auto rx = subject(ostream, t);

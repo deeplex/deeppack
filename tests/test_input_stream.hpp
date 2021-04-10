@@ -18,6 +18,7 @@
 #include <dplx/dp/stream.hpp>
 
 #include "boost-test.hpp"
+#include "test_utils.hpp"
 
 namespace dp_tests
 {
@@ -40,23 +41,22 @@ public:
     {
     }
 
-    friend inline auto
-    tag_invoke(dplx::dp::tag_t<dplx::dp::available_input_size>,
-               test_input_stream &self) noexcept
-            -> dplx::dp::result<std::size_t>
+    friend inline auto tag_invoke(dp::tag_t<dp::available_input_size>,
+                                  test_input_stream &self) noexcept
+            -> dp::result<std::size_t>
     {
         return self.mBuffer.size() - self.mStreamPosition;
     }
-    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::read>,
+    friend inline auto tag_invoke(dp::tag_t<dp::read>,
                                   test_input_stream &self,
                                   std::size_t const amount)
-            -> dplx::dp::result<std::span<std::byte const>>
+            -> dp::result<std::span<std::byte const>>
     {
         BOOST_TEST(self.mReadCounter == self.mCommitCounter);
         auto const start = self.mStreamPosition;
         if (start + amount > self.mBuffer.size())
         {
-            return dplx::dp::errc::end_of_stream;
+            return dp::errc::end_of_stream;
         }
 
         self.mReadCounter += 1;
@@ -68,11 +68,11 @@ public:
 
         return std::span(self.mReadBuffer);
     }
-    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::consume>,
+    friend inline auto tag_invoke(dp::tag_t<dp::consume>,
                                   test_input_stream &self,
                                   std::span<std::byte const> proxy,
                                   std::size_t const actualAmount) noexcept
-            -> dplx::dp::result<void>
+            -> dp::result<void>
     {
         BOOST_TEST(proxy.size() >= actualAmount);
         BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
@@ -80,52 +80,52 @@ public:
         self.mStreamPosition -= (proxy.size() - actualAmount);
         std::vector<std::byte> tmp;
         self.mReadBuffer.swap(tmp); // dispose the memory
-        return dplx::dp::success();
+        return dp::success();
     }
     friend inline auto
-    tag_invoke(dplx::dp::tag_t<dplx::dp::consume>,
+    tag_invoke(dp::tag_t<dp::consume>,
                test_input_stream &self,
                [[maybe_unused]] std::span<std::byte const> const proxy) noexcept
-            -> dplx::dp::result<void>
+            -> dp::result<void>
     {
         BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
         self.mCommitCounter += 1;
         std::vector<std::byte> tmp;
         self.mReadBuffer.swap(tmp); // dispose the memory
-        return dplx::dp::success();
+        return dp::success();
     }
-    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::read>,
+    friend inline auto tag_invoke(dp::tag_t<dp::read>,
                                   test_input_stream &self,
                                   std::byte *buffer,
                                   std::size_t const amount) noexcept
-            -> dplx::dp::result<void>
+            -> dp::result<void>
     {
         BOOST_TEST(self.mReadCounter == self.mCommitCounter);
         if (self.mStreamPosition + amount > self.mBuffer.size())
         {
-            return dplx::dp::errc::end_of_stream;
+            return dp::errc::end_of_stream;
         }
 
         std::memcpy(buffer, self.mBuffer.data() + self.mStreamPosition, amount);
         self.mStreamPosition += amount;
 
-        return dplx::dp::success();
+        return dp::success();
     }
-    friend inline auto tag_invoke(dplx::dp::tag_t<dplx::dp::skip_bytes>,
+    friend inline auto tag_invoke(dp::tag_t<dp::skip_bytes>,
                                   test_input_stream &self,
                                   std::uint64_t const numBytes) noexcept
-            -> dplx::dp::result<void>
+            -> dp::result<void>
     {
         BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
         if (self.mStreamPosition + numBytes > self.mBuffer.size())
         {
-            return dplx::dp::errc::end_of_stream;
+            return dp::errc::end_of_stream;
         }
         self.mStreamPosition += numBytes;
-        return dplx::dp::oc::success();
+        return dp::oc::success();
     }
 };
-static_assert(dplx::dp::lazy_input_stream<test_input_stream>);
+static_assert(dp::lazy_input_stream<test_input_stream>);
 
 template <typename... Ts>
 auto make_test_input_stream(Ts... ts) noexcept -> test_input_stream

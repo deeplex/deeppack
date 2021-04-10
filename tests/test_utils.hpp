@@ -55,6 +55,8 @@ inline auto boost_test_print_type(std::ostream &s, type_code c)
 namespace dp_tests
 {
 
+using namespace dplx;
+
 using byte_span = std::span<std::byte>;
 
 template <typename... Ts>
@@ -93,7 +95,7 @@ auto make_byte_vector(std::initializer_list<T> vs) noexcept
 }
 
 template <typename R>
-inline auto check_result(dplx::dp::result<R> const &rx)
+inline auto check_result(dp::result<R> const &rx)
         -> boost::test_tools::predicate_result
 {
     bool const succeeded = !rx.has_failure();

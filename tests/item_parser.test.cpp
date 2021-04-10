@@ -64,8 +64,8 @@ namespace dp_tests
 
 BOOST_AUTO_TEST_SUITE(item_parser)
 
-using dplx::dp::detail::decode_errc;
-using dplx::dp::detail::item_info;
+using dp::detail::decode_errc;
+using dp::detail::item_info;
 
 struct parse_sample
 {
@@ -110,7 +110,7 @@ BOOST_DATA_TEST_CASE(parse_speculative,
                      boost::unit_test::data::make(parse_samples))
 {
     test_input_stream stream(std::span(sample.stream));
-    auto parseRx = dplx::dp::detail::parse_item_info(stream);
+    auto parseRx = dp::detail::parse_item_info(stream);
     DPLX_REQUIRE_RESULT(parseRx);
 
     item_info const &parsed = parseRx.assume_value();
@@ -126,7 +126,7 @@ BOOST_DATA_TEST_CASE(parse_safe, boost::unit_test::data::make(parse_samples))
     test_input_stream stream(std::span<std::byte const>(sample.stream)
                                      .first(static_cast<std::size_t>(
                                              sample.expected.encoded_length)));
-    auto parseRx = dplx::dp::detail::parse_item_info(stream);
+    auto parseRx = dp::detail::parse_item_info(stream);
     DPLX_REQUIRE_RESULT(parseRx);
 
     item_info const &parsed = parseRx.assume_value();
@@ -139,7 +139,7 @@ BOOST_DATA_TEST_CASE(parse_safe, boost::unit_test::data::make(parse_samples))
 
 BOOST_DATA_TEST_CASE(skip_simple, boost::unit_test::data::make(parse_samples))
 {
-    if (sample.expected.code != dplx::dp::detail::decode_errc::nothing)
+    if (sample.expected.code != dp::detail::decode_errc::nothing)
     {
         return;
     }
@@ -147,10 +147,10 @@ BOOST_DATA_TEST_CASE(skip_simple, boost::unit_test::data::make(parse_samples))
     test_input_stream stream(std::span<std::byte const>(sample.stream)
                                      .first(static_cast<std::size_t>(
                                              sample.expected.encoded_length)));
-    auto parseRx = dplx::dp::skip_item(stream);
+    auto parseRx = dp::skip_item(stream);
     DPLX_REQUIRE_RESULT(parseRx);
 
-    auto remainingRx = dplx::dp::available_input_size(stream);
+    auto remainingRx = dp::available_input_size(stream);
     BOOST_TEST(remainingRx.value() == 0u);
 }
 
