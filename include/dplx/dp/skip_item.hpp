@@ -79,7 +79,6 @@ inline auto skip_item(Stream &inStream) -> result<void>
             [[fallthrough]];
         case static_cast<unsigned>(type_code::posint) >> 5:
         case static_cast<unsigned>(type_code::negint) >> 5:
-        case static_cast<unsigned>(type_code::tag) >> 5:
             stack.pop_back();
             break;
 
@@ -165,6 +164,21 @@ inline auto skip_item(Stream &inStream) -> result<void>
                     stack.pop_back();
                 }
 
+            break;
+        }
+
+        case static_cast<unsigned>(type_code::tag) >> 5:
+        {
+            stack.pop_back();
+            DPLX_TRY(auto taggedItem, detail::parse_item_info(inStream));
+            try
+            {
+                stack.push_back(taggedItem);
+            }
+            catch (std::bad_alloc const &)
+            {
+                return errc::not_enough_memory;
+            }
             break;
         }
         }
