@@ -14,6 +14,7 @@
 #include <type_traits>
 
 #include <dplx/dp/detail/bit.hpp>
+#include <dplx/dp/detail/item_size.hpp>
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
@@ -46,20 +47,6 @@ inline auto store_var_uint_ct(std::byte *dest,
     detail::store(dest + 1, encoded);
 
     return byteSize + 1;
-}
-
-template <typename T>
-inline auto var_uint_encoded_size_ct(T const value) -> unsigned int
-{
-    if (value <= inline_value_max)
-    {
-        return 1u;
-    }
-    unsigned int const lastSetBitIndex = detail::find_last_set_bit(value);
-    unsigned int const bytePower
-            = detail::find_last_set_bit(lastSetBitIndex) - 2;
-
-    return 1u + (1u << bytePower);
 }
 
 template <typename T>
@@ -99,31 +86,6 @@ inline auto store_var_uint_branching(std::byte *dest,
 }
 
 template <typename T>
-constexpr auto var_uint_encoded_size_branching(T const value) -> unsigned int
-{
-    if (value <= inline_value_max)
-    {
-        return 1u;
-    }
-    if (value <= 0xff)
-    {
-        return 2u;
-    }
-    if (value <= 0xffff)
-    {
-        return 3u;
-    }
-    if (value <= 0xffff'ffff)
-    {
-        return 5u;
-    }
-    else
-    {
-        return 9u;
-    }
-}
-
-template <typename T>
 inline auto store_var_uint(std::byte *dest,
                            T const value,
                            std::byte const category) noexcept -> int
@@ -151,39 +113,17 @@ inline auto store_var_uint(std::byte *dest,
 #endif
 }
 
-template <typename T>
-constexpr auto var_uint_encoded_size(T const value) -> unsigned int
-{
-    static_assert(sizeof(T) <= 8);
-    static_assert(std::is_unsigned_v<T>);
-
-#if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
-
-    if (std::is_constant_evaluated())
-    {
-        return var_uint_encoded_size_branching(value);
-    }
-
-    if constexpr (sizeof(T) <= 4)
-    {
-        return var_uint_encoded_size_ct(static_cast<std::uint32_t>(value));
-    }
-    else
-    {
-        return var_uint_encoded_size_ct(static_cast<std::uint64_t>(value));
-    }
-
-#else
-
-    return var_uint_encoded_size_branching(value);
-
-#endif
-}
-
 } // namespace dplx::dp::detail
 
 namespace dplx::dp
 {
+
+template <unsigned_integer T>
+constexpr auto additional_information_size(T const value) noexcept
+        -> unsigned int
+{
+    return detail::var_uint_encoded_size(value);
+}
 
 template <output_stream Stream>
 class item_emitter

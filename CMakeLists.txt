@@ -127,6 +127,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tuple_def.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/type_code.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/item_size.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/arg_list.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
