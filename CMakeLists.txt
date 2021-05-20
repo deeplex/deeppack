@@ -147,6 +147,8 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/skip_item.hpp>
 
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/customization.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/customization.std.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/disappointment.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/indefinite_range.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/map_pair.hpp>
