@@ -144,6 +144,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_string.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/utils.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/parse_item.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_parser.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/skip_item.hpp>
 
@@ -212,6 +213,10 @@ if (BUILD_TESTING)
         "tests/item_emitter.integer.test.cpp"
         "tests/item_emitter.test.cpp"
 
+        "tests/item_parser.array.test.cpp"
+        "tests/item_parser.binary.test.cpp"
+        "tests/item_parser.expect.test.cpp"
+        "tests/item_parser.integer.test.cpp"
         "tests/item_parser.test.cpp"
         
         "tests/decoder.test.cpp"

@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020.
+// Copyright Henrik Steffen Gaßmann 2020-2021.
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -42,6 +42,9 @@ enum class errc
     invalid_indefinite_subitem,
     tuple_size_mismatch,
     duplicate_key,
+    oversized_additional_information_coding,
+    indefinite_item,
+    string_exceeds_size_limit,
 };
 auto error_category() noexcept -> std::error_category const &;
 

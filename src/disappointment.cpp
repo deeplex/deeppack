@@ -61,6 +61,14 @@ auto error_category_impl::message(int code) const -> std::string
         return "the tuple utils decoder expected a different number of items"s;
     case errc::duplicate_key:
         return "a key appeared a second time during associative container deserialization"s;
+    case errc::oversized_additional_information_coding:
+        return "a CBOR item with a non minimally encoded additional "
+               "information value has been encountered during canonical or "
+               "strict parsing"s;
+    case errc::indefinite_item:
+        return "An indefinite binary/string/array/map CBOR item has been encountered during canonical or strict parsing"s;
+    case errc::string_exceeds_size_limit:
+        return "A binary/string CBOR item exceeded a size limit imposed by the user."s;
 
     default:
         return fmt::format(FMT_STRING("unknown code {}"), code);
