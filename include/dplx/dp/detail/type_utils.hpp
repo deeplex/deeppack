@@ -33,16 +33,11 @@ namespace dplx::dp
 {
 
 template <typename T>
-concept integer = std::integral<T> &&detail::none_of<std::remove_cv_t<T>,
-                                                     bool,
-                                                     char,
-                                                     wchar_t,
-                                                     char8_t,
-                                                     char16_t,
-                                                     char32_t>;
+concept integer = std::integral<T> && detail::none_of < std::remove_cv_t<T>,
+bool, char, wchar_t, char8_t, char16_t, char32_t > ;
 
 template <typename T>
-concept signed_integer = integer<T> &&std::is_signed_v<T>;
+concept signed_integer = integer<T> && std::is_signed_v<T>;
 
 template <typename T>
 concept unsigned_integer = integer<T> && !signed_integer<T>;
@@ -191,7 +186,8 @@ apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
 // a poor man's std::apply() which however uses unqualified get<I>()
 // instead of std::get<I>(). This allows it to cope with custom tuple types.
 template <typename F, typename T>
-requires tuple_sized<std::remove_cvref_t<T>> constexpr decltype(auto)
+    requires tuple_sized<std::remove_cvref_t<T>>
+constexpr decltype(auto)
 apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl(
         static_cast<F &&>(f),
         static_cast<T &&>(t),

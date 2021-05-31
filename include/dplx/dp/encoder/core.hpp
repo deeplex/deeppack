@@ -186,8 +186,7 @@ public:
     }
 };
 template <codable_enum Enum>
-constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept
-        -> int
+constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept -> int
 {
     return encoded_size_of(detail::to_underlying(value));
 }
@@ -250,9 +249,10 @@ public:
     }
 };
 template <std::ranges::range T>
-requires tag_invocable<encoded_size_of_fn,
-                       std::ranges::range_reference_t<T>> constexpr auto
-tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+    requires tag_invocable<encoded_size_of_fn,
+                           std::ranges::range_reference_t<T>>
+constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
+        -> unsigned int
 {
     if constexpr (enable_indefinite_encoding<T>)
     {
@@ -310,8 +310,9 @@ public:
     }
 };
 template <std::ranges::contiguous_range T>
-requires std::same_as<char8_t, std::ranges::range_value_t<T>> constexpr auto
-tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+    requires std::same_as<char8_t, std::ranges::range_value_t<T>>
+constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
+        -> unsigned int
 {
     auto const size = std::ranges::size(value);
     return detail::var_uint_encoded_size(size)
@@ -337,8 +338,9 @@ public:
     }
 };
 template <std::ranges::contiguous_range T>
-requires std::same_as<std::byte, std::ranges::range_value_t<T>> constexpr auto
-tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+    requires std::same_as<std::byte, std::ranges::range_value_t<T>>
+constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
+        -> unsigned int
 {
     auto const size = std::ranges::size(value);
     return detail::var_uint_encoded_size(size) + size;
@@ -396,8 +398,8 @@ struct are_tuple_elements_size_ofable<mp_list<Ts...>>
 
 // #TODO think of a ~better~ name
 template <typename T>
-concept size_ofable_tuple_like = tuple_like<T>
-        &&are_tuple_elements_size_ofable<tuple_element_list_t<T>>::value;
+concept size_ofable_tuple_like = tuple_like<
+        T> && are_tuple_elements_size_ofable<tuple_element_list_t<T>>::value;
 
 template <typename T>
 class encoded_size_of_tuple;
@@ -489,9 +491,10 @@ public:
 };
 
 template <associative_range T>
-requires tag_invocable<encoded_size_of_fn,
-                       std::ranges::range_reference_t<T>> constexpr auto
-tag_invoke(encoded_size_of_fn, T const &value) noexcept -> unsigned int
+    requires tag_invocable<encoded_size_of_fn,
+                           std::ranges::range_reference_t<T>>
+constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
+        -> unsigned int
 {
     if constexpr (enable_indefinite_encoding<T>)
     {

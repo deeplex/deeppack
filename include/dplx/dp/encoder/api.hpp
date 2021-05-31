@@ -24,8 +24,8 @@ namespace dplx::dp
 inline constexpr struct encode_fn final
 {
     template <typename T, output_stream Stream>
-    requires encodable<std::remove_cvref_t<T>, Stream> inline auto
-    operator()(Stream &outStream, T &&value) const -> result<void>
+        requires encodable<std::remove_cvref_t<T>, Stream>
+    inline auto operator()(Stream &outStream, T &&value) const -> result<void>
     {
         return basic_encoder<std::remove_cvref_t<T>, Stream>()(
                 outStream, static_cast<T &&>(value));
@@ -61,8 +61,8 @@ inline constexpr struct encode_fn final
         }
 
         template <typename T>
-        requires encodable<std::remove_cvref_t<T>, Stream> inline auto
-        operator()(T &&value) const -> result<void>
+            requires encodable<std::remove_cvref_t<T>, Stream>
+        inline auto operator()(T &&value) const -> result<void>
         {
             return basic_encoder<std::remove_cvref_t<T>, Stream>()(*mOutStream,
                                                                    value);
@@ -75,8 +75,8 @@ inline constexpr struct encode_fn final
         return bound_type<void, Stream>(outStream);
     }
     template <typename T, output_stream Stream>
-    requires encodable<std::remove_cvref_t<T>, Stream> static inline auto
-    bind(Stream &outStream) -> bound_type<T, Stream>
+        requires encodable<std::remove_cvref_t<T>, Stream>
+    static inline auto bind(Stream &outStream) -> bound_type<T, Stream>
     {
         return bound_type<T, Stream>(outStream);
     }
@@ -98,8 +98,8 @@ inline constexpr struct encode_array_fn final
     }
 
     template <output_stream Stream, typename... TArgs>
-    requires(... &&encodable<std::remove_cvref_t<TArgs>,
-                             Stream>) class bound_type
+        requires(... &&encodable<std::remove_cvref_t<TArgs>, Stream>)
+    class bound_type
         : detail::arg_list_encoder<
                   detail::mp_list<std::remove_cvref_t<TArgs>...>,
                   Stream>
@@ -125,8 +125,8 @@ inline constexpr struct encode_array_fn final
         }
 
         template <typename... Ts>
-        requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>) auto
-        operator()(Ts &&...values) const -> result<void>
+            requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>)
+        auto operator()(Ts &&...values) const -> result<void>
         {
             using impl = detail::arg_list_encoder<
                     detail::mp_list<std::remove_cvref_t<Ts>...>, Stream>;
@@ -239,9 +239,10 @@ inline constexpr struct encode_varargs_t final
     // encodes a single value argument directly without an enclosing array
     // encodes multiple value arguments into a CBOR array data item.
     template <typename... Ts, output_stream Stream>
-    requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>) inline auto
-    operator()([[maybe_unused]] Stream &outStream,
-               [[maybe_unused]] Ts &&...values) const -> result<void>
+        requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>)
+    inline auto operator()([[maybe_unused]] Stream &outStream,
+                           [[maybe_unused]] Ts &&...values) const
+            -> result<void>
     {
         if constexpr (sizeof...(Ts) == 0)
         {
@@ -272,8 +273,8 @@ inline constexpr struct encode_varargs_t final
         }
 
         template <typename... Ts>
-        requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>) inline auto
-        operator()(Ts &&...vs) const -> result<void>
+            requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>)
+        inline auto operator()(Ts &&...vs) const -> result<void>
         {
             return encode_varargs_t{}(*mOutStream, static_cast<Ts &&>(vs)...);
         }
@@ -289,8 +290,8 @@ inline constexpr struct encode_varargs_t final
 inline constexpr struct encoded_size_of_fn
 {
     template <typename T>
-    requires tag_invocable<encoded_size_of_fn, T &&> auto
-    operator()(T &&value) const
+        requires tag_invocable<encoded_size_of_fn, T &&>
+    constexpr auto operator()(T &&value) const
             noexcept(nothrow_tag_invocable<encoded_size_of_fn, T &&>)
                     -> tag_invoke_result_t<encoded_size_of_fn, T &&>
     {

@@ -9,8 +9,8 @@
 
 #include <cstddef>
 
-#include <span>
 #include <array>
+#include <span>
 
 namespace dplx::dp
 {
@@ -61,4 +61,4 @@ inline auto tag_invoke(container_resize_fn,
     return errc::not_enough_memory;
 }
 
-}
+} // namespace dplx::dp

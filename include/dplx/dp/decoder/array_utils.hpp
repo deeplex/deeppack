@@ -40,7 +40,7 @@ auto parse_array(Stream &stream,
                  T &value,
                  type_code expectedItemType,
                  DecodeElementFn &&decodeElement) -> result<void>
-        // clang-format off
+    // clang-format off
 requires requires
 {
     { decodeElement(stream, value) }

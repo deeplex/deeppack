@@ -73,9 +73,9 @@ constexpr auto make_byte_array(std::initializer_list<T> vs,
         -> std::array<std::byte, N>
 {
     std::array<std::byte, N> bs;
-    auto last = std::transform(vs.begin(), vs.end(), bs.data(), [](auto v) {
-        return static_cast<std::byte>(v);
-    });
+    auto last
+            = std::transform(vs.begin(), vs.end(), bs.data(),
+                             [](auto v) { return static_cast<std::byte>(v); });
     // std::fill(last, bs.data() + N, fill);
     for (auto const bsEnd = bs.data() + N; last != bsEnd; ++last)
     {

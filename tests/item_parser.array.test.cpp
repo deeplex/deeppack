@@ -39,7 +39,8 @@ BOOST_AUTO_TEST_CASE(std_vector_simple)
             stream, out,
             [&callbackInvocations](
                     test_input_stream &inStream, container_type &container,
-                    std::size_t const i) noexcept -> dp::result<void> {
+                    std::size_t const i) noexcept -> dp::result<void>
+            {
                 callbackInvocations += 1;
 
                 container.resize(i + 1);
@@ -72,7 +73,8 @@ BOOST_AUTO_TEST_CASE(std_vector_indefinite)
             stream, out,
             [&callbackInvocations](
                     test_input_stream &inStream, container_type &container,
-                    std::size_t const i) noexcept -> dp::result<void> {
+                    std::size_t const i) noexcept -> dp::result<void>
+            {
                 callbackInvocations += 1;
 
                 container.resize(i + 1);
@@ -105,7 +107,8 @@ BOOST_AUTO_TEST_CASE(std_vector_finite)
             stream, out,
             [&callbackInvocations](
                     test_input_stream &inStream, container_type &container,
-                    std::size_t const i) noexcept -> dp::result<void> {
+                    std::size_t const i) noexcept -> dp::result<void>
+            {
                 callbackInvocations += 1;
 
                 container.resize(i + 1);

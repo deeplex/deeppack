@@ -36,8 +36,8 @@ enum class parse_mode
 };
 
 template <typename Container>
-concept string_output_container = container_traits<Container>::resize
-        &&std::ranges::contiguous_range<Container>;
+concept string_output_container = container_traits<
+        Container>::resize && std::ranges::contiguous_range<Container>;
 
 // clang-format off
 template <typename Fn, typename InputStream, typename Container>
@@ -246,40 +246,36 @@ public:
     }
 
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    array(Stream &inStream,
-          Container &dest,
-          DecodeElementFn &&decodeElementFn,
-          parse_mode const mode = parse_mode::lenient) -> result<std::size_t>
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto array(Stream &inStream,
+                             Container &dest,
+                             DecodeElementFn &&decodeElementFn,
+                             parse_mode const mode = parse_mode::lenient)
+            -> result<std::size_t>
     {
         return parse::array_like<Container, DecodeElementFn>(
                 inStream, dest, size_t_max, mode, type_code::array,
                 static_cast<DecodeElementFn &&>(decodeElementFn));
     }
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    array(Stream &inStream,
-          Container &dest,
-          std::size_t const maxSize,
-          DecodeElementFn &&decodeElementFn,
-          parse_mode const mode = parse_mode::lenient) -> result<std::size_t>
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto array(Stream &inStream,
+                             Container &dest,
+                             std::size_t const maxSize,
+                             DecodeElementFn &&decodeElementFn,
+                             parse_mode const mode = parse_mode::lenient)
+            -> result<std::size_t>
     {
         return parse::array_like<Container, DecodeElementFn>(
                 inStream, dest, maxSize, mode, type_code::array,
                 static_cast<DecodeElementFn &&>(decodeElementFn));
     }
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    array_finite(Stream &inStream,
-                 Container &dest,
-                 DecodeElementFn &&decodeElementFn,
-                 parse_mode const mode = parse_mode::lenient)
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto array_finite(Stream &inStream,
+                                    Container &dest,
+                                    DecodeElementFn &&decodeElementFn,
+                                    parse_mode const mode = parse_mode::lenient)
             -> result<std::size_t>
     {
         return parse::array_finite_like<Container, DecodeElementFn>(
@@ -287,14 +283,12 @@ public:
                 static_cast<DecodeElementFn &&>(decodeElementFn));
     }
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    array_finite(Stream &inStream,
-                 Container &dest,
-                 std::size_t const maxSize,
-                 DecodeElementFn &&decodeElementFn,
-                 parse_mode const mode = parse_mode::lenient)
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto array_finite(Stream &inStream,
+                                    Container &dest,
+                                    std::size_t const maxSize,
+                                    DecodeElementFn &&decodeElementFn,
+                                    parse_mode const mode = parse_mode::lenient)
             -> result<std::size_t>
     {
         return parse::array_finite_like<Container, DecodeElementFn>(
@@ -303,40 +297,36 @@ public:
     }
 
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    map(Stream &inStream,
-        Container &dest,
-        DecodeElementFn &&decodeElementFn,
-        parse_mode const mode = parse_mode::lenient) -> result<std::size_t>
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto map(Stream &inStream,
+                           Container &dest,
+                           DecodeElementFn &&decodeElementFn,
+                           parse_mode const mode = parse_mode::lenient)
+            -> result<std::size_t>
     {
         return parse::array_like<Container, DecodeElementFn>(
                 inStream, dest, size_t_max, mode, type_code::map,
                 static_cast<DecodeElementFn &&>(decodeElementFn));
     }
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    map(Stream &inStream,
-        Container &dest,
-        std::size_t const maxSize,
-        DecodeElementFn &&decodeElementFn,
-        parse_mode const mode = parse_mode::lenient) -> result<std::size_t>
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto map(Stream &inStream,
+                           Container &dest,
+                           std::size_t const maxSize,
+                           DecodeElementFn &&decodeElementFn,
+                           parse_mode const mode = parse_mode::lenient)
+            -> result<std::size_t>
     {
         return parse::array_like<Container, DecodeElementFn>(
                 inStream, dest, maxSize, mode, type_code::map,
                 static_cast<DecodeElementFn &&>(decodeElementFn));
     }
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    map_finite(Stream &inStream,
-               Container &dest,
-               DecodeElementFn &&decodeElementFn,
-               parse_mode const mode = parse_mode::lenient)
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto map_finite(Stream &inStream,
+                                  Container &dest,
+                                  DecodeElementFn &&decodeElementFn,
+                                  parse_mode const mode = parse_mode::lenient)
             -> result<std::size_t>
     {
         return parse::array_finite_like<Container, DecodeElementFn>(
@@ -344,14 +334,12 @@ public:
                 static_cast<DecodeElementFn &&>(decodeElementFn));
     }
     template <typename Container, typename DecodeElementFn>
-    requires subitem_parslet<DecodeElementFn,
-                             Stream,
-                             Container> static inline auto
-    map_finite(Stream &inStream,
-               Container &dest,
-               std::size_t const maxSize,
-               DecodeElementFn &&decodeElementFn,
-               parse_mode const mode = parse_mode::lenient)
+        requires subitem_parslet<DecodeElementFn, Stream, Container>
+    static inline auto map_finite(Stream &inStream,
+                                  Container &dest,
+                                  std::size_t const maxSize,
+                                  DecodeElementFn &&decodeElementFn,
+                                  parse_mode const mode = parse_mode::lenient)
             -> result<std::size_t>
     {
         return parse::array_finite_like<Container, DecodeElementFn>(

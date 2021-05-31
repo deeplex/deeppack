@@ -18,7 +18,8 @@ namespace dplx::dp
 {
 
 template <auto M>
-requires std::is_member_object_pointer_v<decltype(M)> struct tuple_member_def
+    requires std::is_member_object_pointer_v<decltype(M)>
+struct tuple_member_def
 {
 private:
     using member_object_pointer_type_traits

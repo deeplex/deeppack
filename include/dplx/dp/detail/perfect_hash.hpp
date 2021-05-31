@@ -118,9 +118,8 @@ public:
         }
 
         std::sort(remapPatterns.data(), remapPatterns.data() + remap_size,
-                  [](pattern_type const &l, pattern_type const &r) {
-                      return l.back() > r.back();
-                  });
+                  [](pattern_type const &l, pattern_type const &r)
+                  { return l.back() > r.back(); });
 
         std::size_t i = 0;
         for (; i < remap_size && remapPatterns[i].back() > 1; ++i)

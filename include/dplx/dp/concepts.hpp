@@ -111,19 +111,24 @@ struct are_tuple_elements_encodable<mp_list<Ts...>, Stream>
 };
 
 template <typename T, typename Stream>
-concept encodable_tuple_like = tuple_like<T> &&output_stream<Stream>
-        &&are_tuple_elements_encodable<tuple_element_list_t<T>, Stream>::value;
+concept encodable_tuple_like = tuple_like<T> && output_stream<
+        Stream> && are_tuple_elements_encodable<tuple_element_list_t<T>,
+                                                Stream>::value;
 
 template <typename T, typename Stream>
-concept encodable_pair_like = pair_like<T> &&output_stream<Stream> &&encodable<
-        std::remove_cvref_t<typename std::tuple_element<0, T>::type>,
-        Stream> &&
-        encodable<std::remove_cvref_t<typename std::tuple_element<1, T>::type>,
-                  Stream>;
+concept encodable_pair_like
+        = pair_like<T> && output_stream<Stream> && encodable<
+                std::remove_cvref_t<typename std::tuple_element<0, T>::type>,
+                Stream> && encodable<std::remove_cvref_t<typename std::
+                                                                 tuple_element<
+                                                                         1,
+                                                                         T>::
+                                                                         type>,
+                                     Stream>;
 
 template <typename T, typename Stream>
-concept decodable_pair_like = pair_like<T> &&input_stream<Stream>
-        &&decodable<typename std::tuple_element<0, T>::type, Stream>
-                &&decodable<typename std::tuple_element<1, T>::type, Stream>;
+concept decodable_pair_like = pair_like<T> && input_stream<Stream> && decodable<
+        typename std::tuple_element<0, T>::type,
+        Stream> && decodable<typename std::tuple_element<1, T>::type, Stream>;
 
 } // namespace dplx::dp::detail

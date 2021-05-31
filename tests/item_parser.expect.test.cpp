@@ -53,8 +53,7 @@ constexpr acceptance_sample acceptance_samples[] = {
          make_byte_array<16>({0x38, 0x18})},
         {dp::type_code::special, 0x1fu, dp::parse_mode::strict,
          make_byte_array<16>({0xff})},
-        {
-         dp::type_code::posint, 23u, dp::parse_mode::lenient,
+        {dp::type_code::posint, 23u, dp::parse_mode::lenient,
          make_byte_array<16>({0x18, 0x17})},
 };
 

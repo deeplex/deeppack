@@ -89,8 +89,9 @@ constexpr auto xxhash3_ui64(std::uint64_t const value,
 }
 
 template <unsigned_integer T>
-requires(sizeof(T) <= sizeof(std::uint64_t)) constexpr auto xxhash3(
-        T const value, std::uint64_t const seed) noexcept -> std::uint64_t
+    requires(sizeof(T) <= sizeof(std::uint64_t))
+constexpr auto xxhash3(T const value, std::uint64_t const seed) noexcept
+        -> std::uint64_t
 {
     if constexpr (sizeof(T) <= sizeof(std::uint32_t))
     {

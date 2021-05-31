@@ -16,20 +16,18 @@ namespace dplx::dp
 {
 
 template <std::input_iterator T, typename S = T>
-requires std::sentinel_for<S, T> class indefinite_range
-    : public std::ranges::view_base
+    requires std::sentinel_for<S, T>
+class indefinite_range : public std::ranges::view_base
 {
     T mIt;
     S mEnd;
 
 public:
     template <std::ranges::input_range R>
-    requires std::assignable_from<T &, std::ranges::iterator_t<R const>> &&
-            std::assignable_from<
-                    S &,
-                    std::ranges::sentinel_t<
-                            R const>> constexpr explicit indefinite_range(R const &
-                                                                                  range)
+        requires std::assignable_from<T &,
+                                      std::ranges::iterator_t<R const>> && std::
+                assignable_from<S &, std::ranges::sentinel_t<R const>>
+    constexpr explicit indefinite_range(R const &range)
         : mIt(std::ranges::begin(range))
         , mEnd(std::ranges::end(range))
     {

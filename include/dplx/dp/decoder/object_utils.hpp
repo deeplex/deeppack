@@ -33,18 +33,16 @@ namespace dplx::dp
 inline constexpr struct property_id_hash_fn
 {
     template <typename T>
-    requires tag_invocable<property_id_hash_fn, T const &> constexpr auto
-    operator()(T const &value) const
+        requires tag_invocable<property_id_hash_fn, T const &>
+    constexpr auto operator()(T const &value) const
             noexcept(nothrow_tag_invocable<property_id_hash_fn, T const &>)
                     -> std::uint64_t
     {
         return ::dplx::dp::cpo::tag_invoke(*this, value);
     }
     template <typename T>
-    requires tag_invocable<property_id_hash_fn,
-                           T const &,
-                           std::uint64_t> constexpr auto
-    operator()(T const &value, std::uint64_t seed) const
+        requires tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
+    constexpr auto operator()(T const &value, std::uint64_t seed) const
             noexcept(nothrow_tag_invocable<property_id_hash_fn,
                                            T const &,
                                            std::uint64_t>) -> std::uint64_t
@@ -280,10 +278,9 @@ constexpr auto index_of_limit(T const *elems,
 }
 
 template <auto const &Descriptor, typename T, input_stream Stream>
-requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
-        Descriptor)>::id_type> class decode_object_property_fn<Descriptor,
-                                                               T,
-                                                               Stream>
+    requires dp::unsigned_integer<
+            typename std::remove_cvref_t<decltype(Descriptor)>::id_type>
+class decode_object_property_fn<Descriptor, T, Stream>
 {
     using descriptor_type = std::remove_cvref_t<decltype(Descriptor)>;
     using id_type = typename descriptor_type::id_type;
@@ -532,8 +529,9 @@ inline auto decode_object_properties(Stream &stream,
 }
 
 template <packable_object T, input_stream Stream>
-requires(detail::versioned_decoder_enabled(layout_descriptor_for(
-        std::type_identity<T>{}))) class basic_decoder<T, Stream>
+    requires(detail::versioned_decoder_enabled(
+            layout_descriptor_for(std::type_identity<T>{})))
+class basic_decoder<T, Stream>
 {
     static constexpr auto descriptor
             = layout_descriptor_for(std::type_identity<T>{});

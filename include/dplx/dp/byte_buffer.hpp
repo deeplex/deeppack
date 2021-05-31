@@ -155,8 +155,8 @@ using byte_buffer_view = basic_byte_buffer_view<std::byte>;
 using const_byte_buffer_view = basic_byte_buffer_view<std::byte const>;
 
 template <typename Allocator>
-requires std::is_same_v<typename Allocator::value_type,
-                        std::byte> class byte_buffer final
+    requires std::is_same_v<typename Allocator::value_type, std::byte>
+class byte_buffer final
 {
 public:
     using allocator_type = Allocator;

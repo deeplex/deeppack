@@ -25,8 +25,8 @@ inline constexpr struct write_fn
 {
     // direct encoding variant
     template <typename Stream>
-    requires tag_invocable<write_fn, Stream &, std::size_t const> auto
-    operator()(Stream &stream, std::size_t const size) const noexcept(
+        requires tag_invocable<write_fn, Stream &, std::size_t const>
+    auto operator()(Stream &stream, std::size_t const size) const noexcept(
             nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<write_fn, Stream &, std::size_t const>
     {
@@ -35,13 +35,13 @@ inline constexpr struct write_fn
 
     // bulk transfer variant (for payload data like strings)
     template <typename Stream>
-    requires tag_invocable<write_fn,
-                           Stream &,
-                           std::byte const *,
-                           std::size_t const> auto
-    operator()(Stream &stream,
-               std::byte const *bytes,
-               std::size_t const numBytes) const
+        requires tag_invocable<write_fn,
+                               Stream &,
+                               std::byte const *,
+                               std::size_t const>
+    auto operator()(Stream &stream,
+                    std::byte const *bytes,
+                    std::size_t const numBytes) const
             noexcept(nothrow_tag_invocable<write_fn,
                                            Stream &,
                                            std::byte const *,
@@ -60,8 +60,8 @@ inline constexpr unsigned minimum_guaranteed_write_size = 40;
 inline constexpr struct commit_fn
 {
     template <typename Stream, typename WriteProxy>
-    requires tag_invocable<commit_fn, Stream &, WriteProxy &> auto
-    operator()(Stream &stream, WriteProxy &proxy) const
+        requires tag_invocable<commit_fn, Stream &, WriteProxy &>
+    auto operator()(Stream &stream, WriteProxy &proxy) const
             noexcept(nothrow_tag_invocable<commit_fn, Stream &, WriteProxy &>)
                     -> tag_invoke_result_t<commit_fn, Stream &, WriteProxy &>
     {
@@ -69,10 +69,11 @@ inline constexpr struct commit_fn
     }
 
     template <typename Stream, typename WriteProxy>
-    requires tag_invocable<commit_fn,
-                           Stream &,
-                           WriteProxy &,
-                           std::size_t const> auto
+        requires tag_invocable<commit_fn,
+                               Stream &,
+                               WriteProxy &,
+                               std::size_t const>
+    auto
     operator()(Stream &stream, WriteProxy &proxy, std::size_t const size) const
             noexcept(nothrow_tag_invocable<commit_fn,
                                            Stream &,
@@ -127,8 +128,8 @@ concept output_stream
 // clang-format on
 
 template <output_stream Stream>
-using write_proxy_t = detail::result_value_t<decltype(
-        write(std::declval<Stream &>(), std::declval<std::size_t>()))>;
+using write_proxy_t = detail::result_value_t<decltype(write(
+        std::declval<Stream &>(), std::declval<std::size_t>()))>;
 
 namespace detail
 {
@@ -203,8 +204,8 @@ namespace dplx::dp
 inline constexpr struct read_fn
 {
     template <typename Stream>
-    requires tag_invocable<read_fn, Stream &, std::size_t const> auto
-    operator()(Stream &stream, std::size_t const size) const noexcept(
+        requires tag_invocable<read_fn, Stream &, std::size_t const>
+    auto operator()(Stream &stream, std::size_t const size) const noexcept(
             nothrow_tag_invocable<read_fn, Stream &, std::size_t const>)
             -> tag_invoke_result_t<read_fn, Stream &, std::size_t const>
     {
@@ -212,10 +213,11 @@ inline constexpr struct read_fn
     }
 
     template <typename Stream>
-    requires tag_invocable<read_fn,
-                           Stream &,
-                           std::byte *,
-                           std::size_t const> auto
+        requires tag_invocable<read_fn,
+                               Stream &,
+                               std::byte *,
+                               std::size_t const>
+    auto
     operator()(Stream &stream, std::byte *data, std::size_t const size) const
             noexcept(nothrow_tag_invocable<read_fn,
                                            Stream &,
@@ -235,13 +237,13 @@ inline constexpr unsigned minimum_guaranteed_read_size = 40;
 inline constexpr struct consume_fn
 {
     template <typename Stream, typename ReadProxy>
-    requires tag_invocable<consume_fn,
-                           Stream &,
-                           ReadProxy &,
-                           std::size_t const> auto
-    operator()(Stream &stream,
-               ReadProxy &proxy,
-               std::size_t const actualSize) const
+        requires tag_invocable<consume_fn,
+                               Stream &,
+                               ReadProxy &,
+                               std::size_t const>
+    auto operator()(Stream &stream,
+                    ReadProxy &proxy,
+                    std::size_t const actualSize) const
             noexcept(nothrow_tag_invocable<consume_fn,
                                            Stream &,
                                            ReadProxy &,
@@ -255,8 +257,8 @@ inline constexpr struct consume_fn
     }
 
     template <typename Stream, typename ReadProxy>
-    requires tag_invocable<consume_fn, Stream &, ReadProxy &> auto
-    operator()(Stream &stream, ReadProxy &proxy) const
+        requires tag_invocable<consume_fn, Stream &, ReadProxy &>
+    auto operator()(Stream &stream, ReadProxy &proxy) const
             noexcept(nothrow_tag_invocable<consume_fn, Stream &, ReadProxy &>)
                     -> tag_invoke_result_t<consume_fn, Stream &, ReadProxy &>
     {
@@ -267,7 +269,8 @@ inline constexpr struct consume_fn
 inline constexpr struct skip_bytes_fn
 {
     template <typename Stream>
-    requires tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const> auto
+        requires tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>
+    auto
     operator()(Stream &stream, std::uint64_t const numBytes) const noexcept(
             nothrow_tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>
 
@@ -281,8 +284,8 @@ inline constexpr struct skip_bytes_fn
 inline constexpr struct available_input_size_fn
 {
     template <typename Stream>
-    requires tag_invocable<available_input_size_fn, Stream &> auto
-    operator()(Stream &stream) const
+        requires tag_invocable<available_input_size_fn, Stream &>
+    auto operator()(Stream &stream) const
             noexcept(nothrow_tag_invocable<available_input_size_fn, Stream &>)
                     -> tag_invoke_result_t<available_input_size_fn, Stream &>
     {
@@ -333,8 +336,8 @@ concept input_stream
 // clang-format on
 
 template <input_stream Stream>
-using read_proxy_t = detail::result_value_t<decltype(
-        read(std::declval<Stream &>(), std::declval<std::size_t>()))>;
+using read_proxy_t = detail::result_value_t<decltype(read(
+        std::declval<Stream &>(), std::declval<std::size_t>()))>;
 
 namespace detail
 {
@@ -432,8 +435,8 @@ struct stream_traits<Stream> : detail::input_stream_traits<Stream>
 };
 
 template <typename InOutStream>
-requires output_stream<InOutStream>
-        &&input_stream<InOutStream> struct stream_traits<InOutStream>
+    requires output_stream<InOutStream> && input_stream<InOutStream>
+struct stream_traits<InOutStream>
     : detail::output_stream_traits<InOutStream>
     , detail::input_stream_traits<InOutStream>
 {

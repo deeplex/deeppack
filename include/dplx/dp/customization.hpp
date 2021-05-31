@@ -20,11 +20,11 @@ namespace dplx::dp
 inline constexpr struct container_reserve_fn
 {
     template <typename Container>
-    requires nothrow_tag_invocable<container_reserve_fn,
-                                   Container &,
-                                   std::size_t const> auto
-    operator()(Container &container,
-               std::size_t const reservationSize) const noexcept
+        requires nothrow_tag_invocable<container_reserve_fn,
+                                       Container &,
+                                       std::size_t const>
+    auto operator()(Container &container,
+                    std::size_t const reservationSize) const noexcept
             -> tag_invoke_result_t<container_reserve_fn,
                                    Container &,
                                    std::size_t const>
@@ -36,13 +36,13 @@ inline constexpr struct container_reserve_fn
     friend inline auto tag_invoke(container_reserve_fn,
                                   StdContainer &container,
                                   std::size_t const reservationSize) noexcept
-            -> result<void> requires requires
-    {
+            -> result<void>
+        requires requires
         {
-            container.reserve(reservationSize)
+            {
+                container.reserve(reservationSize)
+                } -> std::same_as<void>;
         }
-        ->std::same_as<void>;
-    }
     {
         try
         {
@@ -59,10 +59,11 @@ inline constexpr struct container_reserve_fn
 inline constexpr struct container_resize_fn
 {
     template <typename Container>
-    requires nothrow_tag_invocable<container_resize_fn,
-                                   Container &,
-                                   std::size_t const> auto
-    operator()(Container &container, std::size_t const newSize) const noexcept
+        requires nothrow_tag_invocable<container_resize_fn,
+                                       Container &,
+                                       std::size_t const>
+    auto operator()(Container &container,
+                    std::size_t const newSize) const noexcept
             -> tag_invoke_result_t<container_resize_fn,
                                    Container &,
                                    std::size_t const>
@@ -74,13 +75,13 @@ inline constexpr struct container_resize_fn
     friend inline auto tag_invoke(container_resize_fn,
                                   StdContainer &container,
                                   std::size_t const newSize) noexcept
-            -> result<void> requires requires
-    {
+            -> result<void>
+        requires requires
         {
-            container.resize(newSize)
+            {
+                container.resize(newSize)
+                } -> std::same_as<void>;
         }
-        ->std::same_as<void>;
-    }
     {
         try
         {
@@ -98,10 +99,11 @@ inline constexpr struct container_resize_fn
 inline constexpr struct container_resize_for_overwrite_fn
 {
     template <typename Container>
-    requires nothrow_tag_invocable<container_resize_for_overwrite_fn,
-                                   Container &,
-                                   std::size_t const> auto
-    operator()(Container &container, std::size_t const newSize) const noexcept
+        requires nothrow_tag_invocable<container_resize_for_overwrite_fn,
+                                       Container &,
+                                       std::size_t const>
+    auto operator()(Container &container,
+                    std::size_t const newSize) const noexcept
             -> tag_invoke_result_t<container_resize_for_overwrite_fn,
                                    Container &,
                                    std::size_t const>
@@ -110,12 +112,13 @@ inline constexpr struct container_resize_for_overwrite_fn
     }
 
     template <typename Container>
-    requires(
-            !nothrow_tag_invocable<
-                    container_resize_for_overwrite_fn,
-                    Container &,
-                    std::size_t const> && tag_invocable<container_resize_fn, Container &, std::size_t const>) auto
-    operator()(Container &container, std::size_t const newSize) const noexcept
+        requires(
+                !nothrow_tag_invocable<
+                        container_resize_for_overwrite_fn,
+                        Container &,
+                        std::size_t const> && tag_invocable<container_resize_fn, Container &, std::size_t const>)
+    auto operator()(Container &container,
+                    std::size_t const newSize) const noexcept
             -> tag_invoke_result_t<container_resize_fn,
                                    Container &,
                                    std::size_t const>

@@ -150,7 +150,8 @@ namespace dplx::dp
 {
 
 template <auto Id, auto M, typename IdRuntimeType = decltype(Id)>
-requires std::is_member_object_pointer_v<decltype(M)> struct basic_property_def
+    requires std::is_member_object_pointer_v<decltype(M)>
+struct basic_property_def
 {
 private:
     using member_object_pointer_type_traits
@@ -204,13 +205,12 @@ using named_property_def = basic_property_def<Id, M, decltype(Id)>;
 template <auto... Properties>
 struct object_def
 {
-    using param_0_type = std::remove_cvref_t<decltype(
-            detail::nth_param_v<0, Properties...>)>;
+    using param_0_type = std::remove_cvref_t<
+            decltype(detail::nth_param_v<0, Properties...>)>;
     using id_type = std::common_type_t<
             typename std::remove_cvref_t<decltype(Properties)>::id_type...>;
-    using id_runtime_type
-            = std::common_type_t<typename std::remove_cvref_t<decltype(
-                    Properties)>::id_runtime_type...>;
+    using id_runtime_type = std::common_type_t<typename std::remove_cvref_t<
+            decltype(Properties)>::id_runtime_type...>;
     using class_type = typename param_0_type::class_type;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);

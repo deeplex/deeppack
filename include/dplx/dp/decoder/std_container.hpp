@@ -59,8 +59,8 @@ concept back_insertion_sequence_container
 // clang-format on
 
 template <sequence_container T, input_stream Stream>
-requires decodable<typename T::value_type, Stream> class basic_decoder<T,
-                                                                       Stream>
+    requires decodable<typename T::value_type, Stream>
+class basic_decoder<T, Stream>
 {
     using element_type = typename T::value_type;
     using element_decoder = basic_decoder<element_type, Stream>;
@@ -148,8 +148,8 @@ concept map_like_associative_container
 // clang-format on
 
 template <associative_container T, input_stream Stream>
-requires decodable<typename T::value_type, Stream> class basic_decoder<T,
-                                                                       Stream>
+    requires decodable<typename T::value_type, Stream>
+class basic_decoder<T, Stream>
 {
     using element_type = typename T::value_type;
     using element_decoder = basic_decoder<element_type, Stream>;
@@ -177,9 +177,9 @@ private:
 };
 
 template <map_like_associative_container T, input_stream Stream>
-requires(decodable<typename T::key_type, Stream>
-                 &&decodable<typename T::mapped_type,
-                             Stream>) class basic_decoder<T, Stream>
+    requires(decodable<typename T::key_type, Stream>
+                     &&decodable<typename T::mapped_type, Stream>)
+class basic_decoder<T, Stream>
 {
     using key_type = typename T::key_type;
     using key_decoder = basic_decoder<key_type, Stream>;
@@ -284,7 +284,8 @@ public:
 };
 
 template <typename T, input_stream Stream>
-requires decodable<T, Stream> class basic_decoder<std::span<T>, Stream>
+    requires decodable<T, Stream>
+class basic_decoder<std::span<T>, Stream>
 {
 public:
     using value_type = std::span<T>;
@@ -320,8 +321,8 @@ public:
 };
 
 template <typename T, input_stream Stream>
-requires detail::
-        decodable_pair_like<T, Stream> class basic_decoder<std::span<T>, Stream>
+    requires detail::decodable_pair_like<T, Stream>
+class basic_decoder<std::span<T>, Stream>
 {
 public:
     using value_type = std::span<T>;
@@ -358,21 +359,19 @@ public:
 };
 
 template <typename T, std::size_t N, input_stream Stream>
-requires(
-        decodable<
-                T,
-                Stream> || std::same_as<std::remove_const_t<T>, std::byte>) class
-        basic_decoder<std::span<T, N>, Stream>
+    requires(decodable<
+                     T,
+                     Stream> || std::same_as<std::remove_const_t<T>, std::byte>)
+class basic_decoder<std::span<T, N>, Stream>
     : public basic_decoder<std::span<T>, Stream>
 {
 };
 
 template <typename T, std::size_t N, input_stream Stream>
-requires(
-        decodable<
-                T,
-                Stream> || std::same_as<std::remove_const_t<T>, std::byte>) class
-        basic_decoder<std::array<T, N>, Stream>
+    requires(decodable<
+                     T,
+                     Stream> || std::same_as<std::remove_const_t<T>, std::byte>)
+class basic_decoder<std::array<T, N>, Stream>
     : public basic_decoder<std::span<T>, Stream>
 {
 };

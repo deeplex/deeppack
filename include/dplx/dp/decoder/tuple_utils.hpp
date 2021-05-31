@@ -92,8 +92,9 @@ inline auto decode_tuple_properties(Stream &stream,
 }
 
 template <packable_tuple T, input_stream Stream>
-requires(detail::versioned_decoder_enabled(layout_descriptor_for(
-        std::type_identity<T>{}))) class basic_decoder<T, Stream>
+    requires(detail::versioned_decoder_enabled(
+            layout_descriptor_for(std::type_identity<T>{})))
+class basic_decoder<T, Stream>
 {
     static constexpr auto descriptor
             = layout_descriptor_for(std::type_identity<T>{});
