@@ -222,9 +222,8 @@ if (BUILD_TESTING)
         "tests/decoder.test.cpp"
         "tests/decoder.std_container.test.cpp"
         "tests/decoder.std_string.test.cpp"
-        # clang currently doesn't support class type NTTPs
-        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/decoder.object_utils.test.cpp>
-        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/decoder.tuple_utils.test.cpp>
+        "tests/decoder.object_utils.test.cpp"
+        "tests/decoder.tuple_utils.test.cpp"
 
         "tests/encoder.test.cpp"
         "tests/encoder.test_utils.hpp"
@@ -233,8 +232,8 @@ if (BUILD_TESTING)
         "tests/encoder.range.test.cpp"
         "tests/encoder.string.test.cpp"
         "tests/encoder.tuple.test.cpp"
-        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.object_utils.test.cpp>
-        $<$<NOT:$<CXX_COMPILER_ID:Clang>>:tests/encoder.tuple_utils.test.cpp>
+        "tests/encoder.object_utils.test.cpp"
+        "tests/encoder.tuple_utils.test.cpp"
         
         "tests/enum_codec.test.cpp"
 

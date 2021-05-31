@@ -279,7 +279,7 @@ constexpr auto index_of_limit(T const *elems,
     return num;
 }
 
-template <typename T, decltype(auto) Descriptor, typename Stream>
+template <auto const &Descriptor, typename T, input_stream Stream>
 requires dp::unsigned_integer<typename std::remove_cvref_t<decltype(
         Descriptor)>::id_type> class decode_object_property_fn<Descriptor,
                                                                T,
@@ -373,7 +373,7 @@ public:
             {
                 return boost::mp11::mp_with_index<small_id_limit>(
                         static_cast<std::size_t>(idInfo.value),
-                        decode_prop_small_id_fn{inStream, dest});
+                        decode_prop_small_id_fn{{inStream, dest}});
             }
         }
         else
@@ -391,7 +391,7 @@ public:
                 }
 
                 return boost::mp11::mp_with_index<id_map_size>(
-                        idx, decode_prop_large_id_fn{inStream, dest});
+                        idx, decode_prop_large_id_fn{{inStream, dest}});
             }
         }
     }

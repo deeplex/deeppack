@@ -64,20 +64,41 @@ struct fixed_u8string
     constexpr auto operator=(fixed_u8string &&) noexcept
             -> fixed_u8string & = default;
 
-    constexpr auto operator==(fixed_u8string const &) const noexcept -> bool
+    friend inline constexpr auto operator==(fixed_u8string const &,
+                                            fixed_u8string const &) noexcept
+            -> bool
             = default;
-    constexpr auto operator<=>(fixed_u8string const &) const noexcept
+    friend inline constexpr auto operator<=>(fixed_u8string const &,
+                                             fixed_u8string const &) noexcept
             -> std::strong_ordering = default;
 
-    constexpr auto operator==(std::u8string_view str) const noexcept -> bool
+    friend inline constexpr auto operator==(fixed_u8string const &lhs,
+                                            std::u8string_view rhs) noexcept
+            -> bool
     {
-        return str == std::u8string_view(*this);
+        return std::u8string_view(lhs) == rhs;
     }
-    constexpr auto operator<=>(std::u8string_view str) const noexcept
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_CLANG, <, 13, 0, 0)
+
+    friend inline constexpr auto operator<=>(fixed_u8string const &lhs,
+                                             std::u8string_view rhs) noexcept
             -> std::strong_ordering
     {
-        return str <=> std::u8string_view(*this);
+        std::u8string_view view(lhs);
+        return std::lexicographical_compare_three_way(view.begin(), view.end(),
+                                                      rhs.begin(), rhs.end());
     }
+
+#else
+
+    friend inline constexpr auto operator<=>(fixed_u8string const &lhs,
+                                             std::u8string_view rhs) noexcept
+            -> std::strong_ordering
+    {
+        return std::u8string_view(lhs) <=> rhs;
+    }
+
+#endif
 
     constexpr operator std::u8string_view() const noexcept
     {

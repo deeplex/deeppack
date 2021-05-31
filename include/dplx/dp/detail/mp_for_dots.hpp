@@ -22,7 +22,7 @@ template <std::size_t... Is>
 struct mp_for_dots_impl<std::index_sequence<Is...>>
 {
     template <class F>
-    static constexpr auto invoke(F &&f) -> result<void>
+    static inline auto invoke(F &&f) -> result<void>
     {
         result<void> rx = success();
 
@@ -36,7 +36,7 @@ struct mp_for_dots_impl<std::index_sequence<Is...>>
 };
 
 template <std::size_t N, typename F>
-constexpr auto mp_for_dots(F &&f) -> result<void>
+inline auto mp_for_dots(F &&f) -> result<void>
 {
     return mp_for_dots_impl<std::make_index_sequence<N>>::invoke(
             static_cast<F &&>(f));
