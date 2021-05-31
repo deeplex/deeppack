@@ -121,7 +121,7 @@ template <std::size_t N, typename... Params>
 using nth_param_t = typename decltype(nth_param_type_impl<N>::deduce(
         static_cast<std::type_identity<Params> *>(nullptr)...))::type;
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <=, 19, 29, 0)
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
 
 template <std::size_t N, auto... Vs>
 struct nth_param_value_impl;
