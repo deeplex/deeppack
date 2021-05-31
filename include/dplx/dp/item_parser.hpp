@@ -42,10 +42,14 @@ concept string_output_container = container_traits<Container>::resize
 // clang-format off
 template <typename Fn, typename InputStream, typename Container>
 concept subitem_parslet = input_stream<InputStream>
-    && (std::invocable<Fn, InputStream &, Container &, std::size_t const>
-            && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const>>
-        || std::invocable<Fn, InputStream &, Container &, std::size_t const, parse_mode const>
-            && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const, parse_mode const>>);
+    && ((
+            std::invocable<Fn, InputStream &, Container &, std::size_t const>
+                        && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const>>)
+            
+        || (
+            std::invocable<Fn, InputStream &, Container &, std::size_t const, parse_mode const>
+                        && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const, parse_mode const>>)
+            );
 // clang-format on
 
 template <input_stream Stream>

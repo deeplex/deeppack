@@ -28,8 +28,7 @@ struct mp_encode_object_property_fn
     template <std::size_t I>
     inline auto operator()(mp_size_t<I>) -> result<void>
     {
-        constexpr decltype(auto) propertyDef
-                = descriptor.template property<I>();
+        constexpr auto &propertyDef = descriptor.template property<I>();
 
         using key_encoder
                 = basic_encoder<std::remove_cvref_t<decltype(propertyDef.id)>,

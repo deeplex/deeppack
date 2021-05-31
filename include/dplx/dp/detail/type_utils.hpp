@@ -13,6 +13,9 @@
 #include <type_traits>
 #include <utility>
 
+#include <boost/predef/compiler.h>
+#include <boost/predef/other/workaround.h>
+
 #include <dplx/dp/detail/mp_lite.hpp>
 
 namespace dplx::dp::detail
@@ -123,7 +126,26 @@ template <std::size_t N, typename... Params>
 using nth_param_t = typename decltype(nth_param_type_impl<N>::deduce(
         static_cast<std::type_identity<Params> *>(nullptr)...))::type;
 
-#if !defined(_MSC_VER) // || 1
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <=, 19, 29, 0)
+
+template <std::size_t N, auto... Vs>
+struct nth_param_value_impl;
+
+template <auto V0, auto... Vs>
+struct nth_param_value_impl<0, V0, Vs...>
+{
+    static constexpr auto value = V0;
+};
+
+template <std::size_t N, auto V0, auto... Vs>
+struct nth_param_value_impl<N, V0, Vs...> : nth_param_value_impl<N - 1, Vs...>
+{
+};
+
+template <std::size_t N, auto... Vs>
+inline constexpr auto &nth_param_v = nth_param_value_impl<N, Vs...>::value;
+
+#else
 
 template <typename>
 struct discarder
@@ -149,27 +171,7 @@ struct nth_param_value_impl<N, std::index_sequence<Is...>>
 };
 
 template <std::size_t N, decltype(auto)... Vs>
-inline constexpr decltype(auto) nth_param_v
-        = nth_param_value_impl<N>::access(Vs...);
-
-#else
-
-template <std::size_t N, auto... Vs>
-struct nth_param_value_impl;
-
-template <auto V0, auto... Vs>
-struct nth_param_value_impl<0, V0, Vs...>
-{
-    static constexpr auto value = V0;
-};
-
-template <std::size_t N, auto V0, auto... Vs>
-struct nth_param_value_impl<N, V0, Vs...> : nth_param_value_impl<N - 1, Vs...>
-{
-};
-
-template <std::size_t N, auto... Vs>
-inline constexpr auto nth_param_v = nth_param_value_impl<N, Vs...>::value;
+inline constexpr auto &nth_param_v = nth_param_value_impl<N>::access(Vs...);
 
 #endif
 

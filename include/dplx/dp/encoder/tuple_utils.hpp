@@ -31,8 +31,7 @@ struct mp_encode_value_fn
     template <std::size_t I>
     inline auto operator()(mp_size_t<I>) -> result<void>
     {
-        constexpr decltype(auto) propertyDef
-                = descriptor.template property<I>();
+        constexpr auto &propertyDef = descriptor.template property<I>();
 
         using property_encoder = dp::basic_encoder<
                 typename decltype(propertyDef.decl_value())::type, Stream>;

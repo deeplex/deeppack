@@ -484,7 +484,7 @@ inline auto decode_object_properties(Stream &stream,
                                      T &dest,
                                      std::int32_t numProperties) -> result<void>
 {
-    constexpr decltype(auto) decode_object_property
+    constexpr auto &decode_object_property
             = detail::decode_object_property<descriptor, T, Stream>;
 
     if constexpr (descriptor.has_optional_properties)

@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
 
 #include <type_traits>
 
@@ -113,9 +113,9 @@ inline auto parse_item_safe(Stream &inStream) noexcept(
     DPLX_TRY(auto &&indicatorProxy, read(inStream, 1u));
     std::byte const *const indicator = std::ranges::data(indicatorProxy);
 
-    item_info info{
+    dp::item_info info{
             .type = static_cast<type_code>(*indicator & std::byte{0b111'00000}),
-            .flags = item_info::flag::none,
+            .flags = dp::item_info::flag::none,
             .encoded_length = 1,
             .value
             = static_cast<std::uint64_t>(*indicator & std::byte{0b000'11111}),
@@ -204,7 +204,8 @@ inline auto parse_item(Stream &stream) noexcept(
         }
     else
     {
-        result<item_info> rx = oc::try_operation_return_as(std::move(readRx));
+        result<dp::item_info> rx
+                = oc::try_operation_return_as(std::move(readRx));
 
         if (rx.assume_error() == errc::end_of_stream)
         {
