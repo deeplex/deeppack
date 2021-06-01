@@ -261,7 +261,8 @@ enum class decode_errc : std::uint8_t
     = static_cast<std::uint8_t>(errc::invalid_additional_information),
 };
 
-struct item_info
+struct [[deprecated(
+        "use dp::item_info instead of dp::detail::item_info")]] item_info
 {
     decode_errc code;
     std::uint8_t type;
@@ -282,8 +283,8 @@ struct item_info
 static_assert(std::is_trivial_v<item_info>);
 static_assert(std::is_standard_layout_v<item_info>);
 
-inline auto parse_item_info_speculative(std::byte const *const encoded)
-        -> result<item_info>
+[[deprecated("use dp::detail::parse_item_speculative() instead")]] inline auto
+parse_item_info_speculative(std::byte const *const encoded) -> result<item_info>
 {
     item_info info{
             .code = decode_errc::nothing,
@@ -407,7 +408,8 @@ inline auto parse_item_info_safe(Stream &inStream) -> result<item_info>
 }
 
 template <input_stream Stream>
-inline auto parse_item_info(Stream &stream) -> result<item_info>
+[[deprecated("use dp::detail::parse_item() instead")]] inline auto
+parse_item_info(Stream &stream) -> result<item_info>
 {
     if (auto readRx = dp::read(stream, var_uint_max_size);
         oc::try_operation_has_value(readRx))
