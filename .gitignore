@@ -1,6 +1,7 @@
 # build directory as mandated by the pitchfork layout
 /build
 
+/CMakeUserPresets.json
 # vcpkg packages installed in manifest mode
 /vcpkg_installed
 # visual studio cmake config
