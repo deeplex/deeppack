@@ -17,6 +17,7 @@
 
 #include <boost/mp11/algorithm.hpp>
 
+#include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/std_string.hpp>
 #include <dplx/dp/decoder/utils.hpp>
 #include <dplx/dp/detail/hash.hpp>
@@ -38,7 +39,7 @@ inline constexpr struct property_id_hash_fn
             noexcept(nothrow_tag_invocable<property_id_hash_fn, T const &>)
                     -> std::uint64_t
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, value);
+        return cpo::tag_invoke(*this, value);
     }
     template <typename T>
         requires tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
@@ -47,7 +48,7 @@ inline constexpr struct property_id_hash_fn
                                            T const &,
                                            std::uint64_t>) -> std::uint64_t
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, value, seed);
+        return cpo::tag_invoke(*this, value, seed);
     }
 
     template <integer T>
@@ -77,31 +78,14 @@ inline constexpr struct property_id_hash_fn
 template <std::size_t N, input_stream Stream>
 class basic_decoder<fixed_u8string<N>, Stream>
 {
+    using parse = item_parser<Stream>;
+
 public:
     auto operator()(Stream &inStream, fixed_u8string<N> &out) const
             -> result<void>
     {
-        DPLX_TRY(auto &&strInfo, detail::parse_item_info(inStream));
-
-        if (std::byte{strInfo.type} != type_code::text)
-        {
-            return errc::item_type_mismatch;
-        }
-        if (strInfo.value > out.max_size())
-        {
-            return errc::item_value_out_of_range;
-        }
-        out.mNumCodeUnits = static_cast<unsigned int>(strInfo.value);
-
-        DPLX_TRY(auto &&availableBytes, dp::available_input_size(inStream));
-        if (availableBytes < out.size())
-        {
-            return errc::missing_data;
-        }
-
-        DPLX_TRY(dp::read(inStream, reinterpret_cast<std::byte *>(out.data()),
-                          out.size()));
-        return success();
+        DPLX_TRY(parse::u8string_finite(inStream, out, N));
+        return oc::success();
     }
 };
 
@@ -232,7 +216,6 @@ class decode_object_property_fn
     using odef_type = std::remove_cvref_t<decltype(descriptor)>;
     using id_type = typename odef_type::id_type;
     using id_runtime_type = typename odef_type::id_runtime_type;
-    using id_decoder = basic_decoder<id_runtime_type, Stream>;
 
     static constexpr property_id_lookup_fn<id_type,
                                            descriptor.ids.size(),
@@ -244,8 +227,7 @@ class decode_object_property_fn
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<std::size_t>
     {
-        id_runtime_type id{};
-        DPLX_TRY(id_decoder()(inStream, id));
+        DPLX_TRY(auto &&id, decode(as_value<id_runtime_type>, inStream));
 
         auto const idx = lookup(id);
         if (idx == unknown_property_id)
@@ -282,6 +264,7 @@ template <auto const &Descriptor, typename T, input_stream Stream>
             typename std::remove_cvref_t<decltype(Descriptor)>::id_type>
 class decode_object_property_fn<Descriptor, T, Stream>
 {
+    using parse = item_parser<Stream>;
     using descriptor_type = std::remove_cvref_t<decltype(Descriptor)>;
     using id_type = typename descriptor_type::id_type;
     static constexpr descriptor_type const &descriptor = Descriptor;
@@ -350,17 +333,9 @@ class decode_object_property_fn<Descriptor, T, Stream>
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<std::size_t>
     {
-        DPLX_TRY(auto &&idInfo, detail::parse_item_info(inStream));
-        if (std::byte{idInfo.type} != type_code::posint)
-        {
-            return errc::item_type_mismatch;
-        }
-        if (idInfo.value > std::numeric_limits<id_type>::max())
-        {
-            return errc::unknown_property;
-        }
+        DPLX_TRY(auto id, parse::template integer<id_type>(inStream));
 
-        if (idInfo.value < small_id_limit)
+        if (id < small_id_limit)
         {
             if constexpr (small_ids_end == 0)
             {
@@ -369,7 +344,7 @@ public:
             else
             {
                 return boost::mp11::mp_with_index<small_id_limit>(
-                        static_cast<std::size_t>(idInfo.value),
+                        static_cast<std::size_t>(id),
                         decode_prop_small_id_fn{{inStream, dest}});
             }
         }
@@ -381,7 +356,7 @@ public:
             }
             else
             {
-                auto const idx = lookup(static_cast<id_type>(idInfo.value));
+                auto const idx = lookup(static_cast<id_type>(id));
                 if (idx == unknown_property_id)
                 {
                     return errc::unknown_property;
@@ -410,13 +385,13 @@ inline auto parse_object_head(Stream &inStream,
                               std::bool_constant<isVersioned> = {})
         -> result<object_head_info>
 {
-    DPLX_TRY(auto &&mapInfo, detail::parse_item_info(inStream));
-    if (static_cast<std::byte>(mapInfo.type & 0b111'00000) != type_code::map)
+    using parse = item_parser<Stream>;
+    DPLX_TRY(auto &&mapInfo, parse::generic(inStream));
+    if (mapInfo.type != type_code::map || mapInfo.indefinite())
     {
         return errc::item_type_mismatch;
     }
-    auto const indefinite = mapInfo.indefinite();
-    if (!indefinite && mapInfo.value == 0)
+    if (mapInfo.value == 0)
     {
         return object_head_info{0, null_def_version};
     }
@@ -454,18 +429,11 @@ inline auto parse_object_head(Stream &inStream,
             DPLX_TRY(dp::consume(inStream, maybeVersionReadProxy));
         }
 
-        DPLX_TRY(auto &&versionInfo, detail::parse_item_info(inStream));
-        if (std::byte{versionInfo.type} != type_code::posint)
-        {
-            return errc::item_type_mismatch;
-        }
         // 0xffff'ffff => max() is reserved as null_def_version
-        if (versionInfo.value >= std::numeric_limits<std::uint32_t>::max())
-        {
-            return errc::item_value_out_of_range;
-        }
-        return object_head_info{numProps - 1,
-                                static_cast<std::uint32_t>(versionInfo.value)};
+        DPLX_TRY(auto version, parse::template integer<std::uint32_t>(
+                                       inStream, 0xffff'fffeu));
+
+        return object_head_info{numProps - 1, version};
     }
 }
 

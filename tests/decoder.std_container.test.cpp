@@ -250,6 +250,13 @@ BOOST_AUTO_TEST_CASE(binary_empty)
     DPLX_REQUIRE_RESULT(rx);
 }
 
+#if defined(BOOST_COMP_CLANG_AVAILABLE)
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+#endif
+
 BOOST_AUTO_TEST_CASE(binary_empty_indefinite)
 {
     auto serializedInput = make_byte_array<2>({0b010'11111, 0xff});
@@ -341,6 +348,12 @@ BOOST_AUTO_TEST_CASE(span_int_one_element_indefinite)
     DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out[0] == 1);
 }
+
+#if defined(BOOST_COMP_CLANG_AVAILABLE)
+
+#pragma clang diagnostic pop
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

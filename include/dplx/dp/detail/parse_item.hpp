@@ -13,6 +13,8 @@
 
 #include <type_traits>
 
+#include <boost/predef/compiler.h>
+
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
@@ -49,7 +51,15 @@ struct item_info
                 | detail::to_underlying(flag::indefinite));
     }
 
-    constexpr bool operator==(item_info const &) const noexcept = default;
+    bool is_special_break() const noexcept
+    {
+        return type == type_code::special
+            && detail::to_underlying(flags)
+                       & detail::to_underlying(flag::indefinite);
+    }
+
+    friend inline constexpr bool
+    operator==(item_info const &, item_info const &) noexcept = default;
 };
 static_assert(std::is_trivial_v<item_info>);
 static_assert(std::is_standard_layout_v<item_info>);
@@ -250,6 +260,23 @@ static inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
 
 } // namespace dplx::dp::detail
 
+#if defined(BOOST_COMP_CLANG_AVAILABLE)
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+#elif defined(BOOST_COMP_GNUC_AVAILABLE)
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+#elif defined(BOOST_COMP_MSVC_AVAILABLE)
+
+#pragma warning(push)
+#pragma warning(disable : 4996)
+
+#endif
+
 // deprecated stuff
 namespace dplx::dp::detail
 {
@@ -440,3 +467,17 @@ parse_item_info(Stream &stream) -> result<item_info>
 }
 
 } // namespace dplx::dp::detail
+
+#if defined(BOOST_COMP_CLANG_AVAILABLE)
+
+#pragma clang diagnostic pop
+
+#elif defined(BOOST_COMP_GNUC_AVAILABLE)
+
+#pragma GCC diagnostic pop
+
+#elif defined BOOST_COMP_MSVC_AVAILABLE
+
+#pragma warning(pop)
+
+#endif

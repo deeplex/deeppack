@@ -22,7 +22,7 @@ namespace dplx::dp::detail
 {
 
 template <input_stream Stream>
-inline auto skip_binary_or_text(Stream &inStream, item_info const &item)
+inline auto skip_binary_or_text(Stream &inStream, dp::item_info const &item)
         -> result<void>
 {
     if (!item.indefinite())
@@ -32,17 +32,15 @@ inline auto skip_binary_or_text(Stream &inStream, item_info const &item)
         }
     else
     {
-        auto const expectedType = item.type & 0b111'00000u;
         for (;;)
         {
-            DPLX_TRY(item_info chunkInfo, detail::parse_item_info(inStream));
+            DPLX_TRY(dp::item_info chunkInfo, detail::parse_item(inStream));
 
-            if (chunkInfo.type == 0b111'00001)
+            if (chunkInfo.is_special_break())
             {
-                // special break
                 break;
             }
-            if (chunkInfo.type != expectedType)
+            if (chunkInfo.type != item.type || chunkInfo.indefinite())
             {
                 return errc::invalid_indefinite_subitem;
             }
@@ -61,17 +59,17 @@ namespace dplx::dp
 template <input_stream Stream>
 inline auto skip_item(Stream &inStream) -> result<void>
 {
-    boost::container::small_vector<detail::item_info, 64> stack;
-    DPLX_TRY(auto toBeSkipped, detail::parse_item_info(inStream));
+    boost::container::small_vector<dp::item_info, 64> stack;
+    DPLX_TRY(auto toBeSkipped, detail::parse_item(inStream));
     stack.push_back(toBeSkipped);
 
     do
     {
         auto &item = stack.back();
-        switch (item.type >> 5)
+        switch (static_cast<std::uint8_t>(to_byte(item.type) >> 5))
         {
         case static_cast<unsigned>(type_code::special) >> 5:
-            if (item.type == 0b111'00001u)
+            if (item.indefinite())
             {
                 // special break has no business being here.
                 return errc::item_type_mismatch;
@@ -102,8 +100,8 @@ inline auto skip_item(Stream &inStream) -> result<void>
             }
 
             // item reference can be invalidated by push back
-            DPLX_TRY(auto subItem, detail::parse_item_info(inStream));
-            if (!indefinite || subItem.type != 0b111'00001u)
+            DPLX_TRY(auto subItem, detail::parse_item(inStream));
+            if (!indefinite || !subItem.is_special_break())
             {
                 try
                 {
@@ -125,23 +123,27 @@ inline auto skip_item(Stream &inStream) -> result<void>
 
         case static_cast<unsigned>(type_code::map) >> 5:
         {
-            bool const indefinite = item.indefinite();
-            // we abuse item.code to track of whether to expect a value or key
-            // code == 0  =>  next item is a key
-            // code == 1  =>  next item is a value, therefore decrement kv ctr
-            auto const decr = static_cast<unsigned>(item.code);
-            item.code = static_cast<detail::decode_errc>(decr ^ 1u);
+            auto const rawFlags = detail::to_underlying(item.flags);
+            unsigned const indefinite
+                    = rawFlags
+                    & detail::to_underlying(dp::item_info::flag::indefinite);
+            // we abuse item.flags to track of whether to expect a value or key
+            // code == 0b0x  =>  next item is a key
+            // code == 0b1x  =>  next item is a value, therefore decrement kv
+            // ctr
+            auto const decr = (rawFlags >> 1) & indefinite;
+            item.flags = static_cast<dp::item_info::flag>(rawFlags ^ 2u);
 
             // for indefinite maps we keep item.value safely at 0x1f != 0
-            item.value -= decr & static_cast<unsigned>(!indefinite);
+            item.value -= decr;
             if (item.value == 0)
             {
                 stack.pop_back();
             }
 
             // item reference can be invalidated by push back
-            DPLX_TRY(auto subItem, detail::parse_item_info(inStream));
-            if (!indefinite || subItem.type != 0b111'00001u)
+            DPLX_TRY(auto subItem, detail::parse_item(inStream));
+            if (!indefinite || !subItem.is_special_break())
             {
                 try
                 {
@@ -169,16 +171,7 @@ inline auto skip_item(Stream &inStream) -> result<void>
 
         case static_cast<unsigned>(type_code::tag) >> 5:
         {
-            stack.pop_back();
-            DPLX_TRY(auto taggedItem, detail::parse_item_info(inStream));
-            try
-            {
-                stack.push_back(taggedItem);
-            }
-            catch (std::bad_alloc const &)
-            {
-                return errc::not_enough_memory;
-            }
+            DPLX_TRY(item, detail::parse_item(inStream));
             break;
         }
         }

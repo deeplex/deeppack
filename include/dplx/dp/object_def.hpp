@@ -25,6 +25,7 @@
 #include <string>
 #endif
 
+#include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/type_code.hpp>
@@ -120,6 +121,48 @@ struct fixed_u8string
     static constexpr auto max_size() noexcept -> std::size_t
     {
         return N;
+    }
+
+    friend inline auto tag_invoke(container_reserve_fn,
+                                  fixed_u8string &self,
+                                  std::size_t const capacity) noexcept
+            -> result<void>
+    {
+        if (capacity <= self.size())
+        {
+            return oc::success();
+        }
+        return errc::not_enough_memory;
+    }
+    friend inline auto tag_invoke(container_resize_fn,
+                                  fixed_u8string &self,
+                                  std::size_t const newSize) noexcept
+            -> result<void>
+    {
+        if (newSize <= self.max_size())
+        {
+            if (newSize > self.size())
+            {
+                std::fill(self.mCodeUnits + self.mNumCodeUnits,
+                          self.mCodeUnits + newSize, char8_t{});
+            }
+
+            self.mNumCodeUnits = static_cast<unsigned int>(newSize);
+            return oc::success();
+        }
+        return errc::not_enough_memory;
+    }
+    friend inline auto tag_invoke(container_resize_for_overwrite_fn,
+                                  fixed_u8string &self,
+                                  std::size_t const newSize) noexcept
+            -> result<void>
+    {
+        if (newSize <= self.max_size())
+        {
+            self.mNumCodeUnits = static_cast<unsigned int>(newSize);
+            return oc::success();
+        }
+        return errc::not_enough_memory;
     }
 };
 

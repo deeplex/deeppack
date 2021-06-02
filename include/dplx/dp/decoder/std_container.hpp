@@ -62,17 +62,20 @@ template <sequence_container T, input_stream Stream>
     requires decodable<typename T::value_type, Stream>
 class basic_decoder<T, Stream>
 {
+    using parse = item_parser<Stream>;
     using element_type = typename T::value_type;
     using element_decoder = basic_decoder<element_type, Stream>;
 
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        return dp::parse_array(stream, value, type_code::array, decode_element);
+        DPLX_TRY(parse::array(stream, value, decode_element));
+        return oc::success();
     }
 
 private:
-    static auto decode_element(Stream &stream, T &value) -> result<void>
+    static auto decode_element(Stream &stream, T &value, std::size_t const)
+            -> result<void>
     {
         element_type *e;
         if constexpr (back_insertion_sequence_container<T>)
@@ -151,17 +154,19 @@ template <associative_container T, input_stream Stream>
     requires decodable<typename T::value_type, Stream>
 class basic_decoder<T, Stream>
 {
+    using parse = item_parser<Stream>;
     using element_type = typename T::value_type;
     using element_decoder = basic_decoder<element_type, Stream>;
 
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        return dp::parse_array(stream, value, type_code::array, decode_element);
+        return parse::array(stream, value, decode_element);
     }
 
 private:
-    static auto decode_element(Stream &stream, T &value) -> result<void>
+    static auto decode_element(Stream &stream, T &value, std::size_t const)
+            -> result<void>
     {
         element_type e{};
         DPLX_TRY(element_decoder()(stream, e));
@@ -181,6 +186,7 @@ template <map_like_associative_container T, input_stream Stream>
                      &&decodable<typename T::mapped_type, Stream>)
 class basic_decoder<T, Stream>
 {
+    using parse = item_parser<Stream>;
     using key_type = typename T::key_type;
     using key_decoder = basic_decoder<key_type, Stream>;
     using mapped_type = typename T::mapped_type;
@@ -189,7 +195,7 @@ class basic_decoder<T, Stream>
 public:
     auto operator()(Stream &stream, T &value) const -> result<void>
     {
-        return dp::parse_array(stream, value, type_code::map, decode_element);
+        return parse::map(stream, value, decode_element);
     }
 
 private:
@@ -214,23 +220,71 @@ private:
 
 } // namespace dplx::dp
 
-// span<std::byte> & span<T>
+// std::array
+namespace dplx::dp
+{
+
+namespace detail
+{
+
+template <typename T, input_stream Stream>
+class basic_array_decoder
+{
+    using parse = item_parser<Stream>;
+
+public:
+    inline auto operator()(Stream &inStream, std::span<T> value) const
+            -> result<void>
+    {
+        DPLX_TRY(auto numElements,
+                 parse::array(inStream, value, decode_element));
+        if (numElements != value.size())
+        {
+            return errc::tuple_size_mismatch;
+        }
+        return oc::success();
+    }
+
+private:
+    static inline auto decode_element(Stream &inStream,
+                                      std::span<T> &storage,
+                                      std::size_t const i) -> result<void>
+    {
+        return dp::decode(inStream, storage[i]);
+    }
+};
+
+} // namespace detail
+
+template <typename T, std::size_t N, input_stream Stream>
+    requires decodable<T, Stream>
+class basic_decoder<std::array<T, N>, Stream>
+    : public detail::basic_array_decoder<T, Stream>
+{
+public:
+    using value_type = std::array<T, N>;
+};
+
+}
+
+// deprecated span<std::byte> & span<T>
 namespace dplx::dp
 {
 
 template <input_stream Stream>
-class basic_decoder<std::span<std::byte>, Stream>
+class [[deprecated("use item_parser::binary() instead")]] basic_decoder<
+        std::span<std::byte>,
+        Stream>
 {
 public:
     using value_type = std::span<std::byte>;
 
-    inline auto operator()(Stream &inStream, value_type value) const
-            -> result<void>
+    inline auto operator()(Stream &inStream, value_type value)
+            const->result<void>
     {
-        DPLX_TRY(auto &&headInfo, detail::parse_item_info(inStream));
+        DPLX_TRY(auto &&headInfo, detail::parse_item(inStream));
 
-        if (static_cast<std::byte>(headInfo.type & 0b111'00000)
-            != type_code::binary)
+        if (headInfo.type != type_code::binary)
         {
             return errc::item_type_mismatch;
         }
@@ -249,14 +303,13 @@ public:
 
             while (writePointer != endPointer)
             {
-                DPLX_TRY(auto &&subItemInfo, detail::parse_item_info(inStream));
+                DPLX_TRY(auto &&subItemInfo, detail::parse_item(inStream));
 
-                if (subItemInfo.type == 0b111'00001) // special break
+                if (subItemInfo.is_special_break()) // special break
                 {
                     return errc::tuple_size_mismatch;
                 }
-                if (static_cast<std::byte>(subItemInfo.type)
-                    != type_code::binary)
+                if (subItemInfo.type != type_code::binary)
                 {
                     return errc::invalid_indefinite_subitem;
                 }
@@ -285,17 +338,18 @@ public:
 
 template <typename T, input_stream Stream>
     requires decodable<T, Stream>
-class basic_decoder<std::span<T>, Stream>
+class [[deprecated(
+        "use item_parser::array() instead")]] basic_decoder<std::span<T>,
+                                                            Stream>
 {
 public:
     using value_type = std::span<T>;
 
-    inline auto operator()(Stream &inStream, value_type value) const
-            -> result<void>
+    inline auto operator()(Stream &inStream, value_type value)
+            const->result<void>
     {
-        DPLX_TRY(auto &&headInfo, detail::parse_item_info(inStream));
-        if (static_cast<std::byte>(headInfo.type & 0b111'00000)
-            != type_code::array)
+        DPLX_TRY(auto &&headInfo, detail::parse_item(inStream));
+        if (headInfo.type != type_code::array)
         {
             return errc::item_type_mismatch;
         }
@@ -322,17 +376,17 @@ public:
 
 template <typename T, input_stream Stream>
     requires detail::decodable_pair_like<T, Stream>
-class basic_decoder<std::span<T>, Stream>
+class [[deprecated(
+        "use item_parser::map() instead")]] basic_decoder<std::span<T>, Stream>
 {
 public:
     using value_type = std::span<T>;
 
-    inline auto operator()(Stream &inStream, value_type &value) const
-            -> result<void>
+    inline auto operator()(Stream &inStream, value_type &value)
+            const->result<void>
     {
-        DPLX_TRY(auto &&headInfo, detail::parse_item_info(inStream));
-        if (static_cast<std::byte>(headInfo.type & 0b111'00000)
-            != type_code::map)
+        DPLX_TRY(auto &&headInfo, detail::parse_item(inStream));
+        if (headInfo.type != type_code::map)
         {
             return errc::item_type_mismatch;
         }
@@ -362,18 +416,9 @@ template <typename T, std::size_t N, input_stream Stream>
     requires(decodable<
                      T,
                      Stream> || std::same_as<std::remove_const_t<T>, std::byte>)
-class basic_decoder<std::span<T, N>, Stream>
-    : public basic_decoder<std::span<T>, Stream>
-{
-};
-
-template <typename T, std::size_t N, input_stream Stream>
-    requires(decodable<
-                     T,
-                     Stream> || std::same_as<std::remove_const_t<T>, std::byte>)
-class basic_decoder<std::array<T, N>, Stream>
-    : public basic_decoder<std::span<T>, Stream>
-{
-};
+class [[deprecated(
+        "use item_parser::array() instead")]] basic_decoder<std::span<T, N>,
+                                                            Stream>
+    : public basic_decoder<std::span<T>, Stream>{};
 
 } // namespace dplx::dp

@@ -28,8 +28,9 @@ inline auto parse_tuple_head(Stream &inStream,
                              std::bool_constant<isVersioned> = {})
         -> result<tuple_head_info>
 {
-    DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(inStream));
-    if (std::byte{arrayInfo.type} != type_code::array)
+    using parse = item_parser<Stream>;
+    DPLX_TRY(auto &&arrayInfo, parse::generic(inStream));
+    if (arrayInfo.type != type_code::array || arrayInfo.indefinite())
     {
         return errc::item_type_mismatch;
     }
@@ -39,8 +40,7 @@ inline auto parse_tuple_head(Stream &inStream,
     {
         return errc::end_of_stream;
     }
-    if (arrayInfo.value
-        >= static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max()))
+    if (!std::in_range<std::int32_t>(arrayInfo.value))
     {
         return errc::too_many_properties;
     }
@@ -57,18 +57,11 @@ inline auto parse_tuple_head(Stream &inStream,
             return errc::item_version_property_missing;
         }
 
-        DPLX_TRY(auto &&versionInfo, detail::parse_item_info(inStream));
-        if (std::byte{versionInfo.type} != type_code::posint)
-        {
-            return errc::item_version_property_missing;
-        }
         // 0xffff'ffff => max() is reserved as null_def_version
-        if (versionInfo.value >= std::numeric_limits<std::uint32_t>::max())
-        {
-            return errc::item_value_out_of_range;
-        }
-        return tuple_head_info{numProps - 1,
-                               static_cast<std::uint32_t>(versionInfo.value)};
+        DPLX_TRY(auto version, parse::template integer<std::uint32_t>(
+                                       inStream, 0xffff'fffeu));
+
+        return tuple_head_info{numProps - 1, version};
     }
 }
 

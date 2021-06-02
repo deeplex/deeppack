@@ -18,8 +18,9 @@ namespace dplx::dp::detail
 template <typename T>
 inline auto var_uint_encoded_byte_power(T const value) noexcept -> int
 {
-    int const lastSetBitIndex = detail::find_last_set_bit(value);
-    int const bytePower = detail::find_last_set_bit(lastSetBitIndex) - 2;
+    auto const lastSetBitIndex
+            = static_cast<unsigned>(detail::find_last_set_bit(value));
+    auto const bytePower = detail::find_last_set_bit(lastSetBitIndex) - 2;
 
     return bytePower;
 }
@@ -31,9 +32,11 @@ inline auto var_uint_encoded_size_ct(T const value) noexcept -> unsigned int
     {
         return 1u;
     }
-    unsigned int const lastSetBitIndex = detail::find_last_set_bit(value);
-    unsigned int const bytePower
-            = detail::find_last_set_bit(lastSetBitIndex) - 2;
+    auto const lastSetBitIndex
+            = static_cast<unsigned>(detail::find_last_set_bit(value));
+    auto const bytePower
+            = static_cast<unsigned>(detail::find_last_set_bit(lastSetBitIndex))
+            - 2u;
 
     return 1u + (1u << bytePower);
 }

@@ -10,6 +10,7 @@
 #include <cstddef>
 
 #include <concepts>
+#include <new>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/tag_invoke.hpp>

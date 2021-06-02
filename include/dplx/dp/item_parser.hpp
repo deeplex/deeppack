@@ -112,48 +112,39 @@ public:
                                parse_mode const mode = parse_mode::lenient)
             -> result<T>
     {
-        DPLX_TRY(item_info const item, parse::generic(inStream));
-
         if constexpr (std::is_unsigned_v<T>)
         {
-            if (item.type != type_code::posint)
-            {
-                return errc::item_type_mismatch;
-            }
+            return parse::integer<T>(inStream, std::numeric_limits<T>::max(),
+                                     mode);
         }
         else
         {
+            DPLX_TRY(item_info const item, parse::generic(inStream));
+
             if (item.type != type_code::posint
                 && item.type != type_code::negint)
             {
                 return errc::item_type_mismatch;
             }
-        }
 
-        // fused check for both positive and negative integers
-        // negative integers are encoded as (-1 -n)
-        // therefore the largest representable additional
-        // information value is the same as the smallest one
-        // e.g. a signed 8bit two's complement min() is -128 which
-        // would be encoded as (-1 -[n=127])
-        if (item.value > static_cast<std::make_unsigned_t<T>>(
-                    std::numeric_limits<T>::max()))
-        {
-            return errc::item_value_out_of_range;
-        }
-        if (mode != parse_mode::lenient
-            && detail::var_uint_encoded_size(item.value)
-                       < static_cast<unsigned>(item.encoded_length))
-        {
-            return errc::oversized_additional_information_coding;
-        }
+            // fused check for both positive and negative integers
+            // negative integers are encoded as (-1 -n)
+            // therefore the largest representable additional
+            // information value is the same as the smallest one
+            // e.g. a signed 8bit two's complement min() is -128 which
+            // would be encoded as (-1 -[n=127])
+            if (item.value > static_cast<std::make_unsigned_t<T>>(
+                        std::numeric_limits<T>::max()))
+            {
+                return errc::item_value_out_of_range;
+            }
+            if (mode != parse_mode::lenient
+                && detail::var_uint_encoded_size(item.value)
+                           < static_cast<unsigned>(item.encoded_length))
+            {
+                return errc::oversized_additional_information_coding;
+            }
 
-        if constexpr (std::is_unsigned_v<T>)
-        {
-            return static_cast<T>(item.value);
-        }
-        else
-        {
             std::uint64_t const signBit = static_cast<std::uint64_t>(item.type)
                                        << 58;
             std::int64_t const signExtended
@@ -163,6 +154,30 @@ public:
 
             return static_cast<T>(item.value ^ xorpad);
         }
+    }
+    template <unsigned_integer T>
+    static inline auto integer(Stream &inStream,
+                               T limit,
+                               parse_mode const mode = parse_mode::lenient)
+            -> result<T>
+    {
+        DPLX_TRY(item_info const item, parse::generic(inStream));
+
+        if (item.type != type_code::posint)
+        {
+            return errc::item_type_mismatch;
+        }
+        if (item.value > limit)
+        {
+            return errc::item_value_out_of_range;
+        }
+        if (mode != parse_mode::lenient
+            && detail::var_uint_encoded_size(item.value)
+                       < static_cast<unsigned>(item.encoded_length))
+        {
+            return errc::oversized_additional_information_coding;
+        }
+        return static_cast<T>(item.value);
     }
 
     template <string_output_container StringType>
@@ -519,9 +534,8 @@ inline auto item_parser<Stream>::string(Stream &inStream,
         {
             DPLX_TRY(item_info chunkItem, parse::generic(inStream));
 
-            if (chunkItem.type == type_code::special && chunkItem.indefinite())
+            if (chunkItem.is_special_break())
             {
-                // special break
                 break;
             }
             else if (chunkItem.type != expectedType)

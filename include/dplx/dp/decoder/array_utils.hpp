@@ -36,10 +36,11 @@ concept resizable_container = requires(T &&value, std::size_t const numElements)
 #endif
 
 template <typename T, input_stream Stream, typename DecodeElementFn>
-auto parse_array(Stream &stream,
-                 T &value,
-                 type_code expectedItemType,
-                 DecodeElementFn &&decodeElement) -> result<void>
+[[deprecated("use item_parser<Stream>::array() instead")]] auto
+parse_array(Stream &stream,
+            T &value,
+            type_code expectedItemType,
+            DecodeElementFn &&decodeElement) -> result<void>
     // clang-format off
 requires requires
 {
@@ -49,10 +50,9 @@ requires requires
 // clang-format on
 try
 {
-    DPLX_TRY(auto &&arrayInfo, detail::parse_item_info(stream));
+    DPLX_TRY(auto &&arrayInfo, detail::parse_item(stream));
 
-    if (static_cast<std::byte>(arrayInfo.type & 0b111'00000)
-        != expectedItemType)
+    if (arrayInfo.type != expectedItemType)
     {
         return errc::item_type_mismatch;
     }
