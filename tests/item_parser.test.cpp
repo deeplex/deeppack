@@ -139,8 +139,7 @@ BOOST_DATA_TEST_CASE(parse_speculative,
 BOOST_DATA_TEST_CASE(parse_safe, boost::unit_test::data::make(parse_samples))
 {
     test_input_stream stream(std::span<std::byte const>(sample.stream)
-                                     .first(static_cast<std::size_t>(
-                                             sample.expected.encoded_length)));
+                                     .first(sample.expected.encoded_length));
     auto parseRx = parse::generic(stream);
     DPLX_REQUIRE_RESULT(parseRx);
 
@@ -159,8 +158,7 @@ BOOST_DATA_TEST_CASE(skip_simple, boost::unit_test::data::make(parse_samples))
         return;
     }
     test_input_stream stream(std::span<std::byte const>(sample.stream)
-                                     .first(static_cast<std::size_t>(
-                                             sample.expected.encoded_length)));
+                                     .first(sample.expected.encoded_length));
     auto parseRx = dp::skip_item(stream);
     DPLX_REQUIRE_RESULT(parseRx);
 

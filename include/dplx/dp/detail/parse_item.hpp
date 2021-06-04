@@ -36,7 +36,7 @@ struct item_info
     type_code type;
     flag flags;
     // std::uint16_t padding;
-    std::int32_t encoded_length;
+    std::uint32_t encoded_length;
     std::uint64_t value;
 
     [[nodiscard]] bool indefinite() const noexcept
@@ -135,7 +135,7 @@ inline auto parse_item_safe(Stream &inStream) noexcept(
         DPLX_ATTR_LIKELY
         {
             auto const bytePower = info.value - (detail::inline_value_max + 1);
-            info.encoded_length = 1 + (1 << bytePower);
+            info.encoded_length = 1u + (1u << bytePower);
 
             // ensure we consume the whole item or nothing
             DPLX_TRY(consume(inStream, indicatorProxy, 0u));

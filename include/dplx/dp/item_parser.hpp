@@ -93,8 +93,7 @@ public:
                 return errc::indefinite_item;
             }
         if (mode != parse_mode::lenient
-            && detail::var_uint_encoded_size(item.value)
-                       < static_cast<unsigned>(item.encoded_length))
+            && detail::var_uint_encoded_size(item.value) < item.encoded_length)
             DPLX_ATTR_UNLIKELY
             {
                 return errc::oversized_additional_information_coding;
@@ -140,7 +139,7 @@ public:
             }
             if (mode != parse_mode::lenient
                 && detail::var_uint_encoded_size(item.value)
-                           < static_cast<unsigned>(item.encoded_length))
+                           < item.encoded_length)
             {
                 return errc::oversized_additional_information_coding;
             }
@@ -173,7 +172,7 @@ public:
         }
         if (mode != parse_mode::lenient
             && detail::var_uint_encoded_size(item.value)
-                       < static_cast<unsigned>(item.encoded_length))
+                       < item.encoded_length)
         {
             return errc::oversized_additional_information_coding;
         }
@@ -392,22 +391,22 @@ public:
         DPLX_TRY(item_info const item, parse::generic(inStream));
 
         if (item.type != type_code::special || item.indefinite()
-            || item.encoded_length < 3)
+            || item.encoded_length < 3u)
         {
             return errc::item_type_mismatch;
         }
 
-        if (item.encoded_length == 9)
+        if (item.encoded_length == 9u)
         {
             return errc::item_value_out_of_range;
         }
-        else if (item.encoded_length == 5)
+        else if (item.encoded_length == 5u)
         {
             float value;
             std::memcpy(&value, &item.value, sizeof(value)); // #bit_cast
             return value;
         }
-        else // if (item.encoded_length == 3)
+        else // if (item.encoded_length == 3u)
         {
             return static_cast<float>(detail::load_iec559_half(
                     static_cast<std::uint16_t>(item.value)));
@@ -418,24 +417,24 @@ public:
         DPLX_TRY(item_info const item, parse::generic(inStream));
 
         if (item.type != type_code::special || item.indefinite()
-            || item.encoded_length < 3)
+            || item.encoded_length < 3u)
         {
             return errc::item_type_mismatch;
         }
 
-        if (item.encoded_length == 9)
+        if (item.encoded_length == 9u)
         {
             double value;
             std::memcpy(&value, &item.value, sizeof(value)); // #bit_cast
             return value;
         }
-        else if (item.encoded_length == 5)
+        else if (item.encoded_length == 5u)
         {
             float value;
             std::memcpy(&value, &item.value, sizeof(value)); // #bit_cast
             return value;
         }
-        else // if (item.encoded_length == 3)
+        else // if (item.encoded_length == 3u)
         {
             return detail::load_iec559_half(
                     static_cast<std::uint16_t>(item.value));
@@ -498,7 +497,7 @@ inline auto item_parser<Stream>::string(Stream &inStream,
         {
             if (mode != parse_mode::lenient
                 && detail::var_uint_encoded_size(item.value)
-                           < static_cast<unsigned>(item.encoded_length))
+                           < item.encoded_length)
             {
                 return errc::oversized_additional_information_coding;
             }
@@ -598,7 +597,7 @@ inline auto item_parser<Stream>::string_finite(Stream &inStream,
     }
     if (mode != parse_mode::lenient
         && detail::var_uint_encoded_size(item.value)
-                   < static_cast<unsigned>(item.encoded_length))
+                   < item.encoded_length)
     {
         return errc::oversized_additional_information_coding;
     }
@@ -757,7 +756,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
     }
     if (mode != parse_mode::lenient
         && detail::var_uint_encoded_size(item.value)
-                   < static_cast<unsigned>(item.encoded_length))
+                   < item.encoded_length)
     {
         return errc::oversized_additional_information_coding;
     }
