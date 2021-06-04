@@ -43,7 +43,7 @@
             },
             "cacheVariables": {
                 "BUILD_TESTING": true,
-                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
                 "VCPKG_TARGET_TRIPLET": "x64-windows-ltcg-static",
                 "CMAKE_C_COMPILER": "cl",

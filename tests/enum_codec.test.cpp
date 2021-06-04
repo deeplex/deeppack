@@ -49,6 +49,8 @@ static_assert(dplx::dp::tag_invocable<dplx::dp::encoded_size_of_fn,
 
 enum unscoped_test_enum
 {
+    UTE_zero = 0,
+    UTE_bound = 256,
 };
 
 static_assert(dplx::dp::encodable<unscoped_test_enum,
@@ -246,7 +248,7 @@ BOOST_AUTO_TEST_CASE(unscoped_zero)
     auto rx = dp::decode(istream, out);
 
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out == unscoped_test_enum{});
+    BOOST_TEST(out == UTE_zero);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

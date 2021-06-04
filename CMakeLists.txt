@@ -50,6 +50,7 @@ endif()
 
 ########################################################################
 # options
+option(DP_ASAN "Build with AddressSanitizer" OFF)
 
 ########################################################################
 # dependencies
@@ -192,6 +193,15 @@ if (WIN32)
         -D_WIN32_WINNT=0x0601 # WinSDK @ Windows 7
         -DUNICODE -D_UNICODE  # force Unicode WinAPIs
     )
+endif()
+
+if (DP_ASAN)
+    if (CL_COMPATIBLE)
+        target_compile_options(deeppack PUBLIC -fsanitize=address)
+    elseif (GXX_COMPATIBLE)
+        target_compile_options(deeppack PUBLIC -fsanitize=address)
+        target_link_options(deeppack PUBLIC -fsanitize=address)
+    endif()
 endif()
 
 ########################################################################
