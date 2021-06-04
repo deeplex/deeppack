@@ -38,7 +38,8 @@ inline constexpr struct container_reserve_fn
                                   StdContainer &container,
                                   std::size_t const reservationSize) noexcept
             -> result<void>
-        requires requires
+        requires std::is_nothrow_move_constructible_v<
+                typename StdContainer::value_type> && requires
         {
             {
                 container.reserve(reservationSize)

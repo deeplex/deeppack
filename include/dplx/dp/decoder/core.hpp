@@ -48,7 +48,8 @@ template <iec559_floating_point T, input_stream Stream>
 class basic_decoder<T, Stream>
 {
     static_assert(std::numeric_limits<T>::is_iec559);
-    static_assert(sizeof(T) == 8 || sizeof(T) == 4); 
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    static_assert(sizeof(T) == 8 || sizeof(T) == 4);
 
     using parse = item_parser<Stream>;
 
@@ -83,7 +84,7 @@ public:
 
 template <codable_enum Enum, input_stream Stream>
 class basic_decoder<Enum, Stream>
-{                   
+{
     using parse = item_parser<Stream>;
     using underlying_type = std::underlying_type_t<Enum>;
 

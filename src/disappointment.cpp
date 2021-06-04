@@ -15,8 +15,10 @@ namespace dplx::dp
 class error_category_impl : public std::error_category
 {
 public:
-    virtual auto name() const noexcept -> const char * override;
-    virtual auto message(int errval) const -> std::string override;
+    [[nodiscard]]
+    auto name() const noexcept -> const char * override;
+    [[nodiscard]]
+    auto message(int errval) const -> std::string override;
 };
 
 auto error_category_impl::name() const noexcept -> const char *
@@ -24,10 +26,10 @@ auto error_category_impl::name() const noexcept -> const char *
     return "dplx::dp error category";
 }
 
-auto error_category_impl::message(int code) const -> std::string
+auto error_category_impl::message(int errval) const -> std::string
 {
     using namespace std::string_literals;
-    switch (static_cast<errc>(code))
+    switch (static_cast<errc>(errval))
     {
     case errc::nothing:
         return "no error/success"s;
@@ -71,7 +73,7 @@ auto error_category_impl::message(int code) const -> std::string
         return "A binary/string CBOR item exceeded a size limit imposed by the user."s;
 
     default:
-        return fmt::format(FMT_STRING("unknown code {}"), code);
+        return fmt::format(FMT_STRING("unknown code {}"), errval);
     }
 }
 

@@ -39,7 +39,7 @@ struct item_info
     std::int32_t encoded_length;
     std::uint64_t value;
 
-    bool indefinite() const noexcept
+    [[nodiscard]] bool indefinite() const noexcept
     {
         return detail::to_underlying(flags)
              & detail::to_underlying(flag::indefinite);
@@ -51,7 +51,7 @@ struct item_info
                 | detail::to_underlying(flag::indefinite));
     }
 
-    bool is_special_break() const noexcept
+    [[nodiscard]] bool is_special_break() const noexcept
     {
         return type == type_code::special
             && detail::to_underlying(flags)

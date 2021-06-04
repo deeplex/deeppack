@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(int_decode)
     auto bytes = make_byte_array<32>({0x16});
     test_input_stream istream(bytes);
 
-    int out;
+    int out{};
     auto rx = dp::decode(istream, out);
 
     DPLX_REQUIRE_RESULT(rx);

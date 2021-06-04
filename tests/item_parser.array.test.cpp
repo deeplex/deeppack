@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(std_vector_simple)
             });
 
     DPLX_REQUIRE_RESULT(parseRx);
-    BOOST_TEST(parseRx.assume_value() == 5);
+    BOOST_TEST(parseRx.assume_value() == 5u);
     BOOST_TEST(callbackInvocations == 5);
     auto expected = make_byte_array<5>({0x01, 0x02, 0x03, 0x04, 0x05},
                                        std::byte{0x00});
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(std_vector_indefinite)
             });
 
     DPLX_REQUIRE_RESULT(parseRx);
-    BOOST_TEST(parseRx.assume_value() == 5);
+    BOOST_TEST(parseRx.assume_value() == 5u);
     BOOST_TEST(callbackInvocations == 5);
     auto expected = make_byte_array<5>({0xc1, 0xc2, 0xc7, 0xc4, 0xc5},
                                        std::byte{0x00});
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(std_vector_finite)
             });
 
     DPLX_REQUIRE_RESULT(parseRx);
-    BOOST_TEST(parseRx.assume_value() == 5);
+    BOOST_TEST(parseRx.assume_value() == 5u);
     BOOST_TEST(callbackInvocations == 5);
     auto expected = make_byte_array<5>({0x01, 0x02, 0x03, 0x04, 0x05},
                                        std::byte{0x00});

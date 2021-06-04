@@ -26,7 +26,7 @@ namespace bdata = boost::unit_test::data;
 
 using parse = dp::item_parser<test_input_stream>;
 
-struct acceptance_sample
+struct acceptance_sample // NOLINT(clang-analyzer-optin.performance.Padding)
 {
     dp::type_code type;
     std::uint64_t value;

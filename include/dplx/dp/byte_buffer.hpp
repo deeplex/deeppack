@@ -25,9 +25,9 @@ namespace dplx::dp
 template <typename T>
 class basic_byte_buffer_view
 {
-    T *mWindowBegin;
-    int mWindowSize;
-    int mAllocationSize;
+    T *mWindowBegin{};
+    int mWindowSize{};
+    int mAllocationSize{};
 
 public:
     using element_type = T;
@@ -41,12 +41,7 @@ public:
     using size_type = int;
     using difference_type = int;
 
-    explicit constexpr basic_byte_buffer_view() noexcept
-        : mWindowBegin{}
-        , mWindowSize{}
-        , mAllocationSize{}
-    {
-    }
+    explicit constexpr basic_byte_buffer_view() noexcept = default;
     explicit constexpr basic_byte_buffer_view(pointer memory,
                                               size_type allocationSize,
                                               difference_type consumed) noexcept
@@ -56,21 +51,21 @@ public:
     {
     }
 
-    // clang-format off
     template <typename U, std::size_t Extent>
-    requires(std::convertible_to<U (*)[], T (*)[]>)
-    explicit constexpr basic_byte_buffer_view(std::span<U, Extent> const &memory)
-        // clang-format on
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        requires(std::convertible_to<U (*)[], T (*)[]>)
+    explicit constexpr basic_byte_buffer_view(
+            std::span<U, Extent> const &memory)
+
         : basic_byte_buffer_view(
                 memory.data(), static_cast<int>(memory.size_bytes()), 0)
     {
     }
-    // clang-format off
     template <typename U>
-    requires(std::convertible_to<U (*)[], T (*)[]>)
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        requires(std::convertible_to<U (*)[], T (*)[]>)
     explicit constexpr basic_byte_buffer_view(
-        basic_byte_buffer_view<U> const &other)
-        // clang-format on
+            basic_byte_buffer_view<U> const &other)
         : mWindowBegin(other.remaining_begin())
         , mWindowSize(static_cast<int>(other.remaining_size()))
         , mAllocationSize(static_cast<int>(other.buffer_size()))
@@ -86,42 +81,44 @@ public:
         swap(lhs.mAllocationSize, rhs.mAllocationSize);
     }
 
-    inline auto consumed_begin() const noexcept -> pointer
+    [[nodiscard]] inline auto consumed_begin() const noexcept -> pointer
     {
         return mWindowBegin + mWindowSize - mAllocationSize;
     }
-    inline auto consumed_end() const noexcept -> pointer
+    [[nodiscard]] inline auto consumed_end() const noexcept -> pointer
     {
         return mWindowBegin;
     }
-    inline auto consumed_size() const noexcept -> size_type
+    [[nodiscard]] inline auto consumed_size() const noexcept -> size_type
     {
         return mAllocationSize - mWindowSize;
     }
-    inline auto consumed() const noexcept -> std::span<element_type>
+    [[nodiscard]] inline auto consumed() const noexcept
+            -> std::span<element_type>
     {
         return {mWindowBegin + mWindowSize - mAllocationSize,
                 static_cast<std::size_t>(mAllocationSize - mWindowSize)};
     }
 
-    inline auto remaining_begin() const noexcept -> pointer
+    [[nodiscard]] inline auto remaining_begin() const noexcept -> pointer
     {
         return mWindowBegin;
     }
-    inline auto remaining_end() const noexcept -> pointer
+    [[nodiscard]] inline auto remaining_end() const noexcept -> pointer
     {
         return mWindowBegin + mWindowSize;
     }
-    inline auto remaining_size() const noexcept -> size_type
+    [[nodiscard]] inline auto remaining_size() const noexcept -> size_type
     {
         return mWindowSize;
     }
-    inline auto remaining() const noexcept -> std::span<element_type>
+    [[nodiscard]] inline auto remaining() const noexcept
+            -> std::span<element_type>
     {
         return {mWindowBegin, static_cast<std::size_t>(mWindowSize)};
     }
 
-    inline auto buffer_size() const noexcept -> size_type
+    [[nodiscard]] inline auto buffer_size() const noexcept -> size_type
     {
         return mAllocationSize;
     }
@@ -132,7 +129,8 @@ public:
         mWindowSize = mAllocationSize;
     }
 
-    inline auto consume(difference_type const amount) noexcept -> pointer
+    [[nodiscard]] inline auto consume(difference_type const amount) noexcept
+            -> pointer
     {
         mWindowSize -= amount;
         return std::exchange(mWindowBegin, mWindowBegin + amount);

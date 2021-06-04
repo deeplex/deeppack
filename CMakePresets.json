@@ -107,7 +107,8 @@
                     "hostOS": [
                         "Windows"
                     ],
-                    "intelliSenseMode": "windows-clang-x64"
+                    "intelliSenseMode": "windows-clang-x64",
+                    "enableClangTidyCodeAnalysis": true
                 }
             }
         },

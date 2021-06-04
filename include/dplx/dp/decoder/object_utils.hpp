@@ -102,8 +102,8 @@ constexpr auto compress_bitset(std::initializer_list<bool> vs) noexcept
     constexpr auto numBuckets = detail::div_ceil(NumBits, digits);
     std::array<std::size_t, numBuckets> buckets{};
 
-    auto it = vs.begin();
-    auto const end = vs.end();
+    auto const *it = vs.begin();
+    auto const *const end = vs.end();
     for (std::size_t shift = 0, offset = 0; it != end; ++it, ++shift)
     {
         if (shift == digits)
@@ -181,8 +181,8 @@ public:
     template <typename TLike>
     constexpr auto operator()(TLike &&id) const noexcept -> std::size_t
     {
-        auto const begin = ids.data();
-        auto const end = ids.data() + ids.size();
+        auto const *const begin = ids.data();
+        auto const *const end = ids.data() + ids.size();
         id_type const *it;
         if constexpr (NumIds <= 64)
         {
@@ -272,7 +272,7 @@ class decode_object_property_fn<Descriptor, T, Stream>
 #if !BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
-    static_assert(detail::digits_v<id_type> <= 64);
+    static_assert(detail::digits_v<id_type> <= detail::digits_v<std::uint64_t>);
 
     static constexpr id_type small_id_limit = detail::inline_value_max + 1;
     static constexpr auto small_ids_end = detail::index_of_limit(
@@ -302,7 +302,7 @@ class decode_object_property_fn<Descriptor, T, Stream>
         template <std::size_t I>
         auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
         {
-            constexpr std::size_t propPos = static_cast<std::size_t>(
+            constexpr auto propPos = static_cast<std::size_t>(
                     std::find(descriptor.ids.data(),
                               descriptor.ids.data() + small_ids_end,
                               static_cast<id_type>(I))
@@ -431,7 +431,7 @@ inline auto parse_object_head(Stream &inStream,
 
         // 0xffff'ffff => max() is reserved as null_def_version
         DPLX_TRY(auto version, parse::template integer<std::uint32_t>(
-                                       inStream, 0xffff'fffeu));
+                                       inStream, 0xffff'fffeU));
 
         return object_head_info{numProps - 1, version};
     }

@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(signed_neg2)
 {
     auto const testValue = signed_test_enum::neg2;
 
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, testValue));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0]
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(signed_neg1)
 {
     auto testValue = signed_test_enum::neg1;
 
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, testValue));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0]
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(signed_zero)
 {
     auto const testValue = signed_test_enum::zero;
 
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, testValue));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0]
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(signed_zero)
 }
 BOOST_AUTO_TEST_CASE(signed_pos2)
 {
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, signed_test_enum::pos2));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, signed_test_enum::pos2));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0]
@@ -146,14 +146,14 @@ BOOST_AUTO_TEST_CASE(unsigned_zero)
 {
     auto const testValue = unsigned_test_enum::zero;
 
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, testValue));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0});
 }
 BOOST_AUTO_TEST_CASE(unsigned_pos2)
 {
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, unsigned_test_enum::pos2));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, unsigned_test_enum::pos2));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{2});
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(unsigned_pos2)
 
 BOOST_AUTO_TEST_CASE(unscoped)
 {
-    DPLX_TEST_RESULT(dp::encode(encodingBuffer, unscoped_test_enum{}));
+    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, unscoped_test_enum{}));
 
     BOOST_TEST(encodingBuffer.size() == 1u);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0});
@@ -176,10 +176,10 @@ BOOST_AUTO_TEST_CASE(signed_neg2)
     auto const bytes = make_byte_array<32>({0x21});
     test_input_stream istream(bytes);
 
-    signed_test_enum out;
+    signed_test_enum out{0xcf};
     auto rx = dp::decode(istream, out);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out == signed_test_enum::neg2);
 }
 BOOST_AUTO_TEST_CASE(signed_neg1)
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(signed_neg1)
 
     auto rx = dp::decode(dp::as_value<signed_test_enum>, istream);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(rx.assume_value() == signed_test_enum::neg1);
 }
 BOOST_AUTO_TEST_CASE(signed_zero)
@@ -197,10 +197,10 @@ BOOST_AUTO_TEST_CASE(signed_zero)
     auto const bytes = make_byte_array<32>({0x00});
     test_input_stream istream(bytes);
 
-    signed_test_enum out;
+    signed_test_enum out{0xcf};
     auto rx = dp::decode(istream, out);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out == signed_test_enum::zero);
 }
 BOOST_AUTO_TEST_CASE(signed_pos2)
@@ -208,10 +208,10 @@ BOOST_AUTO_TEST_CASE(signed_pos2)
     auto const bytes = make_byte_array<32>({0x02});
     test_input_stream istream(bytes);
 
-    signed_test_enum out;
+    signed_test_enum out{0xcf};
     auto rx = dp::decode(istream, out);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out == signed_test_enum::pos2);
 }
 
@@ -220,10 +220,10 @@ BOOST_AUTO_TEST_CASE(unsigned_zero)
     auto const bytes = make_byte_array<32>({0x00});
     test_input_stream istream(bytes);
 
-    unsigned_test_enum out;
+    unsigned_test_enum out{0xcf};
     auto rx = dp::decode(istream, out);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out == unsigned_test_enum::zero);
 }
 BOOST_AUTO_TEST_CASE(unsigned_pos2)
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(unsigned_pos2)
 
     auto rx = dp::decode(dp::as_value<unsigned_test_enum>, istream);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(rx.assume_value() == unsigned_test_enum::pos2);
 }
 
@@ -242,10 +242,10 @@ BOOST_AUTO_TEST_CASE(unscoped_zero)
     auto const bytes = make_byte_array<32>({0x00});
     test_input_stream istream(bytes);
 
-    unscoped_test_enum out;
+    auto out = static_cast<unscoped_test_enum>(0xcf);
     auto rx = dp::decode(istream, out);
 
-    DPLX_TEST_RESULT(rx);
+    DPLX_REQUIRE_RESULT(rx);
     BOOST_TEST(out == unscoped_test_enum{});
 }
 

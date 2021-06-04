@@ -105,7 +105,7 @@ inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
     {
         return false;
     }
-    out = oc::try_operation_return_as(std::move(in));
+    out = oc::try_operation_return_as(in);
     return true;
 }
 template <tryable T>
