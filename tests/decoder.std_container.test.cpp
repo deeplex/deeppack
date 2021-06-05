@@ -8,6 +8,7 @@
 #include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/decoder/std_container.hpp>
 
+#include <array>
 #include <deque>
 #include <list>
 #include <map>
@@ -27,6 +28,9 @@
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
+
+template class dplx::dp::basic_decoder<std::array<std::byte, 16>,
+                                       dp_tests::test_input_stream>;
 
 namespace dp_tests
 {
@@ -71,6 +75,11 @@ static_assert(
         dp::decodable<boost::container::map<int, int>, test_input_stream>);
 static_assert(
         dp::decodable<boost::container::flat_map<int, int>, test_input_stream>);
+
+static_assert(dp::decodable<std::array<std::byte, 15>, test_input_stream>);
+static_assert(dp::decodable<std::array<std::byte, 16>, test_input_stream>);
+static_assert(dp::decodable<std::array<int, 15>, test_input_stream>);
+static_assert(dp::decodable<std::array<unsigned, 16>, test_input_stream>);
 
 BOOST_AUTO_TEST_SUITE(std_container)
 

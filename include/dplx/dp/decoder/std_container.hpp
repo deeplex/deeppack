@@ -15,6 +15,7 @@
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/array_utils.hpp>
+#include <dplx/dp/customization.std.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
@@ -254,10 +255,28 @@ private:
     }
 };
 
+template <input_stream Stream>
+class basic_array_decoder<std::byte, Stream>
+{
+    using parse = item_parser<Stream>;
+
+public:
+    inline auto operator()(Stream &inStream, std::span<std::byte> value) const
+            -> result<void>
+    {
+        DPLX_TRY(auto const size, parse::binary_finite(inStream, value));
+        if (size != value.size())
+        {
+            return errc::tuple_size_mismatch;
+        }
+        return oc::success();
+    }
+};
+
 } // namespace detail
 
 template <typename T, std::size_t N, input_stream Stream>
-    requires decodable<T, Stream>
+    requires (decodable<T, Stream> || std::same_as<T, std::byte>)
 class basic_decoder<std::array<T, N>, Stream>
     : public detail::basic_array_decoder<T, Stream>
 {
