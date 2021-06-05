@@ -18,13 +18,13 @@
 namespace dp_tests
 {
 
-static_assert(dp::input_stream<dp::byte_buffer_view>);
-static_assert(!dp::lazy_input_stream<dp::byte_buffer_view>);
-static_assert(dp::stream_traits<dp::byte_buffer_view>::nothrow_input);
+static_assert(dp::input_stream<dp::memory_buffer>);
+static_assert(!dp::lazy_input_stream<dp::memory_buffer>);
+static_assert(dp::stream_traits<dp::memory_buffer>::nothrow_input);
 
-static_assert(dp::input_stream<dp::const_byte_buffer_view>);
-static_assert(!dp::lazy_input_stream<dp::const_byte_buffer_view>);
-static_assert(dp::stream_traits<dp::const_byte_buffer_view>::nothrow_input);
+static_assert(dp::input_stream<dp::memory_view>);
+static_assert(!dp::lazy_input_stream<dp::memory_view>);
+static_assert(dp::stream_traits<dp::memory_view>::nothrow_input);
 
 BOOST_AUTO_TEST_SUITE(streams)
 
@@ -33,7 +33,7 @@ struct memory_input_stream_dependencies
     static constexpr std::size_t testSize = 67;
     std::vector<std::byte> memory{testSize};
 
-    dp::const_byte_buffer_view subject{std::span<std::byte>(memory)};
+    dp::memory_view subject{std::span<std::byte>(memory)};
 
     memory_input_stream_dependencies()
     {

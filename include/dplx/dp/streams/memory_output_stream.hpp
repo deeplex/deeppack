@@ -7,28 +7,28 @@
 
 #pragma once
 
-#include <dplx/dp/byte_buffer.hpp>
+#include <dplx/dp/memory_buffer.hpp>
 #include <dplx/dp/stream.hpp>
 
 namespace dplx::dp
 {
 
 inline auto
-tag_invoke(write_fn, byte_buffer_view &self, std::size_t const size) noexcept
+tag_invoke(write_fn, memory_buffer &self, std::size_t const size) noexcept
         -> result<std::span<std::byte>>
 {
-    if (static_cast<std::size_t>(self.remaining_size()) < size)
+    if (self.remaining_size() < size)
     {
         return errc::end_of_stream;
     }
     return std::span<std::byte>(self.consume(static_cast<int>(size)), size);
 }
 inline auto tag_invoke(write_fn,
-                       byte_buffer_view &self,
+                       memory_buffer &self,
                        std::byte const *data,
                        std::size_t const size) noexcept -> result<void>
 {
-    if (static_cast<std::size_t>(self.remaining_size()) < size)
+    if (self.remaining_size() < size)
     {
         return errc::end_of_stream;
     }
@@ -38,7 +38,7 @@ inline auto tag_invoke(write_fn,
 }
 
 inline auto tag_invoke(commit_fn,
-                       byte_buffer_view &self,
+                       memory_buffer &self,
                        std::span<std::byte> const writeProxy,
                        std::size_t const actualSize) noexcept -> result<void>
 {

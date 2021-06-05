@@ -119,10 +119,10 @@ set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp.hpp>
 
-    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/byte_buffer.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/fwd.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/layout_descriptor.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/memory_buffer.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/object_def.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/stream.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/tuple_def.hpp>

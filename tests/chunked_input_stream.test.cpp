@@ -51,13 +51,13 @@ public:
 
 private:
     auto acquire_next_chunk_impl(std::uint64_t)
-            -> dp::result<dp::const_byte_buffer_view>
+            -> dp::result<dp::memory_view>
     {
         if (mNext >= mChunks.size())
         {
             return dp::errc::end_of_stream;
         }
-        return dp::const_byte_buffer_view(std::span(mChunks[mNext++]));
+        return dp::memory_view(std::span(mChunks[mNext++]));
     }
 };
 

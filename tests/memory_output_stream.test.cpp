@@ -13,9 +13,9 @@
 namespace dp_tests
 {
 
-static_assert(dp::output_stream<dp::byte_buffer_view>);
-static_assert(!dp::lazy_output_stream<dp::byte_buffer_view>);
-static_assert(dp::stream_traits<dp::byte_buffer_view>::nothrow_output);
+static_assert(dp::output_stream<dp::memory_buffer>);
+static_assert(!dp::lazy_output_stream<dp::memory_buffer>);
+static_assert(dp::stream_traits<dp::memory_buffer>::nothrow_output);
 
 BOOST_AUTO_TEST_SUITE(streams)
 
@@ -24,7 +24,7 @@ struct memory_output_stream_dependencies
     static constexpr std::size_t testSize = 67;
     std::vector<std::byte> memory{testSize, std::byte{0xfeu}};
 
-    dp::byte_buffer_view subject{memory.data(), testSize, 0};
+    dp::memory_buffer subject{memory.data(), testSize, 0};
 
     memory_output_stream_dependencies()
     {
@@ -34,7 +34,7 @@ struct memory_output_stream_dependencies
 BOOST_FIXTURE_TEST_SUITE(memory_output_stream,
                          memory_output_stream_dependencies)
 
-using dp::byte_buffer_view;
+using dp::memory_buffer;
 
 BOOST_AUTO_TEST_CASE(spans_whole_buffer)
 {

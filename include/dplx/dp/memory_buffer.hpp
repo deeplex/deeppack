@@ -23,11 +23,11 @@ namespace dplx::dp
 {
 
 template <typename T>
-class basic_byte_buffer_view
+class basic_memory_buffer
 {
     T *mWindowBegin{};
-    int mWindowSize{};
-    int mAllocationSize{};
+    unsigned mWindowSize{};
+    unsigned mAllocationSize{};
 
 public:
     using element_type = T;
@@ -38,13 +38,13 @@ public:
     using reference = T &;
     using const_reference = T const &;
 
-    using size_type = int;
+    using size_type = unsigned;
     using difference_type = int;
 
-    explicit constexpr basic_byte_buffer_view() noexcept = default;
-    explicit constexpr basic_byte_buffer_view(pointer memory,
-                                              size_type allocationSize,
-                                              difference_type consumed) noexcept
+    explicit constexpr basic_memory_buffer() noexcept = default;
+    explicit constexpr basic_memory_buffer(pointer memory,
+                                           size_type allocationSize,
+                                           difference_type consumed) noexcept
         : mWindowBegin(memory + consumed)
         , mWindowSize(allocationSize - consumed)
         , mAllocationSize(allocationSize)
@@ -54,26 +54,23 @@ public:
     template <typename U, std::size_t Extent>
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
         requires(std::convertible_to<U (*)[], T (*)[]>)
-    explicit constexpr basic_byte_buffer_view(
-            std::span<U, Extent> const &memory)
-
-        : basic_byte_buffer_view(
-                memory.data(), static_cast<int>(memory.size_bytes()), 0)
+    explicit constexpr basic_memory_buffer(std::span<U, Extent> const &memory)
+        : basic_memory_buffer(
+                memory.data(), static_cast<size_type>(memory.size_bytes()), 0)
     {
     }
     template <typename U>
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
         requires(std::convertible_to<U (*)[], T (*)[]>)
-    explicit constexpr basic_byte_buffer_view(
-            basic_byte_buffer_view<U> const &other)
+    explicit constexpr basic_memory_buffer(basic_memory_buffer<U> const &other)
         : mWindowBegin(other.remaining_begin())
-        , mWindowSize(static_cast<int>(other.remaining_size()))
-        , mAllocationSize(static_cast<int>(other.buffer_size()))
+        , mWindowSize(other.remaining_size())
+        , mAllocationSize(other.buffer_size())
     {
     }
 
-    friend inline void swap(basic_byte_buffer_view &lhs,
-                            basic_byte_buffer_view &rhs) noexcept
+    friend inline void swap(basic_memory_buffer &lhs,
+                            basic_memory_buffer &rhs) noexcept
     {
         using std::swap;
         swap(lhs.mWindowBegin, rhs.mWindowBegin);
@@ -97,7 +94,7 @@ public:
             -> std::span<element_type>
     {
         return {mWindowBegin + mWindowSize - mAllocationSize,
-                static_cast<std::size_t>(mAllocationSize - mWindowSize)};
+                mAllocationSize - mWindowSize};
     }
 
     [[nodiscard]] inline auto remaining_begin() const noexcept -> pointer
@@ -115,7 +112,7 @@ public:
     [[nodiscard]] inline auto remaining() const noexcept
             -> std::span<element_type>
     {
-        return {mWindowBegin, static_cast<std::size_t>(mWindowSize)};
+        return {mWindowBegin, mWindowSize};
     }
 
     [[nodiscard]] inline auto buffer_size() const noexcept -> size_type
@@ -149,23 +146,25 @@ public:
     }
 };
 
-using byte_buffer_view = basic_byte_buffer_view<std::byte>;
-using const_byte_buffer_view = basic_byte_buffer_view<std::byte const>;
+using memory_buffer = basic_memory_buffer<std::byte>;
+using memory_view = basic_memory_buffer<std::byte const>;
 
 template <typename Allocator>
-    requires std::is_same_v<typename Allocator::value_type, std::byte>
-class byte_buffer final
+    requires std::same_as<typename Allocator::value_type, std::byte>
+class memory_allocation final
 {
 public:
     using allocator_type = Allocator;
     using allocator_traits = std::allocator_traits<allocator_type>;
 
 private:
-    std::span<std::byte> mBuffer;
-    allocator_type mAllocator;
+    std::span<std::byte> mBuffer{};
+    /*[[no_unique_address]]*/ allocator_type mAllocator{};
 
 public:
-    ~byte_buffer() noexcept
+    using size_type = unsigned;
+
+    ~memory_allocation() noexcept
     {
         if (mBuffer.data() != nullptr)
         {
@@ -174,21 +173,17 @@ public:
         }
     }
 
-    explicit byte_buffer() noexcept
-        : mBuffer()
-        , mAllocator()
-    {
-    }
+    explicit memory_allocation() noexcept = default;
 
-    byte_buffer(byte_buffer const &) = delete;
-    auto operator=(byte_buffer const &) -> byte_buffer & = delete;
+    memory_allocation(memory_allocation const &) = delete;
+    auto operator=(memory_allocation const &) -> memory_allocation & = delete;
 
-    explicit byte_buffer(byte_buffer &&other) noexcept
+    explicit memory_allocation(memory_allocation &&other) noexcept
         : mBuffer(std::exchange(other.mBuffer, {}))
         , mAllocator(std::move(other.mAllocator))
     {
     }
-    auto operator=(byte_buffer &&other) noexcept -> byte_buffer &
+    auto operator=(memory_allocation &&other) noexcept -> memory_allocation &
     {
         mBuffer = std::exchange(other.mBuffer, {});
         if constexpr (allocator_traits::propagate_on_container_move_assignment::
@@ -200,29 +195,39 @@ public:
         return *this;
     }
 
-    friend inline void swap(byte_buffer &lhs, byte_buffer &rhs) noexcept
-    {
-        using std::swap;
-        swap(lhs.mBuffer, rhs.mBuffer);
-        swap(lhs.mAllocator, rhs.mAllocator);
-    }
-
-    explicit byte_buffer(allocator_type bufferAllocator)
+    explicit memory_allocation(allocator_type bufferAllocator)
         : mBuffer()
         , mAllocator(std::move(bufferAllocator))
     {
     }
 
-    auto as_buffer_view() const noexcept -> byte_buffer_view
+    friend inline void swap(memory_allocation &lhs,
+                            memory_allocation &rhs) noexcept
     {
-        return byte_buffer_view(mBuffer);
-    }
-    auto as_span() const noexcept -> std::span<std::byte>
-    {
-        return std::span<std::byte>(mBuffer);
+        std::ranges::swap(lhs.mBuffer, rhs.mBuffer);
+        std::ranges::swap(lhs.mAllocator, rhs.mAllocator);
     }
 
-    inline auto resize(int const newSize) noexcept -> result<void>
+    [[nodiscard]] inline auto as_memory_buffer() const noexcept -> memory_buffer
+    {
+        return dp::memory_buffer(mBuffer);
+    }
+    [[nodiscard /*, deprecated*/]] auto as_buffer_view() const noexcept
+            -> memory_buffer
+    {
+        return dp::memory_buffer(mBuffer);
+    }
+    [[nodiscard]] auto as_span() const noexcept -> std::span<std::byte>
+    {
+        return mBuffer;
+    }
+
+    [[nodiscard]] inline auto size() const noexcept -> size_type
+    {
+        return static_cast<size_type>(mBuffer.size());
+    }
+
+    inline auto resize(size_type const newSize) noexcept -> result<void>
     {
         if (mBuffer.size() == newSize)
         {
@@ -238,7 +243,7 @@ public:
 
         return allocate(newSize);
     }
-    inline auto grow(int const newSize) noexcept -> result<void>
+    inline auto grow(size_type const newSize) noexcept -> result<void>
     {
         if (newSize <= mBuffer.size())
         {
@@ -246,7 +251,7 @@ public:
                               // parameter values
         }
 
-        auto const oldMemory = mBuffer.data();
+        auto const *const oldMemory = mBuffer.data();
         auto const oldSize = mBuffer.size();
 
         auto allocRx = allocate(newSize);
@@ -260,15 +265,14 @@ public:
     }
 
 private:
-    inline auto allocate(int const bufferSize) noexcept -> result<void>
+    inline auto allocate(size_type const bufferSize) noexcept -> result<void>
     {
         try
         {
-            auto const bufferSizeT = static_cast<std::size_t>(bufferSize);
             auto const memory
-                    = allocator_traits::allocate(mAllocator, bufferSizeT);
+                    = allocator_traits::allocate(mAllocator, bufferSize);
 
-            mBuffer = std::span<std::byte>(memory, bufferSizeT);
+            mBuffer = std::span<std::byte>(memory, bufferSize);
             return dp::success();
         }
         catch (std::bad_alloc const &)

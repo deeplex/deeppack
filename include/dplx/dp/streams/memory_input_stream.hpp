@@ -12,7 +12,7 @@
 
 #include <span>
 
-#include <dplx/dp/byte_buffer.hpp>
+#include <dplx/dp/memory_buffer.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
 
@@ -22,7 +22,7 @@ namespace dplx::dp
 template <typename T>
     requires std::is_same_v<std::byte, std::remove_const_t<T>>
 inline auto tag_invoke(tag_t<dp::available_input_size>,
-                       basic_byte_buffer_view<T> &self) noexcept
+                       basic_memory_buffer<T> &self) noexcept
         -> dplx::dp::result<std::size_t>
 {
     return self.remaining_size();
@@ -30,11 +30,11 @@ inline auto tag_invoke(tag_t<dp::available_input_size>,
 template <typename T>
     requires std::is_same_v<std::byte, std::remove_const_t<T>>
 inline auto tag_invoke(tag_t<dp::read>,
-                       basic_byte_buffer_view<T> &self,
+                       basic_memory_buffer<T> &self,
                        std::size_t const amount) noexcept
         -> dplx::dp::result<std::span<std::byte const>>
 {
-    if (amount > static_cast<unsigned>(self.remaining_size()))
+    if (amount > self.remaining_size())
     {
         return errc::end_of_stream;
     }
@@ -44,7 +44,7 @@ inline auto tag_invoke(tag_t<dp::read>,
 template <typename T>
     requires std::is_same_v<std::byte, std::remove_const_t<T>>
 inline auto tag_invoke(tag_t<dp::consume>,
-                       basic_byte_buffer_view<T> &self,
+                       basic_memory_buffer<T> &self,
                        std::span<std::byte const> proxy,
                        std::size_t const actualAmount) noexcept
         -> dplx::dp::result<void>
@@ -55,12 +55,12 @@ inline auto tag_invoke(tag_t<dp::consume>,
 template <typename T>
     requires std::is_same_v<std::byte, std::remove_const_t<T>>
 inline auto tag_invoke(tag_t<dp::read>,
-                       basic_byte_buffer_view<T> &self,
+                       basic_memory_buffer<T> &self,
                        std::byte *buffer,
                        std::size_t const amount) noexcept
         -> dplx::dp::result<void>
 {
-    if (amount > static_cast<unsigned>(self.remaining_size()))
+    if (amount > self.remaining_size())
     {
         return errc::end_of_stream;
     }
@@ -71,11 +71,11 @@ inline auto tag_invoke(tag_t<dp::read>,
 template <typename T>
     requires std::is_same_v<std::byte, std::remove_const_t<T>>
 inline auto tag_invoke(tag_t<dp::skip_bytes>,
-                       basic_byte_buffer_view<T> &self,
+                       basic_memory_buffer<T> &self,
                        std::uint64_t const numBytes) noexcept
         -> dplx::dp::result<void>
 {
-    if (numBytes > static_cast<unsigned>(self.remaining_size()))
+    if (numBytes > self.remaining_size())
     {
         return errc::end_of_stream;
     }

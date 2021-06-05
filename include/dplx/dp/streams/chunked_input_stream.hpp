@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <span>
 
-#include <dplx/dp/byte_buffer.hpp>
+#include <dplx/dp/memory_buffer.hpp>
 #include <dplx/dp/stream.hpp>
 
 namespace dplx::dp
@@ -21,7 +21,7 @@ namespace dplx::dp
 template <typename Impl>
 class chunked_input_stream_base
 {
-    const_byte_buffer_view mReadArea;
+    memory_view mReadArea;
     std::uint64_t mRemaining;
 
     static constexpr unsigned int small_buffer_size
@@ -41,7 +41,7 @@ protected:
     {
     }
 
-    inline auto current_read_area() const noexcept -> const_byte_buffer_view
+    inline auto current_read_area() const noexcept -> memory_view
     {
         return mReadArea;
     }
