@@ -52,10 +52,44 @@ public:
             -> std::strong_ordering = default;
 };
 
+template <typename AccessorType>
+struct tuple_member_fun
+{
+    using class_type = typename AccessorType::class_type;
+    using value_type = typename AccessorType::value_type;
+
+    static auto decl_value() noexcept -> std::type_identity<value_type>;
+    static auto decl_class() noexcept -> std::type_identity<class_type>;
+
+    int nothing = 0;
+
+    static inline auto access(class_type &v) noexcept -> value_type &
+    {
+        // be lazy about this
+        static_assert(member_accessor<AccessorType>);
+        return *AccessorType{}(v);
+    }
+    static inline auto access(class_type const &v) noexcept
+            -> value_type const &
+    {
+        // be lazy about this
+        static_assert(member_accessor<AccessorType>);
+        return *AccessorType{}(v);
+    }
+
+    friend inline constexpr auto operator==(tuple_member_fun const &,
+                                            tuple_member_fun const &) noexcept
+            -> bool
+            = default;
+    friend inline constexpr auto operator<=>(tuple_member_fun const &,
+                                             tuple_member_fun const &) noexcept
+            -> std::strong_ordering = default;
+};
+
 template <auto... Properties>
 struct tuple_def
 {
-    using class_type = std::common_type_t<
+    using class_type = detail::contravariance_t<
             typename std::remove_cvref_t<decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);

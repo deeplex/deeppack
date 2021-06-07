@@ -224,9 +224,12 @@ public:
         return v.*M;
     }
 
-    constexpr auto operator==(basic_property_def const &) const noexcept -> bool
+    friend inline constexpr auto operator==(basic_property_def const &,
+                                            basic_property_def const &) noexcept
+            -> bool
             = default;
-    constexpr auto operator<=>(basic_property_def const &) const noexcept
+    friend inline constexpr auto
+    operator<=>(basic_property_def const &, basic_property_def const &) noexcept
             -> std::strong_ordering = default;
 };
 
@@ -245,16 +248,64 @@ using named_property_def = basic_property_def<Id, M, decltype(Id)>;
 
 #endif
 
+template <auto Id, typename AccessorType, typename IdRuntimeType = decltype(Id)>
+struct basic_property_fun
+{
+public:
+    using id_type = decltype(Id);
+    using id_runtime_type = IdRuntimeType;
+    using value_type = typename AccessorType::value_type;
+    using class_type = typename AccessorType::class_type;
+
+    static constexpr id_type const &id = Id;
+    bool required = true;
+
+    static auto decl_value() noexcept -> std::type_identity<value_type>;
+    static auto decl_class() noexcept -> std::type_identity<class_type>;
+
+    static inline auto access(class_type &v) noexcept -> value_type &
+    {
+        return *AccessorType{}(v);
+    }
+    static inline auto access(class_type const &v) noexcept
+            -> value_type const &
+    {
+        return *AccessorType{}(v);
+    }
+
+    friend inline constexpr auto operator==(basic_property_fun const &,
+                                            basic_property_fun const &) noexcept
+            -> bool
+            = default;
+    friend inline constexpr auto
+    operator<=>(basic_property_fun const &, basic_property_fun const &) noexcept
+            -> std::strong_ordering = default;
+};
+
+template <std::uint32_t Id, typename AccessorType>
+using property_fun = basic_property_fun<Id, AccessorType>;
+
+#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
+
+template <fixed_u8string Id, typename AccessorType>
+using named_property_fun = basic_property_fun<Id, AccessorType, std::u8string>;
+
+#else
+
+template <fixed_u8string Id, typename AccessorType>
+using named_property_fun = basic_property_fun<Id, AccessorType, decltype(Id)>;
+
+#endif
+
 template <auto... Properties>
 struct object_def
 {
-    using param_0_type = std::remove_cvref_t<
-            decltype(detail::nth_param_v<0, Properties...>)>;
     using id_type = std::common_type_t<
             typename std::remove_cvref_t<decltype(Properties)>::id_type...>;
     using id_runtime_type = std::common_type_t<typename std::remove_cvref_t<
             decltype(Properties)>::id_runtime_type...>;
-    using class_type = typename param_0_type::class_type;
+    using class_type = detail::contravariance_t<
+            typename std::remove_cvref_t<decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
     static constexpr bool has_optional_properties

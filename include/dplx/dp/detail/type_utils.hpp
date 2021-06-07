@@ -67,19 +67,40 @@ concept iec559_floating_point
 template <std::size_t>
 void get(...) noexcept = delete;
 
-// clang-format off
 template <typename T>
-concept pair_like
-    = requires(T &&t)
+concept pair_like = requires(T &&t)
+{
+    typename std::tuple_size<T>::type;
+    requires std::derived_from<std::tuple_size<T>,
+                               std::integral_constant<std::size_t, 2>>;
+    typename std::tuple_element<0, T>::type;
+    typename std::tuple_element<1, T>::type;
     {
-        typename std::tuple_size<T>::type;
-        requires std::derived_from<std::tuple_size<T>, std::integral_constant<std::size_t, 2>>;
-        typename std::tuple_element<0, T>::type;
-        typename std::tuple_element<1, T>::type;
-        { get<0>(t) } -> std::convertible_to<std::tuple_element_t<0, T> &>;
-        { get<1>(t) } -> std::convertible_to<std::tuple_element_t<1, T> &>;
-    };
-// clang-format on
+        get<0>(t)
+        } -> std::convertible_to<std::tuple_element_t<0, T> &>;
+    {
+        get<1>(t)
+        } -> std::convertible_to<std::tuple_element_t<1, T> &>;
+};
+
+template <typename T>
+concept member_accessor = std::is_default_constructible_v<T> && requires(
+        T &&x, typename T::class_type &ref, typename T::class_type const &cref)
+{
+    {
+        x(ref)
+        } -> std::same_as<typename T::value_type *>;
+    {
+        x(cref)
+        } -> std::same_as<typename T::value_type const *>;
+};
+
+template <typename ClassType, typename ValueType>
+struct member_accessor_base
+{
+    using class_type = ClassType;
+    using value_type = ValueType;
+};
 
 } // namespace dplx::dp
 
@@ -262,5 +283,43 @@ constexpr auto to_underlying(Enum value) noexcept ->
 {
     return static_cast<std::underlying_type_t<Enum>>(value);
 }
+
+template <typename... Ts>
+struct contravariance;
+
+template <typename... Ts>
+using contravariance_t = typename contravariance<Ts...>::type;
+
+template <>
+struct contravariance<>
+{
+};
+template <typename T>
+struct contravariance<T>
+{
+    using type = T;
+};
+template <typename T, typename... Ts>
+struct contravariance<T, T, Ts...> : contravariance<T, Ts...>
+{
+};
+template <typename T1, typename T2, typename... Ts>
+    requires std::is_base_of_v<T1, T2>
+struct contravariance<T1, T2, Ts...> : contravariance<T2, Ts...>
+{
+};
+template <typename T1, typename T2, typename... Ts>
+    requires std::is_base_of_v<T2, T1>
+struct contravariance<T1, T2, Ts...> : contravariance<T1, Ts...>
+{
+};
+template <typename... Ts>
+struct contravariance<void, Ts...> : contravariance<Ts...>
+{
+};
+template <typename T, typename... Ts>
+struct contravariance<T, void, Ts...> : contravariance<T, Ts...>
+{
+};
 
 } // namespace dplx::dp::detail

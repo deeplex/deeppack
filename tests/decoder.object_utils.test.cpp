@@ -26,6 +26,7 @@ using dp::fixed_u8string;
 using dp::named_property_def;
 using dp::object_def;
 using dp::property_def;
+using dp::property_fun;
 
 static_assert(std::same_as<dp::fixed_u8string<5>,
                            decltype(dp::fixed_u8string(u8"hello"))>);
@@ -255,13 +256,22 @@ class custom_with_layout_descriptor
     std::uint32_t mc;
     std::uint32_t md;
 
+    struct mc_accessor
+        : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
+    {
+        auto operator()(auto &self) const noexcept
+        {
+            return &self.mc;
+        }
+    };
+
 public:
     constexpr custom_with_layout_descriptor() noexcept = default;
 
     static constexpr object_def<
             property_def<1, &custom_with_layout_descriptor::ma>{},
             property_def<2, &custom_with_layout_descriptor::mb>{},
-            property_def<26, &custom_with_layout_descriptor::mc>{},
+            property_fun<26, mc_accessor>{},
             property_def<36, &custom_with_layout_descriptor::md>{}>
             layout_descriptor{};
 

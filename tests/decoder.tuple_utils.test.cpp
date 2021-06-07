@@ -22,6 +22,7 @@ BOOST_AUTO_TEST_SUITE(tuple_utils)
 
 using dp::tuple_def;
 using dp::tuple_member_def;
+using dp::tuple_member_fun;
 
 BOOST_AUTO_TEST_CASE(tuple_head_decode_unversioned)
 {
@@ -150,13 +151,22 @@ class custom_with_layout_descriptor
     std::uint32_t mc;
     std::uint32_t md;
 
+    struct mc_accessor
+        : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
+    {
+        auto operator()(auto &self) const noexcept
+        {
+            return &self.mc;
+        }
+    };
+
 public:
     constexpr custom_with_layout_descriptor() noexcept = default;
 
     static constexpr tuple_def<
             tuple_member_def<&custom_with_layout_descriptor::mb>{},
             tuple_member_def<&custom_with_layout_descriptor::ma>{},
-            tuple_member_def<&custom_with_layout_descriptor::mc>{},
+            tuple_member_fun<mc_accessor>{},
             tuple_member_def<&custom_with_layout_descriptor::md>{}>
             layout_descriptor{};
 
