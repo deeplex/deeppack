@@ -151,6 +151,8 @@ class custom_with_layout_descriptor
     std::uint32_t mc;
     std::uint32_t md;
 
+    test_tuple msub;
+
     struct mc_accessor
         : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
     {
@@ -167,7 +169,9 @@ public:
             tuple_member_def<&custom_with_layout_descriptor::mb>{},
             tuple_member_def<&custom_with_layout_descriptor::ma>{},
             tuple_member_fun<mc_accessor>{},
-            tuple_member_def<&custom_with_layout_descriptor::md>{}>
+            tuple_member_def<&custom_with_layout_descriptor::md>{},
+            tuple_member_def<&custom_with_layout_descriptor::msub,
+                             &test_tuple::ma>{}>
             layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
@@ -186,12 +190,16 @@ public:
     {
         return md;
     }
+    auto msubma() const noexcept -> std::uint32_t
+    {
+        return msub.ma;
+    }
 };
 static_assert(dp::packable_tuple<custom_with_layout_descriptor>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
 {
-    auto bytes = make_byte_array<32>({0b100'00100, 0x13, 0x09, 0x15, 0x17});
+    auto bytes = make_byte_array<32>({0b100'00101, 0x13, 0x09, 0x15, 0x17, 0x0a});
     test_input_stream istream{bytes};
 
     using test_decoder = dp::basic_decoder<custom_with_layout_descriptor,
@@ -205,6 +213,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     BOOST_TEST(t.b() == 0x13);
     BOOST_TEST(t.c() == 0x15);
     BOOST_TEST(t.d() == 0x17);
+    BOOST_TEST(t.msubma() == 0x0a);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

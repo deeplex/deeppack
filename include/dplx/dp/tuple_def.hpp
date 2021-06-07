@@ -17,8 +17,9 @@
 namespace dplx::dp
 {
 
-template <auto M>
-    requires std::is_member_object_pointer_v<decltype(M)>
+template <auto M, auto... Ms>
+    requires(std::is_member_object_pointer_v<decltype(M)> &&...
+                     &&std::is_member_object_pointer_v<decltype(Ms)>)
 struct tuple_member_def
 {
 private:
@@ -26,9 +27,10 @@ private:
             = detail::member_object_pointer_type_traits<decltype(M)>;
 
 public:
-    using value_type = typename member_object_pointer_type_traits::value_type;
     using class_type = std::remove_cvref_t<
             typename member_object_pointer_type_traits::class_type>;
+    using value_type = std::remove_cvref_t<decltype((
+            (std::declval<class_type &>().*M).*....*Ms))>;
 
     int nothing = 0;
 
@@ -38,17 +40,20 @@ public:
 
     static inline auto access(class_type &v) noexcept -> value_type &
     {
-        return v.*M;
+        return ((v.*M).*....*Ms);
     }
     static inline auto access(class_type const &v) noexcept
             -> value_type const &
     {
-        return v.*M;
+        return ((v.*M).*....*Ms);
     }
 
-    constexpr auto operator==(tuple_member_def const &) const noexcept -> bool
+    friend inline constexpr auto operator==(tuple_member_def const &,
+                                            tuple_member_def const &) noexcept
+            -> bool
             = default;
-    constexpr auto operator<=>(tuple_member_def const &) const noexcept
+    friend inline constexpr auto operator<=>(tuple_member_def const &,
+                                             tuple_member_def const &) noexcept
             -> std::strong_ordering = default;
 };
 

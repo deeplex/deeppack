@@ -192,8 +192,9 @@ struct common_type<dplx::dp::fixed_u8string<N1>, dplx::dp::fixed_u8string<N2>>
 namespace dplx::dp
 {
 
-template <auto Id, auto M, typename IdRuntimeType = decltype(Id)>
-    requires std::is_member_object_pointer_v<decltype(M)>
+template <typename IdRuntimeType, auto Id, auto M, auto... Ms>
+    requires(std::is_member_object_pointer_v<decltype(M)> &&...
+                     &&std::is_member_object_pointer_v<decltype(Ms)>)
 struct basic_property_def
 {
 private:
@@ -203,9 +204,10 @@ private:
 public:
     using id_type = decltype(Id);
     using id_runtime_type = IdRuntimeType;
-    using value_type = typename member_object_pointer_type_traits::value_type;
     using class_type = std::remove_cvref_t<
             typename member_object_pointer_type_traits::class_type>;
+    using value_type = std::remove_cvref_t<decltype((
+            (std::declval<class_type &>().*M).*....*Ms))>;
 
     static constexpr id_type const &id = Id;
     bool required = true;
@@ -216,12 +218,12 @@ public:
 
     static inline auto access(class_type &v) noexcept -> value_type &
     {
-        return v.*M;
+        return ((v.*M).*....*Ms);
     }
     static inline auto access(class_type const &v) noexcept
             -> value_type const &
     {
-        return v.*M;
+        return ((v.*M).*....*Ms);
     }
 
     friend inline constexpr auto operator==(basic_property_def const &,
@@ -233,18 +235,18 @@ public:
             -> std::strong_ordering = default;
 };
 
-template <std::uint32_t Id, auto M>
-using property_def = basic_property_def<Id, M>;
+template <std::uint32_t Id, auto M, auto... Ms>
+using property_def = basic_property_def<std::uint32_t, Id, M, Ms...>;
 
 #if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
 
-template <fixed_u8string Id, auto M>
-using named_property_def = basic_property_def<Id, M, std::u8string>;
+template <fixed_u8string Id, auto M, auto... Ms>
+using named_property_def = basic_property_def<std::u8string, Id, M, Ms...>;
 
 #else
 
-template <fixed_u8string Id, auto M>
-using named_property_def = basic_property_def<Id, M, decltype(Id)>;
+template <fixed_u8string Id, auto M, auto... Ms>
+using named_property_def = basic_property_def<decltype(Id), Id, M, Ms...>;
 
 #endif
 

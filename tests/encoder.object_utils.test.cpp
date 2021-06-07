@@ -60,6 +60,8 @@ class custom_with_layout_descriptor
     std::uint32_t mc;
     std::uint32_t md;
 
+    test_object msub;
+
     struct mc_accessor
         : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
     {
@@ -74,17 +76,22 @@ public:
     constexpr custom_with_layout_descriptor(std::uint64_t a,
                                             std::uint32_t b,
                                             std::uint32_t c,
-                                            std::uint32_t d) noexcept
+                                            std::uint32_t d,
+                                            test_object sub) noexcept
         : ma(a)
         , mb(b)
         , mc(c)
         , md(d)
+        , msub(sub)
     {
     }
 
     static constexpr object_def<
             property_def<1, &custom_with_layout_descriptor::ma>{},
             property_def<2, &custom_with_layout_descriptor::mb>{},
+            property_def<5,
+                         &custom_with_layout_descriptor::msub,
+                         &test_object::mc>{},
             property_fun<26, mc_accessor>{},
             property_def<36, &custom_with_layout_descriptor::md>{}>
             layout_descriptor{};
@@ -115,14 +122,15 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
     using test_encoder = dp::basic_encoder<custom_with_layout_descriptor,
                                            test_output_stream<>>;
 
-    auto bytes = make_byte_array<11>(
-            {0b101'00000 | 4, 1, 0x13, 2, 7, 0x18, 26, 4, 0x18, 36, 0x14});
+    auto bytes = make_byte_array<14>({0b101'00000 | 5, 1, 0x13, 2, 7, 5, 0x18,
+                                      0x2a, 0x18, 26, 4, 0x18, 36, 0x14});
 
     test_encoder subject{};
 
     test_output_stream ostream{};
 
-    custom_with_layout_descriptor t{0x13, 0x07, 0x04, 0x14};
+    custom_with_layout_descriptor const t{0x13, 0x07, 0x04, 0x14,
+                                          test_object{0, 0, 0x2a}};
     auto rx = subject(ostream, t);
     DPLX_REQUIRE_RESULT(rx);
 

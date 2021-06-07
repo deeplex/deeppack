@@ -117,6 +117,8 @@ class custom_with_layout_descriptor
     std::uint32_t mc;
     std::uint32_t md;
 
+    test_tuple msub;
+
     struct mc_accessor
         : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
     {
@@ -131,11 +133,13 @@ public:
     constexpr custom_with_layout_descriptor(std::uint64_t a,
                                             std::uint32_t b,
                                             std::uint32_t c,
-                                            std::uint32_t d)
+                                            std::uint32_t d,
+                                            test_tuple sub)
         : ma(a)
         , mb(b)
         , mc(c)
         , md(d)
+        , msub(sub)
     {
     }
 
@@ -143,7 +147,9 @@ public:
             tuple_member_def<&custom_with_layout_descriptor::mb>{},
             tuple_member_def<&custom_with_layout_descriptor::ma>{},
             tuple_member_fun<mc_accessor>{},
-            tuple_member_def<&custom_with_layout_descriptor::md>{}>
+            tuple_member_def<&custom_with_layout_descriptor::md>{},
+            tuple_member_def<&custom_with_layout_descriptor::msub,
+                             &test_tuple::mb>{}>
             layout_descriptor{};
 
     auto a() const noexcept -> std::uint64_t
@@ -162,13 +168,19 @@ public:
     {
         return md;
     }
+
+    auto msubmb() const noexcept -> std::uint64_t
+    {
+        return msub.mb;
+    }
 };
 static_assert(dp::packable_tuple<custom_with_layout_descriptor>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
-    auto bytes = make_byte_array<5>({0b100'00100, 0x13, 0x09, 0x15, 0x17});
-    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17};
+    auto bytes
+            = make_byte_array<6>({0b100'00101, 0x13, 0x09, 0x15, 0x17, 0x05});
+    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}};
 
     using test_encoder = dp::basic_encoder<custom_with_layout_descriptor,
                                            test_output_stream<>>;

@@ -256,6 +256,8 @@ class custom_with_layout_descriptor
     std::uint32_t mc;
     std::uint32_t md;
 
+    test_tuple msub;
+
     struct mc_accessor
         : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
     {
@@ -271,6 +273,9 @@ public:
     static constexpr object_def<
             property_def<1, &custom_with_layout_descriptor::ma>{},
             property_def<2, &custom_with_layout_descriptor::mb>{},
+            property_def<7,
+                         &custom_with_layout_descriptor::msub,
+                         &test_tuple::mc>{},
             property_fun<26, mc_accessor>{},
             property_def<36, &custom_with_layout_descriptor::md>{}>
             layout_descriptor{};
@@ -291,6 +296,10 @@ public:
     {
         return md;
     }
+    auto msubmc() const noexcept -> std::uint32_t
+    {
+        return msub.mc;
+    }
 };
 static_assert(dp::packable<custom_with_layout_descriptor>);
 static_assert(dp::packable_object<custom_with_layout_descriptor>);
@@ -303,7 +312,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     test_encoder subject{};
 
     auto bytes = make_byte_array<32>(
-            {0b101'00000 | 4, 2, 7, 1, 0x13, 24, 26, 4, 24, 36, 0x14});
+            {0b101'00000 | 5, 2, 7, 1, 0x13, 24, 26, 4, 24, 36, 0x14, 7, 0x18, 0xcf});
     test_input_stream istream{bytes};
 
     custom_with_layout_descriptor t{};
@@ -313,6 +322,7 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     BOOST_TEST(t.b() == 0x07);
     BOOST_TEST(t.c() == 0x04);
     BOOST_TEST(t.d() == 0x14);
+    BOOST_TEST(t.msubmc() == 0xcf);
 }
 
 // using namespace dp::string_literals;
