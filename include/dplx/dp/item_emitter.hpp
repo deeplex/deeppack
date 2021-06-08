@@ -13,6 +13,7 @@
 #include <ranges>
 #include <type_traits>
 
+#include <dplx/dp/config.hpp>
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/item_size.hpp>
 #include <dplx/dp/detail/utils.hpp>
@@ -93,7 +94,7 @@ inline auto store_var_uint(std::byte *dest,
     static_assert(sizeof(T) <= 8);
     static_assert(std::is_unsigned_v<T>);
 
-#if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
+#if !DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
 
     if constexpr (sizeof(T) <= 4)
     {

@@ -51,6 +51,10 @@ endif()
 ########################################################################
 # options
 option(DP_ASAN "Build with AddressSanitizer" OFF)
+option(DPLX_DP_DISABLE_WORKAROUNDS "Disable all workarounds" OFF)
+option(DPLX_DP_FLAG_OUTDATED_WORKAROUNDS "Emit compiler errors for workarounds which are active, but haven't been validated for this version" OFF)
+option(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER "Use the branching store_var_uint implementation" OFF)
+mark_as_advanced(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER)
 
 ########################################################################
 # dependencies
@@ -107,10 +111,15 @@ endif()
 # library
 add_library(deeppack)
 add_library(Deeplex::deeppack ALIAS deeppack)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/include/dplx/dp/detail)
 target_include_directories(deeppack PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated/include>
     $<INSTALL_INTERFACE:include>
 )
+
+configure_file("tools/config.hpp.in" ${CMAKE_CURRENT_BINARY_DIR}/generated/include/dplx/dp/detail/config.hpp @ONLY)
 
 target_sources(deeppack PRIVATE
     "src/disappointment.cpp"
@@ -118,6 +127,8 @@ target_sources(deeppack PRIVATE
 set(DP_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/dplx")
 target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/config.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated/include/dplx/dp/detail/config.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/concepts.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/fwd.hpp>
@@ -168,6 +179,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/perfect_hash.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/type_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/utils.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/workaround.hpp>
 )
 
 target_link_libraries(deeppack PUBLIC
@@ -271,6 +283,7 @@ endif()
 include(GNUInstallDirs)
 
 install(DIRECTORY include/ TYPE INCLUDE)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/include/ TYPE INCLUDE)
 install(TARGETS deeppack EXPORT deeppack-targets)
 install(EXPORT deeppack-targets
     NAMESPACE Deeplex::

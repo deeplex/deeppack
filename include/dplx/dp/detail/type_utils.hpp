@@ -14,9 +14,9 @@
 #include <utility>
 
 #include <boost/predef/compiler.h>
-#include <boost/predef/other/workaround.h>
 
 #include <dplx/dp/detail/mp_lite.hpp>
+#include <dplx/dp/detail/workaround.hpp>
 
 namespace dplx::dp::detail
 {
@@ -51,12 +51,13 @@ concept iec559_floating_point
     {
         typename std::numeric_limits<T>;
 
+#if DPLX_DP_WORKAROUND(BOOST_COMP_MSVC, <, 19, 28, 0) 
         // MSVC concepts implementation bug | recheck every version.
         // e.g. iec559_floating_point<int[2]> causes a
         // C2090: function returns array
         // compilation error in the fallback std::numeric_limits<T>
         // implementation.
-#if !defined(_MSC_VER) || _MSC_VER > 1927 || defined(__clang__)
+#else
         requires std::numeric_limits<T>::is_iec559;
 #endif
     };
@@ -142,7 +143,7 @@ template <std::size_t N, typename... Params>
 using nth_param_t = typename decltype(nth_param_type_impl<N>::deduce(
         static_cast<std::type_identity<Params> *>(nullptr)...))::type;
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_MSVC, 19, 29, 30037)
 
 template <std::size_t N, auto... Vs>
 struct nth_param_value_impl;

@@ -17,9 +17,9 @@
 #include <type_traits>
 
 #include <boost/predef/compiler.h>
-#include <boost/predef/other/workaround.h>
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
+#include <dplx/dp/detail/workaround.hpp>
+#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
 // gcc has a problem with the defaulted <=> over structs containing arrays
 // therefore we need to use std::u8string as runtime string type
 #include <string>
@@ -79,7 +79,7 @@ struct fixed_u8string
     {
         return std::u8string_view(lhs) == rhs;
     }
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_CLANG, <, 13, 0, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_CLANG, 12, 0, 0)
 
     friend inline constexpr auto operator<=>(fixed_u8string const &lhs,
                                              std::u8string_view rhs) noexcept
@@ -237,7 +237,7 @@ public:
 template <std::uint32_t Id, auto M, auto... Ms>
 using property_def = basic_property_def<std::uint32_t, Id, M, Ms...>;
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
+#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
 
 template <fixed_u8string Id, auto M, auto... Ms>
 using named_property_def = basic_property_def<std::u8string, Id, M, Ms...>;
@@ -289,7 +289,7 @@ public:
 template <std::uint32_t Id, typename AccessorType>
 using property_fun = basic_property_fun<Id, AccessorType, std::uint32_t>;
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
+#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
 
 template <fixed_u8string Id, typename AccessorType>
 using named_property_fun = basic_property_fun<Id, AccessorType, std::u8string>;
@@ -311,8 +311,8 @@ struct object_def
             typename detail::remove_cref_t<decltype(Properties)>::id_type...>;
     using id_runtime_type = std::common_type_t<typename detail::remove_cref_t<
             decltype(Properties)>::id_runtime_type...>;
-    using class_type = detail::contravariance_t<
-            typename detail::remove_cref_t<decltype(Properties)>::class_type...>;
+    using class_type = detail::contravariance_t<typename detail::remove_cref_t<
+            decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
     static constexpr bool has_optional_properties

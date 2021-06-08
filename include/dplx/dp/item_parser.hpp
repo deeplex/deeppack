@@ -669,7 +669,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
         for (std::size_t i = 0; i < numElements; ++i)
         {
             std::size_t const v = i;
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_MSVC, 19, 29, 30037)
             if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                          std::size_t const, parse_mode const>)
 #else
@@ -715,7 +715,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
             }
 
             std::size_t const v = i;
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_MSVC, 19, 29, 30037)
             if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                          std::size_t const, parse_mode const>)
 #else
@@ -780,7 +780,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
     for (std::size_t i = 0; i < numElements; ++i)
     {
         std::size_t const v = i;
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_MSVC, 19, 29, 30037)
         if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                      std::size_t const, parse_mode const>)
 #else

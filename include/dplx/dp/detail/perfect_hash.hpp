@@ -182,7 +182,7 @@ public:
             auto const slot = freeSlots[--freeSlots.back()];
             remap[key_hash(key) % remap_size] = slot;
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
             // gcc has a problem with the defaulted <=> over structs containing
             // arrays
             values[slot] = static_cast<std::size_t>(

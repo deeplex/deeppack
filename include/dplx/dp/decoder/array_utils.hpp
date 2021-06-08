@@ -12,17 +12,17 @@
 #include <new>
 #include <utility>
 
+#include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/item_parser.hpp>
 #include <dplx/dp/stream.hpp>
 
 #include <boost/predef/compiler.h>
-#include <boost/predef/other/workaround.h>
 
 namespace dplx::dp
 {
 
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_MSVC, 19, 29, 30037)
 namespace detail
 {
 
@@ -73,7 +73,7 @@ try
         }
 
         auto const numElements = static_cast<std::size_t>(arrayInfo.value);
-#if BOOST_PREDEF_WORKAROUND(BOOST_COMP_MSVC, <, 19, 30, 0)
+#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_MSVC, 19, 29, 30037)
         if constexpr (detail::resizable_container<T>)
 #else
         if constexpr (requires { value.reserve(numElements); })

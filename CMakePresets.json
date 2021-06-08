@@ -17,6 +17,8 @@
             },
             "cacheVariables": {
                 "BUILD_TESTING": true,
+                "DPLX_DP_DISABLE_WORKAROUNDS": false,
+                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_DEBUG_POSTFIX": "-Debug",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
@@ -95,6 +97,8 @@
             },
             "cacheVariables": {
                 "BUILD_TESTING": true,
+                "DPLX_DP_DISABLE_WORKAROUNDS": false,
+                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_DEBUG_POSTFIX": "-ClangDebug",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
@@ -123,6 +127,8 @@
                     "type": "FILEPATH"
                 },
                 "BUILD_TESTING": true,
+                "DPLX_DP_DISABLE_WORKAROUNDS": false,
+                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "gcc",
@@ -153,6 +159,8 @@
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/.vs/vcpkg/scripts/buildsystems/vcpkg.cmake",
                 "BUILD_TESTING": true,
+                "DPLX_DP_DISABLE_WORKAROUNDS": false,
+                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "clang",

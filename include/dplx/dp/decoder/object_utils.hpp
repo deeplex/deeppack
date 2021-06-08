@@ -209,7 +209,9 @@ class decode_object_property_fn
     static constexpr auto ids = descriptor.ids;
     static constexpr std::size_t const num_prop_ids = descriptor.ids.size();
 
-#if !BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+    // fixed_u8string id comparison operator is borked
+#else
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
 
@@ -279,7 +281,9 @@ class decode_object_property_fn<descriptor, T, Stream>
     using descriptor_type = detail::remove_cref_t<decltype(descriptor)>;
     using id_type = typename descriptor_type::id_type;
 
-#if !BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+    // fixed_u8string id comparison operator is borked
+#else
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
     static_assert(detail::digits_v<id_type> <= detail::digits_v<std::uint64_t>);

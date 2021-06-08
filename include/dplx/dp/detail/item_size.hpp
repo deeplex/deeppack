@@ -9,6 +9,7 @@
 
 #include <cstdint>
 
+#include <dplx/dp/config.hpp>
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/type_code.hpp>
 
@@ -72,7 +73,7 @@ constexpr auto var_uint_encoded_size(T const value) -> unsigned int
 {
     static_assert(sizeof(T) <= sizeof(std::uint64_t));
 
-#if !DEEPPACK_USE_BRANCHING_INTEGER_ENCODER
+#if !DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
 
     if (std::is_constant_evaluated())
     {
