@@ -8,7 +8,6 @@
 #pragma once
 
 #include <dplx/dp/decoder/utils.hpp>
-#include <dplx/dp/detail/mp_for_dots.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
@@ -70,7 +69,7 @@ inline auto decode_tuple_properties(Stream &stream,
                                     T &dest,
                                     std::int32_t numProperties) -> result<void>
 {
-    using decode_value_fn = detail::mp_decode_value_fn<descriptor, T, Stream>;
+    using decode_value_fn = detail::mp_decode_value_fn<T, Stream>;
 
     constexpr std::size_t expectedNumProps = descriptor.num_properties;
     if (numProperties != expectedNumProps)
@@ -78,20 +77,15 @@ inline auto decode_tuple_properties(Stream &stream,
         return errc::tuple_size_mismatch;
     }
 
-    DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-            decode_value_fn{stream, dest}));
+    DPLX_TRY(descriptor.mp_for_dots(decode_value_fn{stream, dest}));
 
-    return success();
+    return oc::success();
 }
 
 template <packable_tuple T, input_stream Stream>
-    requires(detail::versioned_decoder_enabled(
-            layout_descriptor_for(std::type_identity<T>{})))
+    requires(detail::versioned_decoder_enabled(layout_descriptor_for_v<T>))
 class basic_decoder<T, Stream>
 {
-    static constexpr auto descriptor
-            = layout_descriptor_for(std::type_identity<T>{});
-
 public:
     using value_type = T;
 
@@ -99,20 +93,21 @@ public:
             -> result<void>
     {
         DPLX_TRY(auto &&headInfo,
-                 dp::parse_tuple_head<Stream,
-                                      descriptor.version != null_def_version>(
+                 dp::parse_tuple_head<Stream, layout_descriptor_for_v<T>.version
+                                                      != null_def_version>(
                          inStream));
 
-        if constexpr (descriptor.version != null_def_version)
+        if constexpr (layout_descriptor_for_v<T>.version != null_def_version)
         {
-            if (descriptor.version != headInfo.version)
+            if (layout_descriptor_for_v<T>.version != headInfo.version)
             {
                 return errc::item_version_mismatch;
             }
         }
 
-        return dp::decode_tuple_properties<descriptor, T, Stream>(
-                inStream, dest, headInfo.num_properties);
+        return dp::decode_tuple_properties<layout_descriptor_for_v<T>, T,
+                                           Stream>(inStream, dest,
+                                                   headInfo.num_properties);
     }
 };
 

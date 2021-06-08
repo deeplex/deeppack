@@ -98,7 +98,7 @@ using select_proper_param_type_impl
 
 template <typename T>
 using select_proper_param_type
-        = select_proper_param_type_impl<std::remove_cvref_t<T>>;
+        = select_proper_param_type_impl<detail::remove_cref_t<T>>;
 
 template <typename T, output_stream Stream>
 struct are_tuple_elements_encodable : std::false_type
@@ -118,12 +118,13 @@ concept encodable_tuple_like = tuple_like<T> && output_stream<
 template <typename T, typename Stream>
 concept encodable_pair_like
         = pair_like<T> && output_stream<Stream> && encodable<
-                std::remove_cvref_t<typename std::tuple_element<0, T>::type>,
-                Stream> && encodable<std::remove_cvref_t<typename std::
-                                                                 tuple_element<
-                                                                         1,
-                                                                         T>::
-                                                                         type>,
+                detail::remove_cref_t<typename std::tuple_element<0, T>::type>,
+                Stream> && encodable<detail::
+                                             remove_cref_t<
+                                                     typename std::
+                                                             tuple_element<
+                                                                     1,
+                                                                     T>::type>,
                                      Stream>;
 
 template <typename T, typename Stream>

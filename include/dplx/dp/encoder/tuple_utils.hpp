@@ -10,7 +10,6 @@
 #include <type_traits>
 
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/detail/mp_for_dots.hpp>
 #include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/api.hpp>
@@ -23,22 +22,20 @@
 namespace dplx::dp::detail
 {
 
-template <auto const &descriptor, typename T, typename Stream>
+template <typename T, typename Stream>
 struct mp_encode_value_fn
 {
     Stream &stream;
     T const &value;
 
-    template <std::size_t I>
-    inline auto operator()(mp_size_t<I>) -> result<void>
+    template <typename PropDefType>
+    inline auto operator()(PropDefType const &propertyDef) -> result<void>
     {
-        constexpr auto &propertyDef = descriptor.template property<I>();
-
-        using property_encoder = dp::basic_encoder<
-                typename decltype(propertyDef.decl_value())::type, Stream>;
+        using property_encoder
+                = dp::basic_encoder<typename PropDefType::value_type, Stream>;
 
         DPLX_TRY(property_encoder()(stream, propertyDef.access(value)));
-        return success();
+        return oc::success();
     }
 };
 
@@ -50,22 +47,20 @@ namespace dplx::dp
 template <auto const &descriptor, typename T, output_stream Stream>
 inline auto encode_tuple(Stream &outStream, T const &value) -> result<void>
 {
-    using encode_value_fn = detail::mp_encode_value_fn<descriptor, T, Stream>;
+    using emit = item_emitter<Stream>;
+    using encode_value_fn = detail::mp_encode_value_fn<T, Stream>;
 
     if constexpr (descriptor.version == null_def_version)
     {
-        DPLX_TRY(item_emitter<Stream>::array(outStream,
-                                             descriptor.num_properties));
+        DPLX_TRY(emit::array(outStream, descriptor.num_properties));
     }
     else
     {
-        DPLX_TRY(item_emitter<Stream>::array(outStream,
-                                             descriptor.num_properties + 1));
-        DPLX_TRY(item_emitter<Stream>::integer(outStream, descriptor.version));
+        DPLX_TRY(emit::array(outStream, descriptor.num_properties + 1));
+        DPLX_TRY(emit::integer(outStream, descriptor.version));
     }
 
-    DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-            encode_value_fn{outStream, value}));
+    DPLX_TRY(descriptor.mp_for_dots(encode_value_fn{outStream, value}));
 
     return success();
 }
@@ -75,14 +70,13 @@ inline auto encode_tuple(Stream &outStream,
                          T const &value,
                          std::uint32_t const version) -> result<void>
 {
-    using encode_value_fn = detail::mp_encode_value_fn<descriptor, T, Stream>;
+    using emit = item_emitter<Stream>;
+    using encode_value_fn = detail::mp_encode_value_fn<T, Stream>;
 
-    DPLX_TRY(item_emitter<Stream>::array(outStream,
-                                         descriptor.num_properties + 1));
-    DPLX_TRY(item_emitter<Stream>::integer(outStream, version));
+    DPLX_TRY(emit::array(outStream, descriptor.num_properties + 1));
+    DPLX_TRY(emit::integer(outStream, version));
 
-    DPLX_TRY(detail::mp_for_dots<descriptor.num_properties>(
-            encode_value_fn{outStream, value}));
+    DPLX_TRY(descriptor.mp_for_dots(encode_value_fn{outStream, value}));
 
     return success();
 }
@@ -90,16 +84,14 @@ inline auto encode_tuple(Stream &outStream,
 template <packable_tuple T, output_stream Stream>
 class basic_encoder<T, Stream>
 {
-    static constexpr auto descriptor
-            = layout_descriptor_for(std::type_identity<T>{});
-
 public:
     using value_type = T;
 
     auto operator()(Stream &outStream, value_type const &value) const
             -> result<void>
     {
-        return dp::encode_tuple<descriptor, T, Stream>(outStream, value);
+        return dp::encode_tuple<layout_descriptor_for_v<T>, T, Stream>(
+                outStream, value);
     }
 };
 
@@ -143,7 +135,7 @@ constexpr auto encoded_size_of_tuple(T const &value) noexcept -> std::size_t
 
 template <packable_tuple T>
 constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
-        -> std::size_t 
+        -> std::size_t
 {
     return dp::encoded_size_of_tuple<layout_descriptor_for_v<T>, T>(value);
 }

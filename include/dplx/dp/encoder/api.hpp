@@ -24,10 +24,10 @@ namespace dplx::dp
 inline constexpr struct encode_fn final
 {
     template <typename T, output_stream Stream>
-        requires encodable<std::remove_cvref_t<T>, Stream>
+        requires encodable<detail::remove_cref_t<T>, Stream>
     inline auto operator()(Stream &outStream, T &&value) const -> result<void>
     {
-        return basic_encoder<std::remove_cvref_t<T>, Stream>()(
+        return basic_encoder<detail::remove_cref_t<T>, Stream>()(
                 outStream, static_cast<T &&>(value));
     }
 
@@ -45,8 +45,8 @@ inline constexpr struct encode_fn final
         inline auto operator()(detail::select_proper_param_type<T> value) const
                 -> result<void>
         {
-            return basic_encoder<std::remove_cvref_t<T>, Stream>()(*mOutStream,
-                                                                   value);
+            return basic_encoder<detail::remove_cref_t<T>, Stream>()(
+                    *mOutStream, value);
         }
     };
     template <output_stream Stream>
@@ -61,11 +61,11 @@ inline constexpr struct encode_fn final
         }
 
         template <typename T>
-            requires encodable<std::remove_cvref_t<T>, Stream>
+            requires encodable<detail::remove_cref_t<T>, Stream>
         inline auto operator()(T &&value) const -> result<void>
         {
-            return basic_encoder<std::remove_cvref_t<T>, Stream>()(*mOutStream,
-                                                                   value);
+            return basic_encoder<detail::remove_cref_t<T>, Stream>()(
+                    *mOutStream, value);
         }
     };
 
@@ -75,7 +75,7 @@ inline constexpr struct encode_fn final
         return bound_type<void, Stream>(outStream);
     }
     template <typename T, output_stream Stream>
-        requires encodable<std::remove_cvref_t<T>, Stream>
+        requires encodable<detail::remove_cref_t<T>, Stream>
     static inline auto bind(Stream &outStream) -> bound_type<T, Stream>
     {
         return bound_type<T, Stream>(outStream);
@@ -87,25 +87,25 @@ inline constexpr struct encode_array_fn final
     // encodes value arguments into a CBOR array data item.
     // clang-format off
     template <typename... Ts, output_stream Stream>
-        requires (... && encodable<std::remove_cvref_t<Ts>, Stream>)
+        requires (... && encodable<detail::remove_cref_t<Ts>, Stream>)
     inline auto operator()(Stream &outStream, Ts &&... values) const
         -> result<void>
     // clang-format on
     {
         return detail::arg_list_encoder<
-                detail::mp_list<std::remove_cvref_t<Ts>...>,
+                detail::mp_list<detail::remove_cref_t<Ts>...>,
                 Stream>::encode(outStream, static_cast<Ts &&>(values)...);
     }
 
     template <output_stream Stream, typename... TArgs>
-        requires(... &&encodable<std::remove_cvref_t<TArgs>, Stream>)
+        requires(... &&encodable<detail::remove_cref_t<TArgs>, Stream>)
     class bound_type
         : detail::arg_list_encoder<
-                  detail::mp_list<std::remove_cvref_t<TArgs>...>,
+                  detail::mp_list<detail::remove_cref_t<TArgs>...>,
                   Stream>
     {
         using impl_type = detail::arg_list_encoder<
-                detail::mp_list<std::remove_cvref_t<TArgs>...>,
+                detail::mp_list<detail::remove_cref_t<TArgs>...>,
                 Stream>;
 
     public:
@@ -125,11 +125,11 @@ inline constexpr struct encode_array_fn final
         }
 
         template <typename... Ts>
-            requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>)
+            requires(... &&encodable<detail::remove_cref_t<Ts>, Stream>)
         auto operator()(Ts &&...values) const -> result<void>
         {
             using impl = detail::arg_list_encoder<
-                    detail::mp_list<std::remove_cvref_t<Ts>...>, Stream>;
+                    detail::mp_list<detail::remove_cref_t<Ts>...>, Stream>;
             return impl::encode(*mOutStream, static_cast<Ts &&>(values)...);
         }
     };
@@ -137,7 +137,7 @@ inline constexpr struct encode_array_fn final
     template <typename... TArgs, output_stream Stream>
     static auto bind(Stream &outStream) -> bound_type<Stream, TArgs...>
     {
-        return bound_type<Stream, std::remove_cvref_t<TArgs>...>(outStream);
+        return bound_type<Stream, detail::remove_cref_t<TArgs>...>(outStream);
     }
 } encode_array{};
 
@@ -146,12 +146,12 @@ inline constexpr struct encode_map_t final
     // clang-format off
     template <typename... Ps, output_stream Stream>
     requires (... && (
-        pair_like<std::remove_cvref_t<Ps>>
-        && encodable<std::remove_cvref_t<
-            typename std::tuple_element<0, std::remove_cvref_t<Ps>>::type>,
+        pair_like<detail::remove_cref_t<Ps>>
+        && encodable<detail::remove_cref_t<
+            typename std::tuple_element<0, detail::remove_cref_t<Ps>>::type>,
             Stream>
-        && encodable<std::remove_cvref_t<
-            typename std::tuple_element<1, std::remove_cvref_t<Ps>>::type>,
+        && encodable<detail::remove_cref_t<
+            typename std::tuple_element<1, detail::remove_cref_t<Ps>>::type>,
             Stream>
         ))
     inline auto operator()(Stream &outStream, Ps &&... ps) const -> result<void>
@@ -184,12 +184,12 @@ inline constexpr struct encode_map_t final
         // clang-format off
         template <typename... Ps>
         requires (... && (
-            pair_like<std::remove_cvref_t<Ps>>
-            && encodable<std::remove_cvref_t<
-                typename std::tuple_element<0, std::remove_cvref_t<Ps>>::type>,
+            pair_like<detail::remove_cref_t<Ps>>
+            && encodable<detail::remove_cref_t<
+                typename std::tuple_element<0, detail::remove_cref_t<Ps>>::type>,
                 Stream>
-            && encodable<std::remove_cvref_t<
-                typename std::tuple_element<1, std::remove_cvref_t<Ps>>::type>,
+            && encodable<detail::remove_cref_t<
+                typename std::tuple_element<1, detail::remove_cref_t<Ps>>::type>,
                 Stream>
             ))
         inline auto operator()(Ps &&... ps) const -> result<void>
@@ -221,11 +221,11 @@ private:
     {
         using std::get;
 
-        using pair_type = std::remove_cvref_t<P>;
+        using pair_type = detail::remove_cref_t<P>;
         using key_type
-                = std::remove_cvref_t<std::tuple_element_t<0, pair_type>>;
+                = detail::remove_cref_t<std::tuple_element_t<0, pair_type>>;
         using value_type
-                = std::remove_cvref_t<std::tuple_element_t<1, pair_type>>;
+                = detail::remove_cref_t<std::tuple_element_t<1, pair_type>>;
 
         DPLX_TRY((basic_encoder<key_type, Stream>()(stream, get<0>(p))));
         DPLX_TRY((basic_encoder<value_type, Stream>()(stream, get<1>(p))));
@@ -239,7 +239,7 @@ inline constexpr struct encode_varargs_t final
     // encodes a single value argument directly without an enclosing array
     // encodes multiple value arguments into a CBOR array data item.
     template <typename... Ts, output_stream Stream>
-        requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>)
+        requires(... &&encodable<detail::remove_cref_t<Ts>, Stream>)
     inline auto operator()([[maybe_unused]] Stream &outStream,
                            [[maybe_unused]] Ts &&...values) const
             -> result<void>
@@ -250,13 +250,13 @@ inline constexpr struct encode_varargs_t final
         }
         else if constexpr (sizeof...(Ts) == 1)
         {
-            return basic_encoder<std::remove_cvref_t<Ts>..., Stream>()(
+            return basic_encoder<detail::remove_cref_t<Ts>..., Stream>()(
                     outStream, static_cast<Ts &&>(values)...);
         }
         else if constexpr (sizeof...(Ts) > 1)
         {
             return detail::arg_list_encoder<
-                    detail::mp_list<std::remove_cvref_t<Ts>...>,
+                    detail::mp_list<detail::remove_cref_t<Ts>...>,
                     Stream>::encode(outStream, static_cast<Ts &&>(values)...);
         }
     }
@@ -273,7 +273,7 @@ inline constexpr struct encode_varargs_t final
         }
 
         template <typename... Ts>
-            requires(... &&encodable<std::remove_cvref_t<Ts>, Stream>)
+            requires(... &&encodable<detail::remove_cref_t<Ts>, Stream>)
         inline auto operator()(Ts &&...vs) const -> result<void>
         {
             return encode_varargs_t{}(*mOutStream, static_cast<Ts &&>(vs)...);

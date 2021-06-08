@@ -331,4 +331,7 @@ struct is_type_identity<std::type_identity<T>> : std::true_type
 {
 };
 
+template <typename T>
+using remove_cref_t = std::remove_const_t<std::remove_reference_t<T>>;
+
 } // namespace dplx::dp::detail

@@ -57,7 +57,7 @@ template <typename... TArgs, output_stream Stream>
 class basic_encoder<mp_varargs<TArgs...>, Stream>
 {
     using impl = detail::arg_list_encoder<
-            detail::mp_list<std::remove_cvref_t<TArgs>...>,
+            detail::mp_list<detail::remove_cref_t<TArgs>...>,
             Stream>;
 
 public:
@@ -77,7 +77,7 @@ public:
     template <typename T>
     inline auto operator()(Stream &outStream, T &&value) -> result<void>
     {
-        return basic_encoder<std::remove_cvref_t<T>, Stream>()(
+        return basic_encoder<detail::remove_cref_t<T>, Stream>()(
                 outStream, static_cast<T &&>(value));
     }
 };
@@ -367,7 +367,7 @@ class basic_encoder<T, Stream>
 // clang-format on
 {
     using impl = detail::arg_list_encoder<
-            detail::mp_transform_t<std::remove_cvref_t,
+            detail::mp_transform_t<detail::remove_cref_t,
                                    detail::mp_rename_t<T, detail::mp_list>>,
             Stream>;
 
@@ -392,7 +392,7 @@ template <typename... Ts>
 struct are_tuple_elements_size_ofable<mp_list<Ts...>>
     : std::bool_constant<(
               tag_invocable<encoded_size_of_fn,
-                            std::remove_cvref_t<Ts> const &> && ...)>
+                            detail::remove_cref_t<Ts> const &> && ...)>
 {
 };
 
@@ -422,7 +422,7 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
         -> unsigned int
 {
     using impl = detail::encoded_size_of_tuple<detail::mp_transform_t<
-            std::remove_cvref_t, detail::mp_rename_t<T, detail::mp_list>>>;
+            detail::remove_cref_t, detail::mp_rename_t<T, detail::mp_list>>>;
     return detail::apply_simply(impl{}, value);
 }
 
@@ -434,10 +434,10 @@ class basic_encoder<T, Stream>
 {
     using pair_like = std::ranges::range_value_t<T>;
     using key_encoder = basic_encoder<
-            std::remove_cvref_t<std::tuple_element_t<0, pair_like>>,
+            detail::remove_cref_t<std::tuple_element_t<0, pair_like>>,
             Stream>;
     using value_encoder = basic_encoder<
-            std::remove_cvref_t<std::tuple_element_t<1, pair_like>>,
+            detail::remove_cref_t<std::tuple_element_t<1, pair_like>>,
             Stream>;
 
 public:

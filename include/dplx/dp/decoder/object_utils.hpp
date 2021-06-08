@@ -213,7 +213,7 @@ class decode_object_property_fn
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
 
-    using odef_type = std::remove_cvref_t<decltype(descriptor)>;
+    using odef_type = detail::remove_cref_t<decltype(descriptor)>;
     using id_type = typename odef_type::id_type;
     using id_runtime_type = typename odef_type::id_runtime_type;
 
@@ -222,7 +222,18 @@ class decode_object_property_fn
                                            false>
             lookup{descriptor.ids};
 
-    using decode_value_fn = mp_decode_value_fn<descriptor, T, Stream>;
+    using decode_value_fn = mp_decode_value_fn<T, Stream>;
+
+    struct decode_prop_fn : public decode_value_fn
+    {
+        template <std::size_t I>
+        auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
+        {
+            constexpr auto &propertyDef = descriptor.template property<I>();
+            DPLX_TRY(decode_value_fn::operator()(propertyDef));
+            return I;
+        }
+    };
 
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<std::size_t>
@@ -236,7 +247,7 @@ public:
         }
 
         return boost::mp11::mp_with_index<num_prop_ids>(
-                idx, decode_value_fn{inStream, dest});
+                idx, decode_prop_fn{{inStream, dest}});
     }
 };
 
@@ -259,15 +270,14 @@ constexpr auto index_of_limit(T const *elems,
     return num;
 }
 
-template <auto const &Descriptor, typename T, input_stream Stream>
+template <auto const &descriptor, typename T, input_stream Stream>
     requires dp::unsigned_integer<
-            typename std::remove_cvref_t<decltype(Descriptor)>::id_type>
-class decode_object_property_fn<Descriptor, T, Stream>
+            typename detail::remove_cref_t<decltype(descriptor)>::id_type>
+class decode_object_property_fn<descriptor, T, Stream>
 {
     using parse = item_parser<Stream>;
-    using descriptor_type = std::remove_cvref_t<decltype(Descriptor)>;
+    using descriptor_type = detail::remove_cref_t<decltype(descriptor)>;
     using id_type = typename descriptor_type::id_type;
-    static constexpr descriptor_type const &descriptor = Descriptor;
 
 #if !BOOST_PREDEF_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
@@ -295,7 +305,7 @@ class decode_object_property_fn<Descriptor, T, Stream>
     static constexpr property_id_lookup_fn<id_type, id_map_size, false> lookup{
             large_ids};
 
-    using decode_value_fn = mp_decode_value_fn<descriptor, T, Stream>;
+    using decode_value_fn = mp_decode_value_fn<T, Stream>;
 
     struct decode_prop_small_id_fn : decode_value_fn
     {
@@ -314,8 +324,10 @@ class decode_object_property_fn<Descriptor, T, Stream>
             }
             else
             {
-                return decode_value_fn::operator()(
-                        boost::mp11::mp_size_t<propPos>{});
+                constexpr auto &propertyDef
+                        = descriptor.template property<propPos>();
+                DPLX_TRY(decode_value_fn::operator()(propertyDef));
+                return propPos;
             }
         }
     };
@@ -325,8 +337,10 @@ class decode_object_property_fn<Descriptor, T, Stream>
         template <std::size_t I>
         auto operator()(boost::mp11::mp_size_t<I>) -> result<std::size_t>
         {
-            return decode_value_fn::operator()(
-                    boost::mp11::mp_size_t<I + small_ids_end>{});
+            constexpr auto &propertyDef
+                    = descriptor.template property<I + small_ids_end>();
+            DPLX_TRY(decode_value_fn::operator()(propertyDef));
+            return I + small_ids_end;
         }
     };
 
@@ -497,31 +511,29 @@ inline auto decode_object_properties(Stream &stream,
 }
 
 template <packable_object T, input_stream Stream>
-    requires(detail::versioned_decoder_enabled(
-            layout_descriptor_for(std::type_identity<T>{})))
+    requires(detail::versioned_decoder_enabled(layout_descriptor_for_v<T>))
 class basic_decoder<T, Stream>
 {
-    static constexpr auto descriptor
-            = layout_descriptor_for(std::type_identity<T>{});
-
 public:
     auto operator()(Stream &inStream, T &dest) const -> result<void>
     {
-        DPLX_TRY(auto &&headInfo,
-                 dp::parse_object_head<Stream,
-                                       descriptor.version != null_def_version>(
-                         inStream));
+        DPLX_TRY(
+                auto &&headInfo,
+                dp::parse_object_head<Stream, layout_descriptor_for_v<T>.version
+                                                      != null_def_version>(
+                        inStream));
 
-        if constexpr (descriptor.version != null_def_version)
+        if constexpr (layout_descriptor_for_v<T>.version != null_def_version)
         {
-            if (descriptor.version != headInfo.version)
+            if (layout_descriptor_for_v<T>.version != headInfo.version)
             {
                 return errc::item_version_mismatch;
             }
         }
 
-        return dp::decode_object_properties<descriptor, T, Stream>(
-                inStream, dest, headInfo.num_properties);
+        return dp::decode_object_properties<layout_descriptor_for_v<T>, T,
+                                            Stream>(inStream, dest,
+                                                    headInfo.num_properties);
     }
 };
 
