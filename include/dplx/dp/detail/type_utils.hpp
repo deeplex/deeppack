@@ -322,4 +322,13 @@ struct contravariance<T, void, Ts...> : contravariance<T, Ts...>
 {
 };
 
+template <typename T>
+struct is_type_identity : std::false_type
+{
+};
+template <typename T>
+struct is_type_identity<std::type_identity<T>> : std::true_type
+{
+};
+
 } // namespace dplx::dp::detail

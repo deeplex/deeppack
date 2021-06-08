@@ -14,54 +14,56 @@
 namespace dplx::dp
 {
 
+template <typename T>
+concept exposed_static_layout_descriptor = requires
+{
+    T::layout_descriptor;
+};
+
 inline constexpr struct layout_descriptor_for_fn
 {
     template <typename T>
         requires tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>
-    constexpr auto operator()(std::type_identity<T>) const
-            noexcept(nothrow_tag_invocable<layout_descriptor_for_fn,
-                                           std::type_identity<T>>)
-                    -> tag_invoke_result_t<layout_descriptor_for_fn,
-                                           std::type_identity<T>>
+    constexpr auto operator()(std::type_identity<T> tv) const noexcept
+            -> tag_invoke_result_t<layout_descriptor_for_fn,
+                                   std::type_identity<T>>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, std::type_identity<T>{});
+        return cpo::tag_invoke(*this, tv);
     }
 
-    // clang-format off
     template <typename T>
-    requires is_object_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>
-    friend constexpr decltype(auto)
-            tag_invoke(layout_descriptor_for_fn, std::type_identity<T>) noexcept
-    // clang-format on
+        requires(
+                exposed_static_layout_descriptor<
+                        T> && (is_object_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>> || is_tuple_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>))
+    friend constexpr decltype(auto) tag_invoke(layout_descriptor_for_fn,
+                                               std::type_identity<T>) noexcept
     {
-        return T::layout_descriptor;
-    }
-
-    // clang-format off
-    template <typename T>
-    requires is_tuple_def_v<std::remove_cvref_t<decltype(T::layout_descriptor)>>
-    friend constexpr decltype(auto)
-            tag_invoke(layout_descriptor_for_fn, std::type_identity<T>) noexcept
-    // clang-format on
-    {
-        return T::layout_descriptor;
+        return (T::layout_descriptor);
     }
 
 } layout_descriptor_for;
 
 template <typename T>
 concept packable
-        = tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
+        = !detail::is_type_identity<
+                  T>::value // tis a workaround for infinite compiler recursion
+                            // during encoded_size_of_fn constraint checks
+       && tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
 
 template <typename T>
 concept packable_object = packable<T> && is_object_def_v<std::remove_cvref_t<
-        decltype(layout_descriptor_for(std::type_identity<T>{}))>>;
+        tag_invoke_result_t<layout_descriptor_for_fn, std::type_identity<T>>>>;
 
 template <typename T>
 concept packable_tuple = packable<T> && is_tuple_def_v<std::remove_cvref_t<
-        decltype(layout_descriptor_for(std::type_identity<T>{}))>>;
+        tag_invoke_result_t<layout_descriptor_for_fn, std::type_identity<T>>>>;
 
 inline constexpr std::uint32_t null_def_version = 0xffff'ffffu;
+
+template <typename T>
+    requires packable<T>
+inline constexpr auto layout_descriptor_for_v
+        = layout_descriptor_for(std::type_identity<T>{});
 
 } // namespace dplx::dp
 

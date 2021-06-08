@@ -295,7 +295,7 @@ inline constexpr struct encoded_size_of_fn
             noexcept(nothrow_tag_invocable<encoded_size_of_fn, T &&>)
                     -> tag_invoke_result_t<encoded_size_of_fn, T &&>
     {
-        return ::dplx::dp::cpo::tag_invoke(*this, static_cast<T &&>(value));
+        return cpo::tag_invoke(*this, static_cast<T &&>(value));
     }
 } encoded_size_of{};
 

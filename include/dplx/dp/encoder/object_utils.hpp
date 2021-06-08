@@ -11,6 +11,7 @@
 #include <dplx/dp/detail/mp_for_dots.hpp>
 #include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/item_emitter.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
 #include <dplx/dp/object_def.hpp>
@@ -141,5 +142,53 @@ public:
         return dp::encode_object<descriptor, T, Stream>(outStream, value);
     }
 };
+
+namespace detail
+{
+
+template <typename T>
+struct encoded_size_of_property
+{
+    T const &value;
+
+    constexpr auto operator()(auto const &propertyDef) const noexcept
+    {
+        auto const idSize = encoded_size_of(propertyDef.id);
+        auto const valueSize = encoded_size_of(propertyDef.access(value));
+        return idSize + valueSize;
+    }
+};
+
+} // namespace detail
+
+template <auto const &descriptor, typename T>
+inline constexpr auto encoded_size_of_object(T const &value) noexcept
+        -> std::size_t
+{
+    constexpr auto hasVersion = descriptor.version != null_def_version;
+
+    auto const sizeOfProps = descriptor.mp_map_fold_left(
+            detail::encoded_size_of_property<T>{value});
+
+    auto const prefixSize = detail::var_uint_encoded_size(
+            descriptor.num_properties + hasVersion);
+
+    if constexpr (hasVersion)
+    {
+        return prefixSize + 1u + encoded_size_of(descriptor.version)
+             + sizeOfProps;
+    }
+    else
+    {
+        return prefixSize + sizeOfProps;
+    }
+}
+
+template <packable_object T>
+inline constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
+        -> std::size_t
+{
+    return dp::encoded_size_of_object<layout_descriptor_for_v<T>, T>(value);
+}
 
 } // namespace dplx::dp

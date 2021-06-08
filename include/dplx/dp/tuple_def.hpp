@@ -109,6 +109,12 @@ struct tuple_def
         return detail::nth_param_v<N, Properties...>;
     }
 
+    template <typename MapFn>
+    static constexpr auto mp_map_fold_left(MapFn &&map)
+    {
+        return (... + static_cast<MapFn &&>(map)(Properties));
+    }
+
     constexpr auto operator==(tuple_def const &) const noexcept -> bool
             = default;
     constexpr auto operator<=>(tuple_def const &) const noexcept
@@ -125,6 +131,6 @@ struct is_tuple_def<tuple_def<Properties...>> : std::true_type
 };
 
 template <typename T>
-inline constexpr bool is_tuple_def_v = is_tuple_def<T>::value;
+concept is_tuple_def_v = is_tuple_def<T>::value;
 
 } // namespace dplx::dp

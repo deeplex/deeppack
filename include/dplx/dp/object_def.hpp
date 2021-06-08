@@ -325,6 +325,12 @@ struct object_def
         static_assert(N < num_properties);
         return detail::nth_param_v<N, Properties...>;
     }
+
+    template <typename MapFn>
+    static constexpr auto mp_map_fold_left(MapFn &&map)
+    {
+        return (... + static_cast<MapFn &&>(map)(Properties));
+    }
 };
 
 template <typename>
@@ -337,6 +343,6 @@ struct is_object_def<object_def<Properties...>> : std::true_type
 };
 
 template <typename T>
-inline constexpr bool is_object_def_v = is_object_def<T>::value;
+concept is_object_def_v = is_object_def<T>::value;
 
 } // namespace dplx::dp

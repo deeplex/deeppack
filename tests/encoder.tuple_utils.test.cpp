@@ -193,6 +193,14 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
                boost::test_tools::per_element{});
 }
 
+BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_size_of)
+{
+    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}};
+
+    auto const sizeOfT = dp::encoded_size_of(t);
+    BOOST_TEST(sizeOfT == 6u);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

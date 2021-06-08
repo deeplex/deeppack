@@ -138,7 +138,14 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
                boost::test_tools::per_element{});
 }
 
-// using namespace dp::string_literals;
+BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_size_of)
+{
+    custom_with_layout_descriptor const t{0x13, 0x07, 0x04, 0x14,
+                                          test_object{0, 0, 0x2a}};
+
+    auto const sizeOfT = dp::encoded_size_of(t);
+    BOOST_TEST(sizeOfT == 14u);
+}
 
 class custom_with_named_layout_descriptor
 {
