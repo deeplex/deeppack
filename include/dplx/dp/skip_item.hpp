@@ -91,13 +91,15 @@ inline auto skip_item(Stream &inStream) -> result<void>
 
         case static_cast<unsigned>(type_code::array) >> 5:
         {
-            bool const indefinite = item.indefinite();
-            // for indefinite arrays we keep item.value safely at 0x1f != 0
-            item.value -= !indefinite;
             if (item.value == 0)
             {
                 stack.pop_back();
+                break;
             }
+
+            bool const indefinite = item.indefinite();
+            // for indefinite arrays we keep item.value safely at 0x1f != 0
+            item.value -= !indefinite;
 
             // item reference can be invalidated by push back
             DPLX_TRY(auto subItem, detail::parse_item(inStream));
@@ -123,6 +125,12 @@ inline auto skip_item(Stream &inStream) -> result<void>
 
         case static_cast<unsigned>(type_code::map) >> 5:
         {
+            if (item.value == 0)
+            {
+                stack.pop_back();
+                break;
+            }
+
             auto const rawFlags = detail::to_underlying(item.flags);
             unsigned const indefinite
                     = rawFlags
@@ -131,15 +139,11 @@ inline auto skip_item(Stream &inStream) -> result<void>
             // code == 0b0x  =>  next item is a key
             // code == 0b1x  =>  next item is a value, therefore decrement kv
             // ctr
-            auto const decr = (rawFlags >> 1) & indefinite;
+            auto const decr = (rawFlags >> 1);
             item.flags = static_cast<dp::item_info::flag>(rawFlags ^ 2u);
 
             // for indefinite maps we keep item.value safely at 0x1f != 0
-            item.value -= decr;
-            if (item.value == 0)
-            {
-                stack.pop_back();
-            }
+            item.value -= decr & !indefinite;
 
             // item reference can be invalidated by push back
             DPLX_TRY(auto subItem, detail::parse_item(inStream));
