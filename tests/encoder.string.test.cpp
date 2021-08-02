@@ -21,9 +21,9 @@
 namespace dp_tests
 {
 
-BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
+BOOST_AUTO_TEST_SUITE(encoder)
 
-BOOST_AUTO_TEST_SUITE(string)
+BOOST_FIXTURE_TEST_SUITE(string, default_encoding_fixture)
 
 using namespace std::string_view_literals;
 

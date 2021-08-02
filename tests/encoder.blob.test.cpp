@@ -18,9 +18,9 @@
 namespace dp_tests
 {
 
-BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
+BOOST_AUTO_TEST_SUITE(encoder)
 
-BOOST_AUTO_TEST_SUITE(blob)
+BOOST_FIXTURE_TEST_SUITE(blob, default_encoding_fixture)
 
 static_assert(dp::encodable<std::vector<std::byte>, test_output_stream<>>);
 static_assert(dp::encodable<std::span<std::byte>, test_output_stream<>>);

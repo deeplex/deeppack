@@ -21,9 +21,9 @@
 namespace dp_tests
 {
 
-BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
+BOOST_AUTO_TEST_SUITE(encoder)
 
-BOOST_AUTO_TEST_SUITE(map)
+BOOST_FIXTURE_TEST_SUITE(map, default_encoding_fixture)
 
 static_assert(
         dp::encodable<std::map<int, simple_encodeable>, test_output_stream<>>);

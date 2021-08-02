@@ -54,7 +54,7 @@ public:
 namespace dp_tests
 {
 
-BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
+BOOST_AUTO_TEST_SUITE(encoder)
 
 static_assert(dp::pair_like<dp::map_pair<int, int>>);
 static_assert(std::is_trivial_v<dp::map_pair<int, int>>);
@@ -77,7 +77,7 @@ static_assert(dp::encodable<unsigned int, test_output_stream<>>);
 static_assert(dp::encodable<unsigned long, test_output_stream<>>);
 static_assert(dp::encodable<unsigned long long, test_output_stream<>>);
 
-BOOST_AUTO_TEST_SUITE(encode_api)
+BOOST_FIXTURE_TEST_SUITE(encode_api, default_encoding_fixture)
 
 BOOST_AUTO_TEST_CASE(simple_dispatch)
 {
@@ -232,6 +232,8 @@ BOOST_AUTO_TEST_CASE(varargs_2_bind)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_FIXTURE_TEST_SUITE(core, default_encoding_fixture)
+
 BOOST_AUTO_TEST_CASE(bool_false)
 {
     using test_encoder = dp::basic_encoder<bool, test_output_stream<>>;
@@ -325,6 +327,8 @@ BOOST_AUTO_TEST_CASE(vararg_dispatch_2)
     BOOST_TEST(encodingBuffer.data()[1] == dp::type_code::null);
     BOOST_TEST(encodingBuffer.data()[2] == dp::type_code::posint);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

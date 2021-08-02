@@ -18,9 +18,9 @@
 namespace dp_tests
 {
 
-BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
+BOOST_AUTO_TEST_SUITE(encoder)
 
-BOOST_AUTO_TEST_SUITE(range)
+BOOST_FIXTURE_TEST_SUITE(range, default_encoding_fixture)
 
 static_assert(std::ranges::range<dp::indefinite_range<int *>>);
 static_assert(std::ranges::view<dp::indefinite_range<int *>>);
