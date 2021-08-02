@@ -79,7 +79,7 @@ struct fixed_u8string
     {
         return std::u8string_view(lhs) == rhs;
     }
-#if DPLX_DP_WORKAROUND_TESTED_AT(BOOST_COMP_CLANG, 12, 0, 0)
+#if DPLX_DP_WORKAROUND(BOOST_COMP_CLANG, <, 12, 0, 1)
 
     friend inline constexpr auto operator<=>(fixed_u8string const &lhs,
                                              std::u8string_view rhs) noexcept

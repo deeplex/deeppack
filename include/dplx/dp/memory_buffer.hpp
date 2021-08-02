@@ -45,8 +45,8 @@ public:
     explicit constexpr basic_memory_buffer(pointer memory,
                                            size_type allocationSize,
                                            difference_type consumed) noexcept
-        : mWindowBegin(memory + consumed)
-        , mWindowSize(allocationSize - consumed)
+        : mWindowBegin(memory + static_cast<size_type>(consumed))
+        , mWindowSize(allocationSize - static_cast<size_type>(consumed))
         , mAllocationSize(allocationSize)
     {
     }
@@ -129,13 +129,13 @@ public:
     [[nodiscard]] inline auto consume(difference_type const amount) noexcept
             -> pointer
     {
-        mWindowSize -= amount;
+        mWindowSize -= static_cast<size_type>(amount);
         return std::exchange(mWindowBegin, mWindowBegin + amount);
     }
     inline void move_consumer(difference_type const amount) noexcept
     {
         mWindowBegin += amount;
-        mWindowSize -= amount;
+        mWindowSize -= static_cast<size_type>(amount);
     }
 
     inline void move_consumer_to(difference_type const absoluteOffset) noexcept

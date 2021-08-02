@@ -116,7 +116,10 @@ private:
             {
                 mRemaining -= amount;
                 return std::span<std::byte const>(
-                        mReadArea.consume(remainingChunk), remainingChunk);
+                        mReadArea.consume(
+                                static_cast<memory_view::difference_type>(
+                                        remainingChunk)),
+                        remainingChunk);
             }
 
             auto const bufferStart
@@ -162,7 +165,7 @@ private:
     {
         auto const unused = static_cast<int>(requestedAmount - actualAmount);
 
-        mRemaining += unused;
+        mRemaining += static_cast<unsigned>(unused);
         if (mBufferStart < 0)
         {
             mReadArea.move_consumer(-unused);
