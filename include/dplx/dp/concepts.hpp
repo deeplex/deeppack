@@ -69,15 +69,22 @@ concept decodable
 // clang-format on
 
 template <typename T>
+inline constexpr bool disable_range
+        // ranges which are type recursive w.r.t. their iterator value type
+        // (like std::filesystem::path) can't have an encodable base case and
+        // therefore always need their own specialization. We exclude them here
+        // in order to prevent any partial template specialization ambiguity
+        = std::is_same_v<T, std::ranges::range_value_t<T>>;
+
+template <typename T>
+concept range = std::ranges::range<T> && !disable_range<T>;
+
+template <typename T>
 inline constexpr bool disable_associative_range = false;
 
-// clang-format off
 template <typename T>
-concept associative_range
-    = std::ranges::range<T> &&
-        pair_like<std::ranges::range_value_t<T>> &&
-        !disable_associative_range<T>;
-// clang-format on
+concept associative_range = range<T> && pair_like<
+        std::ranges::range_value_t<T>> && !disable_associative_range<T>;
 
 template <typename Enum>
 inline constexpr bool disable_enum_codec = false;

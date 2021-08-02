@@ -191,11 +191,9 @@ constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept -> int
     return encoded_size_of(detail::to_underlying(value));
 }
 
-// clang-format off
-template <std::ranges::range T, output_stream Stream>
+template <range T, output_stream Stream>
     requires encodable<std::ranges::range_value_t<T>, Stream>
 class basic_encoder<T, Stream>
-// clang-format on
 {
     using wrapped_value_type = std::ranges::range_value_t<T>;
     using wrapped_encoder = basic_encoder<wrapped_value_type, Stream>;
@@ -248,7 +246,7 @@ public:
         }
     }
 };
-template <std::ranges::range T>
+template <range T>
     requires tag_invocable<encoded_size_of_fn,
                            std::ranges::range_reference_t<T>>
 constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
@@ -427,7 +425,7 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
 }
 
 // clang-format off
-template <associative_range T, output_stream Stream>
+template <associative_range T, output_stream Stream> 
     requires encodable<std::ranges::range_value_t<T>, Stream>
 class basic_encoder<T, Stream>
 // clang-format on
