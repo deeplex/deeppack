@@ -145,6 +145,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/narrow_strings.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/object_utils.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/std_path.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
 
@@ -153,6 +154,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_container.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_path.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_string.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/tuple_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/utils.hpp>
@@ -243,6 +245,7 @@ if (BUILD_TESTING)
         
         "tests/decoder.test.cpp"
         "tests/decoder.std_container.test.cpp"
+        "tests/decoder.std_path.test.cpp"
         "tests/decoder.std_string.test.cpp"
         "tests/decoder.object_utils.test.cpp"
         "tests/decoder.tuple_utils.test.cpp"
@@ -252,6 +255,7 @@ if (BUILD_TESTING)
         "tests/encoder.blob.test.cpp"
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
+        "tests/encoder.std_path.test.cpp"
         "tests/encoder.string.test.cpp"
         "tests/encoder.tuple.test.cpp"
         "tests/encoder.object_utils.test.cpp"
