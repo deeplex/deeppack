@@ -17,6 +17,14 @@
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/tag_invoke.hpp>
 
+namespace dplx::dp
+{
+
+using bytes = std::span<std::byte const>;
+using writable_bytes = std::span<std::byte>;
+
+}
+
 // output stream definitions & concepts
 namespace dplx::dp
 {
