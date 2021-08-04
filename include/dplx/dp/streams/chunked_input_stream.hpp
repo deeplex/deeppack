@@ -56,8 +56,7 @@ private:
     {
         return small_buffer_size - static_cast<unsigned int>(mBufferStart);
     }
-    inline auto consume_buffer(std::size_t const amount) noexcept
-            -> std::span<std::byte const>
+    inline auto consume_buffer(std::size_t const amount) noexcept -> bytes
     {
         // precondition:
         // 0 <= mBufferStart < decommission_threshold
@@ -67,8 +66,7 @@ private:
         auto const granted
                 = amount <= remainingBuffered ? amount : remainingBuffered;
 
-        std::span<std::byte const> const readProxy(mSmallBuffer + mBufferStart,
-                                                   granted);
+        bytes const readProxy(mSmallBuffer + mBufferStart, granted);
 
         mBufferStart += static_cast<std::int8_t>(granted);
         mRemaining -= granted;
@@ -87,12 +85,16 @@ private:
 
     inline auto acquire_next_chunk() noexcept -> result<void>
     {
-        DPLX_TRY(this->mReadArea, impl()->acquire_next_chunk_impl(mRemaining));
+        DPLX_TRY(mReadArea, impl()->acquire_next_chunk_impl(mRemaining));
+        if (mReadArea.remaining_size() > mRemaining)
+        {
+            mReadArea = memory_view{mReadArea.remaining().first(mRemaining)};
+        }
         return success();
     }
 
     inline auto read(std::size_t const amount) noexcept
-            -> result<std::span<std::byte const>>
+            -> result<bytes>
     {
         if (mBufferStart < 0
             && amount <= static_cast<unsigned int>(mReadArea.remaining_size()))

@@ -178,7 +178,7 @@ public:
     memory_allocation(memory_allocation const &) = delete;
     auto operator=(memory_allocation const &) -> memory_allocation & = delete;
 
-    explicit memory_allocation(memory_allocation &&other) noexcept
+    memory_allocation(memory_allocation &&other) noexcept
         : mBuffer(std::exchange(other.mBuffer, {}))
         , mAllocator(std::move(other.mAllocator))
     {
