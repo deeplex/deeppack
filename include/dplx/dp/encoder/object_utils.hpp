@@ -81,7 +81,7 @@ inline auto encode_object(Stream &outStream, T const &value) -> result<void>
         std::ranges::data(versionIdWriteProxy)[0] = std::byte{};
         if constexpr (lazy_output_stream<Stream>)
         {
-            DPLX_TRY(consume(outStream, versionIdWriteProxy));
+            DPLX_TRY(commit(outStream, versionIdWriteProxy));
         }
 
         DPLX_TRY(emit::integer(outStream, descriptor.version));
@@ -108,7 +108,7 @@ inline auto encode_object(Stream &outStream,
 
         if constexpr (lazy_output_stream<Stream>)
         {
-            DPLX_TRY(consume(outStream, versionIdWriteProxy));
+            DPLX_TRY(commit(outStream, versionIdWriteProxy));
         }
     }
     DPLX_TRY(item_emitter<Stream>::integer(outStream, version));
