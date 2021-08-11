@@ -129,6 +129,13 @@ BOOST_DATA_TEST_CASE(string_view_with,
                boost::test_tools::per_element{});
 }
 
+BOOST_DATA_TEST_CASE(string_view_size_with,
+                     boost::unit_test::data::make(string_samples))
+{
+    BOOST_TEST(dp::encoded_size_of(sample.content)
+               == sample.prefix_length + sample.content.size());
+}
+
 BOOST_DATA_TEST_CASE(string_with, boost::unit_test::data::make(string_samples))
 {
     using test_type = std::string;
@@ -144,6 +151,13 @@ BOOST_DATA_TEST_CASE(string_with, boost::unit_test::data::make(string_samples))
     BOOST_TEST(byte_span(encodingBuffer).subspan(sample.prefix_length)
                        == as_bytes(std::span(sample.content)),
                boost::test_tools::per_element{});
+}
+
+BOOST_DATA_TEST_CASE(string_size_with,
+                     boost::unit_test::data::make(string_samples))
+{
+    BOOST_TEST(dp::encoded_size_of(std::string{sample.content})
+               == sample.prefix_length + sample.content.size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

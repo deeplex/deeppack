@@ -42,4 +42,11 @@ class basic_encoder<std::string, Stream>
 {
 };
 
+constexpr auto tag_invoke(encoded_size_of_fn, std::string_view strview) noexcept
+        -> unsigned
+{
+    return dp::additional_information_size(strview.size())
+         + static_cast<unsigned>(strview.size());
+}
+
 } // namespace dplx::dp
