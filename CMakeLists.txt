@@ -142,6 +142,7 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/item_size.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/api.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/arg_list.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/chrono.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/narrow_strings.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/encoder/object_utils.hpp>
@@ -151,6 +152,7 @@ target_sources(deeppack PUBLIC
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/api.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/array_utils.hpp>
+    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/chrono.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/std_container.hpp>
@@ -244,6 +246,7 @@ if (BUILD_TESTING)
         "tests/item_parser.test.cpp"
         
         "tests/decoder.test.cpp"
+        "tests/decoder.chrono.test.cpp"
         "tests/decoder.std_container.test.cpp"
         "tests/decoder.std_path.test.cpp"
         "tests/decoder.std_string.test.cpp"
@@ -253,6 +256,7 @@ if (BUILD_TESTING)
         "tests/encoder.test.cpp"
         "tests/encoder.test_utils.hpp"
         "tests/encoder.blob.test.cpp"
+        "tests/encoder.chrono.test.cpp"
         "tests/encoder.map.test.cpp"
         "tests/encoder.range.test.cpp"
         "tests/encoder.std_path.test.cpp"
