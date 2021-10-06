@@ -12,6 +12,7 @@
 
 #include <span>
 
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
@@ -32,6 +33,14 @@ inline auto boost_test_print_type(std::ostream &s,
     std::span<std::uint8_t const, N> ui8view(
             reinterpret_cast<std::uint8_t const *>(arr.data()), N);
     fmt::print(s, "{:#04x}", fmt::join(ui8view, ", "));
+    return s;
+}
+template <typename Rep, typename Period>
+inline auto boost_test_print_type(std::ostream &s,
+                                  std::chrono::duration<Rep, Period> const &v)
+        -> std::ostream &
+{
+    fmt::print(s, "{}", v);
     return s;
 }
 } // namespace boost::test_tools::tt_detail::impl

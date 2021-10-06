@@ -7,11 +7,14 @@
 
 #pragma once
 
-#include <array>
 #include <cstddef>
 
+#include <array>
+#include <chrono>
 #include <string>
 #include <vector>
+
+#include <fmt/format.h>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/type_code.hpp>
