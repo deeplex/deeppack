@@ -22,7 +22,7 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_DEBUG_POSTFIX": "-Debug",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-ltcg-static",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static",
                 "CMAKE_C_COMPILER": "cl",
                 "CMAKE_CXX_COMPILER": "cl"
             },
@@ -87,7 +87,7 @@
             }
         },
         {
-            "name": "x64-windows-clang-debug",
+            "name": "x64-windows-xclang-debug",
             "displayName": "x64 Windows Clang Debug",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
@@ -102,7 +102,7 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_DEBUG_POSTFIX": "-ClangDebug",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-ltcg-static",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static",
                 "CMAKE_C_COMPILER": "clang-cl",
                 "CMAKE_CXX_COMPILER": "clang-cl"
             },
@@ -152,8 +152,8 @@
             }
         },
         {
-            "name": "x64-linux-clang-debug",
-            "displayName": "x64 Linux GCC Debug",
+            "name": "x64-linux-xclang-debug",
+            "displayName": "x64 Linux Clang Debug",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
