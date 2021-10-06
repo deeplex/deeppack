@@ -186,7 +186,7 @@ public:
     }
 };
 template <codable_enum Enum>
-constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept -> int
+constexpr auto tag_invoke(encoded_size_of_fn, Enum value) noexcept -> unsigned
 {
     return encoded_size_of(detail::to_underlying(value));
 }
