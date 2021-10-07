@@ -2,18 +2,5 @@
     "default-registry": {
         "kind": "builtin",
         "baseline": "2a31089e777fc187f1cc05338250b8e1810cfb52"
-    },
-    "registries": [
-        {
-            "kind": "git",
-            "repository": "https://github.com/deeplex-net/vcpkg-registry",
-            "baseline": "fde2be196d0bae613e8265f86499cbe821a7b50b",
-            "packages": [
-                "quickcpplib-unofficial",
-                "outcome",
-                "ntkernel-error-category",
-                "llfio"
-            ]
-        }
-    ]
+    }
 }

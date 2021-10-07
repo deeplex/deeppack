@@ -189,7 +189,7 @@ target_sources(deeppack PUBLIC
 target_link_libraries(deeppack PUBLIC
     Boost::boost
     fmt::fmt
-    outcome::outcome
+    outcome::hl
 )
 
 target_compile_features(deeppack PUBLIC cxx_std_20)
