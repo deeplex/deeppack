@@ -7,24 +7,32 @@
     },
     "configurePresets": [
         {
-            "name": "x64-windows-msvc-debug",
-            "displayName": "x64 Windows MSVC Debug",
+            "name": "base",
+            "hidden": true,
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "BUILD_TESTING": true,
+                "DPLX_DP_DISABLE_WORKAROUNDS": false,
+                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": false,
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/zinstall/${presetName}"
+            }
+        },
+        {
+            "name": "x64-windows",
+            "hidden": true,
+            "inherits": "base",
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
             },
             "cacheVariables": {
-                "BUILD_TESTING": true,
-                "DPLX_DP_DISABLE_WORKAROUNDS": false,
-                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_DEBUG_POSTFIX": "-Debug",
-                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-static",
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
+                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+            },
+            "environment": {
+                "VCPKG_VISUAL_STUDIO_PATH": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise",
+                "VCPKG_VISUAL_STUDIO_PATH_": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise"
             },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -32,107 +40,73 @@
                         "Windows"
                     ]
                 }
+            }
+        },
+        {
+            "name": "x64-windows-msvc",
+            "hidden": true,
+            "inherits": "x64-windows",
+            "cacheVariables": {
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
+            "name": "x64-windows-msvc-debug",
+            "displayName": "x64 Windows MSVC Debug",
+            "inherits": "x64-windows-msvc",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_DEBUG_POSTFIX": "-Debug"
             }
         },
         {
             "name": "x64-windows-msvc-release",
             "displayName": "x64 Windows MSVC Release",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
+            "inherits": "x64-windows-msvc",
             "cacheVariables": {
-                "BUILD_TESTING": true,
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-ltcg-static",
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "hostOS": [
-                        "Windows"
-                    ]
-                }
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
             }
         },
         {
             "name": "x64-windows-msvc-lto",
             "displayName": "x64 Windows MSVC Release LTO",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
+            "inherits": "x64-windows",
             "cacheVariables": {
-                "BUILD_TESTING": true,
-                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "CMAKE_INTERPROCEDURAL_OPTIMIZATION": true,
                 "CMAKE_CXX_FLAGS_RELEASE": "/Zi /O2 /Ob3 /DNDEBUG",
-                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-ltcg-static",
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "hostOS": [
-                        "Windows"
-                    ]
-                }
+                "VCPKG_TARGET_TRIPLET": "x64-windows-ltcg-static"
             }
         },
         {
-            "name": "x64-windows-xclang-debug",
+            "name": "x64-windows-clang-debug",
             "displayName": "x64 Windows Clang Debug",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
+            "inherits": "x64-windows",
             "cacheVariables": {
-                "BUILD_TESTING": true,
-                "DPLX_DP_DISABLE_WORKAROUNDS": false,
-                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_DEBUG_POSTFIX": "-ClangDebug",
-                "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
-                "VCPKG_TARGET_TRIPLET": "x64-windows-static",
                 "CMAKE_C_COMPILER": "clang-cl",
                 "CMAKE_CXX_COMPILER": "clang-cl"
             },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "hostOS": [
-                        "Windows"
-                    ],
                     "intelliSenseMode": "windows-clang-x64",
                     "enableClangTidyCodeAnalysis": true
                 }
             }
         },
         {
-            "name": "x64-linux-gcc-debug",
-            "displayName": "x64 Linux GCC Debug",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "name": "x64-linux",
+            "hidden": true,
+            "inherits": "base",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": {
                     "value": "$env{HOME}/.vs/vcpkg/scripts/buildsystems/vcpkg.cmake",
                     "type": "FILEPATH"
                 },
-                "BUILD_TESTING": true,
-                "DPLX_DP_DISABLE_WORKAROUNDS": false,
-                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-                "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_CXX_COMPILER": "g++"
+                "VCPKG_TARGET_TRIPLET": "x64-linux"
             },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -143,44 +117,39 @@
                 "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
                     "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
                     "copySourcesOptions": {
-                        "exclusionList": [ ".vs", ".git", ".vs", ".vscode", "out", "vcpkg_installed" ]
+                        "exclusionList": [
+                            ".vs",
+                            ".git",
+                            ".vs",
+                            ".vscode",
+                            "build",
+                            "vcpkg_installed"
+                        ]
                     },
                     "copyAdditionalIncludeDirectoriesList": [
-                        "${sourceDir}/out/build/${presetName}/vcpkg_installed/x64-linux/include"
+                        "${sourceDir}/build/${presetName}/vcpkg_installed/x64-linux/include"
                     ]
                 }
             }
         },
         {
+            "name": "x64-linux-gcc-debug",
+            "displayName": "x64 Linux GCC Debug",
+            "inherits": "x64-linux",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
             "name": "x64-linux-xclang-debug",
             "displayName": "x64 Linux Clang Debug",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "inherits": "x64-linux",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "$env{HOME}/.vs/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "BUILD_TESTING": true,
-                "DPLX_DP_DISABLE_WORKAROUNDS": false,
-                "DPLX_DP_FLAG_OUTDATED_WORKAROUNDS": true,
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "hostOS": [
-                        "Linux"
-                    ]
-                },
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
-                    "copySourcesOptions": {
-                        "exclusionList": [ ".vs", ".git", ".vs", ".vscode", "out", "vcpkg_installed" ]
-                    },
-                    "copyAdditionalIncludeDirectoriesList": [
-                        "${sourceDir}/out/build/${presetName}/vcpkg_installed/x64-linux/include"
-                    ]
-                }
             }
         }
     ]
