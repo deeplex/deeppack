@@ -25,6 +25,8 @@
 #include <boost/container/vector.hpp>
 #include <boost/mp11/list.hpp>
 
+#include <dplx/predef/compiler.h>
+
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
@@ -259,7 +261,7 @@ BOOST_AUTO_TEST_CASE(binary_empty)
     DPLX_REQUIRE_RESULT(rx);
 }
 
-#if defined(BOOST_COMP_CLANG_AVAILABLE)
+#if defined(DPLX_COMP_CLANG_AVAILABLE)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -358,7 +360,7 @@ BOOST_AUTO_TEST_CASE(span_int_one_element_indefinite)
     BOOST_TEST(out[0] == 1);
 }
 
-#if defined(BOOST_COMP_CLANG_AVAILABLE)
+#if defined(DPLX_COMP_CLANG_AVAILABLE)
 
 #pragma clang diagnostic pop
 

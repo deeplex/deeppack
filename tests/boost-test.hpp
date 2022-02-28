@@ -17,6 +17,8 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 
+#include <dplx/predef/compiler.h>
+
 namespace boost::test_tools::tt_detail::impl
 {
 inline auto boost_test_print_type(std::ostream &s, std::byte b)
@@ -45,9 +47,7 @@ inline auto boost_test_print_type(std::ostream &s,
 }
 } // namespace boost::test_tools::tt_detail::impl
 
-#include <boost/predef.h>
-
-#if defined BOOST_COMP_GNUC_AVAILABLE
+#if defined DPLX_COMP_GNUC_AVAILABLE
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wextra"
@@ -55,7 +55,7 @@ inline auto boost_test_print_type(std::ostream &s,
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-#if defined BOOST_COMP_MSVC_AVAILABLE
+#if defined DPLX_COMP_MSVC_AVAILABLE
 #pragma warning(push, 3)
 #pragma warning(disable : 4702)
 #endif
@@ -65,10 +65,10 @@ inline auto boost_test_print_type(std::ostream &s,
 #include <boost/test/data/monomorphic.hpp>
 #include <boost/test/data/test_case.hpp>
 
-#if defined BOOST_COMP_MSVC_AVAILABLE
+#if defined DPLX_COMP_MSVC_AVAILABLE
 #pragma warning(pop)
 #endif
 
-#if defined BOOST_COMP_GNUC_AVAILABLE
+#if defined DPLX_COMP_GNUC_AVAILABLE
 #pragma GCC diagnostic pop
 #endif

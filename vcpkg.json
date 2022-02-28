@@ -6,7 +6,6 @@
     "dependencies": [
         "boost-endian",
         "boost-mp11",
-        "boost-predef",
         "concrete",
         "fmt",
         "outcome"

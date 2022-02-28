@@ -13,14 +13,14 @@
 #include <type_traits>
 
 #include <boost/endian/arithmetic.hpp>
-#include <boost/predef/compiler.h>
 
 #include <dplx/cncr/math_supplement.hpp>
+#include <dplx/predef/compiler.h>
 
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
 
-#if defined BOOST_COMP_MSVC_AVAILABLE
+#if defined DPLX_COMP_MSVC_AVAILABLE
 #include <intrin.h>
 #endif
 
@@ -44,7 +44,7 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
 
 #endif
 
-#if defined(BOOST_COMP_GCC_AVAILABLE) || defined(BOOST_COMP_CLANG_AVAILABLE)
+#if defined(DPLX_COMP_GCC_AVAILABLE) || defined(DPLX_COMP_CLANG_AVAILABLE)
 
     if constexpr (sizeof(T) <= sizeof(unsigned int))
     {
@@ -63,7 +63,7 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
              ^ __builtin_clzll(static_cast<unsigned long long>(value));
     }
 
-#elif defined(BOOST_COMP_MSVC_AVAILABLE)
+#elif defined(DPLX_COMP_MSVC_AVAILABLE)
 
     unsigned long result;
     if constexpr (sizeof(T) <= sizeof(unsigned long))

@@ -11,11 +11,12 @@
 
 #include <algorithm>
 
-#include <boost/predef/other/workaround.h>
+#include <dplx/predef/compiler.h>
 
 #include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/detail/bit.hpp>
-#include <dplx/dp/detail/type_utils.hpp>
+#include <dplx/dp/detail/type_utils.hpp>  
+#include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/map_pair.hpp>
 
 namespace dplx::dp::detail
@@ -182,7 +183,7 @@ public:
             auto const slot = freeSlots[--freeSlots.back()];
             remap[key_hash(key) % remap_size] = slot;
 
-#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+#if DPLX_DP_WORKAROUND(DPLX_COMP_GNUC, <=, 10, 1, 0)
             // gcc has a problem with the defaulted <=> over structs containing
             // arrays
             values[slot] = static_cast<std::size_t>(

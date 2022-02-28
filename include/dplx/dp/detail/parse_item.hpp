@@ -12,10 +12,9 @@
 #include <cstdint>
 
 #include <type_traits>
-
-#include <boost/predef/compiler.h>
-                                      
+                                     
 #include <dplx/cncr/misc.hpp>
+#include <dplx/predef/compiler.h>
 
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
@@ -262,17 +261,17 @@ static inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
 
 } // namespace dplx::dp::detail
 
-#if defined(BOOST_COMP_CLANG_AVAILABLE)
+#if defined(DPLX_COMP_CLANG_AVAILABLE)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-#elif defined(BOOST_COMP_GNUC_AVAILABLE)
+#elif defined(DPLX_COMP_GNUC_AVAILABLE)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-#elif defined(BOOST_COMP_MSVC_AVAILABLE)
+#elif defined(DPLX_COMP_MSVC_AVAILABLE)
 
 #pragma warning(push)
 #pragma warning(disable : 4996)
@@ -470,15 +469,15 @@ parse_item_info(Stream &stream) -> result<item_info>
 
 } // namespace dplx::dp::detail
 
-#if defined(BOOST_COMP_CLANG_AVAILABLE)
+#if defined(DPLX_COMP_CLANG_AVAILABLE)
 
 #pragma clang diagnostic pop
 
-#elif defined(BOOST_COMP_GNUC_AVAILABLE)
+#elif defined(DPLX_COMP_GNUC_AVAILABLE)
 
 #pragma GCC diagnostic pop
 
-#elif defined BOOST_COMP_MSVC_AVAILABLE
+#elif defined DPLX_COMP_MSVC_AVAILABLE
 
 #pragma warning(pop)
 

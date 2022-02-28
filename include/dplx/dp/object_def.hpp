@@ -16,14 +16,13 @@
 #include <string_view>
 #include <type_traits>
 
-#include <boost/predef/compiler.h>
-
 #include <dplx/cncr/math_supplement.hpp>
 #include <dplx/cncr/pack_utils.hpp>
 #include <dplx/cncr/type_utils.hpp>
+#include <dplx/predef/compiler.h>
 
 #include <dplx/dp/detail/workaround.hpp>
-#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
+#if DPLX_DP_WORKAROUND(DPLX_COMP_GNUC, <=, 10, 2, 0)
 // gcc has a problem with the defaulted <=> over structs containing arrays
 // therefore we need to use std::u8string as runtime string type
 #include <string>
@@ -83,7 +82,7 @@ struct fixed_u8string
     {
         return std::u8string_view(lhs) == rhs;
     }
-#if DPLX_DP_WORKAROUND(BOOST_COMP_CLANG, <, 12, 0, 1)
+#if DPLX_DP_WORKAROUND(DPLX_COMP_CLANG, <, 12, 0, 1)
 
     friend inline constexpr auto operator<=>(fixed_u8string const &lhs,
                                              std::u8string_view rhs) noexcept
@@ -241,7 +240,7 @@ public:
 template <std::uint32_t Id, auto M, auto... Ms>
 using property_def = basic_property_def<std::uint32_t, Id, M, Ms...>;
 
-#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+#if DPLX_DP_WORKAROUND(DPLX_COMP_GNUC, <=, 10, 1, 0)
 
 template <fixed_u8string Id, auto M, auto... Ms>
 using named_property_def = basic_property_def<std::u8string, Id, M, Ms...>;
@@ -293,7 +292,7 @@ public:
 template <std::uint32_t Id, typename AccessorType>
 using property_fun = basic_property_fun<Id, AccessorType, std::uint32_t>;
 
-#if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)
+#if DPLX_DP_WORKAROUND(DPLX_COMP_GNUC, <=, 10, 1, 0)
 
 template <fixed_u8string Id, typename AccessorType>
 using named_property_fun = basic_property_fun<Id, AccessorType, std::u8string>;

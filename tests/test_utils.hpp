@@ -21,7 +21,7 @@
 
 #include "boost-test.hpp"
 
-#if defined(BOOST_COMP_GNUC_AVAILABLE)
+#if defined(DPLX_COMP_GNUC_AVAILABLE)
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #endif
 
