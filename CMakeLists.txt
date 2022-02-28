@@ -59,6 +59,8 @@ mark_as_advanced(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER)
 ########################################################################
 # dependencies
 
+find_package(concrete CONFIG REQUIRED)
+
 find_package(fmt CONFIG REQUIRED)
 
 find_package(outcome CONFIG REQUIRED)
@@ -188,6 +190,7 @@ target_sources(deeppack PUBLIC
 
 target_link_libraries(deeppack PUBLIC
     Boost::boost
+    Deeplex::concrete
     fmt::fmt
     outcome::hl
 )
@@ -196,13 +199,6 @@ target_compile_features(deeppack PUBLIC cxx_std_20)
 set_target_properties(deeppack PROPERTIES
     CXX_EXTENSIONS OFF
 )
-if (CL_COMPATIBLE)
-    target_compile_options(deeppack PUBLIC
-        /utf-8 # all sources are utf-8 encoded
-        /permissive- # TPL, disables many MSVC leniencies
-        /Zc:__cplusplus # correctly define the __cplusplus macro
-    )
-endif()
 
 if (WIN32)
     target_compile_definitions(deeppack PUBLIC
