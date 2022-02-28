@@ -63,7 +63,7 @@ static_assert(dplx::dp::tag_invocable<dplx::dp::encoded_size_of_fn,
 inline auto operator<<(std::ostream &stream, signed_test_enum value) noexcept
         -> std::ostream &
 {
-    auto const bits = dplx::dp::detail::to_underlying(value);
+    auto const bits = dplx::cncr::to_underlying(value);
     if (bits < -2 || bits > 2)
     {
         return stream << "[invalid signed_test_enum value: " << bits << "]";
@@ -75,7 +75,7 @@ inline auto operator<<(std::ostream &stream, signed_test_enum value) noexcept
 inline auto operator<<(std::ostream &stream, unsigned_test_enum value) noexcept
         -> std::ostream &
 {
-    auto const bits = dplx::dp::detail::to_underlying(value);
+    auto const bits = dplx::cncr::to_underlying(value);
     if (bits > 2u)
     {
         return stream << "[invalid unsigned_test_enum value: " << bits << "]";
@@ -87,7 +87,7 @@ inline auto operator<<(std::ostream &stream, unsigned_test_enum value) noexcept
 inline auto operator<<(std::ostream &stream, unscoped_test_enum value) noexcept
         -> std::ostream &
 {
-    auto const bits = dplx::dp::detail::to_underlying(value);
+    auto const bits = dplx::cncr::to_underlying(value);
     return stream << "[unscoped_test_enum value: " << bits << "]";
 }
 

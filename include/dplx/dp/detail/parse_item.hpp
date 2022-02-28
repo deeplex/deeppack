@@ -14,6 +14,8 @@
 #include <type_traits>
 
 #include <boost/predef/compiler.h>
+                                      
+#include <dplx/cncr/misc.hpp>
 
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
@@ -41,21 +43,21 @@ struct item_info
 
     [[nodiscard]] bool indefinite() const noexcept
     {
-        return detail::to_underlying(flags)
-             & detail::to_underlying(flag::indefinite);
+        return cncr::to_underlying(flags)
+             & cncr::to_underlying(flag::indefinite);
     }
     void make_indefinite() noexcept
     {
         flags = static_cast<item_info::flag>(
-                detail::to_underlying(flags)
-                | detail::to_underlying(flag::indefinite));
+                cncr::to_underlying(flags)
+                | cncr::to_underlying(flag::indefinite));
     }
 
     [[nodiscard]] bool is_special_break() const noexcept
     {
         return type == type_code::special
-            && detail::to_underlying(flags)
-                       & detail::to_underlying(flag::indefinite);
+            && cncr::to_underlying(flags)
+                       & cncr::to_underlying(flag::indefinite);
     }
 
     friend inline constexpr bool

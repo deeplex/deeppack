@@ -9,6 +9,8 @@
 
 #include <vector>
 
+#include <dplx/cncr/misc.hpp>
+
 #include <dplx/dp/customization.std.hpp>
 
 #include "boost-test.hpp"
@@ -38,7 +40,8 @@ auto boost_test_print_type(std::ostream &s, acceptance_sample const &sample)
         -> std::ostream &
 {
     fmt::print(s, "acceptance_sample{{.type={}, .value={}, .mode={}, .input=0x",
-               sample.type, sample.value, static_cast<int>(sample.mode));
+               cncr::to_underlying(sample.type), sample.value,
+               cncr::to_underlying(sample.mode));
     for (auto c : sample.input)
     {
         fmt::print(s, "{:02x}", c);
@@ -81,8 +84,9 @@ auto boost_test_print_type(std::ostream &s, rejection_sample const &sample)
     fmt::print(s,
                "rejection_samples{{.code={}, .type={}, .value={}, .mode={}, "
                ".input=0x",
-               sample.code, sample.type, sample.value,
-               static_cast<int>(sample.mode));
+               cncr::to_underlying(sample.code),
+               cncr::to_underlying(sample.type), sample.value,
+               cncr::to_underlying(sample.mode));
     for (auto c : sample.input)
     {
         fmt::print(s, "{:02x}", c);

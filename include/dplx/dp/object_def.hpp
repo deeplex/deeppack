@@ -18,6 +18,10 @@
 
 #include <boost/predef/compiler.h>
 
+#include <dplx/cncr/math_supplement.hpp>
+#include <dplx/cncr/pack_utils.hpp>
+#include <dplx/cncr/type_utils.hpp>
+
 #include <dplx/dp/detail/workaround.hpp>
 #if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 2, 0)
 // gcc has a problem with the defaulted <=> over structs containing arrays
@@ -184,7 +188,7 @@ template <std::size_t N1, std::size_t N2>
 struct common_type<dplx::dp::fixed_u8string<N1>, dplx::dp::fixed_u8string<N2>>
 {
     using type = dplx::dp::fixed_u8string<
-            dplx::dp::detail::div_ceil(N1 < N2 ? N2 : N1, 16u) * 16u>;
+            dplx::cncr::round_up_p2(N1 < N2 ? N2 : N1, 16U)>;
 };
 
 } // namespace std
@@ -202,11 +206,11 @@ private:
             = detail::member_object_pointer_type_traits<decltype(M)>;
 
 public:
-    using id_type = detail::remove_cref_t<decltype(Id)>;
+    using id_type = cncr::remove_cref_t<decltype(Id)>;
     using id_runtime_type = IdRuntimeType;
-    using class_type = detail::remove_cref_t<
+    using class_type = cncr::remove_cref_t<
             typename member_object_pointer_type_traits::class_type>;
-    using value_type = detail::remove_cref_t<decltype((
+    using value_type = cncr::remove_cref_t<decltype((
             (std::declval<class_type &>().*M).*....*Ms))>;
 
     static constexpr id_type const &id = Id;
@@ -246,17 +250,17 @@ using named_property_def = basic_property_def<std::u8string, Id, M, Ms...>;
 
 template <fixed_u8string Id, auto M, auto... Ms>
 using named_property_def
-        = basic_property_def<detail::remove_cref_t<decltype(Id)>, Id, M, Ms...>;
+        = basic_property_def<cncr::remove_cref_t<decltype(Id)>, Id, M, Ms...>;
 
 #endif
 
 template <auto Id,
           typename AccessorType,
-          typename IdRuntimeType = detail::remove_cref_t<decltype(Id)>>
+          typename IdRuntimeType = cncr::remove_cref_t<decltype(Id)>>
 struct basic_property_fun
 {
 public:
-    using id_type = detail::remove_cref_t<decltype(Id)>;
+    using id_type = cncr::remove_cref_t<decltype(Id)>;
     using id_runtime_type = IdRuntimeType;
     using value_type = typename AccessorType::value_type;
     using class_type = typename AccessorType::class_type;
@@ -300,7 +304,7 @@ template <fixed_u8string Id, typename AccessorType>
 using named_property_fun
         = basic_property_fun<Id,
                              AccessorType,
-                             detail::remove_cref_t<decltype(Id)>>;
+                             cncr::remove_cref_t<decltype(Id)>>;
 
 #endif
 
@@ -308,10 +312,10 @@ template <auto... Properties>
 struct object_def
 {
     using id_type = std::common_type_t<
-            typename detail::remove_cref_t<decltype(Properties)>::id_type...>;
-    using id_runtime_type = std::common_type_t<typename detail::remove_cref_t<
+            typename cncr::remove_cref_t<decltype(Properties)>::id_type...>;
+    using id_runtime_type = std::common_type_t<typename cncr::remove_cref_t<
             decltype(Properties)>::id_runtime_type...>;
-    using class_type = detail::contravariance_t<typename detail::remove_cref_t<
+    using class_type = detail::contravariance_t<typename cncr::remove_cref_t<
             decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
@@ -326,7 +330,7 @@ struct object_def
     static constexpr decltype(auto) property() noexcept
     {
         static_assert(N < num_properties);
-        return detail::nth_param_v<N, Properties...>;
+        return cncr::nth_param<N>(Properties...);
     }
 
     template <typename Fn>

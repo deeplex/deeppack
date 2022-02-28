@@ -88,7 +88,7 @@ constexpr auto xxhash3_ui64(std::uint64_t const value,
     return xxhash3_fixed_impl(swapped, seed, 8u);
 }
 
-template <unsigned_integer T>
+template <cncr::unsigned_integer T>
     requires(sizeof(T) <= sizeof(std::uint64_t))
 constexpr auto xxhash3(T const value, std::uint64_t const seed) noexcept
         -> std::uint64_t

@@ -17,6 +17,9 @@
 
 #include <boost/mp11/algorithm.hpp>
 
+#include <dplx/cncr/math_supplement.hpp>
+#include <dplx/cncr/type_utils.hpp>
+
 #include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/std_string.hpp>
 #include <dplx/dp/decoder/utils.hpp>
@@ -51,13 +54,13 @@ inline constexpr struct property_id_hash_fn
         return cpo::tag_invoke(*this, value, seed);
     }
 
-    template <integer T>
+    template <cncr::integer T>
     friend constexpr auto tag_invoke(property_id_hash_fn, T value) noexcept
             -> std::uint64_t
     {
         return static_cast<std::uint64_t>(value);
     }
-    template <integer T>
+    template <cncr::integer T>
     friend constexpr auto
     tag_invoke(property_id_hash_fn, T value, std::uint64_t seed) noexcept
             -> std::uint64_t
@@ -99,7 +102,7 @@ constexpr auto compress_bitset(std::initializer_list<bool> vs) noexcept
 {
     constexpr auto digits = static_cast<std::size_t>(digits_v<std::size_t>);
 
-    constexpr auto numBuckets = detail::div_ceil(NumBits, digits);
+    constexpr auto numBuckets = cncr::div_ceil(NumBits, digits);
     std::array<std::size_t, numBuckets> buckets{};
 
     auto const *it = vs.begin();
@@ -215,7 +218,7 @@ class decode_object_property_fn
     static_assert(std::is_sorted(descriptor.ids.begin(), descriptor.ids.end()));
 #endif
 
-    using odef_type = detail::remove_cref_t<decltype(descriptor)>;
+    using odef_type = cncr::remove_cref_t<decltype(descriptor)>;
     using id_type = typename odef_type::id_type;
     using id_runtime_type = typename odef_type::id_runtime_type;
 
@@ -273,12 +276,12 @@ constexpr auto index_of_limit(T const *elems,
 }
 
 template <auto const &descriptor, typename T, input_stream Stream>
-    requires dp::unsigned_integer<
-            typename detail::remove_cref_t<decltype(descriptor)>::id_type>
+    requires cncr::unsigned_integer<
+            typename cncr::remove_cref_t<decltype(descriptor)>::id_type>
 class decode_object_property_fn<descriptor, T, Stream>
 {
     using parse = item_parser<Stream>;
-    using descriptor_type = detail::remove_cref_t<decltype(descriptor)>;
+    using descriptor_type = cncr::remove_cref_t<decltype(descriptor)>;
     using id_type = typename descriptor_type::id_type;
 
 #if DPLX_DP_WORKAROUND(BOOST_COMP_GNUC, <=, 10, 1, 0)

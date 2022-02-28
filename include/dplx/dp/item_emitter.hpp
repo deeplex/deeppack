@@ -13,6 +13,8 @@
 #include <ranges>
 #include <type_traits>
 
+#include <dplx/cncr/math_supplement.hpp>
+
 #include <dplx/dp/config.hpp>
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/item_size.hpp>
@@ -119,7 +121,7 @@ inline auto store_var_uint(std::byte *dest,
 namespace dplx::dp
 {
 
-template <unsigned_integer T>
+template <cncr::unsigned_integer T>
 constexpr auto additional_information_size(T const value) noexcept
         -> unsigned int
 {

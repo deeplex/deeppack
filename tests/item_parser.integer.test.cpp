@@ -7,6 +7,8 @@
 
 #include <dplx/dp/item_parser.hpp>
 
+#include <dplx/cncr/mp_lite.hpp>
+
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
@@ -25,16 +27,16 @@ using dp::type_code;
 
 using parse = dp::item_parser<dp_tests::test_input_stream>;
 
-using integer_types = dp::detail::mp_list<signed char,
-                                          unsigned char,
-                                          short,
-                                          unsigned short,
-                                          int,
-                                          unsigned int,
-                                          long,
-                                          unsigned long,
-                                          long long,
-                                          unsigned long long>;
+using integer_types = cncr::mp_list<signed char,
+                                    unsigned char,
+                                    short,
+                                    unsigned short,
+                                    int,
+                                    unsigned int,
+                                    long,
+                                    unsigned long,
+                                    long long,
+                                    unsigned long long>;
 BOOST_AUTO_TEST_CASE_TEMPLATE(compilation, T, integer_types)
 {
     auto const memory = make_byte_array<9>({0x00});

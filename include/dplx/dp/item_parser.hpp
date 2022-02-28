@@ -15,12 +15,14 @@
 
 #include <boost/container/small_vector.hpp>
 #include <boost/predef/compiler.h>
-#include <boost/predef/other/workaround.h>
+
+#include <dplx/cncr/math_supplement.hpp>
 
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/item_size.hpp>
 #include <dplx/dp/detail/parse_item.hpp>
 #include <dplx/dp/detail/utils.hpp>
+#include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
 #include <dplx/dp/type_code.hpp>
@@ -106,7 +108,7 @@ public:
         return oc::success();
     }
 
-    template <integer T>
+    template <cncr::integer T>
     static inline auto integer(Stream &inStream,
                                parse_mode const mode = parse_mode::lenient)
             -> result<T>
@@ -154,7 +156,7 @@ public:
             return static_cast<T>(item.value ^ xorpad);
         }
     }
-    template <unsigned_integer T>
+    template <cncr::unsigned_integer T>
     static inline auto integer(Stream &inStream,
                                T limit,
                                parse_mode const mode = parse_mode::lenient)
@@ -646,7 +648,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
 
     if (!item.indefinite())
     {
-        DPLX_TRY(unsigned_integer auto remainingInputSize,
+        DPLX_TRY(cncr::unsigned_integer auto remainingInputSize,
                  available_input_size(inStream));
 
         remainingInputSize >>= (expectedType == type_code::map ? 1 : 0);
@@ -763,7 +765,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
         return errc::oversized_additional_information_coding;
     }
 
-    DPLX_TRY(unsigned_integer auto remainingInputSize,
+    DPLX_TRY(cncr::unsigned_integer auto remainingInputSize,
              available_input_size(inStream));
 
     remainingInputSize >>= (expectedType == type_code::map ? 1 : 0);

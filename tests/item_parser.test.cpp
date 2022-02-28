@@ -8,33 +8,33 @@
 #include <dplx/dp/item_parser.hpp>
 #include <dplx/dp/skip_item.hpp>
 
+#include <dplx/cncr/misc.hpp>
+
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
-namespace fmt
-{
 template <>
-struct formatter<dplx::dp::item_info>
+struct fmt::formatter<dplx::dp::item_info>
 {
-    template <typename ParseCtx>
-    constexpr auto parse(ParseCtx &ctx)
+    constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin())
     {
         return ctx.begin();
     }
 
     template <typename FormatCtx>
     auto format(dplx::dp::item_info const &info, FormatCtx &ctx)
+            -> decltype(ctx.out())
     {
         return fmt::format_to(
                 ctx.out(),
                 "{{type={:#04x}, .flags={:#04x} .encoded_length={}, "
                 ".value={:#018x}}}",
-                static_cast<std::byte>(info.type), info.flags,
-                info.encoded_length, info.value);
+                dplx::cncr::to_underlying(info.type),
+                dplx::cncr::to_underlying(info.flags), info.encoded_length,
+                info.value);
     }
 };
-} // namespace fmt
 
 namespace dplx::dp
 {
@@ -47,7 +47,7 @@ auto boost_test_print_type(std::ostream &s, item_info const &sample)
 inline auto boost_test_print_type(std::ostream &s, item_info::flag flags)
         -> std::ostream &
 {
-    fmt::print(s, FMT_STRING("{:2x}"), static_cast<std::uint8_t>(flags));
+    fmt::print(s, "{:2x}", static_cast<std::uint8_t>(flags));
     return s;
 }
 } // namespace dplx::dp

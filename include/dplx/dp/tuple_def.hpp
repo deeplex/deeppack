@@ -11,6 +11,9 @@
 
 #include <compare>
 #include <type_traits>
+                       
+#include <dplx/cncr/pack_utils.hpp>
+#include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/detail/type_utils.hpp>
 
@@ -27,15 +30,15 @@ private:
             = detail::member_object_pointer_type_traits<decltype(M)>;
 
 public:
-    using class_type = detail::remove_cref_t<
+    using class_type = cncr::remove_cref_t<
             typename member_object_pointer_type_traits::class_type>;
-    using value_type = detail::remove_cref_t<decltype((
+    using value_type = cncr::remove_cref_t<decltype((
             (std::declval<class_type &>().*M).*....*Ms))>;
 
     int nothing = 0;
 
     static auto decl_value() noexcept
-            -> std::type_identity<detail::remove_cref_t<value_type>>;
+            -> std::type_identity<cncr::remove_cref_t<value_type>>;
     static auto decl_class() noexcept -> std::type_identity<class_type>;
 
     static inline auto access(class_type &v) noexcept -> value_type &
@@ -94,7 +97,7 @@ struct tuple_member_fun
 template <auto... Properties>
 struct tuple_def
 {
-    using class_type = detail::contravariance_t<typename detail::remove_cref_t<
+    using class_type = detail::contravariance_t<typename cncr::remove_cref_t<
             decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
@@ -106,7 +109,7 @@ struct tuple_def
     static constexpr decltype(auto) property() noexcept
     {
         static_assert(N < num_properties);
-        return detail::nth_param_v<N, Properties...>;
+        return cncr::nth_param<N>(Properties...);
     }
 
     template <typename Fn>

@@ -15,6 +15,8 @@
 #include <boost/endian/arithmetic.hpp>
 #include <boost/predef/compiler.h>
 
+#include <dplx/cncr/math_supplement.hpp>
+
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
 
@@ -100,13 +102,13 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
 #endif
 }
 
-template <unsigned_integer T>
+template <cncr::unsigned_integer T>
 constexpr auto rotl(T const v, int n) noexcept -> T
 {
     return (v << n) | (v >> (digits_v<T> - n));
 }
 
-template <integer T, std::endian order>
+template <cncr::integer T, std::endian order>
 constexpr auto load(std::byte const *const src) -> T
 {
     // static_assert(order == std::endian::native);
@@ -172,7 +174,7 @@ constexpr auto load(std::byte const *const src) -> T
     }
 }
 
-template <integer T, std::endian order>
+template <cncr::integer T, std::endian order>
 constexpr auto load_partial(const std::byte *data, int num) -> T
 {
     static_assert(sizeof(T) <= 8);

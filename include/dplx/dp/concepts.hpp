@@ -12,6 +12,9 @@
 #include <ranges>
 #include <type_traits>
 
+#include <dplx/cncr/mp_lite.hpp>
+#include <dplx/cncr/type_utils.hpp>
+
 #include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
@@ -105,14 +108,14 @@ using select_proper_param_type_impl
 
 template <typename T>
 using select_proper_param_type
-        = select_proper_param_type_impl<detail::remove_cref_t<T>>;
+        = select_proper_param_type_impl<cncr::remove_cref_t<T>>;
 
 template <typename T, output_stream Stream>
 struct are_tuple_elements_encodable : std::false_type
 {
 };
 template <typename... Ts, output_stream Stream>
-struct are_tuple_elements_encodable<mp_list<Ts...>, Stream>
+struct are_tuple_elements_encodable<cncr::mp_list<Ts...>, Stream>
     : std::bool_constant<(encodable<Ts, Stream> && ...)>
 {
 };
@@ -125,13 +128,12 @@ concept encodable_tuple_like = tuple_like<T> && output_stream<
 template <typename T, typename Stream>
 concept encodable_pair_like
         = pair_like<T> && output_stream<Stream> && encodable<
-                detail::remove_cref_t<typename std::tuple_element<0, T>::type>,
-                Stream> && encodable<detail::
-                                             remove_cref_t<
-                                                     typename std::
-                                                             tuple_element<
-                                                                     1,
-                                                                     T>::type>,
+                cncr::remove_cref_t<typename std::tuple_element<0, T>::type>,
+                Stream> && encodable<cncr::remove_cref_t<typename std::
+                                                                 tuple_element<
+                                                                         1,
+                                                                         T>::
+                                                                         type>,
                                      Stream>;
 
 template <typename T, typename Stream>

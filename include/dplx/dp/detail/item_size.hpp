@@ -9,6 +9,8 @@
 
 #include <cstdint>
 
+#include <dplx/cncr/math_supplement.hpp>
+
 #include <dplx/dp/config.hpp>
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/type_code.hpp>
@@ -68,7 +70,7 @@ constexpr auto var_uint_encoded_size_branching(T const value) noexcept
     }
 }
 
-template <unsigned_integer T>
+template <cncr::unsigned_integer T>
 constexpr auto var_uint_encoded_size(T const value) -> unsigned int
 {
     static_assert(sizeof(T) <= sizeof(std::uint64_t));

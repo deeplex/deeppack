@@ -16,6 +16,8 @@
 #include <ranges>
 #include <type_traits>
 
+#include <dplx/cncr/math_supplement.hpp>
+
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
@@ -31,7 +33,7 @@ class basic_decoder<volatile T, Stream>;
 template <typename T, input_stream Stream>
 class basic_decoder<volatile T const, Stream>;
 
-template <integer T, input_stream Stream>
+template <cncr::integer T, input_stream Stream>
 class basic_decoder<T, Stream>
 {
     using parse = item_parser<Stream>;
@@ -44,7 +46,7 @@ public:
     }
 };
 
-template <iec559_floating_point T, input_stream Stream>
+template <cncr::iec559_floating_point T, input_stream Stream>
 class basic_decoder<T, Stream>
 {
     static_assert(std::numeric_limits<T>::is_iec559);

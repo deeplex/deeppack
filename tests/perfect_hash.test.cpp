@@ -24,7 +24,7 @@ using dp::detail::perfect_hasher;
 
 struct test_hash
 {
-    template <dp::unsigned_integer T>
+    template <cncr::unsigned_integer T>
     constexpr auto operator()(T const value,
                               std::uint64_t const seed = 0) const noexcept
             -> std::uint64_t

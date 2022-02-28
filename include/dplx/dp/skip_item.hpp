@@ -12,6 +12,8 @@
 #include <new>
 
 #include <boost/container/small_vector.hpp>
+                                            
+#include <dplx/cncr/misc.hpp>
 
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/item_parser.hpp>
@@ -131,10 +133,10 @@ inline auto skip_item(Stream &inStream) -> result<void>
                 break;
             }
 
-            auto const rawFlags = detail::to_underlying(item.flags);
+            auto const rawFlags = cncr::to_underlying(item.flags);
             unsigned const indefinite
                     = rawFlags
-                    & detail::to_underlying(dp::item_info::flag::indefinite);
+                    & cncr::to_underlying(dp::item_info::flag::indefinite);
             // we abuse item.flags to track of whether to expect a value or key
             // code == 0b0x  =>  next item is a key
             // code == 0b1x  =>  next item is a value, therefore decrement kv
