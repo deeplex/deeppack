@@ -44,15 +44,6 @@ auto load(std::byte const *src) noexcept -> T
             reinterpret_cast<unsigned char const *>(src));
 }
 
-template <typename Target, typename Source>
-constexpr auto fits_storage(Source value) -> bool
-{
-    static_assert(std::is_unsigned_v<Target>);
-    static_assert(std::is_unsigned_v<Source>);
-
-    return value <= std::numeric_limits<Target>::max();
-}
-
 template <typename T>
 inline constexpr int digits_v = std::numeric_limits<T>::digits;
 

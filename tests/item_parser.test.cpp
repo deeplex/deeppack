@@ -59,7 +59,6 @@ BOOST_AUTO_TEST_SUITE(item_parser)
 
 using dp::item_info;
 using dp::type_code;
-using dp::detail::decode_errc;
 
 using parse = dp::item_parser<dp_tests::test_input_stream>;
 

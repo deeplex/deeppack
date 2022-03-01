@@ -153,7 +153,6 @@ target_sources(deeppack PUBLIC
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/item_emitter.hpp>
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/api.hpp>
-    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/array_utils.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/chrono.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/core.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/decoder/object_utils.hpp>
