@@ -179,7 +179,6 @@ target_sources(deeppack PUBLIC
 
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/bit.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/hash.hpp>
-    $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/mp_lite.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/mp_for_dots.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/perfect_hash.hpp>
     $<BUILD_INTERFACE:${DP_INC_DIR}/dp/detail/type_utils.hpp>

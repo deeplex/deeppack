@@ -15,7 +15,6 @@
 #include <dplx/cncr/mp_lite.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
-#include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>

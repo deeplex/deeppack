@@ -47,8 +47,8 @@ inline constexpr struct encode_fn final
         inline auto operator()(detail::select_proper_param_type<T> value) const
                 -> result<void>
         {
-            return basic_encoder<cncr::remove_cref_t<T>, Stream>()(
-                    *mOutStream, value);
+            return basic_encoder<cncr::remove_cref_t<T>, Stream>()(*mOutStream,
+                                                                   value);
         }
     };
     template <output_stream Stream>
@@ -66,8 +66,8 @@ inline constexpr struct encode_fn final
             requires encodable<cncr::remove_cref_t<T>, Stream>
         inline auto operator()(T &&value) const -> result<void>
         {
-            return basic_encoder<cncr::remove_cref_t<T>, Stream>()(
-                    *mOutStream, value);
+            return basic_encoder<cncr::remove_cref_t<T>, Stream>()(*mOutStream,
+                                                                   value);
         }
     };
 
@@ -95,19 +95,18 @@ inline constexpr struct encode_array_fn final
     // clang-format on
     {
         return detail::arg_list_encoder<
-                detail::mp_list<cncr::remove_cref_t<Ts>...>,
+                cncr::mp_list<cncr::remove_cref_t<Ts>...>,
                 Stream>::encode(outStream, static_cast<Ts &&>(values)...);
     }
 
     template <output_stream Stream, typename... TArgs>
         requires(... &&encodable<cncr::remove_cref_t<TArgs>, Stream>)
     class bound_type
-        : detail::arg_list_encoder<
-                  detail::mp_list<cncr::remove_cref_t<TArgs>...>,
-                  Stream>
+        : detail::arg_list_encoder<cncr::mp_list<cncr::remove_cref_t<TArgs>...>,
+                                   Stream>
     {
         using impl_type = detail::arg_list_encoder<
-                detail::mp_list<cncr::remove_cref_t<TArgs>...>,
+                cncr::mp_list<cncr::remove_cref_t<TArgs>...>,
                 Stream>;
 
     public:
@@ -131,7 +130,7 @@ inline constexpr struct encode_array_fn final
         auto operator()(Ts &&...values) const -> result<void>
         {
             using impl = detail::arg_list_encoder<
-                    detail::mp_list<cncr::remove_cref_t<Ts>...>, Stream>;
+                    cncr::mp_list<cncr::remove_cref_t<Ts>...>, Stream>;
             return impl::encode(*mOutStream, static_cast<Ts &&>(values)...);
         }
     };
@@ -258,7 +257,7 @@ inline constexpr struct encode_varargs_t final
         else if constexpr (sizeof...(Ts) > 1)
         {
             return detail::arg_list_encoder<
-                    detail::mp_list<cncr::remove_cref_t<Ts>...>,
+                    cncr::mp_list<cncr::remove_cref_t<Ts>...>,
                     Stream>::encode(outStream, static_cast<Ts &&>(values)...);
         }
     }

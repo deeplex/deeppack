@@ -7,8 +7,9 @@
 
 #pragma once
 
+#include <dplx/cncr/mp_lite.hpp>
+
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_emitter.hpp>
 #include <dplx/dp/stream.hpp>
@@ -20,7 +21,7 @@ template <typename T, output_stream Stream>
 class arg_list_encoder;
 
 template <output_stream Stream, typename... TArgs>
-class arg_list_encoder<mp_list<TArgs...>, Stream>
+class arg_list_encoder<cncr::mp_list<TArgs...>, Stream>
 {
     Stream *mOutStream;
 

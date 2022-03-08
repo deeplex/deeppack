@@ -8,7 +8,6 @@
 #pragma once
 
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/item_emitter.hpp>

@@ -10,7 +10,6 @@
 #include <type_traits>
 
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/detail/mp_lite.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/fwd.hpp>

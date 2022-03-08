@@ -22,6 +22,7 @@
 
 #include <dplx/cncr/math_supplement.hpp>
 #include <dplx/cncr/misc.hpp>
+#include <dplx/cncr/mp_lite.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/concepts.hpp>
@@ -61,7 +62,7 @@ template <typename... TArgs, output_stream Stream>
 class basic_encoder<mp_varargs<TArgs...>, Stream>
 {
     using impl = detail::arg_list_encoder<
-            detail::mp_list<cncr::remove_cref_t<TArgs>...>,
+            cncr::mp_list<cncr::remove_cref_t<TArgs>...>,
             Stream>;
 
 public:
@@ -369,8 +370,8 @@ class basic_encoder<T, Stream>
 // clang-format on
 {
     using impl = detail::arg_list_encoder<
-            detail::mp_transform_t<cncr::remove_cref_t,
-                                   detail::mp_rename_t<T, detail::mp_list>>,
+            cncr::mp_transform_t<cncr::remove_cref_t,
+                                 cncr::mp_rename_t<T, cncr::mp_list>>,
             Stream>;
 
 public:
@@ -391,7 +392,7 @@ struct are_tuple_elements_size_ofable : std::false_type
 {
 };
 template <typename... Ts>
-struct are_tuple_elements_size_ofable<mp_list<Ts...>>
+struct are_tuple_elements_size_ofable<cncr::mp_list<Ts...>>
     : std::bool_constant<(
               tag_invocable<encoded_size_of_fn,
                             cncr::remove_cref_t<Ts> const &> && ...)>
@@ -407,7 +408,7 @@ template <typename T>
 class encoded_size_of_tuple;
 
 template <typename... TArgs>
-class encoded_size_of_tuple<mp_list<TArgs...>>
+class encoded_size_of_tuple<cncr::mp_list<TArgs...>>
 {
 public:
     auto inline operator()(TArgs const &...values) const noexcept
@@ -423,8 +424,8 @@ template <detail::size_ofable_tuple_like T>
 constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
         -> unsigned int
 {
-    using impl = detail::encoded_size_of_tuple<detail::mp_transform_t<
-            cncr::remove_cref_t, detail::mp_rename_t<T, detail::mp_list>>>;
+    using impl = detail::encoded_size_of_tuple<cncr::mp_transform_t<
+            cncr::remove_cref_t, cncr::mp_rename_t<T, cncr::mp_list>>>;
     return detail::apply_simply(impl{}, value);
 }
 
