@@ -34,7 +34,7 @@ if (BUILD_TESTING)
 endif()
 
 ########################################################################
-project(deeppack VERSION 0.0.0.0 LANGUAGES CXX)
+project(deeppack VERSION 0.0.0.1 LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
 

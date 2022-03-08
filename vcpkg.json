@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
     "name": "deeppack",
-    "version-semver": "0.0.0-alpha.1",
+    "version-semver": "0.0.0-alpha.2",
     "homepage": "https://github.com/deeplex-net/deeppack",
     "dependencies": [
         "boost-endian",
