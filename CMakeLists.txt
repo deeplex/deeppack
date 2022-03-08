@@ -34,7 +34,7 @@ if (BUILD_TESTING)
 endif()
 
 ########################################################################
-project(deeppack VERSION 0.0.0 LANGUAGES CXX)
+project(deeppack VERSION 0.0.0.0 LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
 
@@ -238,7 +238,7 @@ if (BUILD_TESTING)
         "tests/item_parser.expect.test.cpp"
         "tests/item_parser.integer.test.cpp"
         "tests/item_parser.test.cpp"
-        
+
         "tests/decoder.test.cpp"
         "tests/decoder.chrono.test.cpp"
         "tests/decoder.std_container.test.cpp"
@@ -258,7 +258,7 @@ if (BUILD_TESTING)
         "tests/encoder.tuple.test.cpp"
         "tests/encoder.object_utils.test.cpp"
         "tests/encoder.tuple_utils.test.cpp"
-        
+
         "tests/enum_codec.test.cpp"
 
         "tests/chunked_input_stream.test.cpp"
