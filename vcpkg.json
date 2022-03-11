@@ -5,6 +5,7 @@
     "homepage": "https://github.com/deeplex-net/deeppack",
     "dependencies": [
         "boost-endian",
+        "boost-container",
         "boost-mp11",
         "concrete",
         "fmt",
