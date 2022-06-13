@@ -1,16 +1,18 @@
 # build directory as mandated by the pitchfork layout
-/build
+build/
 
-/CMakeUserPresets.json
-# vcpkg packages installed in manifest mode
-/vcpkg_installed
 # visual studio cmake config
-/CMakeSettings.json
+/CMakeUserPresets.json
 # visual studio settings
 /.vs
 /out
 # visual studio code settings
-/.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
 # clion files
 /.idea
 /cmake-build-debug
