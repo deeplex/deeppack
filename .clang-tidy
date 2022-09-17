@@ -1,5 +1,22 @@
 ---
-Checks: 'clang-diagnostic-*,clang-analyzer-*,bugprone*,modernize*,performance*,readability-*,-readability-named-parameter,-readability-avoid-const-params-in-decls'
-#WarningsAsErrors: '*'
-HeaderFilterRegex: '(\\|/)dplx(\\|/)dp.*\.hpp$'
-FormatStyle:     none
+Checks: >
+  boost-*,
+  bugprone-*,
+  clang-analyzer-*,
+  clang-diagnostic-*,
+  cppcoreguidelines-*,
+    -cppcoreguidelines-special-member-functions,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+    -readability-identifier-length,
+    -readability-named-parameter
+WarningsAsErrors: true
+HeaderFilterRegex: ""
+FormatStyle: file
+CheckOptions:
+  - key: modernize-use-override.AllowOverrideAndFinal
+    value: true
+  - key: cppcoreguidelines-macro-usage.AllowedRegexp
+    value: "DPLX_.+_WORKAROUND(_TESTED_AT)?"
