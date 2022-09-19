@@ -10,9 +10,8 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-
 #include <type_traits>
-                                     
+
 #include <dplx/cncr/misc.hpp>
 #include <dplx/predef/compiler.h>
 

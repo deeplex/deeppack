@@ -5,11 +5,10 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/item_parser.hpp>
-
 #include <vector>
 
 #include <dplx/dp/customization.std.hpp>
+#include <dplx/dp/item_parser.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"

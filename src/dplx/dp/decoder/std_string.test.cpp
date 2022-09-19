@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/decoder/std_string.hpp>
+#include "dplx/dp/decoder/std_string.hpp"
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
@@ -53,14 +53,15 @@ struct string_sample
     }
 };
 
-constexpr string_sample rfc_samples[]
-        = {{u8""sv, 1, make_byte_array<12>({0x60})},
-           {u8"a"sv, 1, make_byte_array<12>({0x61})},
-           {u8"IETF"sv, 1, make_byte_array<12>({0x64})},
-           {u8"\"\\"sv, 1, make_byte_array<12>({0x62})},
-           {u8"\u00fc"sv, 1, make_byte_array<12>({0x62})},
-           {u8"\u6c34"sv, 1, make_byte_array<12>({0x63})},
-           {u8"\U00010151"sv, 1, make_byte_array<12>({0x64})}};
+constexpr string_sample rfc_samples[] = {
+        {          u8""sv, 1, make_byte_array<12>({0x60})},
+        {         u8"a"sv, 1, make_byte_array<12>({0x61})},
+        {      u8"IETF"sv, 1, make_byte_array<12>({0x64})},
+        {      u8"\"\\"sv, 1, make_byte_array<12>({0x62})},
+        {    u8"\u00fc"sv, 1, make_byte_array<12>({0x62})},
+        {    u8"\u6c34"sv, 1, make_byte_array<12>({0x63})},
+        {u8"\U00010151"sv, 1, make_byte_array<12>({0x64})}
+};
 
 BOOST_DATA_TEST_CASE(rfc_sample, boost::unit_test::data::make(rfc_samples))
 {

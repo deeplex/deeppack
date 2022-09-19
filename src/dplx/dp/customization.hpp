@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <concepts>
+#include <cstddef>
 #include <new>
 
 #include <dplx/dp/disappointment.hpp>

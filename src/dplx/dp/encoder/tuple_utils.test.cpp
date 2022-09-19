@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/tuple_utils.hpp>
+#include "dplx/dp/encoder/tuple_utils.hpp"
 
 #include <dplx/dp/encoder/core.hpp>
 
@@ -180,7 +180,9 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
     auto bytes
             = make_byte_array<6>({0b100'00101, 0x13, 0x09, 0x15, 0x17, 0x05});
-    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}};
+    custom_with_layout_descriptor const t{
+            0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}
+    };
 
     using test_encoder = dp::basic_encoder<custom_with_layout_descriptor,
                                            test_output_stream<>>;
@@ -195,7 +197,9 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_size_of)
 {
-    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}};
+    custom_with_layout_descriptor const t{
+            0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}
+    };
 
     auto const sizeOfT = dp::encoded_size_of(t);
     BOOST_TEST(sizeOfT == 6u);

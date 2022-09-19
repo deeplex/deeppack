@@ -8,11 +8,10 @@
 #pragma once
 
 #include <cstddef>
-
 #include <new>
 
 #include <boost/container/small_vector.hpp>
-                                            
+
 #include <dplx/cncr/misc.hpp>
 
 #include <dplx/dp/disappointment.hpp>

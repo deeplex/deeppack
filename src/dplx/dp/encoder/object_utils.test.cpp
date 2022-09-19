@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/object_utils.hpp>
+#include "dplx/dp/encoder/object_utils.hpp"
 
 #include <dplx/dp/encoder/core.hpp>
 
@@ -129,8 +129,9 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 
     test_output_stream ostream{};
 
-    custom_with_layout_descriptor const t{0x13, 0x07, 0x04, 0x14,
-                                          test_object{0, 0, 0x2a}};
+    custom_with_layout_descriptor const t{
+            0x13, 0x07, 0x04, 0x14, test_object{0, 0, 0x2a}
+    };
     auto rx = subject(ostream, t);
     DPLX_REQUIRE_RESULT(rx);
 
@@ -140,8 +141,9 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_size_of)
 {
-    custom_with_layout_descriptor const t{0x13, 0x07, 0x04, 0x14,
-                                          test_object{0, 0, 0x2a}};
+    custom_with_layout_descriptor const t{
+            0x13, 0x07, 0x04, 0x14, test_object{0, 0, 0x2a}
+    };
 
     auto const sizeOfT = dp::encoded_size_of(t);
     BOOST_TEST(sizeOfT == 14u);

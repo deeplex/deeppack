@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <concepts>
+#include <cstddef>
 #include <ranges>
 #include <span>
 #include <type_traits>
@@ -23,7 +22,7 @@ namespace dplx::dp
 using bytes = std::span<std::byte const>;
 using writable_bytes = std::span<std::byte>;
 
-}
+} // namespace dplx::dp
 
 // output stream definitions & concepts
 namespace dplx::dp

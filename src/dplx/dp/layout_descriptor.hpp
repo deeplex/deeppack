@@ -6,7 +6,7 @@
 //           https://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-                     
+
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/object_def.hpp>

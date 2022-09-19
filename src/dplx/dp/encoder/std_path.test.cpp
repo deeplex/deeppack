@@ -5,17 +5,17 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/std_path.hpp>
-                      
-#include <string_view>
+#include "dplx/dp/encoder/std_path.hpp"
 
-#include "boost-test.hpp"     
-#include "encoder.test_utils.hpp"
-#include "test_output_stream.hpp"
-#include "test_utils.hpp"   
+#include <string_view>
 
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/encoder/core.hpp>
+
+#include "boost-test.hpp"
+#include "encoder.test_utils.hpp"
+#include "test_output_stream.hpp"
+#include "test_utils.hpp"
 
 namespace dp_tests
 {
@@ -55,14 +55,13 @@ struct path_sample
 };
 
 using namespace std::string_view_literals;
-   
-constexpr path_sample path_samples[]
-        = {{1, make_byte_array<8>({0b011'00000}), u8""sv},
-           {1,
-            make_byte_array<8, int>({0b011'00000 | 15, u8'f', u8'o', u8'o',
-                                     u8'/', u8'b', u8'a', u8'r'}),
-            u8"foo/bar/baz.txt"sv}};
 
+constexpr path_sample path_samples[] = {
+        {1,make_byte_array<8>({0b011'00000}),                                                 u8""sv},
+        { 1,
+         make_byte_array<8, int>({0b011'00000 | 15, u8'f', u8'o', u8'o', u8'/',
+ u8'b', u8'a', u8'r'}),                   u8"foo/bar/baz.txt"sv}
+};
 
 BOOST_DATA_TEST_CASE(path_with, boost::unit_test::data::make(path_samples))
 {
@@ -81,9 +80,8 @@ BOOST_DATA_TEST_CASE(path_with, boost::unit_test::data::make(path_samples))
                boost::test_tools::per_element{});
 }
 
-
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
-}
+} // namespace dp_tests

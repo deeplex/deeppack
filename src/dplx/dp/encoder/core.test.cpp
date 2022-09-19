@@ -5,8 +5,9 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
+#include "dplx/dp/encoder/core.hpp"
+
 #include <dplx/dp/encoder/api.hpp>
-#include <dplx/dp/encoder/core.hpp>
 
 #include "boost-test.hpp"
 #include "encoder.test_utils.hpp"
@@ -59,8 +60,8 @@ BOOST_AUTO_TEST_SUITE(encoder)
 static_assert(dp::pair_like<dp::map_pair<int, int>>);
 static_assert(std::is_trivial_v<dp::map_pair<int, int>>);
 
-static_assert(!dp::encodable<volatile int, test_output_stream<>>);
-static_assert(!dp::encodable<volatile int const, test_output_stream<>>);
+static_assert(!dp::encodable<int volatile, test_output_stream<>>);
+static_assert(!dp::encodable<int const volatile, test_output_stream<>>);
 static_assert(!dp::encodable<char, test_output_stream<>>);
 
 // the integer encoder template just forwards to typ_encoder::integer()

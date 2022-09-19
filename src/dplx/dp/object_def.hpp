@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <algorithm>
 #include <array>
 #include <compare>
 #include <concepts>
+#include <cstdint>
 #include <string_view>
 #include <type_traits>
 
@@ -186,8 +185,8 @@ struct common_type<dplx::dp::fixed_u8string<N>, dplx::dp::fixed_u8string<N>>
 template <std::size_t N1, std::size_t N2>
 struct common_type<dplx::dp::fixed_u8string<N1>, dplx::dp::fixed_u8string<N2>>
 {
-    using type = dplx::dp::fixed_u8string<
-            dplx::cncr::round_up_p2(N1 < N2 ? N2 : N1, 16U)>;
+    using type = dplx::dp::fixed_u8string<dplx::cncr::round_up_p2(
+            N1 < N2 ? N2 : N1, 16U)>;
 };
 
 } // namespace std
@@ -314,8 +313,8 @@ struct object_def
             typename cncr::remove_cref_t<decltype(Properties)>::id_type...>;
     using id_runtime_type = std::common_type_t<typename cncr::remove_cref_t<
             decltype(Properties)>::id_runtime_type...>;
-    using class_type = detail::contravariance_t<typename cncr::remove_cref_t<
-            decltype(Properties)>::class_type...>;
+    using class_type = detail::contravariance_t<
+            typename cncr::remove_cref_t<decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
     static constexpr bool has_optional_properties

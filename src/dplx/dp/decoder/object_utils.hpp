@@ -7,11 +7,10 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <algorithm>
 #include <array>
 #include <compare>
+#include <cstdint>
 #include <type_traits>
 #include <utility>
 
@@ -252,7 +251,9 @@ public:
         }
 
         return boost::mp11::mp_with_index<num_prop_ids>(
-                idx, decode_prop_fn{{inStream, dest}});
+                idx, decode_prop_fn{
+                             {inStream, dest}
+        });
     }
 };
 
@@ -366,7 +367,9 @@ public:
             {
                 return boost::mp11::mp_with_index<small_id_limit>(
                         static_cast<std::size_t>(id),
-                        decode_prop_small_id_fn{{inStream, dest}});
+                        decode_prop_small_id_fn{
+                                {inStream, dest}
+                });
             }
         }
         else
@@ -384,7 +387,9 @@ public:
                 }
 
                 return boost::mp11::mp_with_index<id_map_size>(
-                        idx, decode_prop_large_id_fn{{inStream, dest}});
+                        idx, decode_prop_large_id_fn{
+                                     {inStream, dest}
+                });
             }
         }
     }

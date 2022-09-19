@@ -5,8 +5,9 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
+#include "dplx/dp/decoder/core.hpp"
+
 #include <dplx/dp/decoder/api.hpp>
-#include <dplx/dp/decoder/core.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"

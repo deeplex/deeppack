@@ -7,10 +7,9 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <cstring>
-
-#include <concepts>
 #include <memory>
 #include <new>
 #include <span>

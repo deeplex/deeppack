@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <cstring>
-
 #include <span>
 
 #include <dplx/dp/stream.hpp>

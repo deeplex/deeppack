@@ -5,13 +5,13 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/core.hpp>
-#include <dplx/dp/indefinite_range.hpp>
-
 #include <map>
 #include <unordered_map>
 
 #include <boost/unordered_map.hpp>
+
+#include <dplx/dp/encoder/core.hpp>
+#include <dplx/dp/indefinite_range.hpp>
 
 #include "boost-test.hpp"
 #include "encoder.test_utils.hpp"
@@ -50,13 +50,14 @@ auto boost_test_print_type(std::ostream &s, map_sample const &sample)
     return s;
 }
 
-constexpr map_sample map_samples[]
-        = {{0, 1, make_byte_array(0b101'00000, 0, 0, 0, 0, 0, 0, 0)},
-           {1, 3, make_byte_array(0b101'00001, 0, 1, 0, 0, 0, 0, 0)},
-           {23, 8, make_byte_array(0b101'00000 | 23, 0, 1, 1, 2, 2, 3, 3)},
-           {24, 8, make_byte_array(0b101'00000 | 24, 24, 0, 1, 1, 2, 2, 3)},
-           {255, 8, make_byte_array(0b101'00000 | 24, 255, 0, 1, 1, 2, 2, 3)},
-           {256, 8, make_byte_array(0b101'00000 | 25, 1, 0, 0, 1, 1, 2, 2)}};
+constexpr map_sample map_samples[] = {
+        {  0, 1,      make_byte_array(0b101'00000,   0, 0, 0, 0, 0, 0, 0)},
+        {  1, 3,      make_byte_array(0b101'00001,   0, 1, 0, 0, 0, 0, 0)},
+        { 23, 8, make_byte_array(0b101'00000 | 23,   0, 1, 1, 2, 2, 3, 3)},
+        { 24, 8, make_byte_array(0b101'00000 | 24,  24, 0, 1, 1, 2, 2, 3)},
+        {255, 8, make_byte_array(0b101'00000 | 24, 255, 0, 1, 1, 2, 2, 3)},
+        {256, 8, make_byte_array(0b101'00000 | 25,   1, 0, 0, 1, 1, 2, 2)}
+};
 
 BOOST_DATA_TEST_CASE(std_map_with, boost::unit_test::data::make(map_samples))
 {
@@ -153,13 +154,14 @@ BOOST_DATA_TEST_CASE(map_pair_range_with,
                boost::test_tools::per_element{});
 }
 
-constexpr map_sample indefinite_map_samples[]
-        = {{0, 1, make_byte_array(0b101'11111, 0xFF, 0, 0, 0, 0, 0, 0)},
-           {1, 3, make_byte_array(0b101'11111, 0, 1, 0xFF, 0, 0, 0, 0)},
-           {23, 8, make_byte_array(0b101'11111, 0, 1, 1, 2, 2, 3, 3)},
-           {24, 8, make_byte_array(0b101'11111, 0, 1, 1, 2, 2, 3, 3)},
-           {255, 8, make_byte_array(0b101'11111, 0, 1, 1, 2, 2, 3, 3)},
-           {256, 8, make_byte_array(0b101'11111, 0, 1, 1, 2, 2, 3, 3)}};
+constexpr map_sample indefinite_map_samples[] = {
+        {  0, 1, make_byte_array(0b101'11111, 0xFF, 0,    0, 0, 0, 0, 0)},
+        {  1, 3, make_byte_array(0b101'11111,    0, 1, 0xFF, 0, 0, 0, 0)},
+        { 23, 8, make_byte_array(0b101'11111,    0, 1,    1, 2, 2, 3, 3)},
+        { 24, 8, make_byte_array(0b101'11111,    0, 1,    1, 2, 2, 3, 3)},
+        {255, 8, make_byte_array(0b101'11111,    0, 1,    1, 2, 2, 3, 3)},
+        {256, 8, make_byte_array(0b101'11111,    0, 1,    1, 2, 2, 3, 3)}
+};
 
 BOOST_DATA_TEST_CASE(indefinite_map_with,
                      boost::unit_test::data::make(indefinite_map_samples))

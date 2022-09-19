@@ -7,10 +7,9 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
-
-#include <algorithm>
 #include <span>
 
 #include <dplx/dp/memory_buffer.hpp>
@@ -93,8 +92,7 @@ private:
         return success();
     }
 
-    inline auto read(std::size_t const amount) noexcept
-            -> result<bytes>
+    inline auto read(std::size_t const amount) noexcept -> result<bytes>
     {
         if (mBufferStart < 0
             && amount <= static_cast<unsigned int>(mReadArea.remaining_size()))

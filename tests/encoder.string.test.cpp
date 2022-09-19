@@ -5,13 +5,13 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/core.hpp>
-#include <dplx/dp/encoder/narrow_strings.hpp>
-
 #include <string>
 #include <string_view>
 
 #include <boost/unordered_map.hpp>
+
+#include <dplx/dp/encoder/core.hpp>
+#include <dplx/dp/encoder/narrow_strings.hpp>
 
 #include "boost-test.hpp"
 #include "encoder.test_utils.hpp"
@@ -63,12 +63,12 @@ auto boost_test_print_type(std::ostream &s,
     return s;
 }
 
-constexpr u8string_sample u8string_samples[]
-        = {{1, make_byte_array<8>({0b011'00000}), u8""sv},
-           {1,
-            make_byte_array<8, int>({0b011'00000 | 11, u8'h', u8'e', u8'l',
-                                     u8'l', u8'o', u8' ', u8'w'}),
-            u8"hello world"sv}};
+constexpr u8string_sample u8string_samples[] = {
+        {1,make_byte_array<8>({0b011'00000}),                                                 u8""sv},
+        { 1,
+         make_byte_array<8, int>({0b011'00000 | 11, u8'h', u8'e', u8'l', u8'l',
+ u8'o', u8' ', u8'w'}),                       u8"hello world"sv}
+};
 
 BOOST_DATA_TEST_CASE(u8string_view_with,
                      boost::unit_test::data::make(u8string_samples))
@@ -105,12 +105,12 @@ BOOST_DATA_TEST_CASE(u8string_with,
                boost::test_tools::per_element{});
 }
 
-constexpr string_sample string_samples[]
-        = {{1, make_byte_array<8>({0b011'00000}), ""sv},
-           {1,
-            make_byte_array<8, int>(
-                    {0b011'00000 | 11, 'h', 'e', 'l', 'l', 'o', ' ', 'w'}),
-            "hello world"sv}};
+constexpr string_sample string_samples[] = {
+        {1,make_byte_array<8>({0b011'00000}),                                                                   ""sv},
+        { 1,
+         make_byte_array<8, int>(
+ {0b011'00000 | 11, 'h', 'e', 'l', 'l', 'o', ' ', 'w'}),        "hello world"sv}
+};
 
 BOOST_DATA_TEST_CASE(string_view_with,
                      boost::unit_test::data::make(string_samples))

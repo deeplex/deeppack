@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/decoder/tuple_utils.hpp>
+#include "dplx/dp/decoder/tuple_utils.hpp"
 
 #include <dplx/dp/decoder/core.hpp>
 
@@ -199,7 +199,8 @@ static_assert(dp::packable_tuple<custom_with_layout_descriptor>);
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
 {
-    auto bytes = make_byte_array<32>({0b100'00101, 0x13, 0x09, 0x15, 0x17, 0x0a});
+    auto bytes
+            = make_byte_array<32>({0b100'00101, 0x13, 0x09, 0x15, 0x17, 0x0a});
     test_input_stream istream{bytes};
 
     using test_decoder = dp::basic_decoder<custom_with_layout_descriptor,

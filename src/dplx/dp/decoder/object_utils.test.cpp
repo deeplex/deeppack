@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/decoder/object_utils.hpp>
+#include "dplx/dp/decoder/object_utils.hpp"
 
 #include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/streams/memory_input_stream.hpp>
@@ -311,8 +311,8 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
 
     test_encoder subject{};
 
-    auto bytes = make_byte_array<32>(
-            {0b101'00000 | 5, 2, 7, 1, 0x13, 24, 26, 4, 24, 36, 0x14, 7, 0x18, 0xcf});
+    auto bytes = make_byte_array<32>({0b101'00000 | 5, 2, 7, 1, 0x13, 24, 26, 4,
+                                      24, 36, 0x14, 7, 0x18, 0xcf});
     test_input_stream istream{bytes};
 
     custom_with_layout_descriptor t{};

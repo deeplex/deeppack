@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <bit>
+#include <cstddef>
 #include <type_traits>
 
 #include <boost/endian/arithmetic.hpp>
@@ -175,7 +174,7 @@ constexpr auto load(std::byte const *const src) -> T
 }
 
 template <cncr::integer T, std::endian order>
-constexpr auto load_partial(const std::byte *data, int num) -> T
+constexpr auto load_partial(std::byte const *data, int num) -> T
 {
     static_assert(sizeof(T) <= 8);
     static_assert(order == std::endian::big || order == std::endian::little);

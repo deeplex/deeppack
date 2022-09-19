@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <cstdint>
-
 #include <ranges>
 #include <type_traits>
 
@@ -171,8 +170,7 @@ public:
             return errc::item_value_out_of_range;
         }
         if (mode != parse_mode::lenient
-            && detail::var_uint_encoded_size(item.value)
-                       < item.encoded_length)
+            && detail::var_uint_encoded_size(item.value) < item.encoded_length)
         {
             return errc::oversized_additional_information_coding;
         }
@@ -596,8 +594,7 @@ inline auto item_parser<Stream>::string_finite(Stream &inStream,
         return errc::indefinite_item;
     }
     if (mode != parse_mode::lenient
-        && detail::var_uint_encoded_size(item.value)
-                   < item.encoded_length)
+        && detail::var_uint_encoded_size(item.value) < item.encoded_length)
     {
         return errc::oversized_additional_information_coding;
     }
@@ -669,7 +666,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
         for (std::size_t i = 0; i < numElements; ++i)
         {
             std::size_t const v = i;
-#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                          \
+#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                            \
         && DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 29, 30137)
             if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                          std::size_t const, parse_mode const>)
@@ -716,7 +713,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
             }
 
             std::size_t const v = i;
-#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                          \
+#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                            \
         && DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 29, 30137)
             if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                          std::size_t const, parse_mode const>)
@@ -757,8 +754,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
         return errc::indefinite_item;
     }
     if (mode != parse_mode::lenient
-        && detail::var_uint_encoded_size(item.value)
-                   < item.encoded_length)
+        && detail::var_uint_encoded_size(item.value) < item.encoded_length)
     {
         return errc::oversized_additional_information_coding;
     }
@@ -782,7 +778,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
     for (std::size_t i = 0; i < numElements; ++i)
     {
         std::size_t const v = i;
-#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                          \
+#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                            \
         && DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 29, 30137)
         if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                      std::size_t const, parse_mode const>)

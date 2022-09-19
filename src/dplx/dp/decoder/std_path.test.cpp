@@ -5,14 +5,14 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/decoder/std_path.hpp>
+#include "dplx/dp/decoder/std_path.hpp"
+
+#include <dplx/dp/concepts.hpp>
+#include <dplx/dp/decoder/core.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
-
-#include <dplx/dp/concepts.hpp>
-#include <dplx/dp/decoder/core.hpp>
 
 namespace dp_tests
 {
@@ -52,9 +52,10 @@ struct path_sample
     }
 };
 
-constexpr path_sample path_samples[]
-        = {{u8""sv, 1, make_byte_array<12>({0x60})},
-           {u8"foo/bar/baz.txt"sv, 1, make_byte_array<12>({0x60 | 15})}};
+constexpr path_sample path_samples[] = {
+        {               u8""sv, 1,      make_byte_array<12>({0x60})},
+        {u8"foo/bar/baz.txt"sv, 1, make_byte_array<12>({0x60 | 15})}
+};
 
 BOOST_DATA_TEST_CASE(path_with, boost::unit_test::data::make(path_samples))
 {

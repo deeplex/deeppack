@@ -5,8 +5,9 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost-test.hpp"
 #include "dplx/dp/concepts.hpp"
+//
+#include "boost-test.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests

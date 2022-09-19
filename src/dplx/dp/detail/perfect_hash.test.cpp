@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/detail/perfect_hash.hpp>
+#include "dplx/dp/detail/perfect_hash.hpp"
 
 #include <array>
 #include <cstdint>

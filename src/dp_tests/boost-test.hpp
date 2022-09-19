@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <cstdint>
-
 #include <span>
 
 #include <fmt/chrono.h>
@@ -60,10 +59,9 @@ inline auto boost_test_print_type(std::ostream &s,
 #pragma warning(disable : 4702)
 #endif
 
-#include <boost/test/unit_test.hpp>
-
 #include <boost/test/data/monomorphic.hpp>
 #include <boost/test/data/test_case.hpp>
+#include <boost/test/unit_test.hpp>
 
 #if defined DPLX_COMP_MSVC_AVAILABLE
 #pragma warning(pop)

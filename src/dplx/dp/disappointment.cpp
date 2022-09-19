@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/disappointment.hpp>
+#include "dplx/dp/disappointment.hpp"
 
 #include <fmt/format.h>
 
@@ -15,13 +15,11 @@ namespace dplx::dp
 class error_category_impl : public std::error_category
 {
 public:
-    [[nodiscard]]
-    auto name() const noexcept -> const char * override;
-    [[nodiscard]]
-    auto message(int errval) const -> std::string override;
+    [[nodiscard]] auto name() const noexcept -> char const * override;
+    [[nodiscard]] auto message(int errval) const -> std::string override;
 };
 
-auto error_category_impl::name() const noexcept -> const char *
+auto error_category_impl::name() const noexcept -> char const *
 {
     return "dplx::dp error category";
 }

@@ -5,8 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/decoder/core.hpp>
-#include <dplx/dp/decoder/std_container.hpp>
+#include "dplx/dp/decoder/std_container.hpp"
 
 #include <array>
 #include <deque>
@@ -26,6 +25,8 @@
 #include <boost/mp11/list.hpp>
 
 #include <dplx/predef/compiler.h>
+
+#include <dplx/dp/decoder/core.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
