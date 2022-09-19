@@ -94,8 +94,7 @@ private:
 
     inline auto read(std::size_t const amount) noexcept -> result<bytes>
     {
-        if (mBufferStart < 0
-            && amount <= static_cast<unsigned int>(mReadArea.remaining_size()))
+        if (mBufferStart < 0 && amount <= mReadArea.remaining_size())
         {
             mRemaining -= amount;
             return std::span<std::byte const>(
@@ -109,8 +108,7 @@ private:
 
         if (mBufferStart < 0)
         {
-            auto const remainingChunk
-                    = static_cast<unsigned int>(mReadArea.remaining_size());
+            auto const remainingChunk = mReadArea.remaining_size();
 
             if (remainingChunk >= minimum_guaranteed_read_size)
             {
@@ -135,9 +133,8 @@ private:
 
             if (remainingChunk > 0)
             {
-                auto const nextPart = std::min(
-                        minimum_guaranteed_read_size - 1,
-                        static_cast<unsigned int>(mReadArea.remaining_size()));
+                auto const nextPart = std::min(minimum_guaranteed_read_size - 1,
+                                               mReadArea.remaining_size());
 
                 std::memcpy(mSmallBuffer + decommission_threshold,
                             mReadArea.remaining_begin(), nextPart);

@@ -222,14 +222,14 @@ public:
         }
         return success();
     }
-    static inline auto float_half(Stream &outStream, std::uint16_t const bytes)
+    static inline auto float_half(Stream &outStream, std::uint16_t const raw)
             -> result<void>
     {
-        DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(bytes)));
+        DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(raw)));
 
         auto const out = std::ranges::data(writeLease);
         out[0] = to_byte(type_code::float_half);
-        std::memcpy(out + 1, &bytes, sizeof(bytes));
+        std::memcpy(out + 1, &raw, sizeof(raw));
 
         if constexpr (lazy_output_stream<Stream>)
         {

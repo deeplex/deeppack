@@ -47,7 +47,7 @@ inline constexpr struct write_fn
                                std::byte const *,
                                std::size_t const>
     auto operator()(Stream &stream,
-                    std::byte const *bytes,
+                    std::byte const *data,
                     std::size_t const numBytes) const
             noexcept(nothrow_tag_invocable<write_fn,
                                            Stream &,
@@ -58,7 +58,7 @@ inline constexpr struct write_fn
                                            std::byte const *,
                                            std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, bytes, numBytes);
+        return cpo::tag_invoke(*this, stream, data, numBytes);
     }
 } write{};
 

@@ -147,9 +147,9 @@ private:
     array_type const &ids;
 
 public:
-    constexpr property_id_lookup_fn(array_type const &ids)
+    constexpr property_id_lookup_fn(array_type const &idsInit)
         : hash(ids)
-        , ids(ids)
+        , ids(idsInit)
     {
     }
 
@@ -175,8 +175,8 @@ private:
     array_type const &ids;
 
 public:
-    constexpr property_id_lookup_fn(array_type const &ids)
-        : ids(ids)
+    constexpr property_id_lookup_fn(array_type const &idsInit)
+        : ids(idsInit)
     {
     }
 

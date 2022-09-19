@@ -11,6 +11,8 @@
 #include <cstring>
 #include <span>
 
+#include <dplx/predef/compiler.h>
+
 #include <dplx/dp/stream.hpp>
 
 namespace dplx::dp
@@ -79,6 +81,10 @@ private:
         return static_cast<Impl *>(this);
     }
 
+#if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast" // std::size_t casts :(
+#endif
     auto acquire_next_chunk() noexcept -> result<void>
     {
         using byte_span = std::span<std::byte>;
@@ -93,6 +99,9 @@ private:
 
         return success();
     }
+#if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
+#pragma GCC diagnostic pop
+#endif
 
     auto write(std::size_t const size) noexcept -> result<sbo_write_proxy>
     {

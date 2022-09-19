@@ -44,7 +44,7 @@ concept subitem_parslet = input_stream<InputStream>
     && ((
             std::invocable<Fn, InputStream &, Container &, std::size_t const>
                         && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const>>)
-            
+
         || (
             std::invocable<Fn, InputStream &, Container &, std::size_t const, parse_mode const>
                         && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const, parse_mode const>>)
@@ -473,6 +473,11 @@ private:
             -> result<std::size_t>;
 };
 
+#if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast" // std::size_t casts :(
+#endif
+
 template <input_stream Stream>
 template <typename StringType>
 inline auto item_parser<Stream>::string(Stream &inStream,
@@ -795,5 +800,9 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
     }
     return numElements;
 }
+
+#if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
+#pragma GCC diagnostic pop
+#endif
 
 } // namespace dplx::dp

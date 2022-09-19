@@ -98,7 +98,7 @@ inline auto parse_item_speculative(std::byte const *const encoded) noexcept
             unsigned char const varLenShift
                     = (0b0011'1000 << sizeBytesPower) & 63;
 
-            info.encoded_length = 1 + (1 << sizeBytesPower);
+            info.encoded_length = 1U + (1U << sizeBytesPower);
             info.value = encodedValue >> varLenShift;
         }
     else if (info.value == 31
