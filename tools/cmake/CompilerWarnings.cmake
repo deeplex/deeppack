@@ -1,5 +1,5 @@
 
-option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
 set(MSVC_WARNINGS
     /W4 # Baseline reasonable warnings
