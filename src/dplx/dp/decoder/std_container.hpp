@@ -77,7 +77,7 @@ private:
     static auto decode_element(Stream &stream, T &value, std::size_t const)
             -> result<void>
     {
-        element_type *e;
+        element_type *e; // NOLINT(cppcoreguidelines-init-variables)
         if constexpr (back_insertion_sequence_container<T>)
         {
             value.emplace_back();
