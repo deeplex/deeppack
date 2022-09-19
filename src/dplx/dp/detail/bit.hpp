@@ -33,15 +33,10 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
     static_assert(std::is_unsigned_v<T>);
     static_assert(sizeof(T) <= sizeof(unsigned long long));
 
-    // #LangODR to be resolved after MSVC supports __cpp_lib_bitops
-#if __cpp_lib_bitops >= 201907L && __cpp_lib_is_constant_evaluated >= 201811L
-
     if (std::is_constant_evaluated())
     {
         return (digits_v<T> - 1) - std::countl_zero(value);
     }
-
-#endif
 
 #if defined(DPLX_COMP_GCC_AVAILABLE) || defined(DPLX_COMP_CLANG_AVAILABLE)
 
@@ -108,57 +103,60 @@ constexpr auto rotl(T const v, int n) noexcept -> T
 }
 
 template <cncr::integer T, std::endian order>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 constexpr auto load(std::byte const *const src) -> T
 {
-    // static_assert(order == std::endian::native);
     static_assert(order == std::endian::big || order == std::endian::little);
 
     if (std::is_constant_evaluated())
     {
+        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         static_assert(sizeof(T) <= 8);
         using uT = std::make_unsigned_t<T>;
         if constexpr (order == std::endian::little)
         {
-            uT acc = std::to_integer<uT>(src[0]);
+            uT acc = static_cast<uT>(src[0]);
             if constexpr (sizeof(acc) >= 2)
             {
-                acc |= std::to_integer<uT>(src[1]) << 8;
+                acc |= static_cast<uT>(src[1]) << 8;
             }
             if constexpr (sizeof(acc) >= 4)
             {
-                acc |= std::to_integer<uT>(src[2]) << 16
-                     | std::to_integer<uT>(src[3]) << 24;
+                acc |= static_cast<uT>(src[2]) << 16
+                     | static_cast<uT>(src[3]) << 24;
             }
             if constexpr (sizeof(acc) == 8)
             {
-                acc |= std::to_integer<uT>(src[4]) << 32
-                     | std::to_integer<uT>(src[5]) << 40
-                     | std::to_integer<uT>(src[6]) << 48
-                     | std::to_integer<uT>(src[7]) << 56;
+                acc |= static_cast<uT>(src[4]) << 32
+                     | static_cast<uT>(src[5]) << 40
+                     | static_cast<uT>(src[6]) << 48
+                     | static_cast<uT>(src[7]) << 56;
             }
             return static_cast<T>(acc);
         }
         else
         {
-            uT acc = std::to_integer<uT>(src[0]) << 56;
+            uT acc = static_cast<uT>(src[0]) << 56;
             if constexpr (sizeof(acc) >= 2)
             {
-                acc |= std::to_integer<uT>(src[1]) << 48;
+                acc |= static_cast<uT>(src[1]) << 48;
             }
             if constexpr (sizeof(acc) >= 4)
             {
-                acc |= std::to_integer<uT>(src[2]) << 40
-                     | std::to_integer<uT>(src[3]) << 32;
+                acc |= static_cast<uT>(src[2]) << 40
+                     | static_cast<uT>(src[3]) << 32;
             }
             if constexpr (sizeof(acc) == 8)
             {
-                acc |= std::to_integer<uT>(src[4]) << 24
-                     | std::to_integer<uT>(src[5]) << 16
-                     | std::to_integer<uT>(src[6]) << 8
-                     | std::to_integer<uT>(src[7]);
+                acc |= static_cast<uT>(src[4]) << 24
+                     | static_cast<uT>(src[5]) << 16
+                     | static_cast<uT>(src[6]) << 8 | static_cast<uT>(src[7]);
             }
             return static_cast<T>(acc >> (64 - digits_v<uT>));
         }
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTEND(readability-magic-numbers)
     }
     else
     {
@@ -177,7 +175,9 @@ template <cncr::integer T, std::endian order>
 constexpr auto load_partial(std::byte const *data, int num) -> T
 {
     static_assert(sizeof(T) <= 8);
-    static_assert(order == std::endian::big || order == std::endian::little);
+    static_assert(order != std::endian::big,
+                  "big endian partial loads haven't been implemented yet");
+    static_assert(order == std::endian::little, "unknown endianess");
 
     using uT = std::make_unsigned_t<T>;
     if constexpr (order == std::endian::little)
@@ -188,44 +188,44 @@ constexpr auto load_partial(std::byte const *data, int num) -> T
         case 7:
             if constexpr (sizeof(assembled) == 8)
             {
-                assembled |= std::to_integer<uT>(data[6]) << 48;
+                assembled |= static_cast<uT>(data[6]) << 48;
             }
             [[fallthrough]];
         case 6:
             if constexpr (sizeof(assembled) == 8)
             {
-                assembled |= std::to_integer<uT>(data[5]) << 40;
+                assembled |= static_cast<uT>(data[5]) << 40;
             }
             [[fallthrough]];
         case 5:
             if constexpr (sizeof(assembled) == 8)
             {
-                assembled |= std::to_integer<uT>(data[4]) << 32;
+                assembled |= static_cast<uT>(data[4]) << 32;
             }
             [[fallthrough]];
 
         case 4:
             if constexpr (sizeof(assembled) >= 4)
             {
-                assembled |= std::to_integer<uT>(data[3]) << 24;
+                assembled |= static_cast<uT>(data[3]) << 24;
             }
             [[fallthrough]];
         case 3:
             if constexpr (sizeof(assembled) >= 4)
             {
-                assembled |= std::to_integer<uT>(data[2]) << 16;
+                assembled |= static_cast<uT>(data[2]) << 16;
             }
             [[fallthrough]];
 
         case 2:
             if constexpr (sizeof(assembled) >= 2)
             {
-                assembled |= std::to_integer<uT>(data[1]) << 8;
+                assembled |= static_cast<uT>(data[1]) << 8;
             }
             [[fallthrough]];
 
         case 1:
-            assembled |= std::to_integer<uT>(data[0]);
+            assembled |= static_cast<uT>(data[0]);
             [[fallthrough]];
 
         case 0:
