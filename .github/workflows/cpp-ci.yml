@@ -69,10 +69,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v3
-      - name: Install the linter driver python package
-        run: python3 -m pip install git+https://github.com/cpp-linter/cpp-linter-action@v1
-
       - uses: lukka/get-cmake@v3.22.2
 
       - name: Initialize vcpkg
@@ -80,9 +76,9 @@ jobs:
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
           vcpkgGitCommitId: 01b29f6d8212bc845da64773b18665d682f5ab66
-          appendedCacheKey: r01
+          #appendedCacheKey: r01
 
-      - name: Configure x64-linux-clang preset
+      - name: Configure x64-linux-clang preset and generate a compilation database
         uses: lukka/run-cmake@v10
         env:
           CMAKE_EXPORT_COMPILE_COMMANDS: '1'
@@ -92,13 +88,13 @@ jobs:
       - name: Lint with clang-format and clang-tidy
         id: linter
         run: |
-          cpp-linter \
+          pipx run cpp-linter \
           --version=14 \
           --style=file \
           --tidy-checks='' \
           --files-changed-only=false \
           --ignore='build|external' \
-          --database=${{ github.event.repository.name }}/build/x64-linux-clang
+          --database=build/x64-linux-clang
 
       - name: Fail if issues have been raised
         if: steps.linter.outputs.checks-failed > 0

@@ -13,7 +13,7 @@ Checks: >
     -readability-identifier-length,
     -readability-named-parameter
 WarningsAsErrors: true
-HeaderFilterRegex: ""
+HeaderFilterRegex: ".*"
 FormatStyle: file
 CheckOptions:
   - key: modernize-use-override.AllowOverrideAndFinal
