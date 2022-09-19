@@ -7,7 +7,11 @@
 
 #pragma once
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #cmakedefine01 DPLX_DP_DISABLE_WORKAROUNDS
 #cmakedefine01 DPLX_DP_FLAG_OUTDATED_WORKAROUNDS
 
 #cmakedefine01 DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
