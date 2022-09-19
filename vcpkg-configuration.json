@@ -1,15 +1,16 @@
 {
     "default-registry": {
         "kind": "builtin",
-        "baseline": "8b62d95a81afcb9efe74bebeb62f04c1e0e2a003"
+        "baseline": "01b29f6d8212bc845da64773b18665d682f5ab66"
     },
     "registries": [
         {
             "kind": "git",
             "repository": "https://github.com/deeplex-net/vcpkg-registry",
-            "baseline": "db04f0a9348238055782bec60cb286b18dbb74e4",
+            "baseline": "7b7ca2779d58987d9d47723bcf6c40ad72ec9d55",
             "packages": [
-                "concrete"
+                "concrete",
+                "outcome"
             ]
         }
     ]
