@@ -164,6 +164,7 @@ constexpr auto load(std::byte const *const src) -> T
                                           ? boost::endian::order::little
                                           : boost::endian::order::big;
         return boost::endian::endian_load<T, sizeof(T), boostOrder>(
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 reinterpret_cast<unsigned char const *>(src));
         // T assembled;
         // std::memcpy(&assembled, src, sizeof(assembled));
@@ -174,6 +175,9 @@ constexpr auto load(std::byte const *const src) -> T
 template <cncr::integer T, std::endian order>
 constexpr auto load_partial(std::byte const *data, int num) -> T
 {
+    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
     static_assert(sizeof(T) <= 8);
     static_assert(order != std::endian::big,
                   "big endian partial loads haven't been implemented yet");
@@ -236,7 +240,10 @@ constexpr auto load_partial(std::byte const *data, int num) -> T
     else
     {
     }
-} // namespace dplx::dp::detail
+
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    // NOLINTEND(readability-magic-numbers)
+}
 
 constexpr auto byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
 {
