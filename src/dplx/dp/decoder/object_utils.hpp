@@ -48,8 +48,8 @@ inline constexpr struct property_id_hash_fn
                 tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
     constexpr auto operator()(T const &value, std::uint64_t seed) const
             noexcept(cncr::nothrow_tag_invocable<property_id_hash_fn,
-                                                  T const &,
-                                                  std::uint64_t>)
+                                                 T const &,
+                                                 std::uint64_t>)
                     -> std::uint64_t
     {
         return cncr::tag_invoke(*this, value, seed);
