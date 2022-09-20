@@ -31,8 +31,8 @@ static_assert(
         dplx::dp::encodable<signed_test_enum, dp_tests::test_output_stream<>>);
 static_assert(
         dplx::dp::decodable<signed_test_enum, dp_tests::test_input_stream>);
-static_assert(dplx::dp::tag_invocable<dplx::dp::encoded_size_of_fn,
-                                      signed_test_enum const &>);
+static_assert(dplx::cncr::tag_invocable<dplx::dp::encoded_size_of_fn,
+                                        signed_test_enum const &>);
 
 enum class unsigned_test_enum : unsigned
 {
@@ -44,8 +44,8 @@ static_assert(dplx::dp::encodable<unsigned_test_enum,
                                   dp_tests::test_output_stream<>>);
 static_assert(
         dplx::dp::decodable<unsigned_test_enum, dp_tests::test_input_stream>);
-static_assert(dplx::dp::tag_invocable<dplx::dp::encoded_size_of_fn,
-                                      unsigned_test_enum const &>);
+static_assert(dplx::cncr::tag_invocable<dplx::dp::encoded_size_of_fn,
+                                        unsigned_test_enum const &>);
 
 enum unscoped_test_enum
 {
@@ -57,8 +57,8 @@ static_assert(dplx::dp::encodable<unscoped_test_enum,
                                   dp_tests::test_output_stream<>>);
 static_assert(
         dplx::dp::decodable<unscoped_test_enum, dp_tests::test_input_stream>);
-static_assert(dplx::dp::tag_invocable<dplx::dp::encoded_size_of_fn,
-                                      unscoped_test_enum const &>);
+static_assert(dplx::cncr::tag_invocable<dplx::dp::encoded_size_of_fn,
+                                        unscoped_test_enum const &>);
 
 inline auto operator<<(std::ostream &stream, signed_test_enum value) noexcept
         -> std::ostream &
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_SUITE(enum_codec)
 static_assert(!dp::codable_enum<std::byte>);
 static_assert(!dp::decodable<std::byte, test_input_stream>);
 static_assert(!dp::encodable<std::byte, test_output_stream<>>);
-static_assert(!dp::tag_invocable<dp::encoded_size_of_fn, std::byte>);
+static_assert(!cncr::tag_invocable<dp::encoded_size_of_fn, std::byte>);
 
 BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
 

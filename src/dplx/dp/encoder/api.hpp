@@ -9,6 +9,7 @@
 
 #include <type_traits>
 
+#include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/concepts.hpp>
@@ -291,12 +292,12 @@ inline constexpr struct encode_varargs_t final
 inline constexpr struct encoded_size_of_fn
 {
     template <typename T>
-        requires tag_invocable<encoded_size_of_fn, T &&>
+        requires cncr::tag_invocable<encoded_size_of_fn, T &&>
     constexpr auto operator()(T &&value) const
-            noexcept(nothrow_tag_invocable<encoded_size_of_fn, T &&>)
-                    -> tag_invoke_result_t<encoded_size_of_fn, T &&>
+            noexcept(cncr::nothrow_tag_invocable<encoded_size_of_fn, T &&>)
+                    -> cncr::tag_invoke_result_t<encoded_size_of_fn, T &&>
     {
-        return cpo::tag_invoke(*this, static_cast<T &&>(value));
+        return cncr::tag_invoke(*this, static_cast<T &&>(value));
     }
 } encoded_size_of{};
 

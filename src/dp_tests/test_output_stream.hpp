@@ -53,14 +53,14 @@ public:
 
         using stream_type = test_output_stream;
 
-        friend inline auto tag_invoke(dp::tag_t<dp::commit>,
+        friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
                                       test_output_stream &stream,
                                       write_proxy &self) -> dp::result<void>
         {
             return write_proxy::commit(stream, self);
         }
 
-        friend inline auto tag_invoke(dp::tag_t<dp::commit>,
+        friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
                                       test_output_stream &stream,
                                       write_proxy &self,
                                       std::size_t const actualSize)
@@ -116,7 +116,7 @@ public:
         return std::ranges::begin(mBuffer) + mCurrentSize;
     }
 
-    friend inline auto tag_invoke(dp::tag_t<dp::write>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
                                   test_output_stream &self,
                                   std::size_t const amount)
             -> dp::result<write_proxy>
@@ -130,7 +130,7 @@ public:
         return write_proxy({self.mBuffer.data() + start, amount},
                            self.mCurrentSize, ctag{});
     }
-    friend inline auto tag_invoke(dp::tag_t<dp::write>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
                                   test_output_stream &self,
                                   std::byte const *bytes,
                                   std::size_t const amount) -> dp::result<void>

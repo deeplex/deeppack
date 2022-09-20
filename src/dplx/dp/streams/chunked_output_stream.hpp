@@ -11,6 +11,7 @@
 #include <cstring>
 #include <span>
 
+#include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/predef/compiler.h>
 
 #include <dplx/dp/stream.hpp>
@@ -194,7 +195,7 @@ private:
     }
 
 public:
-    friend inline auto tag_invoke(tag_t<dp::write>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
                                   chunked_output_stream_base &self,
                                   std::size_t const size) noexcept
             -> result<sbo_write_proxy>
@@ -202,14 +203,14 @@ public:
         return self.write(size);
     }
 
-    friend inline auto tag_invoke(tag_t<dp::commit>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
                                   chunked_output_stream_base &stream,
                                   sbo_write_proxy &proxy) noexcept
             -> result<void>
     {
         return stream.commit(proxy, proxy.size());
     }
-    friend inline auto tag_invoke(tag_t<dp::commit>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
                                   chunked_output_stream_base &stream,
                                   sbo_write_proxy &proxy,
                                   std::size_t const actualSize) noexcept
@@ -218,7 +219,7 @@ public:
         return stream.commit(proxy, actualSize);
     }
 
-    friend inline auto tag_invoke(tag_t<dp::write>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
                                   chunked_output_stream_base &self,
                                   std::byte const *data,
                                   std::size_t const size) noexcept

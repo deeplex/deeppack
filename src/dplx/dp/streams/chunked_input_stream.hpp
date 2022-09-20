@@ -12,6 +12,8 @@
 #include <cstring>
 #include <span>
 
+#include <dplx/cncr/tag_invoke.hpp>
+
 #include <dplx/dp/memory_buffer.hpp>
 #include <dplx/dp/stream.hpp>
 
@@ -279,20 +281,20 @@ private:
     }
 
 public:
-    friend inline auto tag_invoke(tag_t<dp::available_input_size>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::available_input_size>,
                                   chunked_input_stream_base &self) noexcept
             -> result<std::uint64_t>
     {
         return self.mRemaining;
     }
-    friend inline auto tag_invoke(tag_t<dp::read>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
                                   chunked_input_stream_base &self,
                                   std::size_t const amount) noexcept
             -> result<std::span<std::byte const>>
     {
         return self.read(amount);
     }
-    friend inline auto tag_invoke(tag_t<dp::consume>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::consume>,
                                   chunked_input_stream_base &self,
                                   std::span<std::byte const> proxy,
                                   std::size_t const actualAmount) noexcept
@@ -300,7 +302,7 @@ public:
     {
         return self.consume(proxy.size(), actualAmount);
     }
-    friend inline auto tag_invoke(tag_t<dp::read>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
                                   chunked_input_stream_base &self,
                                   std::byte *buffer,
                                   std::size_t const amount) noexcept
@@ -313,7 +315,7 @@ public:
 
         return self.read(buffer, amount);
     }
-    friend inline auto tag_invoke(tag_t<dp::skip_bytes>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::skip_bytes>,
                                   chunked_input_stream_base &self,
                                   std::uint64_t const numBytes) noexcept
             -> result<void>

@@ -13,8 +13,9 @@
 #include <span>
 #include <type_traits>
 
+#include <dplx/cncr/tag_invoke.hpp>
+
 #include <dplx/dp/disappointment.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 
 namespace dplx::dp
 {
@@ -32,33 +33,33 @@ inline constexpr struct write_fn
 {
     // direct encoding variant
     template <typename Stream>
-        requires tag_invocable<write_fn, Stream &, std::size_t const>
+        requires cncr::tag_invocable<write_fn, Stream &, std::size_t const>
     auto operator()(Stream &stream, std::size_t const size) const noexcept(
-            nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
-            -> tag_invoke_result_t<write_fn, Stream &, std::size_t const>
+            cncr::nothrow_tag_invocable<write_fn, Stream &, std::size_t const>)
+            -> cncr::tag_invoke_result_t<write_fn, Stream &, std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, size);
+        return cncr::tag_invoke(*this, stream, size);
     }
 
     // bulk transfer variant (for payload data like strings)
     template <typename Stream>
-        requires tag_invocable<write_fn,
-                               Stream &,
-                               std::byte const *,
-                               std::size_t const>
+        requires cncr::tag_invocable<write_fn,
+                                     Stream &,
+                                     std::byte const *,
+                                     std::size_t const>
     auto operator()(Stream &stream,
                     std::byte const *data,
                     std::size_t const numBytes) const
-            noexcept(nothrow_tag_invocable<write_fn,
-                                           Stream &,
-                                           std::byte const *,
-                                           std::size_t const>)
-                    -> tag_invoke_result_t<write_fn,
-                                           Stream &,
-                                           std::byte const *,
-                                           std::size_t const>
+            noexcept(cncr::nothrow_tag_invocable<write_fn,
+                                                 Stream &,
+                                                 std::byte const *,
+                                                 std::size_t const>)
+                    -> cncr::tag_invoke_result_t<write_fn,
+                                                 Stream &,
+                                                 std::byte const *,
+                                                 std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, data, numBytes);
+        return cncr::tag_invoke(*this, stream, data, numBytes);
     }
 } write{};
 
@@ -67,31 +68,31 @@ inline constexpr unsigned minimum_guaranteed_write_size = 40;
 inline constexpr struct commit_fn
 {
     template <typename Stream, typename WriteProxy>
-        requires tag_invocable<commit_fn, Stream &, WriteProxy &>
-    auto operator()(Stream &stream, WriteProxy &proxy) const
-            noexcept(nothrow_tag_invocable<commit_fn, Stream &, WriteProxy &>)
-                    -> tag_invoke_result_t<commit_fn, Stream &, WriteProxy &>
+        requires cncr::tag_invocable<commit_fn, Stream &, WriteProxy &>
+    auto operator()(Stream &stream, WriteProxy &proxy) const noexcept(
+            cncr::nothrow_tag_invocable<commit_fn, Stream &, WriteProxy &>)
+            -> cncr::tag_invoke_result_t<commit_fn, Stream &, WriteProxy &>
     {
-        return cpo::tag_invoke(*this, stream, proxy);
+        return cncr::tag_invoke(*this, stream, proxy);
     }
 
     template <typename Stream, typename WriteProxy>
-        requires tag_invocable<commit_fn,
-                               Stream &,
-                               WriteProxy &,
-                               std::size_t const>
+        requires cncr::tag_invocable<commit_fn,
+                                     Stream &,
+                                     WriteProxy &,
+                                     std::size_t const>
     auto
     operator()(Stream &stream, WriteProxy &proxy, std::size_t const size) const
-            noexcept(nothrow_tag_invocable<commit_fn,
-                                           Stream &,
-                                           WriteProxy &,
-                                           std::size_t const>)
-                    -> tag_invoke_result_t<commit_fn,
-                                           Stream &,
-                                           WriteProxy &,
-                                           std::size_t const>
+            noexcept(cncr::nothrow_tag_invocable<commit_fn,
+                                                 Stream &,
+                                                 WriteProxy &,
+                                                 std::size_t const>)
+                    -> cncr::tag_invoke_result_t<commit_fn,
+                                                 Stream &,
+                                                 WriteProxy &,
+                                                 std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, proxy, size);
+        return cncr::tag_invoke(*this, stream, proxy, size);
     }
 } commit{};
 
@@ -182,22 +183,22 @@ struct output_stream_traits
     static constexpr bool output = true;
     static constexpr bool lazy_output = lazy_output_stream<Stream>;
 
-    static constexpr bool nothrow_write_direct
-            = nothrow_tag_invocable<write_fn, Stream &, std::size_t const>;
+    static constexpr bool nothrow_write_direct = cncr::
+            nothrow_tag_invocable<write_fn, Stream &, std::size_t const>;
     static constexpr bool nothrow_write_indirect
-            = nothrow_tag_invocable<write_fn,
-                                    Stream &,
-                                    std::byte const *,
-                                    std::size_t const>;
+            = cncr::nothrow_tag_invocable<write_fn,
+                                          Stream &,
+                                          std::byte const *,
+                                          std::size_t const>;
     static constexpr bool nothrow_write
             = nothrow_write_direct && nothrow_write_indirect;
 
     static constexpr bool nothrow_commit
-            = nothrow_tag_invocable<
+            = cncr::nothrow_tag_invocable<
                       commit_fn,
                       Stream &,
                       write_proxy_t<Stream> &,
-                      std::size_t const> && (!lazy_output || nothrow_tag_invocable<commit_fn, Stream &, write_proxy_t<Stream> &>);
+                      std::size_t const> && (!lazy_output || cncr::nothrow_tag_invocable<commit_fn, Stream &, write_proxy_t<Stream> &>);
 
     static constexpr bool nothrow_output = nothrow_write && nothrow_commit;
 };
@@ -211,31 +212,29 @@ namespace dplx::dp
 inline constexpr struct read_fn
 {
     template <typename Stream>
-        requires tag_invocable<read_fn, Stream &, std::size_t const>
+        requires cncr::tag_invocable<read_fn, Stream &, std::size_t const>
     auto operator()(Stream &stream, std::size_t const size) const noexcept(
-            nothrow_tag_invocable<read_fn, Stream &, std::size_t const>)
-            -> tag_invoke_result_t<read_fn, Stream &, std::size_t const>
+            cncr::nothrow_tag_invocable<read_fn, Stream &, std::size_t const>)
+            -> cncr::tag_invoke_result_t<read_fn, Stream &, std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, size);
+        return cncr::tag_invoke(*this, stream, size);
     }
 
     template <typename Stream>
-        requires tag_invocable<read_fn,
-                               Stream &,
-                               std::byte *,
-                               std::size_t const>
+        requires cncr::
+                tag_invocable<read_fn, Stream &, std::byte *, std::size_t const>
     auto
     operator()(Stream &stream, std::byte *data, std::size_t const size) const
-            noexcept(nothrow_tag_invocable<read_fn,
-                                           Stream &,
-                                           std::byte *,
-                                           std::size_t const>)
-                    -> tag_invoke_result_t<read_fn,
-                                           Stream &,
-                                           std::byte *,
-                                           std::size_t const>
+            noexcept(cncr::nothrow_tag_invocable<read_fn,
+                                                 Stream &,
+                                                 std::byte *,
+                                                 std::size_t const>)
+                    -> cncr::tag_invoke_result_t<read_fn,
+                                                 Stream &,
+                                                 std::byte *,
+                                                 std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, data, size);
+        return cncr::tag_invoke(*this, stream, data, size);
     }
 } read{};
 
@@ -244,59 +243,62 @@ inline constexpr unsigned minimum_guaranteed_read_size = 40;
 inline constexpr struct consume_fn
 {
     template <typename Stream, typename ReadProxy>
-        requires tag_invocable<consume_fn,
-                               Stream &,
-                               ReadProxy &,
-                               std::size_t const>
+        requires cncr::tag_invocable<consume_fn,
+                                     Stream &,
+                                     ReadProxy &,
+                                     std::size_t const>
     auto operator()(Stream &stream,
                     ReadProxy &proxy,
                     std::size_t const actualSize) const
-            noexcept(nothrow_tag_invocable<consume_fn,
-                                           Stream &,
-                                           ReadProxy &,
-                                           std::size_t const>)
-                    -> tag_invoke_result_t<consume_fn,
-                                           Stream &,
-                                           ReadProxy &,
-                                           std::size_t const>
+            noexcept(cncr::nothrow_tag_invocable<consume_fn,
+                                                 Stream &,
+                                                 ReadProxy &,
+                                                 std::size_t const>)
+                    -> cncr::tag_invoke_result_t<consume_fn,
+                                                 Stream &,
+                                                 ReadProxy &,
+                                                 std::size_t const>
     {
-        return cpo::tag_invoke(*this, stream, proxy, actualSize);
+        return cncr::tag_invoke(*this, stream, proxy, actualSize);
     }
 
     template <typename Stream, typename ReadProxy>
-        requires tag_invocable<consume_fn, Stream &, ReadProxy &>
-    auto operator()(Stream &stream, ReadProxy &proxy) const
-            noexcept(nothrow_tag_invocable<consume_fn, Stream &, ReadProxy &>)
-                    -> tag_invoke_result_t<consume_fn, Stream &, ReadProxy &>
+        requires cncr::tag_invocable<consume_fn, Stream &, ReadProxy &>
+    auto operator()(Stream &stream, ReadProxy &proxy) const noexcept(
+            cncr::nothrow_tag_invocable<consume_fn, Stream &, ReadProxy &>)
+            -> cncr::tag_invoke_result_t<consume_fn, Stream &, ReadProxy &>
     {
-        return cpo::tag_invoke(*this, stream, proxy);
+        return cncr::tag_invoke(*this, stream, proxy);
     }
 } consume{};
 
 inline constexpr struct skip_bytes_fn
 {
     template <typename Stream>
-        requires tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>
-    auto
-    operator()(Stream &stream, std::uint64_t const numBytes) const noexcept(
-            nothrow_tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>
+        requires cncr::
+                tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>
+    auto operator()(Stream &stream, std::uint64_t const numBytes) const
+            noexcept(cncr::nothrow_tag_invocable<skip_bytes_fn,
+                                                 Stream &,
+                                                 std::uint64_t const>
 
-            )
-            -> tag_invoke_result_t<skip_bytes_fn, Stream &, std::uint64_t const>
+                     ) -> cncr::tag_invoke_result_t<skip_bytes_fn,
+                                                    Stream &,
+                                                    std::uint64_t const>
     {
-        return cpo::tag_invoke(*this, stream, numBytes);
+        return cncr::tag_invoke(*this, stream, numBytes);
     }
 } skip_bytes{};
 
 inline constexpr struct available_input_size_fn
 {
     template <typename Stream>
-        requires tag_invocable<available_input_size_fn, Stream &>
-    auto operator()(Stream &stream) const
-            noexcept(nothrow_tag_invocable<available_input_size_fn, Stream &>)
-                    -> tag_invoke_result_t<available_input_size_fn, Stream &>
+        requires cncr::tag_invocable<available_input_size_fn, Stream &>
+    auto operator()(Stream &stream) const noexcept(
+            cncr::nothrow_tag_invocable<available_input_size_fn, Stream &>)
+            -> cncr::tag_invoke_result_t<available_input_size_fn, Stream &>
     {
-        return cpo::tag_invoke(*this, stream);
+        return cncr::tag_invoke(*this, stream);
     }
 } available_input_size{};
 
@@ -390,29 +392,27 @@ struct input_stream_traits
     static constexpr bool lazy_input = lazy_input_stream<Stream>;
 
     static constexpr bool nothrow_read_direct
-            = nothrow_tag_invocable<read_fn, Stream &, std::size_t const>;
+            = cncr::nothrow_tag_invocable<read_fn, Stream &, std::size_t const>;
     static constexpr bool nothrow_read_indirect
-            = nothrow_tag_invocable<read_fn,
-                                    Stream &,
-                                    std::byte *,
-                                    std::size_t const>;
+            = cncr::nothrow_tag_invocable<read_fn,
+                                          Stream &,
+                                          std::byte *,
+                                          std::size_t const>;
     static constexpr bool nothrow_read
             = nothrow_read_direct && nothrow_read_indirect;
 
     static constexpr bool nothrow_consume
-            = nothrow_tag_invocable<
+            = cncr::nothrow_tag_invocable<
                       consume_fn,
                       Stream &,
                       read_proxy_t<Stream> &,
-                      std::size_t const> && (!lazy_input || nothrow_tag_invocable<consume_fn, Stream &, read_proxy_t<Stream> &>);
+                      std::size_t const> && (!lazy_input || cncr::nothrow_tag_invocable<consume_fn, Stream &, read_proxy_t<Stream> &>);
 
-    static constexpr bool nothrow_skip_bytes
-            = nothrow_tag_invocable<skip_bytes_fn,
-                                    Stream &,
-                                    std::uint64_t const>;
+    static constexpr bool nothrow_skip_bytes = cncr::
+            nothrow_tag_invocable<skip_bytes_fn, Stream &, std::uint64_t const>;
 
     static constexpr bool nothrow_available_input_bytes
-            = nothrow_tag_invocable<available_input_size_fn, Stream &>;
+            = cncr::nothrow_tag_invocable<available_input_size_fn, Stream &>;
 
     static constexpr bool nothrow_input = nothrow_read && nothrow_consume
                                        && nothrow_skip_bytes

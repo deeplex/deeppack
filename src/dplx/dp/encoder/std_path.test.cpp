@@ -25,7 +25,8 @@ BOOST_AUTO_TEST_SUITE(encoder)
 BOOST_FIXTURE_TEST_SUITE(std_path, default_encoding_fixture)
 
 static_assert(dp::encodable<std::filesystem::path, test_output_stream<>>);
-static_assert(dp::tag_invocable<dp::encoded_size_of_fn, std::filesystem::path>);
+static_assert(
+        cncr::tag_invocable<dp::encoded_size_of_fn, std::filesystem::path>);
 
 struct path_sample
 {

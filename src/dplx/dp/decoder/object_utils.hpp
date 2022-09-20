@@ -17,6 +17,7 @@
 #include <boost/mp11/algorithm.hpp>
 
 #include <dplx/cncr/math_supplement.hpp>
+#include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/decoder/api.hpp>
@@ -28,7 +29,6 @@
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
 #include <dplx/dp/object_def.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 
 namespace dplx::dp
 {
@@ -36,21 +36,23 @@ namespace dplx::dp
 inline constexpr struct property_id_hash_fn
 {
     template <typename T>
-        requires tag_invocable<property_id_hash_fn, T const &>
-    constexpr auto operator()(T const &value) const
-            noexcept(nothrow_tag_invocable<property_id_hash_fn, T const &>)
-                    -> std::uint64_t
+        requires cncr::tag_invocable<property_id_hash_fn, T const &>
+    constexpr auto operator()(T const &value) const noexcept(
+            cncr::nothrow_tag_invocable<property_id_hash_fn, T const &>)
+            -> std::uint64_t
     {
-        return cpo::tag_invoke(*this, value);
+        return cncr::tag_invoke(*this, value);
     }
     template <typename T>
-        requires tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
+        requires cncr::
+                tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
     constexpr auto operator()(T const &value, std::uint64_t seed) const
-            noexcept(nothrow_tag_invocable<property_id_hash_fn,
-                                           T const &,
-                                           std::uint64_t>) -> std::uint64_t
+            noexcept(cncr::nothrow_tag_invocable<property_id_hash_fn,
+                                                  T const &,
+                                                  std::uint64_t>)
+                    -> std::uint64_t
     {
-        return cpo::tag_invoke(*this, value, seed);
+        return cncr::tag_invoke(*this, value, seed);
     }
 
     template <cncr::integer T>

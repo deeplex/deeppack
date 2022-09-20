@@ -40,13 +40,13 @@ public:
     {
     }
 
-    friend inline auto tag_invoke(dp::tag_t<dp::available_input_size>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::available_input_size>,
                                   test_input_stream &self) noexcept
             -> dp::result<std::size_t>
     {
         return self.mBuffer.size() - self.mStreamPosition;
     }
-    friend inline auto tag_invoke(dp::tag_t<dp::read>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
                                   test_input_stream &self,
                                   std::size_t const amount)
             -> dp::result<std::span<std::byte const>>
@@ -67,7 +67,7 @@ public:
 
         return std::span(self.mReadBuffer);
     }
-    friend inline auto tag_invoke(dp::tag_t<dp::consume>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::consume>,
                                   test_input_stream &self,
                                   std::span<std::byte const> proxy,
                                   std::size_t const actualAmount) noexcept
@@ -82,7 +82,7 @@ public:
         return dp::success();
     }
     friend inline auto
-    tag_invoke(dp::tag_t<dp::consume>,
+    tag_invoke(cncr::tag_t<dp::consume>,
                test_input_stream &self,
                [[maybe_unused]] std::span<std::byte const> const proxy) noexcept
             -> dp::result<void>
@@ -93,7 +93,7 @@ public:
         self.mReadBuffer.swap(tmp); // dispose the memory
         return dp::success();
     }
-    friend inline auto tag_invoke(dp::tag_t<dp::read>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
                                   test_input_stream &self,
                                   std::byte *buffer,
                                   std::size_t const amount) noexcept
@@ -110,7 +110,7 @@ public:
 
         return dp::success();
     }
-    friend inline auto tag_invoke(dp::tag_t<dp::skip_bytes>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::skip_bytes>,
                                   test_input_stream &self,
                                   std::uint64_t const numBytes) noexcept
             -> dp::result<void>

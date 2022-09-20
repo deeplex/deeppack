@@ -29,7 +29,6 @@
 
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/type_code.hpp>
 
 namespace dplx::dp

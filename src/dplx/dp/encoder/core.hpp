@@ -23,6 +23,7 @@
 #include <dplx/cncr/math_supplement.hpp>
 #include <dplx/cncr/misc.hpp>
 #include <dplx/cncr/mp_lite.hpp>
+#include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/concepts.hpp>
@@ -252,8 +253,8 @@ public:
     }
 };
 template <range T>
-    requires tag_invocable<encoded_size_of_fn,
-                           std::ranges::range_reference_t<T>>
+    requires cncr::tag_invocable<encoded_size_of_fn,
+                                 std::ranges::range_reference_t<T>>
 constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
         -> unsigned int
 {
@@ -394,8 +395,8 @@ struct are_tuple_elements_size_ofable : std::false_type
 template <typename... Ts>
 struct are_tuple_elements_size_ofable<cncr::mp_list<Ts...>>
     : std::bool_constant<(
-              tag_invocable<encoded_size_of_fn,
-                            cncr::remove_cref_t<Ts> const &> && ...)>
+              cncr::tag_invocable<encoded_size_of_fn,
+                                  cncr::remove_cref_t<Ts> const &> && ...)>
 {
 };
 
@@ -430,7 +431,7 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
 }
 
 // clang-format off
-template <associative_range T, output_stream Stream> 
+template <associative_range T, output_stream Stream>
     requires encodable<std::ranges::range_value_t<T>, Stream>
 class basic_encoder<T, Stream>
 // clang-format on
@@ -494,8 +495,8 @@ public:
 };
 
 template <associative_range T>
-    requires tag_invocable<encoded_size_of_fn,
-                           std::ranges::range_reference_t<T>>
+    requires cncr::tag_invocable<encoded_size_of_fn,
+                                 std::ranges::range_reference_t<T>>
 constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
         -> unsigned int
 {

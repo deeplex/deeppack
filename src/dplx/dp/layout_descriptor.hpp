@@ -7,10 +7,10 @@
 
 #pragma once
 
+#include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/object_def.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/tuple_def.hpp>
 
 namespace dplx::dp
@@ -25,12 +25,13 @@ concept exposed_static_layout_descriptor = requires
 inline constexpr struct layout_descriptor_for_fn
 {
     template <typename T>
-        requires tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>
+        requires cncr::tag_invocable<layout_descriptor_for_fn,
+                                     std::type_identity<T>>
     constexpr auto operator()(std::type_identity<T> tv) const noexcept
-            -> tag_invoke_result_t<layout_descriptor_for_fn,
-                                   std::type_identity<T>>
+            -> cncr::tag_invoke_result_t<layout_descriptor_for_fn,
+                                         std::type_identity<T>>
     {
-        return cpo::tag_invoke(*this, tv);
+        return cncr::tag_invoke(*this, tv);
     }
 
     template <typename T>
@@ -51,15 +52,17 @@ concept packable
                                               // compiler recursion during
                                               // encoded_size_of_fn constraint
                                               // checks (for gcc 11.1)
-       && tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
+       && cncr::tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
 
 template <typename T>
-concept packable_object = packable<T> && is_object_def_v<cncr::remove_cref_t<
-        tag_invoke_result_t<layout_descriptor_for_fn, std::type_identity<T>>>>;
+concept packable_object = packable<T> && is_object_def_v<
+        cncr::remove_cref_t<cncr::tag_invoke_result_t<layout_descriptor_for_fn,
+                                                      std::type_identity<T>>>>;
 
 template <typename T>
-concept packable_tuple = packable<T> && is_tuple_def_v<cncr::remove_cref_t<
-        tag_invoke_result_t<layout_descriptor_for_fn, std::type_identity<T>>>>;
+concept packable_tuple = packable<T> && is_tuple_def_v<
+        cncr::remove_cref_t<cncr::tag_invoke_result_t<layout_descriptor_for_fn,
+                                                      std::type_identity<T>>>>;
 
 inline constexpr std::uint32_t null_def_version = 0xffff'ffffu;
 

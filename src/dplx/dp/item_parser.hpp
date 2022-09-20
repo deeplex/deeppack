@@ -662,7 +662,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
         }
 
         auto const numElements = static_cast<std::size_t>(item.value);
-        if constexpr (nothrow_tag_invocable<container_reserve_fn, T &,
+        if constexpr (cncr::nothrow_tag_invocable<container_reserve_fn, T &,
                                             std::size_t const>)
         {
             DPLX_TRY(container_reserve(dest, numElements));

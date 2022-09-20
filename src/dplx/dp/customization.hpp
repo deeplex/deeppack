@@ -11,8 +11,9 @@
 #include <cstddef>
 #include <new>
 
+#include <dplx/cncr/tag_invoke.hpp>
+
 #include <dplx/dp/disappointment.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 
 namespace dplx::dp
 {
@@ -20,16 +21,16 @@ namespace dplx::dp
 inline constexpr struct container_reserve_fn
 {
     template <typename Container>
-        requires nothrow_tag_invocable<container_reserve_fn,
-                                       Container &,
-                                       std::size_t const>
+        requires cncr::nothrow_tag_invocable<container_reserve_fn,
+                                             Container &,
+                                             std::size_t const>
     auto operator()(Container &container,
                     std::size_t const reservationSize) const noexcept
-            -> tag_invoke_result_t<container_reserve_fn,
-                                   Container &,
-                                   std::size_t const>
+            -> cncr::tag_invoke_result_t<container_reserve_fn,
+                                         Container &,
+                                         std::size_t const>
     {
-        return cpo::tag_invoke(*this, container, reservationSize);
+        return cncr::tag_invoke(*this, container, reservationSize);
     }
 
     template <typename StdContainer>
@@ -60,16 +61,16 @@ inline constexpr struct container_reserve_fn
 inline constexpr struct container_resize_fn
 {
     template <typename Container>
-        requires nothrow_tag_invocable<container_resize_fn,
-                                       Container &,
-                                       std::size_t const>
+        requires cncr::nothrow_tag_invocable<container_resize_fn,
+                                             Container &,
+                                             std::size_t const>
     auto operator()(Container &container,
                     std::size_t const newSize) const noexcept
-            -> tag_invoke_result_t<container_resize_fn,
-                                   Container &,
-                                   std::size_t const>
+            -> cncr::tag_invoke_result_t<container_resize_fn,
+                                         Container &,
+                                         std::size_t const>
     {
-        return cpo::tag_invoke(*this, container, newSize);
+        return cncr::tag_invoke(*this, container, newSize);
     }
 
     template <typename StdContainer>
@@ -100,31 +101,31 @@ inline constexpr struct container_resize_fn
 inline constexpr struct container_resize_for_overwrite_fn
 {
     template <typename Container>
-        requires nothrow_tag_invocable<container_resize_for_overwrite_fn,
-                                       Container &,
-                                       std::size_t const>
+        requires cncr::nothrow_tag_invocable<container_resize_for_overwrite_fn,
+                                             Container &,
+                                             std::size_t const>
     auto operator()(Container &container,
                     std::size_t const newSize) const noexcept
-            -> tag_invoke_result_t<container_resize_for_overwrite_fn,
-                                   Container &,
-                                   std::size_t const>
+            -> cncr::tag_invoke_result_t<container_resize_for_overwrite_fn,
+                                         Container &,
+                                         std::size_t const>
     {
-        return cpo::tag_invoke(*this, container, newSize);
+        return cncr::tag_invoke(*this, container, newSize);
     }
 
     template <typename Container>
         requires(
-                !nothrow_tag_invocable<
+                !cncr::nothrow_tag_invocable<
                         container_resize_for_overwrite_fn,
                         Container &,
-                        std::size_t const> && tag_invocable<container_resize_fn, Container &, std::size_t const>)
+                        std::size_t const> && cncr::tag_invocable<container_resize_fn, Container &, std::size_t const>)
     auto operator()(Container &container,
                     std::size_t const newSize) const noexcept
-            -> tag_invoke_result_t<container_resize_fn,
-                                   Container &,
-                                   std::size_t const>
+            -> cncr::tag_invoke_result_t<container_resize_fn,
+                                         Container &,
+                                         std::size_t const>
     {
-        return cpo::tag_invoke(container_resize, container, newSize);
+        return cncr::tag_invoke(container_resize, container, newSize);
     }
 
 } container_resize_for_overwrite;
@@ -132,19 +133,21 @@ inline constexpr struct container_resize_for_overwrite_fn
 template <typename Container>
 struct container_traits
 {
-    static constexpr bool reserve = nothrow_tag_invocable<container_reserve_fn,
-                                                          Container &,
-                                                          std::size_t const>;
+    static constexpr bool reserve
+            = cncr::nothrow_tag_invocable<container_reserve_fn,
+                                          Container &,
+                                          std::size_t const>;
 
-    static constexpr bool resize = nothrow_tag_invocable<container_resize_fn,
-                                                         Container &,
-                                                         std::size_t const>;
+    static constexpr bool resize
+            = cncr::nothrow_tag_invocable<container_resize_fn,
+                                          Container &,
+                                          std::size_t const>;
 
     static constexpr bool resize_for_overwrite
             = resize
-           || nothrow_tag_invocable<container_resize_for_overwrite_fn,
-                                    Container &,
-                                    std::size_t const>;
+           || cncr::nothrow_tag_invocable<container_resize_for_overwrite_fn,
+                                          Container &,
+                                          std::size_t const>;
 };
 
 } // namespace dplx::dp

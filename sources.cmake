@@ -54,7 +54,6 @@ dplx_target_sources(deeppack
         dp/customization.std
         dp/indefinite_range
         dp/map_pair
-        dp/tag_invoke
 
         dp/streams/chunked_input_stream
         dp/streams/chunked_output_stream
