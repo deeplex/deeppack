@@ -21,7 +21,7 @@ struct map_pair final
     key_type key;
     value_type value;
 
-    bool operator==(map_pair const &) const noexcept = default;
+    auto operator==(map_pair const &) const noexcept -> bool = default;
     auto operator<=>(map_pair const &) const noexcept = default;
 };
 
@@ -29,10 +29,10 @@ template <typename Key, typename Value>
 map_pair(Key, Value) -> map_pair<Key, Value>;
 
 template <std::size_t I, typename Key, typename Value>
-inline decltype(auto) get(map_pair<Key, Value> &mapPair) noexcept
+inline auto get(map_pair<Key, Value> &mapPair) noexcept -> decltype(auto)
 {
-    static_assert(I < 2);
-    if constexpr (I == 0)
+    static_assert(I < 2U);
+    if constexpr (I == 0U)
     {
         return static_cast<Key &>(mapPair.key);
     }
@@ -42,10 +42,10 @@ inline decltype(auto) get(map_pair<Key, Value> &mapPair) noexcept
     }
 }
 template <std::size_t I, typename Key, typename Value>
-inline decltype(auto) get(map_pair<Key, Value> const &mapPair) noexcept
+inline auto get(map_pair<Key, Value> const &mapPair) noexcept -> decltype(auto)
 {
-    static_assert(I < 2);
-    if constexpr (I == 0)
+    static_assert(I < 2U);
+    if constexpr (I == 0U)
     {
         return static_cast<Key const &>(mapPair.key);
     }
@@ -55,10 +55,10 @@ inline decltype(auto) get(map_pair<Key, Value> const &mapPair) noexcept
     }
 }
 template <std::size_t I, typename Key, typename Value>
-inline decltype(auto) get(map_pair<Key, Value> &&mapPair) noexcept
+inline auto get(map_pair<Key, Value> &&mapPair) noexcept -> decltype(auto)
 {
-    static_assert(I < 2);
-    if constexpr (I == 0)
+    static_assert(I < 2U);
+    if constexpr (I == 0U)
     {
         return static_cast<Key &&>(mapPair.key);
     }
@@ -68,10 +68,10 @@ inline decltype(auto) get(map_pair<Key, Value> &&mapPair) noexcept
     }
 }
 template <std::size_t I, typename Key, typename Value>
-inline decltype(auto) get(map_pair<Key, Value> const &&mapPair) noexcept
+inline auto get(map_pair<Key, Value> const &&mapPair) noexcept -> decltype(auto)
 {
-    static_assert(I < 2);
-    if constexpr (I == 0)
+    static_assert(I < 2U);
+    if constexpr (I == 0U)
     {
         return static_cast<Key const &&>(mapPair.key);
     }
@@ -83,26 +83,21 @@ inline decltype(auto) get(map_pair<Key, Value> const &&mapPair) noexcept
 
 } // namespace dplx::dp
 
-namespace std
-{
-
 template <typename Key, typename Value>
-struct tuple_size<dplx::dp::map_pair<Key, Value>>
-    : ::std::integral_constant<std::size_t, 2>
+struct std::tuple_size<dplx::dp::map_pair<Key, Value>>
+    : integral_constant<std::size_t, 2U>
 {
 };
 
 template <typename Key, typename Value>
-class tuple_element<0, dplx::dp::map_pair<Key, Value>>
+class std::tuple_element<0U, dplx::dp::map_pair<Key, Value>>
 {
 public:
     using type = Key;
 };
 template <typename Key, typename Value>
-class tuple_element<1, dplx::dp::map_pair<Key, Value>>
+class std::tuple_element<1U, dplx::dp::map_pair<Key, Value>>
 {
 public:
     using type = Value;
 };
-
-} // namespace std

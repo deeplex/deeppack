@@ -10,9 +10,8 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-
 #include <type_traits>
-                                     
+
 #include <dplx/cncr/misc.hpp>
 #include <dplx/predef/compiler.h>
 
@@ -40,56 +39,66 @@ struct item_info
     std::uint32_t encoded_length;
     std::uint64_t value;
 
-    [[nodiscard]] bool indefinite() const noexcept
+    [[nodiscard]] constexpr auto indefinite() const noexcept -> bool
     {
-        return cncr::to_underlying(flags)
-             & cncr::to_underlying(flag::indefinite);
+        return (cncr::to_underlying(flags)
+                & cncr::to_underlying(flag::indefinite))
+            != 0U;
     }
-    void make_indefinite() noexcept
+    constexpr void make_indefinite() noexcept
     {
         flags = static_cast<item_info::flag>(
                 cncr::to_underlying(flags)
                 | cncr::to_underlying(flag::indefinite));
     }
 
-    [[nodiscard]] bool is_special_break() const noexcept
+    [[nodiscard]] constexpr auto is_special_break() const noexcept -> bool
     {
         return type == type_code::special
-            && cncr::to_underlying(flags)
-                       & cncr::to_underlying(flag::indefinite);
+            && (cncr::to_underlying(flags)
+                & cncr::to_underlying(flag::indefinite))
+                       != 0U;
     }
 
-    friend inline constexpr bool
-    operator==(item_info const &, item_info const &) noexcept = default;
+    friend inline constexpr auto operator==(item_info const &,
+                                            item_info const &) noexcept -> bool
+            = default;
 };
+#if !NDEBUG
 static_assert(std::is_trivial_v<item_info>);
 static_assert(std::is_standard_layout_v<item_info>);
+static_assert(std::is_aggregate_v<item_info>);
+#endif
 
 } // namespace dplx::dp
 
 namespace dplx::dp::detail
 {
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 inline auto parse_item_speculative(std::byte const *const encoded) noexcept
         -> result<item_info>
 {
+
     item_info info{
-            .type = static_cast<type_code>(*encoded & std::byte{0b111'00000}),
+            .type = static_cast<type_code>(*encoded & std::byte{0b111'00000U}),
             .flags = item_info::flag::none,
             .encoded_length = 1,
             .value
-            = static_cast<std::uint64_t>(*encoded & std::byte{0b000'11111}),
+            = static_cast<std::uint64_t>(*encoded & std::byte{0b000'11111U}),
     };
 
     if (info.value <= inline_value_max)
     {
         // this is always well formed
     }
-    else if (info.value <= 27)
+    else if (info.value <= 27U)
         DPLX_ATTR_LIKELY
         {
             auto const sizeBytesPower = static_cast<signed char>(
-                    info.value - (inline_value_max + 1));
+                    info.value - (inline_value_max + 1U));
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             auto const encodedValue = detail::load<std::uint64_t>(encoded + 1);
 
             // 8B value => shift by  0 (0b00'0000)
@@ -99,11 +108,11 @@ inline auto parse_item_speculative(std::byte const *const encoded) noexcept
             unsigned char const varLenShift
                     = (0b0011'1000 << sizeBytesPower) & 63;
 
-            info.encoded_length = 1 + (1 << sizeBytesPower);
+            info.encoded_length = 1U + (1U << sizeBytesPower);
             info.value = encodedValue >> varLenShift;
         }
-    else if (info.value == 31
-             && !((static_cast<std::byte>(info.type) & std::byte{0b110'00000})
+    else if (info.value == 31U
+             && !((static_cast<std::byte>(info.type) & std::byte{0b110'00000U})
                           == std::byte{}
                   || info.type == type_code::tag))
     {
@@ -117,48 +126,51 @@ inline auto parse_item_speculative(std::byte const *const encoded) noexcept
 }
 
 template <input_stream Stream>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto parse_item_safe(Stream &inStream) noexcept(
         stream_traits<Stream>::nothrow_read_direct
                 &&stream_traits<Stream>::nothrow_consume) -> result<item_info>
 {
-    DPLX_TRY(auto &&indicatorProxy, read(inStream, 1u));
+    DPLX_TRY(auto &&indicatorProxy, read(inStream, 1U));
     std::byte const *const indicator = std::ranges::data(indicatorProxy);
 
     dp::item_info info{
-            .type = static_cast<type_code>(*indicator & std::byte{0b111'00000}),
+            .type
+            = static_cast<type_code>(*indicator & std::byte{0b111'00000U}),
             .flags = dp::item_info::flag::none,
             .encoded_length = 1,
             .value
-            = static_cast<std::uint64_t>(*indicator & std::byte{0b000'11111}),
+            = static_cast<std::uint64_t>(*indicator & std::byte{0b000'11111U}),
     };
 
-    if (detail::inline_value_max < info.value && info.value <= 27)
+    if (detail::inline_value_max < info.value && info.value <= 27U)
         DPLX_ATTR_LIKELY
         {
-            auto const bytePower = info.value - (detail::inline_value_max + 1);
-            info.encoded_length = 1u + (1u << bytePower);
+            auto const bytePower = info.value - (detail::inline_value_max + 1U);
+            info.encoded_length = 1U + (1U << bytePower);
 
             // ensure we consume the whole item or nothing
-            DPLX_TRY(consume(inStream, indicatorProxy, 0u));
+            DPLX_TRY(consume(inStream, indicatorProxy, 0U));
 
             DPLX_TRY(auto &&payloadProxy,
                      read(inStream,
                           static_cast<std::size_t>(info.encoded_length)));
 
             std::byte const *payload = std::ranges::data(payloadProxy);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             payload += 1;
             switch (bytePower)
             {
-            case 0:
+            case 0U:
                 info.value = static_cast<std::uint64_t>(*payload);
                 break;
-            case 1:
+            case 1U:
                 info.value = detail::load<std::uint16_t>(payload);
                 break;
-            case 2:
+            case 2U:
                 info.value = detail::load<std::uint32_t>(payload);
                 break;
-            case 3: // this case can only be reached if inStream misbehaves
+            case 3U: // this case can only be reached if inStream misbehaves
                 info.value = detail::load<std::uint64_t>(payload);
                 break;
             }
@@ -179,8 +191,8 @@ inline auto parse_item_safe(Stream &inStream) noexcept(
     {
         // this is always well formed
     }
-    else if (info.value == 31
-             && !((static_cast<std::byte>(info.type) & std::byte{0b110'00000})
+    else if (info.value == 31U
+             && !((static_cast<std::byte>(info.type) & std::byte{0b110'00000U})
                           == std::byte{}
                   || info.type == type_code::tag))
 
@@ -193,6 +205,8 @@ inline auto parse_item_safe(Stream &inStream) noexcept(
     }
     return info;
 }
+
+// NOLINTEND(readability-magic-numbers)
 
 template <input_stream Stream>
 inline auto parse_item(Stream &stream) noexcept(
@@ -232,22 +246,24 @@ static inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
     // 1bit sign | 5bit exponent | 10bit significand
     // 0x8000    | 0x7C00        | 0x3ff
 
-    // #TODO check whether I got the endianess right
-    unsigned int significand = bits & 0x3ffu;
-    int exponent = (bits >> 10) & 0x1f;
+    // NOLINTBEGIN(readability-magic-numbers)
 
-    double value;
+    // #TODO check whether I got the endianess right
+    unsigned const significand = bits & 0x3FFU;
+    int const exponent = (bits >> 10) & 0x1F;
+
+    double value;      // NOLINT(cppcoreguidelines-init-variables)
     if (exponent == 0) // zero | subnormal
     {
         value = std::ldexp(significand, -24);
     }
-    else if (exponent != 0x1f) // normalized values
+    else if (exponent != 0x1F) // normalized values
     {
         // 0x400 => implicit lead bit
         // 25 = 15 exponent bias + 10bit significand
-        value = std::ldexp(significand + 0x400, exponent - 25);
+        value = std::ldexp(significand + 0x400U, exponent - 25);
     }
-    else if (significand == 0)
+    else if (significand == 0U)
     {
         value = std::numeric_limits<double>::infinity();
     }
@@ -256,7 +272,9 @@ static inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
         value = std::numeric_limits<double>::quiet_NaN();
     }
     // respect sign bit
-    return (bits & 0x8000) == 0 ? value : -value;
+    return (bits & 0x8000U) == 0U ? value : -value;
+
+    // NOLINTEND(readability-magic-numbers)
 }
 
 } // namespace dplx::dp::detail

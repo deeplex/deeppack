@@ -5,15 +5,17 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/core.hpp>
-#include <dplx/dp/indefinite_range.hpp>
-
 #include <array>
 #include <list>
 #include <vector>
 
+#include <dplx/dp/encoder/core.hpp>
+#include <dplx/dp/indefinite_range.hpp>
+
 #include "boost-test.hpp"
 #include "encoder.test_utils.hpp"
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 namespace dp_tests
 {
@@ -52,13 +54,14 @@ auto boost_test_print_type(std::ostream &s, range_sample const &sample)
     return s;
 }
 
-constexpr range_sample vector_samples[]
-        = {{0, 1, make_byte_array(0b100'00000, 0, 0, 0, 0, 0, 0, 0)},
-           {1, 1, make_byte_array(0b100'00001, 1, 0, 0, 0, 0, 0, 0)},
-           {23, 1, make_byte_array(0b100'00000 | 23, 1, 2, 3, 4, 5, 6, 7)},
-           {24, 2, make_byte_array(0b100'00000 | 24, 24, 1, 2, 3, 4, 5, 6)},
-           {255, 2, make_byte_array(0b100'00000 | 24, 255, 1, 2, 3, 4, 5, 6)},
-           {256, 3, make_byte_array(0b100'00000 | 25, 1, 0, 1, 2, 3, 4, 5)}};
+constexpr range_sample vector_samples[] = {
+        {  0, 1,      make_byte_array(0b100'00000,   0, 0, 0, 0, 0, 0, 0)},
+        {  1, 1,      make_byte_array(0b100'00001,   1, 0, 0, 0, 0, 0, 0)},
+        { 23, 1, make_byte_array(0b100'00000 | 23,   1, 2, 3, 4, 5, 6, 7)},
+        { 24, 2, make_byte_array(0b100'00000 | 24,  24, 1, 2, 3, 4, 5, 6)},
+        {255, 2, make_byte_array(0b100'00000 | 24, 255, 1, 2, 3, 4, 5, 6)},
+        {256, 3, make_byte_array(0b100'00000 | 25,   1, 0, 1, 2, 3, 4, 5)}
+};
 
 BOOST_DATA_TEST_CASE(vector_with, boost::unit_test::data::make(vector_samples))
 {
@@ -73,7 +76,7 @@ BOOST_DATA_TEST_CASE(vector_with, boost::unit_test::data::make(vector_samples))
     vs.reserve(sample.num);
     for (std::size_t i = 0; i < sample.num; ++i)
     {
-        std::byte v = static_cast<std::byte>(i + 1);
+        auto const v = static_cast<std::byte>(i + 1);
         bytes.push_back(v);
         vs.push_back(simple_encodeable{v});
     }
@@ -181,11 +184,11 @@ public:
     }
     unsized_input_view() noexcept = default;
 
-    constexpr auto begin() const -> T
+    [[nodiscard]] constexpr auto begin() const -> T
     {
         return mIt;
     }
-    constexpr auto end() const -> T
+    [[nodiscard]] constexpr auto end() const -> T
     {
         return mEnd;
     }
@@ -218,3 +221,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <algorithm>
 #include <array>
 #include <compare>
 #include <concepts>
+#include <cstdint>
 #include <string_view>
 #include <type_traits>
 
@@ -30,7 +29,6 @@
 
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 #include <dplx/dp/type_code.hpp>
 
 namespace dplx::dp
@@ -39,7 +37,8 @@ namespace dplx::dp
 template <std::size_t N>
 struct fixed_u8string
 {
-    unsigned int mNumCodeUnits;
+    unsigned mNumCodeUnits;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
     char8_t mCodeUnits[N];
 
     constexpr fixed_u8string() noexcept
@@ -47,24 +46,17 @@ struct fixed_u8string
         , mCodeUnits{}
     {
     }
-    constexpr fixed_u8string(char8_t const (&codeUnits)[N + 1]) noexcept
-        : mNumCodeUnits{N}
-    {
-        std::copy_n(codeUnits, N, mCodeUnits);
-    }
-    template <std::size_t N2>
-    constexpr fixed_u8string(fixed_u8string<N2> const &other) noexcept
-        : mNumCodeUnits{static_cast<unsigned int>(other.size())}
-        , mCodeUnits{}
-    {
-        static_assert(N >= N2);
-        std::copy_n(other.data(), other.size(), mCodeUnits);
-    }
+
+    // funnily enough clang-tidy also flags compiler generated code 😆
+    // NOLINTBEGIN(modernize-use-nullptr)
+    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
 
     constexpr fixed_u8string(fixed_u8string const &) noexcept = default;
-    constexpr fixed_u8string(fixed_u8string &&) noexcept = default;
     constexpr auto operator=(fixed_u8string const &) noexcept
             -> fixed_u8string & = default;
+
+    constexpr fixed_u8string(fixed_u8string &&) noexcept = default;
     constexpr auto operator=(fixed_u8string &&) noexcept
             -> fixed_u8string & = default;
 
@@ -75,6 +67,37 @@ struct fixed_u8string
     friend inline constexpr auto operator<=>(fixed_u8string const &,
                                              fixed_u8string const &) noexcept
             -> std::strong_ordering = default;
+
+    // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
+    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(modernize-use-nullptr)
+
+    // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    constexpr fixed_u8string(char8_t const (&codeUnits)[N + 1U]) noexcept
+        : mNumCodeUnits{N}
+    {
+        for (std::size_t i = 0U; i < N; ++i)
+        {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+            mCodeUnits[i] = codeUnits[i];
+        }
+    }
+    // NOLINTEND(cppcoreguidelines-avoid-c-arrays)
+
+    template <std::size_t N2>
+    constexpr fixed_u8string(fixed_u8string<N2> const &other) noexcept
+        : mNumCodeUnits{static_cast<unsigned>(other.size())}
+        , mCodeUnits{}
+    {
+        static_assert(N2 <= N,
+                      "Can only copy import a fixed string of smaller size.");
+        for (std::size_t i = 0U; i < N2; ++i)
+        {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+            mCodeUnits[i] = other.mCodeUnits[i];
+        }
+    }
 
     friend inline constexpr auto operator==(fixed_u8string const &lhs,
                                             std::u8string_view rhs) noexcept
@@ -109,88 +132,103 @@ struct fixed_u8string
         return std::u8string_view(mCodeUnits, mNumCodeUnits);
     }
 
-    constexpr auto data() noexcept -> char8_t *
+    [[nodiscard]] constexpr auto begin() noexcept -> char8_t *
     {
-        return mCodeUnits;
+        return static_cast<char8_t *>(mCodeUnits);
     }
-    constexpr auto data() const noexcept -> char8_t const *
+    [[nodiscard]] constexpr auto begin() const noexcept -> char8_t const *
     {
-        return mCodeUnits;
+        return static_cast<char8_t const *>(mCodeUnits);
     }
-    constexpr auto size() const noexcept -> std::size_t
+    [[nodiscard]] constexpr auto end() noexcept -> char8_t *
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return static_cast<char8_t *>(mCodeUnits) + mNumCodeUnits;
+    }
+    [[nodiscard]] constexpr auto end() const noexcept -> char8_t const *
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return static_cast<char8_t const *>(mCodeUnits) + mNumCodeUnits;
+    }
+    [[nodiscard]] constexpr auto data() noexcept -> char8_t *
+    {
+        return static_cast<char8_t *>(mCodeUnits);
+    }
+    [[nodiscard]] constexpr auto data() const noexcept -> char8_t const *
+    {
+        return static_cast<char8_t const *>(mCodeUnits);
+    }
+    [[nodiscard]] constexpr auto size() const noexcept -> std::size_t
     {
         return mNumCodeUnits;
     }
-    static constexpr auto max_size() noexcept -> std::size_t
+    [[nodiscard]] static constexpr auto max_size() noexcept -> std::size_t
     {
         return N;
     }
 
     friend inline auto tag_invoke(container_reserve_fn,
-                                  fixed_u8string &self,
+                                  [[maybe_unused]] fixed_u8string &self,
                                   std::size_t const capacity) noexcept
             -> result<void>
     {
-        if (capacity <= self.size())
+        if (capacity > N)
         {
-            return oc::success();
+            return errc::not_enough_memory;
         }
-        return errc::not_enough_memory;
+        return oc::success();
     }
     friend inline auto tag_invoke(container_resize_fn,
                                   fixed_u8string &self,
                                   std::size_t const newSize) noexcept
             -> result<void>
     {
-        if (newSize <= self.max_size())
+        if (newSize > N)
         {
-            if (newSize > self.size())
-            {
-                std::fill(self.mCodeUnits + self.mNumCodeUnits,
-                          self.mCodeUnits + newSize, char8_t{});
-            }
-
-            self.mNumCodeUnits = static_cast<unsigned int>(newSize);
-            return oc::success();
+            return errc::not_enough_memory;
         }
-        return errc::not_enough_memory;
+        for (std::size_t i = self.mNumCodeUnits; i < newSize; ++i)
+        {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+            self.mCodeUnits[i] = char8_t{};
+        }
+        self.mNumCodeUnits = static_cast<unsigned int>(newSize);
+        return oc::success();
     }
     friend inline auto tag_invoke(container_resize_for_overwrite_fn,
                                   fixed_u8string &self,
                                   std::size_t const newSize) noexcept
             -> result<void>
     {
-        if (newSize <= self.max_size())
+        if (newSize > N)
         {
-            self.mNumCodeUnits = static_cast<unsigned int>(newSize);
-            return oc::success();
+            return errc::not_enough_memory;
         }
-        return errc::not_enough_memory;
+        self.mNumCodeUnits = static_cast<unsigned int>(newSize);
+        return oc::success();
     }
 };
 
 template <std::size_t N>
-fixed_u8string(char8_t const (&)[N]) -> fixed_u8string<N - 1>;
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
+fixed_u8string(char8_t const (&)[N])->fixed_u8string<N - 1>;
 
 } // namespace dplx::dp
 
-namespace std
-{
-
 template <std::size_t N>
-struct common_type<dplx::dp::fixed_u8string<N>, dplx::dp::fixed_u8string<N>>
+struct std::common_type<dplx::dp::fixed_u8string<N>,
+                        dplx::dp::fixed_u8string<N>>
 {
     using type = dplx::dp::fixed_u8string<N>;
 };
 
 template <std::size_t N1, std::size_t N2>
-struct common_type<dplx::dp::fixed_u8string<N1>, dplx::dp::fixed_u8string<N2>>
+struct std::common_type<dplx::dp::fixed_u8string<N1>,
+                        dplx::dp::fixed_u8string<N2>>
 {
-    using type = dplx::dp::fixed_u8string<
-            dplx::cncr::round_up_p2(N1 < N2 ? N2 : N1, 16U)>;
+    using type = dplx::dp::fixed_u8string<dplx::cncr::round_up_p2(
+            N1 < N2 ? N2 : N1, 16U)>; // NOLINT(readability-magic-numbers)
 };
-
-} // namespace std
 
 namespace dplx::dp
 {
@@ -314,19 +352,20 @@ struct object_def
             typename cncr::remove_cref_t<decltype(Properties)>::id_type...>;
     using id_runtime_type = std::common_type_t<typename cncr::remove_cref_t<
             decltype(Properties)>::id_runtime_type...>;
-    using class_type = detail::contravariance_t<typename cncr::remove_cref_t<
-            decltype(Properties)>::class_type...>;
+    using class_type = detail::contravariance_t<
+            typename cncr::remove_cref_t<decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
     static constexpr bool has_optional_properties
             = !(... && Properties.required);
     static constexpr std::array<id_type, num_properties> ids{Properties.id...};
 
+    // NOLINTNEXTLINE(readability-magic-numbers)
     std::uint32_t version = 0xffff'ffff;
     bool allow_versioned_auto_decoder = false;
 
     template <std::size_t N>
-    static constexpr decltype(auto) property() noexcept
+    static constexpr auto property() noexcept -> decltype(auto)
     {
         static_assert(N < num_properties);
         return cncr::nth_param<N>(Properties...);

@@ -54,9 +54,11 @@ public:
     {
         DPLX_TRY(item_emitter<Stream>::u8string(outStream, value.size()));
 
-        DPLX_TRY(write(outStream,
-                       reinterpret_cast<std::byte const *>(value.data()),
-                       value.size()));
+        DPLX_TRY(write(
+                outStream,
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                reinterpret_cast<std::byte const *>(value.data()),
+                value.size()));
 
         return success();
     }
@@ -163,7 +165,7 @@ inline constexpr auto encoded_size_of_object(T const &value) noexcept
 
     if constexpr (hasVersion)
     {
-        return prefixSize + 1u + encoded_size_of(descriptor.version)
+        return prefixSize + 1U + encoded_size_of(descriptor.version)
              + sizeOfProps;
     }
     else

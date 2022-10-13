@@ -7,17 +7,17 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <algorithm>
 #include <array>
 #include <compare>
+#include <cstdint>
 #include <type_traits>
 #include <utility>
 
 #include <boost/mp11/algorithm.hpp>
 
 #include <dplx/cncr/math_supplement.hpp>
+#include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/decoder/api.hpp>
@@ -29,7 +29,6 @@
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
 #include <dplx/dp/object_def.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 
 namespace dplx::dp
 {
@@ -37,21 +36,23 @@ namespace dplx::dp
 inline constexpr struct property_id_hash_fn
 {
     template <typename T>
-        requires tag_invocable<property_id_hash_fn, T const &>
-    constexpr auto operator()(T const &value) const
-            noexcept(nothrow_tag_invocable<property_id_hash_fn, T const &>)
-                    -> std::uint64_t
+        requires cncr::tag_invocable<property_id_hash_fn, T const &>
+    constexpr auto operator()(T const &value) const noexcept(
+            cncr::nothrow_tag_invocable<property_id_hash_fn, T const &>)
+            -> std::uint64_t
     {
-        return cpo::tag_invoke(*this, value);
+        return cncr::tag_invoke(*this, value);
     }
     template <typename T>
-        requires tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
+        requires cncr::
+                tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
     constexpr auto operator()(T const &value, std::uint64_t seed) const
-            noexcept(nothrow_tag_invocable<property_id_hash_fn,
-                                           T const &,
-                                           std::uint64_t>) -> std::uint64_t
+            noexcept(cncr::nothrow_tag_invocable<property_id_hash_fn,
+                                                 T const &,
+                                                 std::uint64_t>)
+                    -> std::uint64_t
     {
-        return cpo::tag_invoke(*this, value, seed);
+        return cncr::tag_invoke(*this, value, seed);
     }
 
     template <cncr::integer T>
@@ -107,6 +108,7 @@ constexpr auto compress_bitset(std::initializer_list<bool> vs) noexcept
 
     auto const *it = vs.begin();
     auto const *const end = vs.end();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (std::size_t shift = 0, offset = 0; it != end; ++it, ++shift)
     {
         if (shift == digits)
@@ -115,6 +117,7 @@ constexpr auto compress_bitset(std::initializer_list<bool> vs) noexcept
             offset += 1;
         }
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
         buckets[offset] |= static_cast<std::size_t>(*it) << shift;
     }
     return buckets;
@@ -148,9 +151,9 @@ private:
     array_type const &ids;
 
 public:
-    constexpr property_id_lookup_fn(array_type const &ids)
+    constexpr property_id_lookup_fn(array_type const &idsInit)
         : hash(ids)
-        , ids(ids)
+        , ids(idsInit)
     {
     }
 
@@ -176,18 +179,20 @@ private:
     array_type const &ids;
 
 public:
-    constexpr property_id_lookup_fn(array_type const &ids)
-        : ids(ids)
+    constexpr property_id_lookup_fn(array_type const &idsInit)
+        : ids(idsInit)
     {
     }
 
     template <typename TLike>
     constexpr auto operator()(TLike &&id) const noexcept -> std::size_t
     {
+        constexpr std::size_t linear_search_efficiency_threshold = 64U;
+
         auto const *const begin = ids.data();
         auto const *const end = ids.data() + ids.size();
-        id_type const *it;
-        if constexpr (NumIds <= 64)
+        id_type const *it; // NOLINT(cppcoreguidelines-init-variables)
+        if constexpr (NumIds <= linear_search_efficiency_threshold)
         {
             if (it = std::find(begin, end, id); it == end)
             {
@@ -252,7 +257,9 @@ public:
         }
 
         return boost::mp11::mp_with_index<num_prop_ids>(
-                idx, decode_prop_fn{{inStream, dest}});
+                idx, decode_prop_fn{
+                             {inStream, dest}
+        });
     }
 };
 
@@ -261,12 +268,14 @@ inline constexpr decode_object_property_fn<Descriptor, T, Stream>
         decode_object_property{};
 
 template <typename T>
-constexpr auto index_of_limit(T const *elems,
+consteval auto index_of_limit(T const *elems,
                               std::size_t const num,
                               T const limit) noexcept -> std::size_t
 {
     for (std::size_t i = 0; i < num; ++i)
     {
+        // consteval -> misuse would be catched by the compiler
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (elems[i] >= limit)
         {
             return i;
@@ -297,13 +306,22 @@ class decode_object_property_fn<descriptor, T, Stream>
 
     static constexpr std::size_t id_map_size
             = descriptor.ids.size() - small_ids_end;
-
-    static constexpr auto copy_large_ids() noexcept
-            -> std::array<id_type, id_map_size>
+    static
+#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 14, 0, 6)
+            // clang errors on the invocation further below saying:
+            // > cannot take address of consteval function
+            constexpr
+#else
+            consteval
+#endif
+            auto
+            copy_large_ids() noexcept -> std::array<id_type, id_map_size>
     {
         std::array<id_type, id_map_size> ids{};
         for (std::size_t i = 0; i < id_map_size; ++i)
         {
+            // consteval -> misuse would be catched by the compiler
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
             ids[i] = descriptor.ids[i + small_ids_end];
         }
         return ids;
@@ -366,7 +384,9 @@ public:
             {
                 return boost::mp11::mp_with_index<small_id_limit>(
                         static_cast<std::size_t>(id),
-                        decode_prop_small_id_fn{{inStream, dest}});
+                        decode_prop_small_id_fn{
+                                {inStream, dest}
+                });
             }
         }
         else
@@ -384,7 +404,9 @@ public:
                 }
 
                 return boost::mp11::mp_with_index<id_map_size>(
-                        idx, decode_prop_large_id_fn{{inStream, dest}});
+                        idx, decode_prop_large_id_fn{
+                                     {inStream, dest}
+                });
             }
         }
     }
@@ -402,6 +424,7 @@ struct object_head_info
 };
 
 template <input_stream Stream, bool isVersioned = true>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto parse_object_head(Stream &inStream,
                               std::bool_constant<isVersioned> = {})
         -> result<object_head_info>
@@ -439,7 +462,7 @@ inline auto parse_object_head(Stream &inStream,
         // the version property id is posint 0
         // and always encoded as a single byte
         DPLX_TRY(auto &&maybeVersionReadProxy, dp::read(inStream, 1));
-        if (std::ranges::data(maybeVersionReadProxy)[0] != std::byte{})
+        if (*std::ranges::data(maybeVersionReadProxy) != std::byte{})
         {
             DPLX_TRY(dp::consume(inStream, maybeVersionReadProxy, 0));
             return object_head_info{numProps, null_def_version};
@@ -486,6 +509,7 @@ inline auto decode_object_properties(Stream &stream,
             auto const offset = which / detail::digits_v<std::size_t>;
             auto const shift = which % detail::digits_v<std::size_t>;
 
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
             foundProps[offset] |= static_cast<std::size_t>(1) << shift;
         }
 
@@ -493,8 +517,10 @@ inline auto decode_object_properties(Stream &stream,
         for (std::size_t i = 0; i < foundProps.size(); ++i)
         {
             auto const requiredProps
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
                     = detail::required_prop_mask_for<descriptor>[i];
 
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
             acc += (foundProps[i] & requiredProps) == requiredProps;
         }
         if (acc != foundProps.size())

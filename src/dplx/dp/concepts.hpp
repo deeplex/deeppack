@@ -19,7 +19,6 @@
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
-#include <dplx/dp/tag_invoke.hpp>
 
 static_assert(CHAR_BIT == 8); // NOLINT(readability-magic-numbers)
 

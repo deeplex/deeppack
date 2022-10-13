@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <cstdint>
-
 #include <ranges>
 #include <type_traits>
 
@@ -45,7 +44,7 @@ concept subitem_parslet = input_stream<InputStream>
     && ((
             std::invocable<Fn, InputStream &, Container &, std::size_t const>
                         && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const>>)
-            
+
         || (
             std::invocable<Fn, InputStream &, Container &, std::size_t const, parse_mode const>
                         && detail::tryable<std::invoke_result_t<Fn, InputStream &, Container &, std::size_t const, parse_mode const>>)
@@ -83,7 +82,8 @@ public:
             {
                 if (type == type_code::special)
                 {
-                    if (value == 0x1fu)
+                    // NOLINTNEXTLINE(readability-magic-numbers)
+                    if (value == 0x1FU)
                     {
                         return oc::success();
                     }
@@ -144,12 +144,16 @@ public:
                 return errc::oversized_additional_information_coding;
             }
 
+            // NOLINTBEGIN(modernize-use-auto)
+
             std::uint64_t const signBit = static_cast<std::uint64_t>(item.type)
                                        << 58;
             std::int64_t const signExtended
                     = static_cast<std::int64_t>(signBit) >> 63;
             std::uint64_t const xorpad
                     = static_cast<std::uint64_t>(signExtended);
+
+            // NOLINTEND(modernize-use-auto)
 
             return static_cast<T>(item.value ^ xorpad);
         }
@@ -171,8 +175,7 @@ public:
             return errc::item_value_out_of_range;
         }
         if (mode != parse_mode::lenient
-            && detail::var_uint_encoded_size(item.value)
-                       < item.encoded_length)
+            && detail::var_uint_encoded_size(item.value) < item.encoded_length)
         {
             return errc::oversized_additional_information_coding;
         }
@@ -366,15 +369,15 @@ public:
         constexpr auto boolPattern
                 = static_cast<std::uint8_t>(type_code::bool_false);
 
-        DPLX_TRY(auto &&readProxy, read(inStream, 1));
+        DPLX_TRY(auto &&readProxy, read(inStream, 1U));
         auto const memory = std::ranges::data(readProxy);
         auto const value = static_cast<std::uint8_t>(*memory);
         unsigned const rolled = value - boolPattern;
 
-        if (rolled > 1u)
+        if (rolled > 1U)
             DPLX_ATTR_UNLIKELY
             {
-                DPLX_TRY(consume(readProxy, 0));
+                DPLX_TRY(consume(readProxy, 0U));
                 return errc::item_type_mismatch;
             }
 
@@ -388,95 +391,107 @@ public:
 
     static inline auto float_single(Stream &inStream) -> result<float>
     {
+        // NOLINTBEGIN(readability-magic-numbers)
+
         DPLX_TRY(item_info const item, parse::generic(inStream));
 
         if (item.type != type_code::special || item.indefinite()
-            || item.encoded_length < 3u)
+            || item.encoded_length < 3U)
         {
             return errc::item_type_mismatch;
         }
 
-        if (item.encoded_length == 9u)
+        if (item.encoded_length == 9U)
         {
             return errc::item_value_out_of_range;
         }
-        else if (item.encoded_length == 5u)
+        if (item.encoded_length == 5U)
         {
-            float value;
+            float value; // NOLINT(cppcoreguidelines-init-variables)
             std::memcpy(&value, &item.value, sizeof(value)); // #bit_cast
             return value;
         }
-        else // if (item.encoded_length == 3u)
-        {
-            return static_cast<float>(detail::load_iec559_half(
-                    static_cast<std::uint16_t>(item.value)));
-        }
+        // if (item.encoded_length == 3U)
+        // {
+        return static_cast<float>(detail::load_iec559_half(
+                static_cast<std::uint16_t>(item.value)));
+        // }
+
+        // NOLINTEND(readability-magic-numbers)
     }
     static inline auto float_double(Stream &inStream) -> result<double>
     {
+        // NOLINTBEGIN(readability-magic-numbers)
+
         DPLX_TRY(item_info const item, parse::generic(inStream));
 
         if (item.type != type_code::special || item.indefinite()
-            || item.encoded_length < 3u)
+            || item.encoded_length < 3U)
         {
             return errc::item_type_mismatch;
         }
 
-        if (item.encoded_length == 9u)
+        if (item.encoded_length == 9U)
         {
-            double value;
+            double value; // NOLINT(cppcoreguidelines-init-variables)
             std::memcpy(&value, &item.value, sizeof(value)); // #bit_cast
             return value;
         }
-        else if (item.encoded_length == 5u)
+        if (item.encoded_length == 5U)
         {
-            float value;
+            float value; // NOLINT(cppcoreguidelines-init-variables)
             std::memcpy(&value, &item.value, sizeof(value)); // #bit_cast
             return value;
         }
-        else // if (item.encoded_length == 3u)
-        {
-            return detail::load_iec559_half(
-                    static_cast<std::uint16_t>(item.value));
-        }
+        // if (item.encoded_length == 3U)
+        // {
+        return detail::load_iec559_half(static_cast<std::uint16_t>(item.value));
+        // }
+
+        // NOLINTEND(readability-magic-numbers)
     }
 
 private:
     template <typename StringType>
     static inline auto string(Stream &inStream,
                               StringType &dest,
-                              std::size_t const maxSize,
-                              parse_mode const mode,
-                              type_code const expectedType)
-            -> result<std::size_t>;
+                              std::size_t maxSize,
+                              parse_mode mode,
+                              type_code expectedType) -> result<std::size_t>;
     template <typename StringType>
     static inline auto string_finite(Stream &inStream,
                                      StringType &dest,
-                                     std::size_t const maxSize,
-                                     parse_mode const mode,
-                                     type_code const expectedType)
+                                     std::size_t maxSize,
+                                     parse_mode mode,
+                                     type_code expectedType)
             -> result<std::size_t>;
 
     template <typename T, typename DecodeElementFn>
     static inline auto array_like(Stream &inStream,
                                   T &dest,
-                                  std::size_t const maxSize,
-                                  parse_mode const mode,
-                                  type_code const expectedType,
+                                  std::size_t maxSize,
+                                  parse_mode mode,
+                                  type_code expectedType,
                                   DecodeElementFn &&decodeElement)
             -> result<std::size_t>;
     template <typename T, typename DecodeElementFn>
     static inline auto array_finite_like(Stream &inStream,
                                          T &dest,
-                                         std::size_t const maxSize,
-                                         parse_mode const mode,
-                                         type_code const expectedType,
+                                         std::size_t maxSize,
+                                         parse_mode mode,
+                                         type_code expectedType,
                                          DecodeElementFn &&decodeElement)
             -> result<std::size_t>;
 };
 
+#if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast" // std::size_t casts :(
+#endif
+
 template <input_stream Stream>
 template <typename StringType>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto item_parser<Stream>::string(Stream &inStream,
                                         StringType &dest,
                                         std::size_t const maxSize,
@@ -491,7 +506,7 @@ inline auto item_parser<Stream>::string(Stream &inStream,
         return errc::item_type_mismatch;
     }
 
-    std::size_t size;
+    std::size_t size; // NOLINT(cppcoreguidelines-init-variables)
     if (!item.indefinite())
         DPLX_ATTR_LIKELY
         {
@@ -517,6 +532,7 @@ inline auto item_parser<Stream>::string(Stream &inStream,
 
             auto const memory = std::ranges::data(dest);
 
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
             DPLX_TRY(read(inStream, reinterpret_cast<std::byte *>(memory),
                           size));
         }
@@ -526,7 +542,7 @@ inline auto item_parser<Stream>::string(Stream &inStream,
     }
     else
     {
-        size = 0u;
+        size = 0U;
         DPLX_TRY(container_resize(dest, std::size_t{}));
 
         for (;;)
@@ -537,7 +553,7 @@ inline auto item_parser<Stream>::string(Stream &inStream,
             {
                 break;
             }
-            else if (chunkItem.type != expectedType)
+            if (chunkItem.type != expectedType)
             {
                 return errc::invalid_indefinite_subitem;
             }
@@ -560,9 +576,14 @@ inline auto item_parser<Stream>::string(Stream &inStream,
 
             auto const memory = std::ranges::data(dest);
 
+            // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+            // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             DPLX_TRY(read(inStream,
                           reinterpret_cast<std::byte *>(memory) + size,
                           chunkSize));
+
+            // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
             size = static_cast<std::size_t>(newSize);
         }
@@ -596,8 +617,7 @@ inline auto item_parser<Stream>::string_finite(Stream &inStream,
         return errc::indefinite_item;
     }
     if (mode != parse_mode::lenient
-        && detail::var_uint_encoded_size(item.value)
-                   < item.encoded_length)
+        && detail::var_uint_encoded_size(item.value) < item.encoded_length)
     {
         return errc::oversized_additional_information_coding;
     }
@@ -617,6 +637,7 @@ inline auto item_parser<Stream>::string_finite(Stream &inStream,
 
     auto const memory = std::ranges::data(dest);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     DPLX_TRY(read(inStream, reinterpret_cast<std::byte *>(memory), byteSize));
 
     // if (mode == parse_mode::strict && expectedType == type_code::text)
@@ -629,6 +650,7 @@ inline auto item_parser<Stream>::string_finite(Stream &inStream,
 
 template <input_stream Stream>
 template <typename T, typename DecodeElementFn>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto item_parser<Stream>::array_like(Stream &inStream,
                                             T &dest,
                                             std::size_t const maxSize,
@@ -660,8 +682,8 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
         }
 
         auto const numElements = static_cast<std::size_t>(item.value);
-        if constexpr (nothrow_tag_invocable<container_reserve_fn, T &,
-                                            std::size_t const>)
+        if constexpr (cncr::nothrow_tag_invocable<container_reserve_fn, T &,
+                                                  std::size_t const>)
         {
             DPLX_TRY(container_reserve(dest, numElements));
         }
@@ -669,7 +691,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
         for (std::size_t i = 0; i < numElements; ++i)
         {
             std::size_t const v = i;
-#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                          \
+#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                            \
         && DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 29, 30137)
             if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                          std::size_t const, parse_mode const>)
@@ -686,11 +708,11 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
         }
         return numElements;
     }
-    else if (mode != parse_mode::lenient)
+    if (mode != parse_mode::lenient)
     {
         return errc::indefinite_item;
     }
-    else
+    // else
     {
         std::size_t i = 0;
         for (;; ++i)
@@ -703,6 +725,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
 
             {
                 DPLX_TRY(auto &&maybeStop, read(inStream, 1));
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 if (std::ranges::data(maybeStop)[0] == type_code::special_break)
                 {
                     if constexpr (lazy_input_stream<Stream>)
@@ -716,7 +739,7 @@ inline auto item_parser<Stream>::array_like(Stream &inStream,
             }
 
             std::size_t const v = i;
-#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                          \
+#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                            \
         && DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 29, 30137)
             if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                          std::size_t const, parse_mode const>)
@@ -757,8 +780,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
         return errc::indefinite_item;
     }
     if (mode != parse_mode::lenient
-        && detail::var_uint_encoded_size(item.value)
-                   < item.encoded_length)
+        && detail::var_uint_encoded_size(item.value) < item.encoded_length)
     {
         return errc::oversized_additional_information_coding;
     }
@@ -782,7 +804,7 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
     for (std::size_t i = 0; i < numElements; ++i)
     {
         std::size_t const v = i;
-#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                          \
+#if DPLX_COMP_MSVC < DPLX_VERSION_NUMBER(19, 30, 0)                            \
         && DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 29, 30137)
         if constexpr (std::invocable<DecodeElementFn, Stream &, T &,
                                      std::size_t const, parse_mode const>)
@@ -799,5 +821,9 @@ item_parser<Stream>::array_finite_like(Stream &inStream,
     }
     return numElements;
 }
+
+#if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
+#pragma GCC diagnostic pop
+#endif
 
 } // namespace dplx::dp

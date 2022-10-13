@@ -5,8 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/decoder/core.hpp>
-#include <dplx/dp/decoder/std_container.hpp>
+#include "dplx/dp/decoder/std_container.hpp"
 
 #include <array>
 #include <deque>
@@ -27,9 +26,13 @@
 
 #include <dplx/predef/compiler.h>
 
+#include <dplx/dp/decoder/core.hpp>
+
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 template class dplx::dp::basic_decoder<std::array<std::byte, 16>,
                                        dp_tests::test_input_stream>;
@@ -103,7 +106,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(empty_array, T, uint_sequence_containers)
     auto rx = decoder_type()(stream, out);
     DPLX_REQUIRE_RESULT(rx);
 
-    BOOST_TEST(out.size() == 0u);
+    BOOST_TEST(out.size() == 0U);
 }
 BOOST_AUTO_TEST_CASE_TEMPLATE(empty_indefinite_array,
                               T,
@@ -118,7 +121,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(empty_indefinite_array,
     auto rx = decoder_type()(stream, out);
     DPLX_REQUIRE_RESULT(rx);
 
-    BOOST_TEST(out.size() == 0u);
+    BOOST_TEST(out.size() == 0U);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(single_item, T, uint_sequence_containers)
@@ -132,8 +135,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(single_item, T, uint_sequence_containers)
     auto rx = decoder_type()(stream, out);
     DPLX_REQUIRE_RESULT(rx);
 
-    BOOST_TEST(out.size() == 1u);
-    BOOST_TEST(out.front() == 0x15u);
+    BOOST_TEST(out.size() == 1U);
+    BOOST_TEST(out.front() == 0x15U);
 }
 BOOST_AUTO_TEST_CASE_TEMPLATE(single_indefinite_item,
                               T,
@@ -148,8 +151,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(single_indefinite_item,
     auto rx = decoder_type()(stream, out);
     DPLX_REQUIRE_RESULT(rx);
 
-    BOOST_TEST(out.size() == 1u);
-    BOOST_TEST(out.front() == 0x15u);
+    BOOST_TEST(out.size() == 1U);
+    BOOST_TEST(out.front() == 0x15U);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(multiple_items, T, uint_sequence_containers)
@@ -164,11 +167,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiple_items, T, uint_sequence_containers)
     auto rx = decoder_type()(stream, out);
     DPLX_REQUIRE_RESULT(rx);
 
-    BOOST_TEST(out.size() == 3u);
+    BOOST_TEST(out.size() == 3U);
     auto it = out.begin();
-    BOOST_TEST(*it++ == 0x15u);
-    BOOST_TEST(*it++ == 0x04u);
-    BOOST_TEST(*it++ == 0x10u);
+    BOOST_TEST(*it++ == 0x15U);
+    BOOST_TEST(*it++ == 0x04U);
+    BOOST_TEST(*it++ == 0x10U);
 }
 BOOST_AUTO_TEST_CASE_TEMPLATE(multiple_indefinite_items,
                               T,
@@ -184,11 +187,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiple_indefinite_items,
     auto rx = decoder_type()(stream, out);
     DPLX_REQUIRE_RESULT(rx);
 
-    BOOST_TEST(out.size() == 3u);
+    BOOST_TEST(out.size() == 3U);
     auto it = out.begin();
-    BOOST_TEST(*it++ == 0x15u);
-    BOOST_TEST(*it++ == 0x04u);
-    BOOST_TEST(*it++ == 0x10u);
+    BOOST_TEST(*it++ == 0x15U);
+    BOOST_TEST(*it++ == 0x04U);
+    BOOST_TEST(*it++ == 0x10U);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(reject_missing_data, T, uint_sequence_containers)
@@ -253,3 +256,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

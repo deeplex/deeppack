@@ -16,6 +16,8 @@
 namespace dplx::dp::detail
 {
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 template <typename T>
 constexpr auto fnvx_hash(T const *const data,
                          std::size_t const size,
@@ -25,6 +27,7 @@ constexpr auto fnvx_hash(T const *const data,
     for (std::size_t i = 0; i < size; ++i)
     {
         state *= 0x00000100000001B3;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         state ^= static_cast<std::uint8_t>(data[i]);
     }
 
@@ -78,15 +81,17 @@ constexpr auto xxhash3_ui32(std::uint32_t const value,
 {
     std::uint64_t const stretched
             = value | (static_cast<std::uint64_t>(value) << 32);
-    return xxhash3_fixed_impl(stretched, seed, 4u);
+    return xxhash3_fixed_impl(stretched, seed, 4U);
 }
 
 constexpr auto xxhash3_ui64(std::uint64_t const value,
                             std::uint64_t const seed) noexcept -> std::uint64_t
 {
     std::uint64_t const swapped = (value << 32) | (value >> 32);
-    return xxhash3_fixed_impl(swapped, seed, 8u);
+    return xxhash3_fixed_impl(swapped, seed, 8U);
 }
+
+// NOLINTEND(readability-magic-numbers)
 
 template <cncr::unsigned_integer T>
     requires(sizeof(T) <= sizeof(std::uint64_t))

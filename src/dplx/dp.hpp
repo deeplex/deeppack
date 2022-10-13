@@ -7,13 +7,11 @@
 
 #pragma once
 
-#include <dplx/dp/disappointment.hpp>
-#include <dplx/dp/fwd.hpp>
-
 #include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/decoder/std_container.hpp>
 #include <dplx/dp/decoder/std_string.hpp>
-
+#include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/encoder/core.hpp>
+#include <dplx/dp/fwd.hpp>

@@ -51,14 +51,14 @@ inline auto parse_tuple_head(Stream &inStream,
     }
     else
     {
-        if (arrayInfo.value < 1u)
+        if (arrayInfo.value < 1U)
         {
             return errc::item_version_property_missing;
         }
 
         // 0xffff'ffff => max() is reserved as null_def_version
         DPLX_TRY(auto version, parse::template integer<std::uint32_t>(
-                                       inStream, 0xffff'fffeu));
+                                       inStream, 0xFFFF'FFFEU));
 
         return tuple_head_info{numProps - 1, version};
     }

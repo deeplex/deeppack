@@ -50,7 +50,7 @@ auto error_category() noexcept -> std::error_category const &;
 
 inline auto make_error_code(errc value) -> std::error_code
 {
-    return std::error_code(static_cast<int>(value), error_category());
+    return {static_cast<int>(value), error_category()};
 }
 
 } // namespace dplx::dp
@@ -122,5 +122,6 @@ inline auto try_extract_failure(T &&in, result<void> &out) -> bool
 } // namespace dplx::dp::detail
 
 #ifndef DPLX_TRY
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DPLX_TRY(...) OUTCOME_TRY(__VA_ARGS__)
 #endif

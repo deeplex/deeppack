@@ -13,6 +13,7 @@
 
 #include <dplx/cncr/pack_utils.hpp>
 #include <dplx/cncr/type_utils.hpp>
+
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 
@@ -101,11 +102,12 @@ struct tuple_def
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
 
+    // NOLINTNEXTLINE(readability-magic-numbers)
     std::uint32_t version = 0xffff'ffff;
     bool allow_versioned_auto_decoder = false;
 
     template <std::size_t N>
-    static constexpr decltype(auto) property() noexcept
+    static constexpr auto property() noexcept -> decltype(auto)
     {
         static_assert(N < num_properties);
         return cncr::nth_param<N>(Properties...);

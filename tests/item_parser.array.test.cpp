@@ -5,15 +5,17 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/item_parser.hpp>
-
 #include <vector>
 
 #include <dplx/dp/customization.std.hpp>
+#include <dplx/dp/item_parser.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 namespace dp_tests
 {
@@ -51,7 +53,7 @@ BOOST_AUTO_TEST_CASE(std_vector_simple)
             });
 
     DPLX_REQUIRE_RESULT(parseRx);
-    BOOST_TEST(parseRx.assume_value() == 5u);
+    BOOST_TEST(parseRx.assume_value() == 5U);
     BOOST_TEST(callbackInvocations == 5);
     auto expected = make_byte_array<5>({0x01, 0x02, 0x03, 0x04, 0x05},
                                        std::byte{0x00});
@@ -85,7 +87,7 @@ BOOST_AUTO_TEST_CASE(std_vector_indefinite)
             });
 
     DPLX_REQUIRE_RESULT(parseRx);
-    BOOST_TEST(parseRx.assume_value() == 5u);
+    BOOST_TEST(parseRx.assume_value() == 5U);
     BOOST_TEST(callbackInvocations == 5);
     auto expected = make_byte_array<5>({0xc1, 0xc2, 0xc7, 0xc4, 0xc5},
                                        std::byte{0x00});
@@ -119,7 +121,7 @@ BOOST_AUTO_TEST_CASE(std_vector_finite)
             });
 
     DPLX_REQUIRE_RESULT(parseRx);
-    BOOST_TEST(parseRx.assume_value() == 5u);
+    BOOST_TEST(parseRx.assume_value() == 5U);
     BOOST_TEST(callbackInvocations == 5);
     auto expected = make_byte_array<5>({0x01, 0x02, 0x03, 0x04, 0x05},
                                        std::byte{0x00});
@@ -131,3 +133,6 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTEND(readability-magic-numbers)

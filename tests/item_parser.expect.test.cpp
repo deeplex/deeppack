@@ -5,17 +5,18 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/item_parser.hpp>
-
 #include <vector>
 
 #include <dplx/cncr/misc.hpp>
 
 #include <dplx/dp/customization.std.hpp>
+#include <dplx/dp/item_parser.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 namespace dp_tests
 {
@@ -50,13 +51,13 @@ auto boost_test_print_type(std::ostream &s, acceptance_sample const &sample)
 }
 
 constexpr acceptance_sample acceptance_samples[] = {
-        {dp::type_code::posint, 0u, dp::parse_mode::strict,
-         make_byte_array<16>({0x00})},
-        {dp::type_code::negint, 24u, dp::parse_mode::strict,
+        { dp::type_code::posint,    0U,  dp::parse_mode::strict,
+         make_byte_array<16>({0x00})      },
+        { dp::type_code::negint,   24U,  dp::parse_mode::strict,
          make_byte_array<16>({0x38, 0x18})},
-        {dp::type_code::special, 0x1fu, dp::parse_mode::strict,
-         make_byte_array<16>({0xff})},
-        {dp::type_code::posint, 23u, dp::parse_mode::lenient,
+        {dp::type_code::special, 0x1fU,  dp::parse_mode::strict,
+         make_byte_array<16>({0xff})      },
+        { dp::type_code::posint,   23U, dp::parse_mode::lenient,
          make_byte_array<16>({0x18, 0x17})},
 };
 
@@ -95,22 +96,22 @@ auto boost_test_print_type(std::ostream &s, rejection_sample const &sample)
 }
 
 constexpr rejection_sample rejection_samples[] = {
-        {dp::errc::item_type_mismatch, dp::type_code::special, 0u,
-         dp::parse_mode::strict, make_byte_array<16>({0x00})},
-        {dp::errc::item_type_mismatch, dp::type_code::special, 22u,
-         dp::parse_mode::strict, make_byte_array<16>({0xff})},
-        {dp::errc::invalid_additional_information, dp::type_code::negint, 24u,
+        {                     dp::errc::item_type_mismatch,dp::type_code::special,  0U,
+         dp::parse_mode::strict,make_byte_array<16>({0x00})                                },
+        {                     dp::errc::item_type_mismatch, dp::type_code::special, 22U,
+         dp::parse_mode::strict,       make_byte_array<16>({0xff})},
+        {         dp::errc::invalid_additional_information,  dp::type_code::negint, 24U,
          dp::parse_mode::strict, make_byte_array<16>({0x3f, 0x18})},
-        {dp::errc::indefinite_item, dp::type_code::binary, 21u,
-         dp::parse_mode::strict, make_byte_array<16>({0x5f})},
-        {dp::errc::item_value_out_of_range, dp::type_code::array, 21u,
-         dp::parse_mode::strict, make_byte_array<16>({0x82})},
+        {                        dp::errc::indefinite_item,  dp::type_code::binary, 21U,
+         dp::parse_mode::strict,       make_byte_array<16>({0x5f})},
+        {                dp::errc::item_value_out_of_range,   dp::type_code::array, 21U,
+         dp::parse_mode::strict,       make_byte_array<16>({0x82})},
         {dp::errc::oversized_additional_information_coding,
-         dp::type_code::posint, 23u, dp::parse_mode::strict,
-         make_byte_array<16>({0x18, 0x17})},
+         dp::type_code::posint, 23U,    dp::parse_mode::strict,
+         make_byte_array<16>({0x18, 0x17})                        },
         {dp::errc::oversized_additional_information_coding,
-         dp::type_code::posint, 23u, dp::parse_mode::canonical,
-         make_byte_array<16>({0x18, 0x17})},
+         dp::type_code::posint, 23U, dp::parse_mode::canonical,
+         make_byte_array<16>({0x18, 0x17})                        },
 };
 
 BOOST_DATA_TEST_CASE(rejects_mismatching_input, bdata::make(rejection_samples))
@@ -128,3 +129,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

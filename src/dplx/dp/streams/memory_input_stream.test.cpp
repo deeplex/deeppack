@@ -5,15 +5,16 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/streams/memory_input_stream.hpp>
-
-#include <cstddef>
+#include "dplx/dp/streams/memory_input_stream.hpp"
 
 #include <array>
+#include <cstddef>
 #include <vector>
 
 #include "boost-test.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 namespace dp_tests
 {
@@ -37,7 +38,7 @@ struct memory_input_stream_dependencies
 
     memory_input_stream_dependencies()
     {
-        for (auto i = 0u; i < testSize; ++i)
+        for (auto i = 0U; i < testSize; ++i)
         {
             memory[i] = static_cast<std::byte>(i);
         }
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     auto proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 29u);
+    BOOST_TEST(std::ranges::size(proxy) == 29U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29));
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 29);
-    BOOST_TEST(std::ranges::size(proxy) == 31u);
+    BOOST_TEST(std::ranges::size(proxy) == 31U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 31));
@@ -79,9 +80,9 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 60);
-    BOOST_TEST(std::ranges::size(proxy) == 7u);
+    BOOST_TEST(std::ranges::size(proxy) == 7U);
 
-    BOOST_TEST_REQUIRE(dp::available_input_size(subject).value() == 0u);
+    BOOST_TEST_REQUIRE(dp::available_input_size(subject).value() == 0U);
 
     readRx = dp::read(subject, 1);
     BOOST_TEST_REQUIRE(readRx.has_error());
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_large_reads)
     DPLX_REQUIRE_RESULT(
             dp::read(subject, readBuffer3.data(), readBuffer3.size()));
 
-    BOOST_TEST_REQUIRE(dp::available_input_size(subject).value() == 0u);
+    BOOST_TEST_REQUIRE(dp::available_input_size(subject).value() == 0U);
     BOOST_TEST(std::span(readBuffer3) == std::span(memory).subspan(60, 7),
                boost::test_tools::per_element());
 
@@ -128,7 +129,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_mixed_reads)
     DPLX_REQUIRE_RESULT(readRx);
     auto proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 17u);
+    BOOST_TEST(std::ranges::size(proxy) == 17U);
 
     std::vector<std::byte> readBuffer2(47);
     DPLX_REQUIRE_RESULT(
@@ -143,7 +144,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_mixed_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 64);
-    BOOST_TEST(std::ranges::size(proxy) == 3u);
+    BOOST_TEST(std::ranges::size(proxy) == 3U);
 
     readRx = dp::read(subject, 1);
     BOOST_TEST_REQUIRE(readRx.has_error());
@@ -156,7 +157,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_partial_reads)
     DPLX_REQUIRE_RESULT(readRx);
     auto proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 31u);
+    BOOST_TEST(std::ranges::size(proxy) == 31U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 31));
@@ -170,7 +171,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_partial_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 29);
-    BOOST_TEST(std::ranges::size(proxy) == 5u);
+    BOOST_TEST(std::ranges::size(proxy) == 5U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 5));
@@ -184,9 +185,9 @@ BOOST_AUTO_TEST_CASE(correctly_handles_partial_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 32);
-    BOOST_TEST(std::ranges::size(proxy) == 35u);
+    BOOST_TEST(std::ranges::size(proxy) == 35U);
 
-    BOOST_TEST_REQUIRE(dp::available_input_size(subject).value() == 0u);
+    BOOST_TEST_REQUIRE(dp::available_input_size(subject).value() == 0U);
 
     readRx = dp::read(subject, 1);
     BOOST_TEST_REQUIRE(readRx.has_error());
@@ -202,7 +203,7 @@ BOOST_AUTO_TEST_CASE(properly_skips_bytes_at_beginning_1)
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == memory.data() + 17);
-    BOOST_TEST(std::ranges::size(proxy) == 50u);
+    BOOST_TEST(std::ranges::size(proxy) == 50U);
 }
 
 BOOST_AUTO_TEST_CASE(skips_correctly_from_sbo_1)
@@ -210,23 +211,23 @@ BOOST_AUTO_TEST_CASE(skips_correctly_from_sbo_1)
     auto sreadRx = dp::read(subject, 17);
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 17u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 17U);
 
     sreadRx = dp::read(subject, 40);
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40U);
 
-    auto consumeRx = dp::consume(subject, proxy, 20u);
+    auto consumeRx = dp::consume(subject, proxy, 20U);
     DPLX_REQUIRE_RESULT(consumeRx);
 
-    auto skipRx = dp::skip_bytes(subject, 13u);
+    auto skipRx = dp::skip_bytes(subject, 13U);
     DPLX_REQUIRE_RESULT(skipRx);
 
-    sreadRx = dp::read(subject, 17u);
+    sreadRx = dp::read(subject, 17U);
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 17u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 17U);
     BOOST_TEST_REQUIRE(std::ranges::data(proxy) == memory.data() + 50);
 }
 
@@ -235,3 +236,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

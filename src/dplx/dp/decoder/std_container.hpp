@@ -13,8 +13,8 @@
 #include <span>
 
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/customization.std.hpp>
+#include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
@@ -77,7 +77,7 @@ private:
     static auto decode_element(Stream &stream, T &value, std::size_t const)
             -> result<void>
     {
-        element_type *e;
+        element_type *e; // NOLINT(cppcoreguidelines-init-variables)
         if constexpr (back_insertion_sequence_container<T>)
         {
             value.emplace_back();
@@ -275,7 +275,7 @@ public:
 } // namespace detail
 
 template <typename T, std::size_t N, input_stream Stream>
-    requires (decodable<T, Stream> || std::same_as<T, std::byte>)
+    requires(decodable<T, Stream> || std::same_as<T, std::byte>)
 class basic_decoder<std::array<T, N>, Stream>
     : public detail::basic_array_decoder<T, Stream>
 {
@@ -283,4 +283,4 @@ public:
     using value_type = std::array<T, N>;
 };
 
-}
+} // namespace dplx::dp

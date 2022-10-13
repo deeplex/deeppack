@@ -5,19 +5,23 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/item_parser.hpp>
-#include <dplx/dp/skip_item.hpp>
+#include "dplx/dp/item_parser.hpp"
 
 #include <dplx/cncr/misc.hpp>
+
+#include <dplx/dp/skip_item.hpp>
 
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 template <>
 struct fmt::formatter<dplx::dp::item_info>
 {
-    constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(format_parse_context &ctx)
+            -> decltype(ctx.begin())
     {
         return ctx.begin();
     }
@@ -78,46 +82,46 @@ auto boost_test_print_type(std::ostream &s, parse_sample const &sample)
 
 constexpr parse_sample parse_samples[] = {
 
-        // Appendix A.Examples
+  // Appendix A.Examples
 
-        {make_byte_array<9>({0x00}), {type_code::posint, {}, 1, 0}},
-        {make_byte_array<9>({0x01}), {type_code::posint, {}, 1, 1}},
-        {make_byte_array<9>({0x0a}), {type_code::posint, {}, 1, 0x0a}},
-        {make_byte_array<9>({0x18, 0x19}), {type_code::posint, {}, 2, 0x19}},
-        {make_byte_array<9>({0x18, 0x64}), {type_code::posint, {}, 2, 0x64}},
-        {make_byte_array<9>({0x19, 0x03, 0xe8}),
-         {type_code::posint, {}, 3, 0x03e8}},
-        {make_byte_array<9>({0x1a, 0x00, 0x0f, 0x42, 0x40}),
-         {type_code::posint, {}, 5, 0x000f'4240}},
+        {                                              make_byte_array<9>({0x00}),{type_code::posint, {}, 1, 0}                                                                                  },
+        {                                              make_byte_array<9>({0x01}),    {type_code::posint, {}, 1, 1}},
+        {                                              make_byte_array<9>({0x0a}), {type_code::posint, {}, 1, 0x0a}},
+        {                                        make_byte_array<9>({0x18, 0x19}), {type_code::posint, {}, 2, 0x19}},
+        {                                        make_byte_array<9>({0x18, 0x64}), {type_code::posint, {}, 2, 0x64}},
+        {                                  make_byte_array<9>({0x19, 0x03, 0xe8}),
+         {type_code::posint, {}, 3, 0x03e8}                                                                        },
+        {                      make_byte_array<9>({0x1a, 0x00, 0x0f, 0x42, 0x40}),
+         {type_code::posint, {}, 5, 0x000f'4240}                                                                   },
         {make_byte_array<9>(
-                 {0x1b, 0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00}),
-         {type_code::posint, {}, 9, 0x0000'00e8'd4a5'1000}},
+{0x1b, 0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00}),
+         {type_code::posint, {}, 9, 0x0000'00e8'd4a5'1000}                                                         },
 
-        {make_byte_array<9>({0x29}), {type_code::negint, {}, 1, 9}},
-        {make_byte_array<9>({0x38, 0x63}), {type_code::negint, {}, 2, 99}},
-        {make_byte_array<9>({0x39, 0x03, 0xe7}),
-         {type_code::negint, {}, 3, 999}},
+        {                                              make_byte_array<9>({0x29}),    {type_code::negint, {}, 1, 9}},
+        {                                        make_byte_array<9>({0x38, 0x63}),   {type_code::negint, {}, 2, 99}},
+        {                                  make_byte_array<9>({0x39, 0x03, 0xe7}),
+         {type_code::negint, {}, 3, 999}                                                                           },
 
-        // posint
-        {make_byte_array<9>({0x17}), {type_code::posint, {}, 1, 0x17}},
-        {make_byte_array<9>({0x18, 0x18}), {type_code::posint, {}, 2, 0x18}},
-        {make_byte_array<9>({0x18, 0xff}), {type_code::posint, {}, 2, 0xff}},
-        {make_byte_array<9>({0x19, 0x01, 0x00}),
-         {type_code::posint, {}, 3, 0x0100}},
-        {make_byte_array<9>({0x19, 0xff, 0xff}),
-         {type_code::posint, {}, 3, 0xffff}},
-        {make_byte_array<9>({0x1a, 0x00, 0x01, 0x00, 0x00}),
-         {type_code::posint, {}, 5, 0x1'0000}},
-        {make_byte_array<9>({0x1a, 0xff, 0xff, 0xff, 0xff}),
-         {type_code::posint, {}, 5, 0xffff'ffff}},
+ // posint
+        {                                              make_byte_array<9>({0x17}), {type_code::posint, {}, 1, 0x17}},
+        {                                        make_byte_array<9>({0x18, 0x18}), {type_code::posint, {}, 2, 0x18}},
+        {                                        make_byte_array<9>({0x18, 0xff}), {type_code::posint, {}, 2, 0xff}},
+        {                                  make_byte_array<9>({0x19, 0x01, 0x00}),
+         {type_code::posint, {}, 3, 0x0100}                                                                        },
+        {                                  make_byte_array<9>({0x19, 0xff, 0xff}),
+         {type_code::posint, {}, 3, 0xffff}                                                                        },
+        {                      make_byte_array<9>({0x1a, 0x00, 0x01, 0x00, 0x00}),
+         {type_code::posint, {}, 5, 0x1'0000}                                                                      },
+        {                      make_byte_array<9>({0x1a, 0xff, 0xff, 0xff, 0xff}),
+         {type_code::posint, {}, 5, 0xffff'ffff}                                                                   },
         {make_byte_array<9>(
-                 {0x1b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00}),
-         {type_code::posint, {}, 9, 0x1'0000'0000}},
+{0x1b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00}),
+         {type_code::posint, {}, 9, 0x1'0000'0000}                                                                 },
         {make_byte_array<9>(
-                 {0x1b, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}),
-         {type_code::posint, {}, 9, 0xffff'ffff'ffff'ffff}},
-        {make_byte_array<9>({0xff}),
-         {type_code::special, item_info::flag::indefinite, 1, 0x1f}},
+{0x1b, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}),
+         {type_code::posint, {}, 9, 0xffff'ffff'ffff'ffff}                                                         },
+        {                                              make_byte_array<9>({0xff}),
+         {type_code::special, item_info::flag::indefinite, 1, 0x1f}                                                },
 };
 
 BOOST_DATA_TEST_CASE(parse_speculative,
@@ -162,9 +166,11 @@ BOOST_DATA_TEST_CASE(skip_simple, boost::unit_test::data::make(parse_samples))
     DPLX_REQUIRE_RESULT(parseRx);
 
     auto remainingRx = dp::available_input_size(stream);
-    BOOST_TEST(remainingRx.value() == 0u);
+    BOOST_TEST(remainingRx.value() == 0U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

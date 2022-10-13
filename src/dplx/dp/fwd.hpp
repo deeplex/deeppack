@@ -14,7 +14,7 @@
 namespace dplx::dp
 {
 
-static_assert(CHAR_BIT == 8);
+static_assert(CHAR_BIT == 8); // NOLINT(readability-magic-numbers)
 
 template <typename T, output_stream Stream>
 class basic_encoder;

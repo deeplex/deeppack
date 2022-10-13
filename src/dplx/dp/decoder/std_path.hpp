@@ -27,12 +27,12 @@ public:
 
     auto operator()(Stream &inStream, value_type &value) -> result<void>
     {
+        std::u8string u8Representation;
+        DPLX_TRY(parse::u8string_finite(inStream, u8Representation));
+
         try
         {
-            std::u8string u8Representation;
-            DPLX_TRY(parse::u8string_finite(inStream, u8Representation));
-
-            value = value_type{std::move(u8Representation)};
+            value = value_type{static_cast<std::u8string &&>(u8Representation)};
             return oc::success();
         }
         catch (std::bad_alloc const &)

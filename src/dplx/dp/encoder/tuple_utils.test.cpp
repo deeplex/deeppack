@@ -5,13 +5,15 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include <dplx/dp/encoder/tuple_utils.hpp>
+#include "dplx/dp/encoder/tuple_utils.hpp"
 
 #include <dplx/dp/encoder/core.hpp>
 
 #include "boost-test.hpp"
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 namespace dp_tests
 {
@@ -45,7 +47,7 @@ constexpr tuple_def<tuple_member_def<&test_tuple::ma>{},
 BOOST_AUTO_TEST_CASE(encode_def_1)
 {
     auto bytes = make_byte_array<6>({0x81, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF});
-    test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
+    test_tuple const t{0xDEADBEEFU, 0x07U, 0xFEFEU};
 
     test_output_stream<> ostream{};
     auto rx = dp::encode_tuple<test_tuple_def_1>(ostream, t);
@@ -58,7 +60,7 @@ BOOST_AUTO_TEST_CASE(encode_def_1)
 BOOST_AUTO_TEST_CASE(encode_def_2)
 {
     auto bytes = make_byte_array<7>({0x82, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 0x07});
-    test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
+    test_tuple const t{0xDEADBEEFU, 0x07U, 0xFEFEU};
 
     test_output_stream<> ostream{};
     auto rx = dp::encode_tuple<test_tuple_def_2>(ostream, t);
@@ -72,7 +74,7 @@ BOOST_AUTO_TEST_CASE(encode_def_2_with_version)
 {
     auto bytes = make_byte_array<8>(
             {0x83, 0x0D, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 0x07});
-    test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
+    test_tuple const t{0xDEADBEEFU, 0x07U, 0xFEFEU};
 
     test_output_stream<> ostream{};
     auto rx = dp::encode_tuple<test_tuple_def_2>(ostream, t, 0x0D);
@@ -86,7 +88,7 @@ BOOST_AUTO_TEST_CASE(encode_def_3_with_version)
 {
     auto bytes = make_byte_array<10>(
             {0x83, 0x1A, 0xDE, 0xAD, 0xBE, 0xEF, 0x07, 0x19, 0xFE, 0xFE});
-    test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
+    test_tuple const t{0xDEADBEEFU, 0x07U, 0xFEFEU};
 
     test_output_stream<> ostream{};
     auto rx = dp::encode_tuple<test_tuple_def_3>(ostream, t);
@@ -100,7 +102,7 @@ BOOST_AUTO_TEST_CASE(encode_def_3)
 {
     auto bytes = make_byte_array<12>({0x84, 0x18, 0xFF, 0x1A, 0xDE, 0xAD, 0xBE,
                                       0xEF, 0x07, 0x19, 0xFE, 0xFE});
-    test_tuple const t{0xDEADBEEFu, 0x07u, 0xFEFEu};
+    test_tuple const t{0xDEADBEEFU, 0x07U, 0xFEFEU};
 
     test_output_stream<> ostream{};
     auto rx = dp::encode_tuple<test_tuple_def_3>(ostream, t, 0xFF);
@@ -152,24 +154,24 @@ public:
                              &test_tuple::mb>{}>
             layout_descriptor{};
 
-    auto a() const noexcept -> std::uint64_t
+    [[nodiscard]] auto a() const noexcept -> std::uint64_t
     {
         return ma;
     }
-    auto b() const noexcept -> std::uint32_t
+    [[nodiscard]] auto b() const noexcept -> std::uint32_t
     {
         return mb;
     }
-    auto c() const noexcept -> std::uint32_t
+    [[nodiscard]] auto c() const noexcept -> std::uint32_t
     {
         return mc;
     }
-    auto d() const noexcept -> std::uint32_t
+    [[nodiscard]] auto d() const noexcept -> std::uint32_t
     {
         return md;
     }
 
-    auto msubmb() const noexcept -> std::uint64_t
+    [[nodiscard]] auto msubmb() const noexcept -> std::uint64_t
     {
         return msub.mb;
     }
@@ -180,7 +182,9 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 {
     auto bytes
             = make_byte_array<6>({0b100'00101, 0x13, 0x09, 0x15, 0x17, 0x05});
-    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}};
+    custom_with_layout_descriptor const t{
+            0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}
+    };
 
     using test_encoder = dp::basic_encoder<custom_with_layout_descriptor,
                                            test_output_stream<>>;
@@ -195,10 +199,12 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_encoding)
 
 BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_size_of)
 {
-    custom_with_layout_descriptor const t{0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}};
+    custom_with_layout_descriptor const t{
+            0x09, 0x13, 0x15, 0x17, {0, 0x05, 0}
+    };
 
     auto const sizeOfT = dp::encoded_size_of(t);
-    BOOST_TEST(sizeOfT == 6u);
+    BOOST_TEST(sizeOfT == 6U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -206,3 +212,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

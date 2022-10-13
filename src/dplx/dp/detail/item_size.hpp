@@ -18,6 +18,8 @@
 namespace dplx::dp::detail
 {
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 template <typename T>
 inline auto var_uint_encoded_byte_power(T const value) noexcept -> int
 {
@@ -33,15 +35,15 @@ inline auto var_uint_encoded_size_ct(T const value) noexcept -> unsigned int
 {
     if (value <= inline_value_max)
     {
-        return 1u;
+        return 1U;
     }
     auto const lastSetBitIndex
             = static_cast<unsigned>(detail::find_last_set_bit(value));
     auto const bytePower
             = static_cast<unsigned>(detail::find_last_set_bit(lastSetBitIndex))
-            - 2u;
+            - 2U;
 
-    return 1u + (1u << bytePower);
+    return 1U + (1U << bytePower);
 }
 
 template <typename T>
@@ -50,25 +52,25 @@ constexpr auto var_uint_encoded_size_branching(T const value) noexcept
 {
     if (value <= inline_value_max)
     {
-        return 1u;
+        return 1U;
     }
-    if (value <= 0xff)
+    if (value <= 0xFFU)
     {
-        return 2u;
+        return 2U;
     }
-    if (value <= 0xffff)
+    if (value <= 0xFFFFU)
     {
-        return 3u;
+        return 3U;
     }
-    if (value <= 0xffff'ffff)
+    if (value <= 0xFFFF'FFFFU)
     {
-        return 5u;
+        return 5U;
     }
-    else
-    {
-        return 9u;
-    }
+
+    return 9U;
 }
+
+// NOLINTEND(readability-magic-numbers)
 
 template <cncr::unsigned_integer T>
 constexpr auto var_uint_encoded_size(T const value) -> unsigned int
@@ -79,10 +81,10 @@ constexpr auto var_uint_encoded_size(T const value) -> unsigned int
 
     if (std::is_constant_evaluated())
     {
-        return var_uint_encoded_size_branching(value);
+        return detail::var_uint_encoded_size_branching(value);
     }
 
-    if constexpr (sizeof(T) <= 4)
+    if constexpr (sizeof(T) <= sizeof(std::uint32_t))
     {
         return var_uint_encoded_size_ct(static_cast<std::uint32_t>(value));
     }
@@ -93,7 +95,7 @@ constexpr auto var_uint_encoded_size(T const value) -> unsigned int
 
 #else
 
-    return var_uint_encoded_size_branching(value);
+    return detail::var_uint_encoded_size_branching(value);
 
 #endif
 }

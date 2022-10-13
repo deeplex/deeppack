@@ -18,6 +18,7 @@
 namespace dp_tests
 {
 
+// NOLINTNEXTLINE(readability-magic-numbers)
 template <std::size_t MaxSize = 56>
 class test_output_stream final
 {
@@ -38,7 +39,7 @@ public:
 
     class write_proxy final : public std::span<std::byte>
     {
-        std::size_t mInitSize;
+        std::size_t mInitSize{};
 
         static constexpr std::size_t invalidated_init_size
                 = ~static_cast<std::size_t>(0);
@@ -53,14 +54,14 @@ public:
 
         using stream_type = test_output_stream;
 
-        friend inline auto tag_invoke(dp::tag_t<dp::commit>,
+        friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
                                       test_output_stream &stream,
                                       write_proxy &self) -> dp::result<void>
         {
             return write_proxy::commit(stream, self);
         }
 
-        friend inline auto tag_invoke(dp::tag_t<dp::commit>,
+        friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
                                       test_output_stream &stream,
                                       write_proxy &self,
                                       std::size_t const actualSize)
@@ -99,24 +100,26 @@ public:
         }
     };
 
-    auto begin() noexcept
+    [[nodiscard]] auto begin() noexcept
     {
         return std::ranges::begin(mBuffer);
     }
-    auto begin() const noexcept
+    [[nodiscard]] auto begin() const noexcept
     {
         return std::ranges::begin(mBuffer);
     }
-    auto end() noexcept
+    [[nodiscard]] auto end() noexcept
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return std::ranges::begin(mBuffer) + mCurrentSize;
     }
-    auto end() const noexcept
+    [[nodiscard]] auto end() const noexcept
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return std::ranges::begin(mBuffer) + mCurrentSize;
     }
 
-    friend inline auto tag_invoke(dp::tag_t<dp::write>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
                                   test_output_stream &self,
                                   std::size_t const amount)
             -> dp::result<write_proxy>
@@ -130,7 +133,7 @@ public:
         return write_proxy({self.mBuffer.data() + start, amount},
                            self.mCurrentSize, ctag{});
     }
-    friend inline auto tag_invoke(dp::tag_t<dp::write>,
+    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
                                   test_output_stream &self,
                                   std::byte const *bytes,
                                   std::size_t const amount) -> dp::result<void>
@@ -139,6 +142,7 @@ public:
         BOOST_TEST_REQUIRE(self.mCurrentSize + amount
                            <= std::ranges::size(self.mBuffer));
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(std::ranges::data(self.mBuffer) + self.mCurrentSize, bytes,
                     amount);
         self.mCurrentSize += amount;
@@ -146,24 +150,24 @@ public:
         return dp::success();
     }
 
-    auto data() noexcept -> std::byte *
+    [[nodiscard]] auto data() noexcept -> std::byte *
     {
         return mBuffer.data();
     }
-    auto data() const noexcept -> std::byte const *
+    [[nodiscard]] auto data() const noexcept -> std::byte const *
     {
         return mBuffer.data();
     }
-    auto size() const noexcept -> std::size_t
+    [[nodiscard]] auto size() const noexcept -> std::size_t
     {
         return mCurrentSize;
     }
 
-    auto write_counter() const noexcept -> int
+    [[nodiscard]] auto write_counter() const noexcept -> int
     {
         return mWriteCounter;
     }
-    auto commit_counter() const noexcept -> int
+    [[nodiscard]] auto commit_counter() const noexcept -> int
     {
         return mCommitCounter;
     }
