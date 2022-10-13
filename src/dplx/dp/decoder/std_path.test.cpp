@@ -14,6 +14,8 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -34,18 +36,21 @@ struct path_sample
     unsigned int prefix_length;
     std::array<std::byte, 12> expected_prefix;
 
-    auto derive_input_vector() const -> std::vector<std::byte>
+    [[nodiscard]] auto derive_input_vector() const -> std::vector<std::byte>
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::vector<std::byte> v;
         v.resize(expected.size() + expected_prefix.size());
         std::memcpy(v.data(), expected_prefix.data(), prefix_length);
         std::memcpy(v.data() + prefix_length, expected.data(), expected.size());
         return v;
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     friend inline auto boost_test_print_type(std::ostream &s,
                                              path_sample const &c)
             -> std::ostream &
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         std::string_view conv{reinterpret_cast<char const *>(c.expected.data()),
                               c.expected.size()};
         return s << conv;
@@ -75,3 +80,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

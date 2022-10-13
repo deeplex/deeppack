@@ -259,13 +259,15 @@ constexpr auto byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
         //     undefined behavior as suggested by Giovanni Piero Deretta,
         //     with a further refinement suggested by Pyry Jahkola.
 
+        // NOLINTBEGIN(readability-magic-numbers)
+
         std::uint32_t const step16 = x << 16 | x >> 16;
         return ((step16 << 8) & 0xff00ff00) | ((step16 >> 8) & 0x00ff00ff);
+
+        // NOLINTEND(readability-magic-numbers)
     }
-    else
-    {
-        return boost::endian::endian_reverse(x);
-    }
+
+    return boost::endian::endian_reverse(x);
 }
 
 } // namespace dplx::dp::detail

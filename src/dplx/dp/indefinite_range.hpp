@@ -39,11 +39,11 @@ public:
     }
     indefinite_range() noexcept = default;
 
-    constexpr auto begin() const -> T
+    [[nodiscard]] constexpr auto begin() const -> T
     {
         return mIt;
     }
-    constexpr auto end() const -> S
+    [[nodiscard]] constexpr auto end() const -> S
     {
         return mEnd;
     }

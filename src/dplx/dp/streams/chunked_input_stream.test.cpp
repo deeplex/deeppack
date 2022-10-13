@@ -14,6 +14,10 @@
 #include "boost-test.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
+
 namespace dp_tests
 {
 
@@ -90,7 +94,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     auto proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 29u);
+    BOOST_TEST(std::ranges::size(proxy) == 29U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29));
@@ -99,7 +103,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 29);
-    BOOST_TEST(std::ranges::size(proxy) == 31u);
+    BOOST_TEST(std::ranges::size(proxy) == 31U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 31));
@@ -108,7 +112,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 60);
-    BOOST_TEST(std::ranges::size(proxy) == 7u);
+    BOOST_TEST(std::ranges::size(proxy) == 7U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 31 - 7));
@@ -118,7 +122,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 51u);
+    BOOST_TEST(std::ranges::size(proxy) == 51U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 31 - 7 - 51));
@@ -127,7 +131,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_small_reads)
     DPLX_REQUIRE_RESULT(readRx);
     proxy = readRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[1].data() + 39);
-    BOOST_TEST(std::ranges::size(proxy) == 1u);
+    BOOST_TEST(std::ranges::size(proxy) == 1U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 31 - 7 - 51 - 1));
@@ -145,7 +149,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_1)
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 67u);
+    BOOST_TEST(std::ranges::size(proxy) == 67U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 67));
@@ -155,7 +159,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_1)
     proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 51u);
+    BOOST_TEST(std::ranges::size(proxy) == 51U);
     BOOST_REQUIRE_EQUAL_COLLECTIONS(proxy.begin(), proxy.begin() + 12,
                                     subject.mChunks[0].begin() + 67,
                                     subject.mChunks[0].begin() + 79);
@@ -171,7 +175,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_1)
     proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 77);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 41u);
+    BOOST_TEST(std::ranges::size(proxy) == 41U);
     BOOST_REQUIRE_EQUAL_COLLECTIONS(proxy.begin(), proxy.begin() + 2,
                                     subject.mChunks[0].begin() + 77,
                                     subject.mChunks[0].begin() + 79);
@@ -204,7 +208,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_2)
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 67u);
+    BOOST_TEST(std::ranges::size(proxy) == 67U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 67));
@@ -214,7 +218,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_2)
     proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 51u);
+    BOOST_TEST(std::ranges::size(proxy) == 51U);
     BOOST_REQUIRE_EQUAL_COLLECTIONS(proxy.begin(), proxy.begin() + 12,
                                     subject.mChunks[0].begin() + 67,
                                     subject.mChunks[0].begin() + 79);
@@ -229,7 +233,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_2)
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[1].data() + 1);
-    BOOST_TEST(std::ranges::size(proxy) == 38u);
+    BOOST_TEST(std::ranges::size(proxy) == 38U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 29 - 31 - 7 - 51));
@@ -305,7 +309,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_3)
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 67u);
+    BOOST_TEST(std::ranges::size(proxy) == 67U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 67));
@@ -315,7 +319,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_3)
     proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 51u);
+    BOOST_TEST(std::ranges::size(proxy) == 51U);
     BOOST_REQUIRE_EQUAL_COLLECTIONS(proxy.begin(), proxy.begin() + 12,
                                     subject.mChunks[0].begin() + 67,
                                     subject.mChunks[0].begin() + 79);
@@ -360,7 +364,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_4)
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[0].data() + 0);
-    BOOST_TEST(std::ranges::size(proxy) == 67u);
+    BOOST_TEST(std::ranges::size(proxy) == 67U);
 
     BOOST_TEST_REQUIRE(dp::available_input_size(subject).value()
                        == (testSize - 67));
@@ -370,7 +374,7 @@ BOOST_AUTO_TEST_CASE(correctly_handles_reads_with_consumed_breaks_4)
     proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 51u);
+    BOOST_TEST(std::ranges::size(proxy) == 51U);
     BOOST_REQUIRE_EQUAL_COLLECTIONS(proxy.begin(), proxy.begin() + 12,
                                     subject.mChunks[0].begin() + 67,
                                     subject.mChunks[0].begin() + 79);
@@ -414,7 +418,7 @@ BOOST_AUTO_TEST_CASE(properly_skips_bytes_at_beginning_1)
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) != subject.mChunks[0].data() + 67);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 51u);
+    BOOST_TEST(std::ranges::size(proxy) == 51U);
     BOOST_REQUIRE_EQUAL_COLLECTIONS(proxy.begin(), proxy.begin() + 12,
                                     subject.mChunks[0].begin() + 67,
                                     subject.mChunks[0].begin() + 79);
@@ -433,7 +437,7 @@ BOOST_AUTO_TEST_CASE(skips_over_a_chunk_gap)
     auto proxy = sreadRx.assume_value();
     BOOST_TEST(std::ranges::data(proxy) == subject.mChunks[1].data() + 1);
     // 51B = 12B from chunk 0 + 39B from chunk 1 copied to the small buffer
-    BOOST_TEST(std::ranges::size(proxy) == 39u);
+    BOOST_TEST(std::ranges::size(proxy) == 39U);
 }
 
 BOOST_AUTO_TEST_CASE(skips_correctly_from_sbo_1)
@@ -441,23 +445,23 @@ BOOST_AUTO_TEST_CASE(skips_correctly_from_sbo_1)
     auto sreadRx = dp::read(subject, 57);
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 57u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 57U);
 
     sreadRx = dp::read(subject, 40);
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40U);
 
-    auto consumeRx = dp::consume(subject, proxy, 20u);
+    auto consumeRx = dp::consume(subject, proxy, 20U);
     DPLX_REQUIRE_RESULT(consumeRx);
 
-    auto skipRx = dp::skip_bytes(subject, 13u);
+    auto skipRx = dp::skip_bytes(subject, 13U);
     DPLX_REQUIRE_RESULT(skipRx);
 
-    sreadRx = dp::read(subject, 29u);
+    sreadRx = dp::read(subject, 29U);
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 29u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 29U);
     BOOST_TEST_REQUIRE(std::ranges::data(proxy)
                        == subject.mChunks[1].data() + 11);
 }
@@ -467,23 +471,23 @@ BOOST_AUTO_TEST_CASE(skips_correctly_from_sbo_2)
     auto sreadRx = dp::read(subject, 57);
     DPLX_REQUIRE_RESULT(sreadRx);
     auto proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 57u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 57U);
 
     sreadRx = dp::read(subject, 40);
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 40U);
 
-    auto consumeRx = dp::consume(subject, proxy, 30u);
+    auto consumeRx = dp::consume(subject, proxy, 30U);
     DPLX_REQUIRE_RESULT(consumeRx);
 
-    auto skipRx = dp::skip_bytes(subject, 3u);
+    auto skipRx = dp::skip_bytes(subject, 3U);
     DPLX_REQUIRE_RESULT(skipRx);
 
-    sreadRx = dp::read(subject, 29u);
+    sreadRx = dp::read(subject, 29U);
     DPLX_REQUIRE_RESULT(sreadRx);
     proxy = sreadRx.assume_value();
-    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 29u);
+    BOOST_TEST_REQUIRE(std::ranges::size(proxy) == 29U);
     BOOST_TEST_REQUIRE(std::ranges::data(proxy)
                        == subject.mChunks[1].data() + 11);
 }
@@ -493,3 +497,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTEND(readability-magic-numbers)

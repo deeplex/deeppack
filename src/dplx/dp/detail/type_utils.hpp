@@ -91,9 +91,10 @@ concept tuple_sized = requires
 };
 
 template <typename F, typename T, std::size_t... Is>
-constexpr decltype(auto)
+constexpr auto
 apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
         noexcept(static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...)))
+        -> decltype(auto)
 {
     return static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...);
 }
@@ -101,12 +102,13 @@ apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
 // instead of std::get<I>(). This allows it to cope with custom tuple types.
 template <typename F, typename T>
     requires tuple_sized<std::remove_cvref_t<T>>
-constexpr decltype(auto)
+constexpr auto
 apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl(
         static_cast<F &&>(f),
         static_cast<T &&>(t),
         std::make_index_sequence<
                 std::tuple_size_v<std::remove_reference_t<T>>>())))
+        -> decltype(auto)
 {
     return detail::apply_simply_impl<F, T>(
             static_cast<F &&>(f), static_cast<T &&>(t),

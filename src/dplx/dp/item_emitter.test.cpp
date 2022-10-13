@@ -13,6 +13,9 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
 template class dplx::dp::item_emitter<dp_tests::test_output_stream<>>;
 
 namespace dp_tests
@@ -53,9 +56,9 @@ auto boost_test_print_type(std::ostream &s, value_sample<T> const &sample)
 }
 
 constexpr value_sample<float> float_single_samples[] = {
-        {                              100000.0f,make_byte_array(0x47, 0xc3, 0x50, 0x00)                                                 },
-        {                3.4028234663852886e+38f, make_byte_array(0x7f, 0x7f, 0xff, 0xff)},
-        {                              100000.0f, make_byte_array(0x47, 0xc3, 0x50, 0x00)},
+        {                              100000.0F,make_byte_array(0x47, 0xc3, 0x50, 0x00)                                                 },
+        {                3.4028234663852886e+38F, make_byte_array(0x7f, 0x7f, 0xff, 0xff)},
+        {                              100000.0F, make_byte_array(0x47, 0xc3, 0x50, 0x00)},
         { std::numeric_limits<float>::infinity(),
          make_byte_array(0x7f, 0x80, 0x00, 0x00)                                         },
         {std::numeric_limits<float>::quiet_NaN(),
@@ -106,7 +109,7 @@ BOOST_AUTO_TEST_CASE(bool_false)
 {
     DPLX_TEST_RESULT(test_encoder::boolean(encodingBuffer, false));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10100});
 }
 
@@ -114,7 +117,7 @@ BOOST_AUTO_TEST_CASE(bool_true)
 {
     DPLX_TEST_RESULT(test_encoder::boolean(encodingBuffer, true));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10101});
 }
 
@@ -122,7 +125,7 @@ BOOST_AUTO_TEST_CASE(null)
 {
     DPLX_TEST_RESULT(test_encoder::null(encodingBuffer));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10110});
 }
 
@@ -130,7 +133,7 @@ BOOST_AUTO_TEST_CASE(undefined)
 {
     DPLX_TEST_RESULT(test_encoder::undefined(encodingBuffer));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0b111'10111});
 }
 
@@ -138,7 +141,7 @@ BOOST_AUTO_TEST_CASE(break_)
 {
     DPLX_TEST_RESULT(test_encoder::break_(encodingBuffer));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0xff});
 }
 
@@ -149,3 +152,6 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTEND(readability-magic-numbers)

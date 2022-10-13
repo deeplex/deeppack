@@ -38,8 +38,9 @@ inline constexpr struct layout_descriptor_for_fn
         requires(
                 exposed_static_layout_descriptor<
                         T> && (is_object_def_v<cncr::remove_cref_t<decltype(T::layout_descriptor)>> || is_tuple_def_v<cncr::remove_cref_t<decltype(T::layout_descriptor)>>))
-    friend constexpr decltype(auto) tag_invoke(layout_descriptor_for_fn,
-                                               std::type_identity<T>) noexcept
+    friend constexpr auto tag_invoke(layout_descriptor_for_fn,
+                                     std::type_identity<T>) noexcept
+            -> decltype(auto)
     {
         return (T::layout_descriptor);
     }
@@ -64,7 +65,7 @@ concept packable_tuple = packable<T> && is_tuple_def_v<
         cncr::remove_cref_t<cncr::tag_invoke_result_t<layout_descriptor_for_fn,
                                                       std::type_identity<T>>>>;
 
-inline constexpr std::uint32_t null_def_version = 0xffff'ffffu;
+inline constexpr std::uint32_t null_def_version = 0xFFFF'FFFFU;
 
 template <typename T>
     requires packable<T>

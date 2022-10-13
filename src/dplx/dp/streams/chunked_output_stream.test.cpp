@@ -14,6 +14,8 @@
 #include "boost-test.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -28,14 +30,16 @@ public:
             = dp::chunked_output_stream_base<test_chunked_output_stream>;
 
     std::array<std::vector<std::byte>, 2> mChunks;
-    unsigned int mNext;
+    unsigned mNext;
 
     explicit test_chunked_output_stream(unsigned int streamSize)
         : base_type({}, streamSize)
         , mChunks()
+        , mNext(0U)
+
     {
-        constexpr auto invalidItem = std::byte{0xfeu};
-        constexpr auto partition = dp::minimum_guaranteed_write_size * 2 - 1;
+        constexpr auto invalidItem = std::byte{0xFEU};
+        constexpr auto partition = dp::minimum_guaranteed_write_size * 2U - 1U;
         assert(streamSize > partition);
 
         mChunks[0].resize(partition);
@@ -52,6 +56,7 @@ private:
         {
             return dp::errc::end_of_stream;
         }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
         return std::span(mChunks[mNext++]);
     }
 };
@@ -82,3 +87,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

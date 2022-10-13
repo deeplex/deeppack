@@ -14,6 +14,8 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -47,7 +49,7 @@ BOOST_AUTO_TEST_CASE(std_array_indefinite)
     test_input_stream stream(memoryData);
 
     std::array<std::byte, 8> out{};
-    auto parseRx = parse::binary(stream, out, 8u);
+    auto parseRx = parse::binary(stream, out, 8U);
 
     DPLX_REQUIRE_RESULT(parseRx);
     BOOST_TEST(parseRx.assume_value() == 8);
@@ -96,7 +98,7 @@ BOOST_AUTO_TEST_CASE(std_vector_indefinite)
     test_input_stream stream(memoryData);
 
     std::vector<std::byte> out{};
-    auto parseRx = parse::binary(stream, out, 8u);
+    auto parseRx = parse::binary(stream, out, 8U);
 
     DPLX_REQUIRE_RESULT(parseRx);
     BOOST_TEST(parseRx.assume_value() == 8);
@@ -126,3 +128,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

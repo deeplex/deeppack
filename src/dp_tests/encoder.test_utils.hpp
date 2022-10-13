@@ -30,6 +30,7 @@ public:
             -> result<void>
     {
         DPLX_TRY(auto &&writeLease, dp::write(outStream, 1));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::ranges::data(writeLease)[0] = x.value;
 
         if constexpr (lazy_output_stream<Stream>)

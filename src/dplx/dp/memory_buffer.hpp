@@ -44,6 +44,7 @@ public:
     explicit constexpr basic_memory_buffer(pointer memory,
                                            size_type allocationSize,
                                            difference_type consumed) noexcept
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         : mWindowBegin(memory + static_cast<size_type>(consumed))
         , mWindowSize(allocationSize - static_cast<size_type>(consumed))
         , mAllocationSize(allocationSize)
@@ -51,7 +52,7 @@ public:
     }
 
     template <typename U, std::size_t Extent>
-        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         requires(std::convertible_to<U (*)[], T (*)[]>)
     explicit constexpr basic_memory_buffer(std::span<U, Extent> const &memory)
         : basic_memory_buffer(
@@ -59,7 +60,7 @@ public:
     {
     }
     template <typename U>
-        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         requires(std::convertible_to<U (*)[], T (*)[]>)
     explicit constexpr basic_memory_buffer(basic_memory_buffer<U> const &other)
         : mWindowBegin(other.remaining_begin())
@@ -79,6 +80,7 @@ public:
 
     [[nodiscard]] inline auto consumed_begin() const noexcept -> pointer
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return mWindowBegin + mWindowSize - mAllocationSize;
     }
     [[nodiscard]] inline auto consumed_end() const noexcept -> pointer
@@ -92,6 +94,7 @@ public:
     [[nodiscard]] inline auto consumed() const noexcept
             -> std::span<element_type>
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return {mWindowBegin + mWindowSize - mAllocationSize,
                 mAllocationSize - mWindowSize};
     }
@@ -102,6 +105,7 @@ public:
     }
     [[nodiscard]] inline auto remaining_end() const noexcept -> pointer
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return mWindowBegin + mWindowSize;
     }
     [[nodiscard]] inline auto remaining_size() const noexcept -> size_type
@@ -121,6 +125,7 @@ public:
 
     inline void reset() noexcept
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         mWindowBegin += mWindowSize - mAllocationSize;
         mWindowSize = mAllocationSize;
     }
@@ -129,10 +134,12 @@ public:
             -> pointer
     {
         mWindowSize -= static_cast<size_type>(amount);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return std::exchange(mWindowBegin, mWindowBegin + amount);
     }
     inline void move_consumer(difference_type const amount) noexcept
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         mWindowBegin += amount;
         mWindowSize -= static_cast<size_type>(amount);
     }
@@ -140,6 +147,7 @@ public:
     inline void move_consumer_to(difference_type const absoluteOffset) noexcept
     {
         auto const newSize = mAllocationSize - absoluteOffset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         mWindowBegin += mWindowSize - newSize;
         mWindowSize = newSize;
     }

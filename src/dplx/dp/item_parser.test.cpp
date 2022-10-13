@@ -15,10 +15,13 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 template <>
 struct fmt::formatter<dplx::dp::item_info>
 {
-    constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(format_parse_context &ctx)
+            -> decltype(ctx.begin())
     {
         return ctx.begin();
     }
@@ -163,9 +166,11 @@ BOOST_DATA_TEST_CASE(skip_simple, boost::unit_test::data::make(parse_samples))
     DPLX_REQUIRE_RESULT(parseRx);
 
     auto remainingRx = dp::available_input_size(stream);
-    BOOST_TEST(remainingRx.value() == 0u);
+    BOOST_TEST(remainingRx.value() == 0U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

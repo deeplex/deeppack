@@ -56,7 +56,7 @@ public:
 constexpr auto tag_invoke(encoded_size_of_fn, null_type const) noexcept
         -> unsigned int
 {
-    return 1u;
+    return 1U;
 }
 
 template <typename... TArgs, output_stream Stream>
@@ -102,7 +102,7 @@ public:
 constexpr auto tag_invoke(encoded_size_of_fn, bool const) noexcept
         -> unsigned int
 {
-    return 1u;
+    return 1U;
 }
 constexpr auto tag_invoke(encoded_size_of_fn, char8_t const) noexcept
         -> unsigned int
@@ -155,11 +155,13 @@ public:
 
     auto operator()(Stream &outStream, value_type value) -> result<void>
     {
-        if constexpr (sizeof(value) == 4)
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        if constexpr (sizeof(value) == 4U)
         {
             return item_emitter<Stream>::float_single(outStream, value);
         }
-        else if constexpr (sizeof(value) == 8)
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        else if constexpr (sizeof(value) == 8U)
         {
             return item_emitter<Stream>::float_double(outStream, value);
         }
@@ -168,14 +170,16 @@ public:
 template <cncr::iec559_floating_point T>
 constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept -> unsigned int
 {
+    // NOLINTBEGIN(readability-magic-numbers)
     if constexpr (sizeof(T) == 4)
     {
-        return 5u;
+        return 5U;
     }
     else if constexpr (sizeof(T) == 8)
     {
-        return 9u;
+        return 9U;
     }
+    // NOLINTEND(readability-magic-numbers)
 }
 
 template <codable_enum Enum, output_stream Stream>
@@ -207,6 +211,7 @@ class basic_encoder<T, Stream>
 public:
     using value_type = T;
 
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity)
     auto operator()(Stream &outStream, value_type const &value) const
             -> result<void>
     {
@@ -260,7 +265,7 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
 {
     if constexpr (enable_indefinite_encoding<T>)
     {
-        unsigned int accumulator = 1u + 1u;
+        unsigned int accumulator = 1U + 1U;
         for (auto &&part : value)
         {
             accumulator += encoded_size_of(static_cast<decltype(part)>(part));
@@ -308,6 +313,7 @@ public:
 
         DPLX_TRY(dp::write(
                 outStream,
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 reinterpret_cast<std::byte const *>(std::ranges::data(value)),
                 size));
         return success();
@@ -353,12 +359,14 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
 // clang-format off
 template <typename T, std::size_t N, output_stream Stream>
     requires encodable<T, Stream>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
 class basic_encoder<T[N], Stream> : basic_encoder<std::span<T const>, Stream>
 // clang-format on
 {
     using wrapped_encoder = basic_encoder<std::span<T const>, Stream>;
 
 public:
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
     using value_type = T[N];
     using basic_encoder<std::span<T const>, Stream>::basic_encoder;
     using wrapped_encoder::operator();
@@ -447,6 +455,7 @@ class basic_encoder<T, Stream>
 public:
     using value_type = T;
 
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity)
     auto operator()(Stream &outStream, value_type const &value) -> result<void>
     {
         if constexpr (enable_indefinite_encoding<T>)
@@ -502,7 +511,7 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const &value) noexcept
 {
     if constexpr (enable_indefinite_encoding<T>)
     {
-        unsigned int accumulator = 1u + 1u;
+        unsigned int accumulator = 1U + 1U;
         for (auto &&[k, v] : value)
         {
             accumulator += encoded_size_of(static_cast<decltype(k)>(k));

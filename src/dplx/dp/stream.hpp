@@ -105,7 +105,9 @@ concept write_proxy
     = std::ranges::contiguous_range<T>
     && std::ranges::sized_range<T>
     && std::convertible_to<
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         std::remove_reference_t<std::ranges::range_reference_t<T>>(*)[],
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         std::byte (*)[]>
     && std::is_nothrow_default_constructible_v<T>
     && std::is_nothrow_move_constructible_v<T>
@@ -311,7 +313,9 @@ concept read_proxy
     = std::ranges::contiguous_range<Proxy>
     && std::ranges::sized_range<Proxy>
     && std::convertible_to<
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         std::remove_reference_t<std::ranges::range_reference_t<Proxy>>(*)[],
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         std::byte const (*)[]>
     && std::is_nothrow_default_constructible_v<Proxy>
     && std::is_nothrow_move_constructible_v<Proxy>

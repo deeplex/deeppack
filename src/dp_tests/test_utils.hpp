@@ -26,20 +26,23 @@
 
 namespace boost::test_tools::tt_detail::impl
 {
+
 template <>
-inline auto boost_test_print_type<char8_t>(std::ostream &s, char8_t const &c)
+inline auto boost_test_print_type<char8_t>(std::ostream &ostr, char8_t const &t)
         -> std::ostream &
 {
-    fmt::print(s, "\\x{:02x}", static_cast<std::uint8_t>(c));
-    return s;
+    fmt::print(ostr, "\\x{:02x}", static_cast<std::uint8_t>(t));
+    return ostr;
 }
 inline auto boost_test_print_type(std::ostream &s, std::u8string const &c)
         -> std::ostream &
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     std::string_view conv{reinterpret_cast<char const *>(c.data()), c.size()};
     s << conv;
     return s;
 }
+
 } // namespace boost::test_tools::tt_detail::impl
 
 namespace dplx::dp
@@ -74,12 +77,14 @@ constexpr auto make_byte_array(std::initializer_list<T> vs,
                                std::byte const fill = std::byte{0xFE}) noexcept
         -> std::array<std::byte, N>
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     std::array<std::byte, N> bs;
-    auto last
+    auto *last
             = std::transform(vs.begin(), vs.end(), bs.data(),
                              [](auto v) { return static_cast<std::byte>(v); });
     // std::fill(last, bs.data() + N, fill);
-    for (auto const bsEnd = bs.data() + N; last != bsEnd; ++last)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (auto *const bsEnd = bs.data() + N; last != bsEnd; ++last)
     {
         *last = fill;
     }
@@ -113,8 +118,10 @@ inline auto check_result(dp::result<R> const &rx)
     return prx;
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DPLX_TEST_RESULT(...)                                                  \
     BOOST_TEST((::dp_tests::check_result((__VA_ARGS__))))
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DPLX_REQUIRE_RESULT(...)                                               \
     BOOST_TEST_REQUIRE((::dp_tests::check_result((__VA_ARGS__))))
 

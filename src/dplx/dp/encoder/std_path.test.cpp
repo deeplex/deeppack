@@ -17,6 +17,8 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -39,6 +41,7 @@ struct path_sample
             -> std::ostream &
     {
         std::string_view charView(
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                 reinterpret_cast<char const *>(sample.content.data()),
                 sample.content.size());
 
@@ -86,3 +89,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

@@ -32,6 +32,7 @@ inline auto boost_test_print_type(std::ostream &s,
         -> std::ostream &
 {
     std::span<std::uint8_t const, N> ui8view(
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
             reinterpret_cast<std::uint8_t const *>(arr.data()), N);
     fmt::print(s, "{:#04x}", fmt::join(ui8view, ", "));
     return s;

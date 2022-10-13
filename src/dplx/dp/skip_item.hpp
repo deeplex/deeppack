@@ -58,8 +58,11 @@ namespace dplx::dp
 {
 
 template <input_stream Stream>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto skip_item(Stream &inStream) -> result<void>
 {
+    // NOLINTBEGIN(readability-magic-numbers)
+
     boost::container::small_vector<dp::item_info, 64> stack;
     DPLX_TRY(auto toBeSkipped, detail::parse_item(inStream));
     stack.push_back(toBeSkipped);
@@ -141,7 +144,7 @@ inline auto skip_item(Stream &inStream) -> result<void>
             // code == 0b1x  =>  next item is a value, therefore decrement kv
             // ctr
             auto const decr = (rawFlags >> 1);
-            item.flags = static_cast<dp::item_info::flag>(rawFlags ^ 2u);
+            item.flags = static_cast<dp::item_info::flag>(rawFlags ^ 2U);
 
             // for indefinite maps we keep item.value safely at 0x1f != 0
             item.value -= decr & !indefinite;
@@ -184,6 +187,8 @@ inline auto skip_item(Stream &inStream) -> result<void>
     } while (!stack.empty());
 
     return oc::success();
+
+    // NOLINTEND(readability-magic-numbers)
 }
 
 } // namespace dplx::dp

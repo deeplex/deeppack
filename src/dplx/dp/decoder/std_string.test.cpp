@@ -11,6 +11,8 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -34,18 +36,22 @@ struct string_sample
     unsigned int prefix_length;
     std::array<std::byte, 12> expected_prefix;
 
-    auto derive_input_vector() const -> std::vector<std::byte>
+    [[nodiscard]] auto derive_input_vector() const -> std::vector<std::byte>
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::vector<std::byte> v;
         v.resize(expected.size() + expected_prefix.size());
         std::memcpy(v.data(), expected_prefix.data(), prefix_length);
         std::memcpy(v.data() + prefix_length, expected.data(), expected.size());
         return v;
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     friend inline auto boost_test_print_type(std::ostream &s,
                                              string_sample const &c)
             -> std::ostream &
     {
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         std::string_view conv{reinterpret_cast<char const *>(c.expected.data()),
                               c.expected.size()};
         s << conv;
@@ -98,7 +104,7 @@ BOOST_AUTO_TEST_CASE(rejects_undersized_string_0)
     auto rx = subject(sampleStream, out);
     BOOST_TEST_REQUIRE(rx.has_error());
     BOOST_TEST(rx.assume_error() == dp::errc::missing_data);
-    BOOST_TEST(out.size() == 0u);
+    BOOST_TEST(out.size() == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(rejects_undersized_string_1)
@@ -109,7 +115,7 @@ BOOST_AUTO_TEST_CASE(rejects_undersized_string_1)
     auto rx = subject(sampleStream, out);
     BOOST_TEST_REQUIRE(rx.has_error());
     BOOST_TEST(rx.assume_error() == dp::errc::missing_data);
-    BOOST_TEST(out.size() == 0u);
+    BOOST_TEST(out.size() == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(rejects_other_item_type)
@@ -120,7 +126,7 @@ BOOST_AUTO_TEST_CASE(rejects_other_item_type)
     auto rx = subject(sampleStream, out);
     BOOST_TEST_REQUIRE(rx.has_error());
     BOOST_TEST(rx.assume_error() == dp::errc::item_type_mismatch);
-    BOOST_TEST(out.size() == 0u);
+    BOOST_TEST(out.size() == 0U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -128,3 +134,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

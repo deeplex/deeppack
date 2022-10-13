@@ -16,6 +16,9 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
 namespace
 {
 
@@ -70,18 +73,20 @@ inline auto operator<<(std::ostream &stream, signed_test_enum value) noexcept
     }
     char const *strs[] = {"neg2", "neg1", "zero", "pos1", "pos2"};
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     return stream << "signed_test_enum::" << strs[bits + 2];
 }
 inline auto operator<<(std::ostream &stream, unsigned_test_enum value) noexcept
         -> std::ostream &
 {
     auto const bits = dplx::cncr::to_underlying(value);
-    if (bits > 2u)
+    if (bits > 2U)
     {
         return stream << "[invalid unsigned_test_enum value: " << bits << "]";
     }
     char const *strs[] = {"zero", "pos1", "pos2"};
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     return stream << "signed_test_enum::" << strs[bits];
 }
 inline auto operator<<(std::ostream &stream, unscoped_test_enum value) noexcept
@@ -111,7 +116,7 @@ BOOST_AUTO_TEST_CASE(signed_neg2)
 
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0]
                == (to_byte(dp::type_code::negint) | std::byte{1}));
 }
@@ -121,7 +126,7 @@ BOOST_AUTO_TEST_CASE(signed_neg1)
 
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0]
                == (to_byte(dp::type_code::negint) | std::byte{0}));
 }
@@ -131,7 +136,7 @@ BOOST_AUTO_TEST_CASE(signed_zero)
 
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0]
                == (to_byte(dp::type_code::posint) | std::byte{0}));
 }
@@ -139,7 +144,7 @@ BOOST_AUTO_TEST_CASE(signed_pos2)
 {
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, signed_test_enum::pos2));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0]
                == (to_byte(dp::type_code::posint) | std::byte{2}));
 }
@@ -150,14 +155,14 @@ BOOST_AUTO_TEST_CASE(unsigned_zero)
 
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0});
 }
 BOOST_AUTO_TEST_CASE(unsigned_pos2)
 {
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, unsigned_test_enum::pos2));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{2});
 }
 
@@ -165,7 +170,7 @@ BOOST_AUTO_TEST_CASE(unscoped)
 {
     DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, unscoped_test_enum{}));
 
-    BOOST_TEST(encodingBuffer.size() == 1u);
+    BOOST_TEST(encodingBuffer.size() == 1U);
     BOOST_TEST(encodingBuffer.data()[0] == std::byte{0});
 }
 
@@ -256,3 +261,6 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTEND(readability-magic-numbers)

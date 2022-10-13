@@ -13,6 +13,8 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -47,7 +49,7 @@ BOOST_AUTO_TEST_CASE(tuple_head_decode_versioned_00)
 
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 0x0B - 1);
-    BOOST_TEST(version == 0x00u);
+    BOOST_TEST(version == 0x00U);
 }
 
 BOOST_AUTO_TEST_CASE(tuple_head_decode_versioned_ff)
@@ -60,7 +62,7 @@ BOOST_AUTO_TEST_CASE(tuple_head_decode_versioned_ff)
 
     auto const [numProps, version] = rx.assume_value();
     BOOST_TEST(numProps == 0x0B - 1);
-    BOOST_TEST(version == 0xFFu);
+    BOOST_TEST(version == 0xFFU);
 }
 
 struct test_tuple
@@ -90,9 +92,9 @@ BOOST_AUTO_TEST_CASE(decode_def_1)
     auto rx = dp::decode_tuple_properties<test_tuple_def_1>(istream, out, 1);
 
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0xDEADBEEFu);
-    BOOST_TEST(out.mb == 0u);
-    BOOST_TEST(out.mc == 0u);
+    BOOST_TEST(out.ma == 0xDEADBEEFU);
+    BOOST_TEST(out.mb == 0U);
+    BOOST_TEST(out.mc == 0U);
 }
 BOOST_AUTO_TEST_CASE(decode_def_2)
 {
@@ -103,9 +105,9 @@ BOOST_AUTO_TEST_CASE(decode_def_2)
     auto rx = dp::decode_tuple_properties<test_tuple_def_2>(istream, out, 2);
 
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0x17u);
-    BOOST_TEST(out.mb == 0xDEADBEEFu);
-    BOOST_TEST(out.mc == 0u);
+    BOOST_TEST(out.ma == 0x17U);
+    BOOST_TEST(out.mb == 0xDEADBEEFU);
+    BOOST_TEST(out.mc == 0U);
 }
 BOOST_AUTO_TEST_CASE(decode_def_3)
 {
@@ -117,9 +119,9 @@ BOOST_AUTO_TEST_CASE(decode_def_3)
     auto rx = dp::decode_tuple_properties<test_tuple_def_3>(istream, out, 3);
 
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0xDEADBEEFu);
-    BOOST_TEST(out.mb == 0x07u);
-    BOOST_TEST(out.mc == 0xFEFEu);
+    BOOST_TEST(out.ma == 0xDEADBEEFU);
+    BOOST_TEST(out.mb == 0x07U);
+    BOOST_TEST(out.mc == 0xFEFEU);
 }
 
 BOOST_AUTO_TEST_CASE(def_3_reject_missing_member)
@@ -156,7 +158,7 @@ class custom_with_layout_descriptor
     struct mc_accessor
         : dp::member_accessor_base<custom_with_layout_descriptor, std::uint32_t>
     {
-        auto operator()(auto &self) const noexcept
+        [[nodiscard]] auto operator()(auto &self) const noexcept
         {
             return &self.mc;
         }
@@ -174,23 +176,23 @@ public:
                              &test_tuple::ma>{}>
             layout_descriptor{};
 
-    auto a() const noexcept -> std::uint64_t
+    [[nodiscard]] auto a() const noexcept -> std::uint64_t
     {
         return ma;
     }
-    auto b() const noexcept -> std::uint32_t
+    [[nodiscard]] auto b() const noexcept -> std::uint32_t
     {
         return mb;
     }
-    auto c() const noexcept -> std::uint32_t
+    [[nodiscard]] auto c() const noexcept -> std::uint32_t
     {
         return mc;
     }
-    auto d() const noexcept -> std::uint32_t
+    [[nodiscard]] auto d() const noexcept -> std::uint32_t
     {
         return md;
     }
-    auto msubma() const noexcept -> std::uint32_t
+    [[nodiscard]] auto msubma() const noexcept -> std::uint32_t
     {
         return msub.ma;
     }
@@ -222,3 +224,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

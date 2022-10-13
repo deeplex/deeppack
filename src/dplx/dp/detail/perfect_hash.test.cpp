@@ -15,6 +15,9 @@
 #include "boost-test.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(readability-implicit-bool-conversion)
+
 namespace dp_tests
 {
 
@@ -41,6 +44,7 @@ constexpr auto failing_hash(std::array<T, N> const &spec) noexcept
 
     for (std::size_t i = 0; i < spec.size(); ++i)
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
         auto const hash = ph(spec[i]);
         if (hash != i)
         {
@@ -52,66 +56,66 @@ constexpr auto failing_hash(std::array<T, N> const &spec) noexcept
 
 BOOST_AUTO_TEST_CASE(h_01n_0)
 {
-    constexpr std::array subject{0u};
+    constexpr std::array subject{0U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_02_0)
 {
-    constexpr std::array subject{0u, 1u};
+    constexpr std::array subject{0U, 1U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_02_1)
 {
-    constexpr std::array subject{2u, 4u};
+    constexpr std::array subject{2U, 4U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_03_0)
 {
-    constexpr std::array subject{2u, 3u, 4u};
+    constexpr std::array subject{2U, 3U, 4U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_03_1)
 {
-    constexpr std::array subject{2u, 4u, 6u};
+    constexpr std::array subject{2U, 4U, 6U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_06_0)
 {
-    constexpr std::array subject{25u, 36u, 37u, 40u, 44u, 46u};
+    constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 46U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_06_1)
 {
-    constexpr std::array subject{25u, 36u, 37u, 40u, 44u, 47u};
+    constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 47U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_16_0)
 {
-    constexpr std::array subject{25u, 36u, 37u, 40u, 44u, 47u, 51u, 54u,
-                                 67u, 69u, 70u, 77u, 79u, 81u, 83u, 89u};
+    constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 47U, 51U, 54U,
+                                 67U, 69U, 70U, 77U, 79U, 81U, 83U, 89U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
 
 BOOST_AUTO_TEST_CASE(h_20_0)
 {
-    constexpr std::array subject{25u, 36u, 37u, 40u, 44u, 47u, 51u,
-                                 54u, 67u, 69u, 70u, 77u, 79u, 81u,
-                                 83u, 89u, 93u, 95u, 98u, 100u};
+    constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 47U, 51U,
+                                 54U, 67U, 69U, 70U, 77U, 79U, 81U,
+                                 83U, 89U, 93U, 95U, 98U, 100U};
     static_assert(!failing_hash(subject));
     BOOST_TEST(!failing_hash(subject));
 }
@@ -119,3 +123,6 @@ BOOST_AUTO_TEST_CASE(h_20_0)
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-implicit-bool-conversion)
+// NOLINTEND(readability-magic-numbers)

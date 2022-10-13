@@ -18,6 +18,8 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 namespace dp_tests
 {
 
@@ -69,7 +71,7 @@ BOOST_DATA_TEST_CASE(std_map_with, boost::unit_test::data::make(map_samples))
     test_map vs{};
     for (std::size_t i = 0; i < sample.num; ++i)
     {
-        std::byte v = static_cast<std::byte>(i + 1);
+        auto const v = static_cast<std::byte>(i + 1);
         vs.insert({i, simple_encodeable{v}});
     }
 
@@ -93,7 +95,7 @@ BOOST_DATA_TEST_CASE(std_unordered_map_with,
     test_map vs{};
     for (std::size_t i = 0; i < sample.num; ++i)
     {
-        std::byte v = static_cast<std::byte>(i + 1);
+        auto const v = static_cast<std::byte>(i + 1);
         vs.insert({i, simple_encodeable{v}});
     }
 
@@ -117,7 +119,7 @@ BOOST_DATA_TEST_CASE(boost_unordered_map_with,
     test_map vs{};
     for (std::size_t i = 0; i < sample.num; ++i)
     {
-        std::byte v = static_cast<std::byte>(i + 1);
+        auto const v = static_cast<std::byte>(i + 1);
         vs.insert({i, simple_encodeable{v}});
     }
 
@@ -141,7 +143,7 @@ BOOST_DATA_TEST_CASE(map_pair_range_with,
     test_map vs{};
     for (std::size_t i = 0; i < sample.num; ++i)
     {
-        std::byte v = static_cast<std::byte>(i + 1);
+        auto const v = static_cast<std::byte>(i + 1);
         vs.push_back({i, simple_encodeable{v}});
     }
 
@@ -173,7 +175,7 @@ BOOST_DATA_TEST_CASE(indefinite_map_with,
     test_map vs{};
     for (std::size_t i = 0; i < sample.num; ++i)
     {
-        std::byte v = static_cast<std::byte>(i + 1);
+        auto const v = static_cast<std::byte>(i + 1);
         vs.insert({i, simple_encodeable{v}});
     }
 
@@ -199,3 +201,5 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-magic-numbers)

@@ -35,6 +35,7 @@ public:
 
             DPLX_TRY(dp::write(
                     outStream,
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
                     reinterpret_cast<std::byte const *>(generic.data()),
                     numCodeUnits));
             return oc::success();

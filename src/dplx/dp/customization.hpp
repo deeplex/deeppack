@@ -55,6 +55,10 @@ inline constexpr struct container_reserve_fn
         {
             return errc::not_enough_memory;
         }
+        catch (...)
+        {
+            std::terminate();
+        }
     }
 } container_reserve;
 
@@ -93,6 +97,10 @@ inline constexpr struct container_resize_fn
         catch (std::bad_alloc const &)
         {
             return errc::not_enough_memory;
+        }
+        catch (...)
+        {
+            std::terminate();
         }
     }
 

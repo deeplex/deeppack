@@ -14,6 +14,9 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
+// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(modernize-use-nodiscard)
+
 namespace dp_tests
 {
 
@@ -107,9 +110,9 @@ BOOST_AUTO_TEST_CASE(prop_decode_1)
     test_tuple out{};
     auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 23u);
-    BOOST_TEST(out.mb == 0);
-    BOOST_TEST(out.mc == 0);
+    BOOST_TEST(out.ma == 23U);
+    BOOST_TEST(out.mb == 0U);
+    BOOST_TEST(out.mc == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(prop_decode_2)
@@ -120,9 +123,9 @@ BOOST_AUTO_TEST_CASE(prop_decode_2)
     test_tuple out{};
     auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0);
-    BOOST_TEST(out.mb == 0xEF);
-    BOOST_TEST(out.mc == 0);
+    BOOST_TEST(out.ma == 0U);
+    BOOST_TEST(out.mb == 0xEFU);
+    BOOST_TEST(out.mc == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(prop_decode_3)
@@ -133,9 +136,9 @@ BOOST_AUTO_TEST_CASE(prop_decode_3)
     test_tuple out{};
     auto rx = dp::decode_object_property<test_tuple_def_3>(istream, out);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0);
-    BOOST_TEST(out.mb == 0);
-    BOOST_TEST(out.mc == 0xDEADBEEF);
+    BOOST_TEST(out.ma == 0U);
+    BOOST_TEST(out.mb == 0U);
+    BOOST_TEST(out.mc == 0xDEADBEEFU);
 }
 
 BOOST_AUTO_TEST_CASE(prop_decode_reject_unknown_prop)
@@ -166,9 +169,9 @@ BOOST_AUTO_TEST_CASE(def_1)
     test_tuple out{};
     auto rx = dp::decode_object_properties<test_tuple_def_1>(istream, out, 1);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0x17);
-    BOOST_TEST(out.mb == 0);
-    BOOST_TEST(out.mc == 0);
+    BOOST_TEST(out.ma == 0x17U);
+    BOOST_TEST(out.mb == 0U);
+    BOOST_TEST(out.mc == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(def_2)
@@ -179,9 +182,9 @@ BOOST_AUTO_TEST_CASE(def_2)
     test_tuple out{};
     auto rx = dp::decode_object_properties<test_tuple_def_2>(istream, out, 2);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0x48CF);
-    BOOST_TEST(out.mb == 0xEF);
-    BOOST_TEST(out.mc == 0);
+    BOOST_TEST(out.ma == 0x48CFU);
+    BOOST_TEST(out.mb == 0xEFU);
+    BOOST_TEST(out.mc == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(def_3)
@@ -193,9 +196,9 @@ BOOST_AUTO_TEST_CASE(def_3)
     test_tuple out{};
     auto rx = dp::decode_object_properties<test_tuple_def_3>(istream, out, 3);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0x48CF);
-    BOOST_TEST(out.mb == 0xEF);
-    BOOST_TEST(out.mc == 0xDEADBEEF);
+    BOOST_TEST(out.ma == 0x48CFU);
+    BOOST_TEST(out.mb == 0xEFU);
+    BOOST_TEST(out.mc == 0xDEADBEEFU);
 }
 
 BOOST_AUTO_TEST_CASE(def_3_reject_missing_property)
@@ -218,9 +221,9 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_set)
     auto rx = dp::decode_object_properties<test_tuple_def_3_with_optional>(
             istream, out, 3);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0x48CF);
-    BOOST_TEST(out.mb == 0xEF);
-    BOOST_TEST(out.mc == 0xDEADBEEF);
+    BOOST_TEST(out.ma == 0x48CFU);
+    BOOST_TEST(out.mb == 0xEFU);
+    BOOST_TEST(out.mc == 0xDEADBEEFU);
 }
 
 BOOST_AUTO_TEST_CASE(def_3_with_optional_not_set)
@@ -233,9 +236,9 @@ BOOST_AUTO_TEST_CASE(def_3_with_optional_not_set)
     auto rx = dp::decode_object_properties<test_tuple_def_3_with_optional>(
             istream, out, 2);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(out.ma == 0x48CF);
-    BOOST_TEST(out.mb == 0);
-    BOOST_TEST(out.mc == 0xDEADBEEF);
+    BOOST_TEST(out.ma == 0x48CFU);
+    BOOST_TEST(out.mb == 0U);
+    BOOST_TEST(out.mc == 0xDEADBEEFU);
 }
 
 BOOST_AUTO_TEST_CASE(def_3_with_optional_reject_missing_property)
@@ -318,11 +321,11 @@ BOOST_AUTO_TEST_CASE(custom_with_layout_descriptor_decoding)
     custom_with_layout_descriptor t{};
     auto rx = subject(istream, t);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(t.a() == 0x13);
-    BOOST_TEST(t.b() == 0x07);
-    BOOST_TEST(t.c() == 0x04);
-    BOOST_TEST(t.d() == 0x14);
-    BOOST_TEST(t.msubmc() == 0xcf);
+    BOOST_TEST(t.a() == 0x13U);
+    BOOST_TEST(t.b() == 0x07U);
+    BOOST_TEST(t.c() == 0x04U);
+    BOOST_TEST(t.d() == 0x14U);
+    BOOST_TEST(t.msubmc() == 0xCFU);
 }
 
 // using namespace dp::string_literals;
@@ -392,10 +395,10 @@ BOOST_AUTO_TEST_CASE(custom_with_named_layout_descriptor_decoding)
     custom_with_named_layout_descriptor t{};
     auto rx = subject(istream, t);
     DPLX_REQUIRE_RESULT(rx);
-    BOOST_TEST(t.a() == 0x13);
-    BOOST_TEST(t.b() == 0x07);
-    BOOST_TEST(t.c() == 0x04);
-    BOOST_TEST(t.d() == 0x14);
+    BOOST_TEST(t.a() == 0x13U);
+    BOOST_TEST(t.b() == 0x07U);
+    BOOST_TEST(t.c() == 0x04U);
+    BOOST_TEST(t.d() == 0x14U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -403,3 +406,6 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
+
+// NOLINTEND(modernize-use-nodiscard)
+// NOLINTEND(readability-magic-numbers)

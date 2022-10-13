@@ -30,6 +30,7 @@ inline auto store_var_uint_ct(std::byte *dest,
                               T const value,
                               std::byte const category) noexcept -> int
 {
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     if (value <= inline_value_max)
     {
         dest[0] = category | static_cast<std::byte>(value);
@@ -40,6 +41,7 @@ inline auto store_var_uint_ct(std::byte *dest,
             = static_cast<unsigned int>(detail::find_last_set_bit(value));
     int const bytePowerP2 = detail::find_last_set_bit(lastSetBitIndex);
 
+    // NOLINTNEXTLINE(readability-magic-numbers)
     dest[0] = category | static_cast<std::byte>(24 + bytePowerP2 - 2);
 
     auto const bitSize = 2 << bytePowerP2;
@@ -49,6 +51,8 @@ inline auto store_var_uint_ct(std::byte *dest,
     detail::store(dest + 1, encoded);
 
     return byteSize + 1;
+
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 }
 
 template <typename T>
@@ -56,35 +60,39 @@ inline auto store_var_uint_branching(std::byte *dest,
                                      T const value,
                                      std::byte const category) noexcept -> int
 {
+    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     if (value <= inline_value_max)
     {
         dest[0] = category | static_cast<std::byte>(value);
         return 1;
     }
-    if (value <= 0xff)
+    if (value <= 0xFFU)
     {
-        dest[0] = category | std::byte{24};
+        dest[0] = category | std::byte{24U};
         dest[1] = static_cast<std::byte>(value);
         return 2;
     }
-    if (value <= 0xffff)
+    if (value <= 0xFFFFU)
     {
-        dest[0] = category | std::byte{25};
+        dest[0] = category | std::byte{25U};
         detail::store(dest + 1, static_cast<std::uint16_t>(value));
         return 3;
     }
-    if (value <= 0xffff'ffff)
+    if (value <= 0xFFFF'FFFFU)
     {
-        dest[0] = category | std::byte{26};
+        dest[0] = category | std::byte{26U};
         detail::store(dest + 1, static_cast<std::uint32_t>(value));
         return 5;
     }
-    else
-    {
-        dest[0] = category | std::byte{27};
-        detail::store(dest + 1, static_cast<std::uint64_t>(value));
-        return 9;
-    }
+    // else
+    // {
+    dest[0] = category | std::byte{27U};
+    detail::store(dest + 1, static_cast<std::uint64_t>(value));
+    return 9;
+    // }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    // NOLINTEND(readability-magic-numbers)
 }
 
 template <typename T>
@@ -92,25 +100,27 @@ inline auto store_var_uint(std::byte *dest,
                            T const value,
                            std::byte const category) noexcept -> int
 {
-    static_assert(sizeof(T) <= 8);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    static_assert(sizeof(T) <= 8U);
     static_assert(std::is_unsigned_v<T>);
 
 #if !DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
 
-    if constexpr (sizeof(T) <= 4)
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    if constexpr (sizeof(T) <= 4U)
     {
-        return store_var_uint_ct(dest, static_cast<std::uint32_t>(value),
-                                 category);
+        return detail::store_var_uint_ct(
+                dest, static_cast<std::uint32_t>(value), category);
     }
     else
     {
-        return store_var_uint_ct(dest, static_cast<std::uint64_t>(value),
-                                 category);
+        return detail::store_var_uint_ct(
+                dest, static_cast<std::uint64_t>(value), category);
     }
 
 #else
 
-    return store_var_uint_branching(dest, value, category);
+    return detail::store_var_uint_branching(dest, value, category);
 
 #endif
 }
@@ -146,13 +156,15 @@ public:
         {
             using uvalue_type = std::make_unsigned_t<T>;
             auto const signmask = static_cast<uvalue_type>(
-                    value >> (detail::digits_v<uvalue_type> - 1));
+                    value >> (detail::digits_v<uvalue_type> - 1U));
             // complement negatives
             uvalue_type const uvalue
                     = signmask ^ static_cast<uvalue_type>(value);
 
             std::byte const category
-                    = static_cast<std::byte>(signmask) & std::byte{0b001'00000};
+                    = static_cast<std::byte>(signmask)
+                    // NOLINTNEXTLINE(readability-magic-numbers)
+                    & std::byte{0b001'00000U};
             return item_emitter::encode_type_info(outStream, uvalue, category);
         }
         else
@@ -212,6 +224,7 @@ public:
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::ranges::data(writeLease)[0]
                 = to_byte(type_code::bool_false)
                 | std::byte{static_cast<std::uint8_t>(value)};
@@ -228,7 +241,9 @@ public:
         DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(raw)));
 
         auto const out = std::ranges::data(writeLease);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         out[0] = to_byte(type_code::float_half);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::memcpy(out + 1, &raw, sizeof(raw));
 
         if constexpr (lazy_output_stream<Stream>)
@@ -243,7 +258,9 @@ public:
         DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(value)));
 
         auto const out = std::ranges::data(writeLease);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         out[0] = to_byte(type_code::float_single);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         detail::store(out + 1, value);
 
         if constexpr (lazy_output_stream<Stream>)
@@ -258,7 +275,9 @@ public:
         DPLX_TRY(auto &&writeLease, write(outStream, 1 + sizeof(value)));
 
         auto const out = std::ranges::data(writeLease);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         out[0] = to_byte(type_code::float_double);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         detail::store(out + 1, value);
 
         if constexpr (lazy_output_stream<Stream>)
@@ -271,6 +290,7 @@ public:
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::ranges::data(writeLease)[0] = to_byte(type_code::null);
 
         if constexpr (lazy_output_stream<Stream>)
@@ -283,6 +303,7 @@ public:
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::ranges::data(writeLease)[0] = to_byte(type_code::undefined);
 
         if constexpr (lazy_output_stream<Stream>)
@@ -295,6 +316,7 @@ public:
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::ranges::data(writeLease)[0] = to_byte(type_code::special_break);
 
         if constexpr (lazy_output_stream<Stream>)
@@ -311,7 +333,10 @@ private:
     {
         DPLX_TRY(auto &&writeLease, write(outStream, 1));
 
-        std::ranges::data(writeLease)[0] = category | std::byte{0b000'11111};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::ranges::data(writeLease)[0]
+                = category
+                | std::byte{0b000'11111U}; // NOLINT(readability-magic-numbers)
 
         if constexpr (lazy_output_stream<Stream>)
         {
@@ -353,11 +378,14 @@ private:
     }
 
     template <typename T>
+    // NOLINTNEXTLINE(readability-function-cognitive-complexity)
     static auto encode_type_info_recover_eos(Stream &outStream,
                                              T const value,
                                              std::byte const category)
             -> result<void>
     {
+        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (value <= detail::inline_value_max)
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 1));
@@ -369,7 +397,7 @@ private:
                 DPLX_TRY(commit(outStream, writeLease));
             }
         }
-        else if (value <= 0xff)
+        else if (value <= 0xFFU)
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 2));
             auto out = std::ranges::data(writeLease);
@@ -381,7 +409,7 @@ private:
                 DPLX_TRY(commit(outStream, writeLease));
             }
         }
-        else if (value <= 0xffff)
+        else if (value <= 0xFFFFU)
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 3));
             auto out = std::ranges::data(writeLease);
@@ -393,7 +421,7 @@ private:
                 DPLX_TRY(commit(outStream, writeLease));
             }
         }
-        else if (value <= 0xffff'ffff)
+        else if (value <= 0xFFFF'FFFFU)
         {
             DPLX_TRY(auto &&writeLease, write(outStream, 5));
             auto out = std::ranges::data(writeLease);
@@ -413,6 +441,8 @@ private:
             return errc::end_of_stream;
         }
         return success();
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTEND(readability-magic-numbers)
     }
 };
 

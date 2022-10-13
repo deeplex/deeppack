@@ -26,6 +26,7 @@ class sbo_write_proxy final
     std::byte mBuffer[minimum_guaranteed_write_size];
 
 public:
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
     constexpr sbo_write_proxy() noexcept = default;
     inline explicit sbo_write_proxy(std::size_t size) noexcept
         : mMemory(nullptr)
@@ -37,27 +38,29 @@ public:
         , mSize(memory.size())
     {
     }
+    // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
-    inline auto uses_small_buffer() const noexcept -> bool
+    [[nodiscard]] inline auto uses_small_buffer() const noexcept -> bool
     {
         return mMemory == nullptr;
     }
 
-    inline auto data() noexcept -> std::byte *
+    [[nodiscard]] inline auto data() noexcept -> std::byte *
     {
         return mMemory != nullptr ? mMemory : mBuffer;
     }
-    inline auto size() const noexcept -> std::size_t
+    [[nodiscard]] inline auto size() const noexcept -> std::size_t
     {
         return mSize;
     }
 
-    inline auto begin() noexcept -> std::byte *
+    [[nodiscard]] inline auto begin() noexcept -> std::byte *
     {
         return data();
     }
-    inline auto end() noexcept -> std::byte *
+    [[nodiscard]] inline auto end() noexcept -> std::byte *
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return data() + mSize;
     }
 };
@@ -112,11 +115,11 @@ private:
             mWriteArea = mWriteArea.subspan(size);
             return sbo_write_proxy(buffer);
         }
-        else if (mWriteArea.size() + mRemaining < size)
+        if (mWriteArea.size() + mRemaining < size)
         {
             return dplx::dp::errc::end_of_stream;
         }
-        else if (mWriteArea.size() == 0)
+        if (mWriteArea.empty())
         {
             DPLX_TRY(this->acquire_next_chunk());
             return write(size);
@@ -176,7 +179,7 @@ private:
         }
 
         for (std::span<std::byte const> remaining(data, size);
-             remaining.size() > 0;)
+             !remaining.empty();)
         {
             auto const chunk = std::min(remaining.size(), mWriteArea.size());
 
@@ -185,7 +188,7 @@ private:
             remaining = remaining.subspan(chunk);
             mWriteArea = mWriteArea.subspan(chunk);
 
-            if (mWriteArea.size() == 0)
+            if (mWriteArea.empty())
             {
                 DPLX_TRY(this->acquire_next_chunk());
             }

@@ -29,9 +29,10 @@ public:
         auto const size = value.size();
         DPLX_TRY(emit::u8string(outStream, size));
 
-        DPLX_TRY(dp::write(outStream,
-                           reinterpret_cast<std::byte const *>(value.data()),
-                           size));
+        DPLX_TRY(dp::write(
+                outStream,
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                reinterpret_cast<std::byte const *>(value.data()), size));
         return success();
     }
 };
