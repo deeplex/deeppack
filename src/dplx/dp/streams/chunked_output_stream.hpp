@@ -47,7 +47,7 @@ public:
 
     [[nodiscard]] inline auto data() noexcept -> std::byte *
     {
-        return mMemory != nullptr ? mMemory : mBuffer;
+        return mMemory != nullptr ? mMemory : static_cast<std::byte *>(mBuffer);
     }
     [[nodiscard]] inline auto size() const noexcept -> std::size_t
     {
