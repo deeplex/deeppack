@@ -23,7 +23,7 @@ namespace dplx::dp::detail
 
 constexpr auto is_prime(std::uint64_t const i) noexcept -> bool
 {
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
     // if (i == 2 || i == 3)
     // {
@@ -48,7 +48,7 @@ constexpr auto is_prime(std::uint64_t const i) noexcept -> bool
         }
     }
     return true;
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 constexpr auto next_prime(std::uint64_t const i) noexcept -> std::uint64_t
@@ -98,7 +98,7 @@ struct perfect_hasher
     static constexpr KeyHash key_hash{};
     static constexpr std::uint64_t initial_seed = 0x8000'0000'0000'0000U;
     static constexpr std::size_t remap_size = detail::next_prime(N / 5U);
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     static_assert(remap_size >= (N / 5U));
 
     std::array<std::uint64_t, remap_size> remap;
@@ -163,7 +163,7 @@ public:
                     // current seed would generate a collision => reroll
                     j = 0;
                     seed += 1;
-                    // NOLINTNEXTLINE(readability-magic-numbers)
+                    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
                     seed ^= (hash & 0x7fff'ffff'0000'0000);
                 }
                 else
@@ -221,7 +221,7 @@ public:
     constexpr auto operator()(TLike &&key) const -> std::size_t
     {
         std::uint64_t const remapped = remap[key_hash(key) % remap_size];
-        // NOLINTNEXTLINE(readability-magic-numbers)
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         if ((remapped & 0x8000'0000'0000'0000U) == 0U)
         {
             return values[remapped];

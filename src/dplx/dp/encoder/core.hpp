@@ -155,12 +155,12 @@ public:
 
     auto operator()(Stream &outStream, value_type value) -> result<void>
     {
-        // NOLINTNEXTLINE(readability-magic-numbers)
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         if constexpr (sizeof(value) == 4U)
         {
             return item_emitter<Stream>::float_single(outStream, value);
         }
-        // NOLINTNEXTLINE(readability-magic-numbers)
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         else if constexpr (sizeof(value) == 8U)
         {
             return item_emitter<Stream>::float_double(outStream, value);
@@ -170,7 +170,7 @@ public:
 template <cncr::iec559_floating_point T>
 constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept -> unsigned int
 {
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     if constexpr (sizeof(T) == 4)
     {
         return 5U;
@@ -179,7 +179,7 @@ constexpr auto tag_invoke(encoded_size_of_fn, T const) noexcept -> unsigned int
     {
         return 9U;
     }
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 template <codable_enum Enum, output_stream Stream>

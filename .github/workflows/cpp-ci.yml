@@ -32,15 +32,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: lukka/get-cmake@v3.22.2
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.22.6
 
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
-          vcpkgGitCommitId: 01b29f6d8212bc845da64773b18665d682f5ab66
+          vcpkgGitCommitId: 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
           prependedCacheKey: compiler=${{ matrix.compiler }}
-          #appendedCacheKey: r01
+          #appendedCacheKey: r00
 
       - if: matrix.os == 'windows-2022'
         name: Add MSVC to PATH
@@ -63,6 +65,13 @@ jobs:
           buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
           testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
 
+      - name: Prevent uploading a corrupted vcpkg cache
+        if: ${{ failure() || cancelled() }}
+        run: |
+          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
+        shell: bash
+
+
       - if: ${{ failure() || cancelled() }}
         run: |
           echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
@@ -76,38 +85,43 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: lukka/get-cmake@v3.22.2
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.22.6
 
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
-          vcpkgGitCommitId: 01b29f6d8212bc845da64773b18665d682f5ab66
+          vcpkgGitCommitId: 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
           prependedCacheKey: compiler=gcc
-          #appendedCacheKey: r01
+          #appendedCacheKey: r00
 
-      # prevent cache racing
-      - run: |
+      - name: Disable vcpkg cache to prevent racing with the Test jobs
+        run: |
           echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
         shell: bash
 
-      - name: Configure x64-linux-clang preset and generate a compilation database
+      - name: Configure x64-linux-clang preset
         uses: lukka/run-cmake@v10
         env:
           CMAKE_EXPORT_COMPILE_COMMANDS: '1'
         with:
           configurePreset: x64-linux-clang
 
-      - name: Lint with clang-format and clang-tidy
+      - uses: cpp-linter/cpp-linter-action@v2
+        name: Lint with clang-format and clang-tidy
         id: linter
-        run: |
-          pipx run cpp-linter \
-          --version=14 \
-          --style=file \
-          --tidy-checks='' \
-          --files-changed-only=true \
-          --ignore='build|external' \
-          --database=build/x64-linux-clang
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            version: 14
+            style: file # use .clang-format settings
+            tidy-checks: '' # use .clang-tidy settings
+            extensions: cpp,hpp
+            ignore: '.github|build|external'
+            files-changed-only: false
+            database: build/x64-linux-clang
 
       - name: Fail if issues have been raised
         if: steps.linter.outputs.checks-failed > 0

@@ -75,7 +75,7 @@ static_assert(std::is_aggregate_v<item_info>);
 namespace dplx::dp::detail
 {
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 inline auto parse_item_speculative(std::byte const *const encoded) noexcept
         -> result<item_info>
@@ -206,7 +206,7 @@ inline auto parse_item_safe(Stream &inStream) noexcept(
     return info;
 }
 
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 template <input_stream Stream>
 inline auto parse_item(Stream &stream) noexcept(
@@ -247,7 +247,7 @@ inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
     // 1bit sign | 5bit exponent | 10bit significand
     // 0x8000    | 0x7C00        | 0x3ff
 
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
     // #TODO check whether I got the endianess right
     unsigned const significand = bits & 0x3FFU;
@@ -275,7 +275,7 @@ inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
     // respect sign bit
     return (bits & 0x8000U) == 0U ? value : -value;
 
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 } // namespace dplx::dp::detail

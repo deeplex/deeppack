@@ -18,7 +18,7 @@
 namespace dplx::dp::detail
 {
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 template <typename T>
 inline auto var_uint_encoded_byte_power(T const value) noexcept -> int
@@ -70,7 +70,7 @@ constexpr auto var_uint_encoded_size_branching(T const value) noexcept
     return 9U;
 }
 
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 template <cncr::unsigned_integer T>
 constexpr auto var_uint_encoded_size(T const value) -> unsigned int

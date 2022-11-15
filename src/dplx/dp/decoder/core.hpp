@@ -49,7 +49,7 @@ template <cncr::iec559_floating_point T, input_stream Stream>
 class basic_decoder<T, Stream>
 {
     static_assert(std::numeric_limits<T>::is_iec559);
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     static_assert(sizeof(T) == 8 || sizeof(T) == 4);
 
     using parse = item_parser<Stream>;

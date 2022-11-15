@@ -41,7 +41,7 @@ inline auto store_var_uint_ct(std::byte *dest,
             = static_cast<unsigned int>(detail::find_last_set_bit(value));
     int const bytePowerP2 = detail::find_last_set_bit(lastSetBitIndex);
 
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     dest[0] = category | static_cast<std::byte>(24 + bytePowerP2 - 2);
 
     auto const bitSize = 2 << bytePowerP2;
@@ -60,7 +60,7 @@ inline auto store_var_uint_branching(std::byte *dest,
                                      T const value,
                                      std::byte const category) noexcept -> int
 {
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     if (value <= inline_value_max)
     {
@@ -92,7 +92,7 @@ inline auto store_var_uint_branching(std::byte *dest,
     return 9;
     // }
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 template <typename T>
@@ -100,13 +100,13 @@ inline auto store_var_uint(std::byte *dest,
                            T const value,
                            std::byte const category) noexcept -> int
 {
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     static_assert(sizeof(T) <= 8U);
     static_assert(std::is_unsigned_v<T>);
 
 #if !DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
 
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     if constexpr (sizeof(T) <= 4U)
     {
         return detail::store_var_uint_ct(
@@ -163,7 +163,7 @@ public:
 
             std::byte const category
                     = static_cast<std::byte>(signmask)
-                    // NOLINTNEXTLINE(readability-magic-numbers)
+                    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
                     & std::byte{0b001'00000U};
             return item_emitter::encode_type_info(outStream, uvalue, category);
         }
@@ -335,8 +335,8 @@ private:
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::ranges::data(writeLease)[0]
-                = category
-                | std::byte{0b000'11111U}; // NOLINT(readability-magic-numbers)
+                // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+                = category | std::byte{0b000'11111U};
 
         if constexpr (lazy_output_stream<Stream>)
         {
@@ -384,7 +384,7 @@ private:
                                              std::byte const category)
             -> result<void>
     {
-        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (value <= detail::inline_value_max)
         {
@@ -442,7 +442,7 @@ private:
         }
         return success();
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        // NOLINTEND(readability-magic-numbers)
+        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }
 };
 

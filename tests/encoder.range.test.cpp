@@ -15,7 +15,7 @@
 #include "boost-test.hpp"
 #include "encoder.test_utils.hpp"
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 namespace dp_tests
 {
@@ -222,4 +222,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
 
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

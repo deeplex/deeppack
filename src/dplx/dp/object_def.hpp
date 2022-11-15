@@ -49,7 +49,7 @@ struct fixed_u8string
 
     // funnily enough clang-tidy also flags compiler generated code 😆
     // NOLINTBEGIN(modernize-use-nullptr)
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
 
     constexpr fixed_u8string(fixed_u8string const &) noexcept = default;
@@ -69,7 +69,7 @@ struct fixed_u8string
             -> std::strong_ordering = default;
 
     // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     // NOLINTEND(modernize-use-nullptr)
 
     // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays)
@@ -227,7 +227,9 @@ struct std::common_type<dplx::dp::fixed_u8string<N1>,
                         dplx::dp::fixed_u8string<N2>>
 {
     using type = dplx::dp::fixed_u8string<dplx::cncr::round_up_p2(
-            N1 < N2 ? N2 : N1, 16U)>; // NOLINT(readability-magic-numbers)
+            N1 < N2 ? N2 : N1,
+            // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+            16U)>;
 };
 
 namespace dplx::dp
@@ -360,7 +362,7 @@ struct object_def
             = !(... && Properties.required);
     static constexpr std::array<id_type, num_properties> ids{Properties.id...};
 
-    // NOLINTNEXTLINE(readability-magic-numbers)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     std::uint32_t version = 0xffff'ffff;
     bool allow_versioned_auto_decoder = false;
 

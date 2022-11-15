@@ -32,7 +32,7 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 template class dplx::dp::basic_decoder<std::array<std::byte, 16>,
                                        dp_tests::test_input_stream>;
@@ -257,4 +257,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
 
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
