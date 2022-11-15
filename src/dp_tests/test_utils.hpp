@@ -57,6 +57,61 @@ inline auto boost_test_print_type(std::ostream &s, type_code c)
 
 } // namespace dplx::dp
 
+namespace SYSTEM_ERROR2_NAMESPACE
+{
+
+inline auto boost_test_print_type(std::ostream &s,
+                                  status_code_domain::string_ref const &ref)
+        -> std::ostream &
+{
+    return s.write(ref.c_str(), std::ssize(ref));
+}
+
+template <typename Enum>
+inline auto boost_test_print_type(
+        std::ostream &s,
+        errored_status_code<
+                dplx::cncr::data_defined_status_domain_type<Enum>> const &code)
+        -> std::ostream &
+{
+    auto const &cat = code.domain();
+    return s << "[domain: " << cat.name().c_str()
+             << "; value: " << static_cast<std::intptr_t>(code.value())
+             << "; message: " << code.message().c_str() << "]";
+}
+
+} // namespace SYSTEM_ERROR2_NAMESPACE
+
+namespace OUTCOME_V2_NAMESPACE
+{
+
+template <typename R>
+inline auto boost_test_print_type(std::ostream &s,
+                                  dplx::dp::result<R> const &rx)
+        -> std::ostream &
+{
+    if (rx.has_value())
+    {
+        return s << rx.assume_value();
+    }
+    else
+    {
+        return boost_test_print_type(s, rx.assume_error());
+    }
+}
+
+} // namespace OUTCOME_V2_NAMESPACE
+
+namespace dplx::dp
+{
+
+inline auto boost_test_print_type(std::ostream &s, errc c) -> std::ostream &
+{
+    return boost_test_print_type(s, result<void>::error_type(c));
+}
+
+} // namespace dplx::dp
+
 namespace dp_tests
 {
 
@@ -109,11 +164,7 @@ inline auto check_result(dp::result<R> const &rx)
     boost::test_tools::predicate_result prx{succeeded};
     if (!succeeded)
     {
-        auto error = rx.assume_error();
-        auto const &cat = error.category();
-        prx.message() << "[category: " << cat.name()
-                      << "; value: " << error.value()
-                      << "; message: " << error.message() << "]";
+        boost_test_print_type(prx.message().stream(), rx.assume_error());
     }
     return prx;
 }

@@ -53,6 +53,7 @@ find_package(concrete CONFIG REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 
+find_package(status-code CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
 
 if (BUILD_TESTING)
@@ -113,6 +114,7 @@ target_link_libraries(deeppack PUBLIC
     Deeplex::concrete
     fmt::fmt
     outcome::hl
+    status-code::hl
 )
 
 target_include_directories(deeppack PUBLIC
