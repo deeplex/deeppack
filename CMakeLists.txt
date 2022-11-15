@@ -51,6 +51,8 @@ cmake_dependent_option(DPLX_DP_TESTS_PCH "enable std header precompilation for t
 ########################################################################
 # dependencies
 
+set(Boost_NO_WARN_NEW_VERSIONS ON)
+
 find_package(concrete CONFIG REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
