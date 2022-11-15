@@ -129,24 +129,29 @@ namespace dplx::dp::detail
 
 template <typename B>
 concept boolean_testable_impl = std::convertible_to<B, bool>;
+// clang-format off
 template <typename B>
 concept boolean_testable
-        = boolean_testable_impl<B> && requires(B &&b) {
-                                          {
-                                              !static_cast<B &&>(b)
-                                              } -> boolean_testable_impl;
-                                      };
+        = boolean_testable_impl<B>
+        && requires(B &&b)
+        {
+            { !static_cast<B &&>(b) }
+                -> boolean_testable_impl;
+        };
+// clang-format on
 
+// clang-format off
 template <typename T>
-concept tryable = requires(T &&t) {
-                      {
-                          oc::try_operation_has_value(t)
-                          } -> boolean_testable;
-                      {
-                          oc::try_operation_return_as(static_cast<T &&>(t))
-                          } -> std::convertible_to<result<void>>;
-                      oc::try_operation_extract_value(static_cast<T &&>(t));
-                  };
+concept tryable
+    = requires(T &&t)
+{
+    { oc::try_operation_has_value(t) }
+        -> boolean_testable;
+    { oc::try_operation_return_as(static_cast<T &&>(t)) }
+        -> std::convertible_to<result<void>>;
+    oc::try_operation_extract_value(static_cast<T &&>(t));
+};
+// clang-format on
 
 template <tryable T>
 using result_value_t

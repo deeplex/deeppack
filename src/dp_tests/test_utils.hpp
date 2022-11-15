@@ -94,10 +94,7 @@ inline auto boost_test_print_type(std::ostream &s,
     {
         return s << rx.assume_value();
     }
-    else
-    {
-        return boost_test_print_type(s, rx.assume_error());
-    }
+    return boost_test_print_type(s, rx.assume_error());
 }
 
 } // namespace OUTCOME_V2_NAMESPACE
