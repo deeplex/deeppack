@@ -240,7 +240,8 @@ inline auto parse_item(Stream &stream) noexcept(
     }
 }
 
-static inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
+inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
 {
     // IEC 60559:2011 half precision
     // 1bit sign | 5bit exponent | 10bit significand

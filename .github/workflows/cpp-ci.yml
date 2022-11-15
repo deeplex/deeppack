@@ -39,6 +39,7 @@ jobs:
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
           vcpkgGitCommitId: 01b29f6d8212bc845da64773b18665d682f5ab66
+          prependedCacheKey: compiler=${{ matrix.compiler }}
           #appendedCacheKey: r01
 
       - if: matrix.os == 'windows-2022'
@@ -62,6 +63,12 @@ jobs:
           buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
           testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
 
+      - if: ${{ failure() || cancelled() }}
+        run: |
+          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
+        shell: bash
+
+
   check-format:
     name: clang-tidy & clang-format
     runs-on: ubuntu-22.04
@@ -76,7 +83,13 @@ jobs:
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
           vcpkgGitCommitId: 01b29f6d8212bc845da64773b18665d682f5ab66
+          prependedCacheKey: compiler=gcc
           #appendedCacheKey: r01
+
+      # prevent cache racing
+      - run: |
+          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
+        shell: bash
 
       - name: Configure x64-linux-clang preset and generate a compilation database
         uses: lukka/run-cmake@v10

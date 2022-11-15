@@ -7,26 +7,28 @@
 
 #pragma once
 
-#include <system_error>
+#include <concepts>
 #include <type_traits>
+#include <utility>
 
-#include <outcome/std_result.hpp>
+#include <outcome/experimental/status_result.hpp>
 #include <outcome/try.hpp>
+#include <status-code/system_code.hpp>
+
+#include <dplx/cncr/data_defined_status_domain.hpp>
 
 namespace dplx::dp
 {
 
+namespace system_error = SYSTEM_ERROR2_NAMESPACE;
 namespace oc = OUTCOME_V2_NAMESPACE;
-
-template <typename R, typename EC = std::error_code>
-using result = oc::basic_result<R, EC, oc::policy::default_policy<R, EC, void>>;
 
 using oc::failure;
 using oc::success;
 
 enum class errc
 {
-    nothing = 0, // to be removed
+    nothing = 0,
     bad = 1,
     end_of_stream,
     invalid_additional_information,
@@ -45,50 +47,111 @@ enum class errc
     oversized_additional_information_coding,
     indefinite_item,
     string_exceeds_size_limit,
-};
-auto error_category() noexcept -> std::error_category const &;
 
-inline auto make_error_code(errc value) -> std::error_code
-{
-    return {static_cast<int>(value), error_category()};
-}
+    LIMIT,
+};
 
 } // namespace dplx::dp
 
-namespace std
+namespace dplx::cncr
 {
 
 template <>
-struct is_error_code_enum<dplx::dp::errc> : std::true_type
+struct status_enum_definition<::dplx::dp::errc>
+    : status_enum_definition_defaults<::dplx::dp::errc>
 {
+    static constexpr char domain_id[] = "F768D4DE-71BF-4A04-B763-51AAA3A8F092";
+    static constexpr char domain_name[] = "dplx::dp error domain";
+
+    static constexpr value_descriptor values[] = {
+  // clang-format off
+        { code::nothing, generic_errc::success,
+            "no error/success" },
+        { code::bad, generic_errc::unknown,
+            "an external API did not meet its operation contract"},
+        { code::end_of_stream, generic_errc::unknown,
+            "the input stream is missing data" },
+        { code::invalid_additional_information, generic_errc::bad_message,
+            "a CBOR item has been encoded with a reserved/invalid bitsequence" },
+        { code::item_type_mismatch, generic_errc::bad_message,
+             "the decoder expected a different CBOR item type" },
+        { code::item_value_out_of_range, generic_errc::value_too_large,
+            "the CBOR item value over/underflows the target type" },
+        { code::unknown_property, generic_errc::bad_message,
+            "the object_utils decoder was fed an unknown map key" },
+        { code::too_many_properties, generic_errc::bad_message,
+            "the tuple/object_utils decoder has been fed a CBOR item with more properties than existing property definitions" },
+        { code::item_version_property_missing, generic_errc::bad_message,
+            "the encoded tuple/object missed its version property" },
+        { code::item_version_mismatch, generic_errc::bad_message,
+            "the encoded tuple/object version is not supported" },
+        { code::required_object_property_missing, generic_errc::bad_message,
+            "the encoded object misses a required property" },
+        { code::not_enough_memory, generic_errc::not_enough_memory,
+            "not enough memory could be allocated to complete the operation" },
+        { code::missing_data, generic_errc::bad_message,
+            "the map/array content cannot fit in the remaining input data" },
+        { code::invalid_indefinite_subitem, generic_errc::bad_message,
+            "the indefinite string/binary contained a non-string/binary subitem" },
+        { code::tuple_size_mismatch, generic_errc::bad_message,
+            "the tuple utils decoder expected a different number of items" },
+        { code::duplicate_key, generic_errc::bad_message,
+            "a key appeared a second time during associative container deserialization" },
+        { code::oversized_additional_information_coding, generic_errc::bad_message,
+            "a CBOR item with a non minimally encoded additional information value has been encountered during canonical or strict parsing" },
+        { code::indefinite_item, generic_errc::bad_message,
+            "An indefinite binary/string/array/map CBOR item has been encountered during canonical or strict parsing" },
+        { code::string_exceeds_size_limit, generic_errc::bad_message,
+            "A binary/string CBOR item exceeded a size limit imposed by the user." },
+  // clang-format on
+    };
+
+    static_assert(std::size(values) == static_cast<std::size_t>(code::LIMIT));
 };
 
-} // namespace std
+} // namespace dplx::cncr
+
+namespace dplx::dp
+{
+
+template <typename R,
+          typename EC = system_error::errored_status_code<
+                  cncr::data_defined_status_domain_type<errc>>>
+using result = oc::basic_result<
+        R,
+        EC,
+        oc::experimental::policy::default_status_result_policy<R, EC>>;
+
+}
 
 namespace dplx::dp::detail
 {
 
 template <typename B>
 concept boolean_testable_impl = std::convertible_to<B, bool>;
+// clang-format off
 template <typename B>
-concept boolean_testable = boolean_testable_impl<B> && requires(B &&b)
-{
-    {
-        !static_cast<B &&>(b)
-        } -> boolean_testable_impl;
-};
+concept boolean_testable
+        = boolean_testable_impl<B>
+        && requires(B &&b)
+        {
+            { !static_cast<B &&>(b) }
+                -> boolean_testable_impl;
+        };
+// clang-format on
 
+// clang-format off
 template <typename T>
-concept tryable = requires(T &&t)
+concept tryable
+    = requires(T &&t)
 {
-    {
-        oc::try_operation_has_value(t)
-        } -> boolean_testable;
-    {
-        oc::try_operation_return_as(static_cast<T &&>(t))
-        } -> std::convertible_to<result<void>>;
+    { oc::try_operation_has_value(t) }
+        -> boolean_testable;
+    { oc::try_operation_return_as(static_cast<T &&>(t)) }
+        -> std::convertible_to<result<void>>;
     oc::try_operation_extract_value(static_cast<T &&>(t));
 };
+// clang-format on
 
 template <tryable T>
 using result_value_t

@@ -126,8 +126,8 @@
                 "x64-linux"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_CXX_FLAGS": "-fsized-deallocation"
+                "VCPKG_TARGET_TRIPLET": "x64-linux-clang",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/tools/toolchains/clang-x64-linux.cmake"
             }
         },
         {
@@ -136,6 +136,7 @@
                 "x64-linux"
             ],
             "cacheVariables": {
+                "DPLX_DP_TESTS_PCH": false,
                 "CMAKE_CXX_FLAGS": "-fconcepts-diagnostics-depth=3 -fsanitize=address,leak,undefined -g -fno-omit-frame-pointer",
                 "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,leak,undefined",
                 "CMAKE_CXX_COMPILER": "g++"

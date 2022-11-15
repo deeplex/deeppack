@@ -46,13 +46,18 @@ option(DPLX_DP_FLAG_OUTDATED_WORKAROUNDS "Emit compiler errors for workarounds w
 option(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER "Use the branching store_var_uint implementation" OFF)
 mark_as_advanced(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER)
 
+cmake_dependent_option(DPLX_DP_TESTS_PCH "enable std header precompilation for test TUs" ON "BUILD_TESTING" OFF)
+
 ########################################################################
 # dependencies
+
+set(Boost_NO_WARN_NEW_VERSIONS ON)
 
 find_package(concrete CONFIG REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 
+find_package(status-code CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
 
 if (BUILD_TESTING)
@@ -113,6 +118,7 @@ target_link_libraries(deeppack PUBLIC
     Deeplex::concrete
     fmt::fmt
     outcome::hl
+    status-code::hl
 )
 
 target_include_directories(deeppack PUBLIC
@@ -138,6 +144,22 @@ if (BUILD_TESTING)
     target_include_directories(deeppack-tests PRIVATE
         src/dp_tests
     )
+
+    if (DPLX_DP_TESTS_PCH)
+        target_precompile_headers(deeppack-tests PRIVATE
+            <algorithm>
+            <array>
+            <bit>
+            <cmath>
+            <concepts>
+            <cstddef>
+            <cstdint>
+            <limits>
+            <ranges>
+            <span>
+            <type_traits>
+        )
+    endif()
 
     add_test(NAME deeppack-tests COMMAND deeppack-tests)
 endif()

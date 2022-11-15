@@ -143,11 +143,11 @@ private:
                 auto const nextPart = std::min(minimum_guaranteed_read_size - 1,
                                                mReadArea.remaining_size());
 
-                std::memcpy(
-                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                        static_cast<std::byte *>(mSmallBuffer)
-                                + decommission_threshold,
-                        mReadArea.remaining_begin(), nextPart);
+                // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                std::memcpy(static_cast<std::byte *>(mSmallBuffer)
+                                    + decommission_threshold,
+                            mReadArea.remaining_begin(), nextPart);
+                // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
                 mBufferStart = static_cast<int8_t>(bufferStart);
             }
@@ -224,7 +224,9 @@ private:
             // else
             // {
             // need more data than buffered
+
             decommission_buffer();
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             return read(data + buffered.size(), amount - buffered.size());
             // }
         }
@@ -269,21 +271,17 @@ private:
                 mBufferStart += static_cast<int8_t>(numBytes);
                 return oc::success();
             }
-            else
-            {
-                auto const popped = static_cast<unsigned>(decommission_threshold
-                                                          - mBufferStart);
-                mRemaining -= popped;
-                mBufferStart = -1;
 
-                return discard(numBytes - popped);
-            }
+            auto const popped = static_cast<unsigned>(decommission_threshold
+                                                      - mBufferStart);
+            mRemaining -= popped;
+            mBufferStart = -1;
+
+            return discard(numBytes - popped);
         }
-        else
-        {
-            decommission_buffer();
-            return discard(numBytes);
-        }
+
+        decommission_buffer();
+        return discard(numBytes);
     }
 
 public:
