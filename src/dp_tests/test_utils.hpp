@@ -7,6 +7,12 @@
 
 #pragma once
 
+#include <dplx/predef/compiler.h>
+
+#ifdef DPLX_COMP_GNUC_AVAILABLE
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#endif
+
 #include <array>
 #include <chrono>
 #include <cstddef>
@@ -19,10 +25,6 @@
 #include <dplx/dp/type_code.hpp>
 
 #include "boost-test.hpp"
-
-#if defined(DPLX_COMP_GNUC_AVAILABLE)
-#pragma GCC diagnostic ignored "-Wmissing-declarations"
-#endif
 
 namespace boost::test_tools::tt_detail::impl
 {
