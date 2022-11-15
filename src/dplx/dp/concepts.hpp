@@ -20,7 +20,7 @@
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/stream.hpp>
 
-static_assert(CHAR_BIT == 8); // NOLINT(readability-magic-numbers)
+static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
 namespace dplx::dp
 {

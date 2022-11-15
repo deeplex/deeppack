@@ -110,7 +110,7 @@ constexpr auto load(std::byte const *const src) -> T
 
     if (std::is_constant_evaluated())
     {
-        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         static_assert(sizeof(T) <= 8);
         using uT = std::make_unsigned_t<T>;
@@ -156,7 +156,7 @@ constexpr auto load(std::byte const *const src) -> T
             return static_cast<T>(acc >> (64 - digits_v<uT>));
         }
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        // NOLINTEND(readability-magic-numbers)
+        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }
     else
     {
@@ -175,7 +175,7 @@ constexpr auto load(std::byte const *const src) -> T
 template <cncr::integer T, std::endian order>
 constexpr auto load_partial(std::byte const *data, int num) -> T
 {
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
     static_assert(sizeof(T) <= 8);
@@ -242,7 +242,7 @@ constexpr auto load_partial(std::byte const *data, int num) -> T
     }
 
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 constexpr auto byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
@@ -259,12 +259,12 @@ constexpr auto byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
         //     undefined behavior as suggested by Giovanni Piero Deretta,
         //     with a further refinement suggested by Pyry Jahkola.
 
-        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
         std::uint32_t const step16 = x << 16 | x >> 16;
         return ((step16 << 8) & 0xff00ff00) | ((step16 >> 8) & 0x00ff00ff);
 
-        // NOLINTEND(readability-magic-numbers)
+        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }
 
     return boost::endian::endian_reverse(x);

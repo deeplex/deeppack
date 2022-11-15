@@ -14,7 +14,7 @@
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 namespace dp_tests
@@ -135,4 +135,4 @@ BOOST_AUTO_TEST_SUITE_END()
 } // namespace dp_tests
 
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

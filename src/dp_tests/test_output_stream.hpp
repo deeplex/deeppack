@@ -18,7 +18,7 @@
 namespace dp_tests
 {
 
-// NOLINTNEXTLINE(readability-magic-numbers)
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
 template <std::size_t MaxSize = 56>
 class test_output_stream final
 {

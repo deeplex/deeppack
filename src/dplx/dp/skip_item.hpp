@@ -61,7 +61,7 @@ template <input_stream Stream>
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto skip_item(Stream &inStream) -> result<void>
 {
-    // NOLINTBEGIN(readability-magic-numbers)
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
     boost::container::small_vector<dp::item_info, 64> stack;
     DPLX_TRY(auto toBeSkipped, detail::parse_item(inStream));
@@ -188,7 +188,7 @@ inline auto skip_item(Stream &inStream) -> result<void>
 
     return oc::success();
 
-    // NOLINTEND(readability-magic-numbers)
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 } // namespace dplx::dp

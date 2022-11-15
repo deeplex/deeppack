@@ -82,7 +82,7 @@ public:
             {
                 if (type == type_code::special)
                 {
-                    // NOLINTNEXTLINE(readability-magic-numbers)
+                    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
                     if (value == 0x1FU)
                     {
                         return oc::success();
@@ -391,7 +391,7 @@ public:
 
     static inline auto float_single(Stream &inStream) -> result<float>
     {
-        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
         DPLX_TRY(item_info const item, parse::generic(inStream));
 
@@ -417,11 +417,11 @@ public:
                 static_cast<std::uint16_t>(item.value)));
         // }
 
-        // NOLINTEND(readability-magic-numbers)
+        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }
     static inline auto float_double(Stream &inStream) -> result<double>
     {
-        // NOLINTBEGIN(readability-magic-numbers)
+        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
         DPLX_TRY(item_info const item, parse::generic(inStream));
 
@@ -448,7 +448,7 @@ public:
         return detail::load_iec559_half(static_cast<std::uint16_t>(item.value));
         // }
 
-        // NOLINTEND(readability-magic-numbers)
+        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }
 
 private:

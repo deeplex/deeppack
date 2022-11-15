@@ -16,7 +16,7 @@
 namespace dplx::dp::detail
 {
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 template <typename T>
 constexpr auto fnvx_hash(T const *const data,
@@ -91,7 +91,7 @@ constexpr auto xxhash3_ui64(std::uint64_t const value,
     return xxhash3_fixed_impl(swapped, seed, 8U);
 }
 
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 template <cncr::unsigned_integer T>
     requires(sizeof(T) <= sizeof(std::uint64_t))
