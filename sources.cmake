@@ -1,6 +1,15 @@
 
 dplx_target_sources(deeppack
     TEST_TARGET deeppack-tests
+    MODE SMART_HEADER_ONLY MERGED_LAYOUT
+    BASE_DIR dplx
+    
+    PUBLIC
+        dp/streams/output_buffer
+)
+
+dplx_target_sources(deeppack
+    TEST_TARGET deeppack-legacy-tests
     MODE SMART_SOURCE MERGED_LAYOUT
     BASE_DIR dplx
     
@@ -10,7 +19,7 @@ dplx_target_sources(deeppack
 )
 
 dplx_target_sources(deeppack
-    TEST_TARGET deeppack-tests
+    TEST_TARGET deeppack-legacy-tests
     MODE SMART_HEADER_ONLY MERGED_LAYOUT
     BASE_DIR dplx
 
@@ -76,13 +85,21 @@ target_sources(deeppack PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen
 if (BUILD_TESTING)
     dplx_target_sources(deeppack-tests PRIVATE
         MODE VERBATIM
+        BASE_DIR dp_tests-ng
+
+        PRIVATE
+            test_utils.hpp
+    )
+
+    dplx_target_sources(deeppack-legacy-tests PRIVATE
+        MODE VERBATIM
         BASE_DIR dp_tests
 
         PRIVATE
             test_utils.hpp
     )
 
-    target_sources(deeppack-tests PRIVATE
+    target_sources(deeppack-legacy-tests PRIVATE
         tests/encoder.blob.test.cpp
         tests/encoder.map.test.cpp
         tests/encoder.range.test.cpp

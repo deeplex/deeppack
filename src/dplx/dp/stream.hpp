@@ -16,6 +16,7 @@
 #include <dplx/cncr/tag_invoke.hpp>
 
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/streams/output_buffer.hpp>
 
 namespace dplx::dp
 {
@@ -62,8 +63,6 @@ inline constexpr struct write_fn
         return cncr::tag_invoke(*this, stream, data, numBytes);
     }
 } write{};
-
-inline constexpr unsigned minimum_guaranteed_write_size = 40;
 
 inline constexpr struct commit_fn
 {

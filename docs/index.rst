@@ -7,7 +7,7 @@
    :maxdepth: 2
    :caption: Contents:
 
-
+   modules/streams.rst
 
 
 --------------------

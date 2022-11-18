@@ -131,22 +131,36 @@ target_include_directories(deeppack PUBLIC
 # library test project
 if (BUILD_TESTING)
     add_executable(deeppack-tests)
-    source_group(TREE dp_tests PREFIX test_utils)
 
     target_link_libraries(deeppack-tests PRIVATE
+        Deeplex::deeppack
+
+        Catch2::Catch2 Catch2::Catch2WithMain
+    )
+    
+    target_include_directories(deeppack-tests PRIVATE
+        src/dp_tests-ng
+    )
+    
+    add_test(NAME deeppack-tests COMMAND deeppack-tests)
+
+    ## legacy tests ####################################################
+    add_executable(deeppack-legacy-tests)
+    source_group(TREE src/dp_tests PREFIX test_utils)
+
+    target_link_libraries(deeppack-legacy-tests PRIVATE
         Deeplex::deeppack
         
         Boost::unit_test_framework
         fmt::fmt
-        #Catch2::Catch2 Catch2::Catch2WithMain
     )
 
-    target_include_directories(deeppack-tests PRIVATE
+    target_include_directories(deeppack-legacy-tests PRIVATE
         src/dp_tests
     )
 
     if (DPLX_DP_TESTS_PCH)
-        target_precompile_headers(deeppack-tests PRIVATE
+        target_precompile_headers(deeppack-legacy-tests PRIVATE
             <algorithm>
             <array>
             <bit>
@@ -161,7 +175,7 @@ if (BUILD_TESTING)
         )
     endif()
 
-    add_test(NAME deeppack-tests COMMAND deeppack-tests)
+    add_test(NAME deeppack-legacy-tests COMMAND deeppack-legacy-tests)
 endif()
 
 ########################################################################
