@@ -8,7 +8,9 @@
 #pragma once
 
 #include <bit>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 
 #include <boost/endian/conversion.hpp>
@@ -41,7 +43,8 @@ inline
 #endif
         namespace cpp20
 {
-template <typename T>
+
+template <std::integral T>
 DPLX_ATTR_FORCE_INLINE void store(std::byte *dest, T value)
 {
     if constexpr (std::endian::native == std::endian::little)
@@ -61,11 +64,12 @@ DPLX_ATTR_FORCE_INLINE void store(std::byte *dest, T value)
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 }
 
-template <typename T>
+template <std::integral T>
 DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
 {
     // T value;
     // std::memcpy(&value, src, sizeof(T));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     alignas(T) byte_bag<sizeof(T)> raw;
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto dest = static_cast<std::byte *>(raw.bytes),
@@ -118,6 +122,7 @@ DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
 {
     // T value;
     // std::memcpy(&value, src, sizeof(T));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     alignas(T) byte_bag<sizeof(T)> raw;
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto dest = static_cast<std::byte *>(raw.bytes),
@@ -141,6 +146,36 @@ DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
 } // namespace cpp23
 
 #endif
+
+template <std::floating_point T>
+DPLX_ATTR_FORCE_INLINE void store(std::byte *dest, T value)
+{
+    static_assert(sizeof(T) == sizeof(std::uint32_t)
+                  || sizeof(T) == sizeof(std::uint64_t));
+    if constexpr (sizeof(T) == sizeof(std::uint32_t))
+    {
+        detail::store<std::uint32_t>(dest, std::bit_cast<std::uint32_t>(value));
+    }
+    else
+    {
+        detail::store<std::uint64_t>(dest, std::bit_cast<std::uint64_t>(value));
+    }
+}
+
+template <std::floating_point T>
+DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
+{
+    static_assert(sizeof(T) == sizeof(std::uint32_t)
+                  || sizeof(T) == sizeof(std::uint64_t));
+    if constexpr (sizeof(T) == sizeof(std::uint32_t))
+    {
+        return std::bit_cast<T>(detail::load<std::uint32_t>(src));
+    }
+    else
+    {
+        return std::bit_cast<T>(detail::load<std::uint64_t>(src));
+    }
+}
 
 template <typename T>
 inline constexpr int digits_v = std::numeric_limits<T>::digits;
