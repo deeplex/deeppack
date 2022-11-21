@@ -5,6 +5,7 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
     
     PUBLIC
+        dp/items/item_emitter
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
 )

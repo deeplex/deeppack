@@ -19,6 +19,11 @@ namespace dplx::dp
 
 inline constexpr unsigned minimum_guaranteed_write_size = 40U;
 
+}
+
+namespace dplx::dp
+{
+
 class output_buffer
 {
     std::byte *mOutputBuffer;
