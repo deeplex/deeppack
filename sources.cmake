@@ -90,6 +90,7 @@ if (BUILD_TESTING)
         BASE_DIR dp_tests-ng
 
         PRIVATE
+            range_generator.hpp
             test_utils.hpp
     )
 

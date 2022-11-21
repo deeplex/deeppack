@@ -8,21 +8,20 @@
 #include "dplx/dp/items/item_emitter.hpp"
 
 #include <array>
-#include <vector>
-
-#include <boost/container/static_vector.hpp>
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/generators/catch_generators_range.hpp>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 
-#include <dplx/cncr/misc.hpp>
-#include <dplx/cncr/mp_lite.hpp>
+#include <dplx/predef/compiler.h>
 
+#include "dplx/dp/detail/workaround.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
+#include "range_generator.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -30,17 +29,6 @@ namespace dp_tests
 
 namespace
 {
-
-using mp_int_type_list = cncr::mp_list<unsigned char,
-                                       signed char,
-                                       unsigned short,
-                                       short,
-                                       unsigned,
-                                       int,
-                                       unsigned long,
-                                       long,
-                                       unsigned long long,
-                                       long long>;
 
 template <typename T>
 struct item_sample
@@ -99,7 +87,6 @@ constexpr item_sample<long long> negint_samples[] = {
          9, {0x3b, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
          },
 };
-inline constexpr auto num_negint_samples = std::ranges::size(negint_samples);
 
 constexpr item_sample<unsigned long long> posint_samples[] = {
   // Appendix A.Examples
@@ -146,87 +133,111 @@ constexpr item_sample<unsigned long long> posint_samples[] = {
          {0x1b, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
          },
 };
-inline constexpr auto num_posint_samples = std::ranges::size(posint_samples);
 
-template <typename T>
-class IntegerSampleGenerator
-    : public Catch::Generators::IGenerator<item_sample<T>>
+template <typename R, typename T, std::size_t N>
+auto integer_samples(item_sample<T> const (&samples)[N])
 {
-    std::size_t mIndex{};
-    boost::container::static_vector<item_sample<T>,
-                                    num_negint_samples + num_posint_samples>
-            samples{};
-
-public:
-    IntegerSampleGenerator()
+#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
+    typename iterator_generator<item_sample<R>>::container_type values;
+    values.reserve(N);
+    for (auto &sample : samples)
     {
-        for (auto const &sample : posint_samples)
+        if (std::in_range<R>(sample.value))
         {
-            if (std::in_range<T>(sample.value))
-            {
-                samples.push_back(sample.as<T>());
-            }
-        }
-        if constexpr (std::is_signed_v<T>)
-        {
-            for (auto const &sample : negint_samples)
-            {
-                if (std::in_range<T>(sample.value))
-                {
-                    samples.push_back(sample.as<T>());
-                }
-            }
+            values.push_back(sample.template as<R>());
         }
     }
 
-    [[nodiscard]] auto get() const -> item_sample<T> const & override
-    {
-        return samples[mIndex];
-    }
-    [[nodiscard]] auto next() -> bool override
-    {
-        mIndex += 1;
-        return mIndex < samples.size();
-    }
-};
+    return dp_tests::from_range(std::move(values));
+#else
+    using namespace std::ranges::views;
 
-template <typename T>
-auto integer_samples() -> Catch::Generators::GeneratorWrapper<item_sample<T>>
-{
-    return Catch::Generators::GeneratorWrapper<item_sample<T>>(
-            new IntegerSampleGenerator<T>());
+    return dp_tests::from_range(
+            samples
+            | filter([](item_sample<T> const &sample)
+                     { return std::in_range<R>(sample.value); })
+            | transform([](item_sample<T> const &sample)
+                        { return sample.template as<R>(); }));
+#endif
 }
 
 } // namespace
 
-TEMPLATE_LIST_TEST_CASE("integers emit correctly", "", mp_int_type_list)
+TEMPLATE_TEST_CASE("positive integers emit correctly",
+                   "",
+                   unsigned char,
+                   signed char,
+                   unsigned short,
+                   short,
+                   unsigned,
+                   int,
+                   unsigned long,
+                   long,
+                   unsigned long long,
+                   long long)
 {
-    auto sample = GENERATE(integer_samples<TestType>());
+    auto sample = GENERATE(integer_samples<TestType>(posint_samples));
     INFO(sample);
 
-    std::vector<std::byte> encodingBuffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(encodingBuffer);
+    SECTION("with a fitting buffer")
+    {
+        std::vector<std::byte> encodingBuffer(sample.encoded_length);
+        dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter emit(outputStream);
-    REQUIRE(emit.integer(sample.value));
+        dp::ng::item_emitter emit(outputStream);
+        REQUIRE(emit.integer(sample.value));
 
-    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+        CHECK(std::ranges::equal(outputStream.written(),
+                                 sample.encoded_bytes()));
+    }
+
+    SECTION("with an oversized buffer")
+    {
+        std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
+        dp::memory_output_stream outputStream(encodingBuffer);
+
+        dp::ng::item_emitter emit(outputStream);
+        REQUIRE(emit.integer(sample.value));
+
+        CHECK(std::ranges::equal(outputStream.written(),
+                                 sample.encoded_bytes()));
+    }
 }
 
-TEMPLATE_LIST_TEST_CASE("integers emit correctly presized",
-                        "",
-                        mp_int_type_list)
+TEMPLATE_TEST_CASE("negative integers emit correctly",
+                   "",
+                   signed char,
+                   short,
+                   int,
+                   long,
+                   long long)
 {
-    auto sample = GENERATE(integer_samples<TestType>());
+    auto sample = GENERATE(integer_samples<TestType>(negint_samples));
     INFO(sample);
 
-    std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
-    dp::memory_output_stream outputStream(encodingBuffer);
+    SECTION("with a fitting buffer")
+    {
+        std::vector<std::byte> encodingBuffer(sample.encoded_length);
+        dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter emit(outputStream);
-    REQUIRE(emit.integer(sample.value));
+        dp::ng::item_emitter emit(outputStream);
+        REQUIRE(emit.integer(sample.value));
 
-    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+        CHECK(std::ranges::equal(outputStream.written(),
+                                 sample.encoded_bytes()));
+    }
+
+    SECTION("with an oversized buffer")
+    {
+        std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
+        dp::memory_output_stream outputStream(encodingBuffer);
+
+        dp::ng::item_emitter emit(outputStream);
+        REQUIRE(emit.integer(sample.value));
+
+        CHECK(std::ranges::equal(outputStream.written(),
+                                 sample.encoded_bytes()));
+    }
 }
 
 } // namespace dp_tests
