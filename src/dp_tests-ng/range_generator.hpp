@@ -86,4 +86,45 @@ inline auto from_range(It begin, It end)
     return {new iterator_generator<std::iter_value_t<It>>(begin, end)};
 }
 
+template <std::ranges::borrowed_range R>
+    requires std::ranges::input_range<R>
+class borrowed_range_generator
+    : public Catch::Generators::IGenerator<std::ranges::range_value_t<R>>
+{
+    std::ranges::iterator_t<R> mIt;
+    std::ranges::sentinel_t<R> mEnd;
+
+public:
+    borrowed_range_generator(R &range)
+        : mIt(std::ranges::begin(range))
+        , mEnd(std::ranges::end(range))
+    {
+        if (mIt == mEnd)
+        {
+            throw std::runtime_error("borrowed_range_generator must be "
+                                     "initialized with at least one value");
+        }
+    }
+
+    [[nodiscard]] auto get() const
+            -> std::ranges::range_value_t<R> const & override
+    {
+        return *mIt;
+    }
+
+    [[nodiscard]] auto next() -> bool override
+    {
+        ++mIt;
+        return mIt != mEnd;
+    }
+};
+
+template <std::ranges::input_range R>
+    requires std::ranges::borrowed_range<R>
+inline auto borrowed_range(R &&range)
+        -> Catch::Generators::GeneratorWrapper<std::ranges::range_value_t<R>>
+{
+    return {new borrowed_range_generator<R>(range)};
+}
+
 } // namespace dp_tests

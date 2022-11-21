@@ -51,42 +51,68 @@ struct item_sample
     friend inline auto operator<<(std::ostream &os, item_sample const &sample)
             -> std::ostream &
     {
+        fmt::print(os, "{{item_value: <please specialize me>, {}, 0x{:02x}}}",
+                   sample.encoded_length,
+                   fmt::join(sample.encoded_bytes(), "'"));
+        return os;
+    }
+    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
+            -> std::ostream &requires(std::integral<T>)
+    {
         fmt::print(os, "{{item_value: {:#x}, {}, 0x{:02x}}}", sample.value,
+                   sample.encoded_length,
+                   fmt::join(sample.encoded_bytes(), "'"));
+        return os;
+    }
+    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
+            -> std::ostream &requires(std::floating_point<T>)
+    {
+        fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,
                    sample.encoded_length,
                    fmt::join(sample.encoded_bytes(), "'"));
         return os;
     }
 };
 
-constexpr item_sample<long long> negint_samples[] = {
-  // Appendix A.Examples
-        {              -10LL,1,                                           {0b001'01001}},
-        {                      -100LL, 2,                                            {0x38, 0x63}},
-        {                     -1000LL, 3,                                      {0x39, 0x03, 0xe7}},
- // boundary test cases
-        {                     -0x01LL, 1,                                           {0b001'00000}},
-        {                 -1 - 0x17LL, 1,                                           {0b001'10111}},
-        {                 -1 - 0x18LL, 2,                                            {0x38, 0x18}},
-        {                 -1 - 0x7fLL, 2,                                            {0x38, 0x7f}},
-        {                 -1 - 0x80LL, 2,                                            {0x38, 0x80}},
-        {                 -1 - 0xffLL, 2,                                            {0x38, 0xff}},
-        {                -1 - 0x100LL, 3,                                      {0x39, 0x01, 0x00}},
-        {               -1 - 0x7fffLL, 3,                                      {0x39, 0x7f, 0xff}},
-        {               -1 - 0x8000LL, 3,                                      {0x39, 0x80, 0x00}},
-        {               -1 - 0xffffLL, 3,                                      {0x39, 0xff, 0xff}},
-        {             -1 - 0x1'0000LL, 5,                          {0x3a, 0x00, 0x01, 0x00, 0x00}},
-        {          -1 - 0x7fff'ffffLL, 5,                          {0x3a, 0x7f, 0xff, 0xff, 0xff}},
-        {          -1 - 0x8000'0000LL, 5,                          {0x3a, 0x80, 0x00, 0x00, 0x00}},
-        {          -1 - 0xffff'ffffLL, 5,                          {0x3a, 0xff, 0xff, 0xff, 0xff}},
+} // namespace
+
+namespace
+{
+
+template <typename T>
+using limits = std::numeric_limits<T>;
+
+template <typename R, typename T, std::size_t N>
+auto integer_samples(item_sample<T> const (&samples)[N])
+{
+#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
+    typename iterator_generator<item_sample<R>>::container_type values;
+    values.reserve(N);
+    for (auto &sample : samples)
+    {
+        if (std::in_range<R>(sample.value))
         {
-         -1 - 0x1'0000'0000LL,
-         9, {0x3b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00},
-         },
-        {
-         -1 - 0x7fff'ffff'ffff'ffffLL,
-         9, {0x3b, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-         },
-};
+            values.push_back(sample.template as<R>());
+        }
+    }
+
+    return dp_tests::from_range(std::move(values));
+#else
+    using namespace std::ranges::views;
+
+    return dp_tests::from_range(
+            samples
+            | filter([](item_sample<T> const &sample)
+                     { return std::in_range<R>(sample.value); })
+            | transform([](item_sample<T> const &sample)
+                        { return sample.template as<R>(); }));
+#endif
+}
+
+} // namespace
+
+namespace
+{
 
 constexpr item_sample<unsigned long long> posint_samples[] = {
   // Appendix A.Examples
@@ -134,33 +160,6 @@ constexpr item_sample<unsigned long long> posint_samples[] = {
          },
 };
 
-template <typename R, typename T, std::size_t N>
-auto integer_samples(item_sample<T> const (&samples)[N])
-{
-#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
-    typename iterator_generator<item_sample<R>>::container_type values;
-    values.reserve(N);
-    for (auto &sample : samples)
-    {
-        if (std::in_range<R>(sample.value))
-        {
-            values.push_back(sample.template as<R>());
-        }
-    }
-
-    return dp_tests::from_range(std::move(values));
-#else
-    using namespace std::ranges::views;
-
-    return dp_tests::from_range(
-            samples
-            | filter([](item_sample<T> const &sample)
-                     { return std::in_range<R>(sample.value); })
-            | transform([](item_sample<T> const &sample)
-                        { return sample.template as<R>(); }));
-#endif
-}
-
 } // namespace
 
 TEMPLATE_TEST_CASE("positive integers emit correctly",
@@ -204,6 +203,41 @@ TEMPLATE_TEST_CASE("positive integers emit correctly",
     }
 }
 
+namespace
+{
+
+constexpr item_sample<long long> negint_samples[] = {
+  // Appendix A.Examples
+        {              -10LL,1,                                           {0b001'01001}},
+        {                      -100LL, 2,                                            {0x38, 0x63}},
+        {                     -1000LL, 3,                                      {0x39, 0x03, 0xe7}},
+ // boundary test cases
+        {                     -0x01LL, 1,                                           {0b001'00000}},
+        {                 -1 - 0x17LL, 1,                                           {0b001'10111}},
+        {                 -1 - 0x18LL, 2,                                            {0x38, 0x18}},
+        {                 -1 - 0x7fLL, 2,                                            {0x38, 0x7f}},
+        {                 -1 - 0x80LL, 2,                                            {0x38, 0x80}},
+        {                 -1 - 0xffLL, 2,                                            {0x38, 0xff}},
+        {                -1 - 0x100LL, 3,                                      {0x39, 0x01, 0x00}},
+        {               -1 - 0x7fffLL, 3,                                      {0x39, 0x7f, 0xff}},
+        {               -1 - 0x8000LL, 3,                                      {0x39, 0x80, 0x00}},
+        {               -1 - 0xffffLL, 3,                                      {0x39, 0xff, 0xff}},
+        {             -1 - 0x1'0000LL, 5,                          {0x3a, 0x00, 0x01, 0x00, 0x00}},
+        {          -1 - 0x7fff'ffffLL, 5,                          {0x3a, 0x7f, 0xff, 0xff, 0xff}},
+        {          -1 - 0x8000'0000LL, 5,                          {0x3a, 0x80, 0x00, 0x00, 0x00}},
+        {          -1 - 0xffff'ffffLL, 5,                          {0x3a, 0xff, 0xff, 0xff, 0xff}},
+        {
+         -1 - 0x1'0000'0000LL,
+         9, {0x3b, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00},
+         },
+        {
+         -1 - 0x7fff'ffff'ffff'ffffLL,
+         9, {0x3b, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+         },
+};
+
+}
+
 TEMPLATE_TEST_CASE("negative integers emit correctly",
                    "",
                    signed char,
@@ -238,6 +272,64 @@ TEMPLATE_TEST_CASE("negative integers emit correctly",
         CHECK(std::ranges::equal(outputStream.written(),
                                  sample.encoded_bytes()));
     }
+}
+
+namespace
+{
+
+constexpr item_sample<float> float_single_samples[] = {
+        {                 100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}},
+        {   3.4028234663852886e+38F, 5, {0xfa, 0x7f, 0x7f, 0xff, 0xff}},
+        {                 100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}},
+        { limits<float>::infinity(), 5, {0xfa, 0x7f, 0x80, 0x00, 0x00}},
+        {limits<float>::quiet_NaN(), 5, {0xfa, 0x7f, 0xc0, 0x00, 0x00}},
+        {-limits<float>::infinity(), 5, {0xfa, 0xff, 0x80, 0x00, 0x00}},
+};
+
+}
+
+TEST_CASE("float single emits correctly")
+{
+    auto sample = GENERATE(borrowed_range(float_single_samples));
+    INFO(sample);
+
+    std::vector<std::byte> encodingBuffer(sample.encoded_length);
+    dp::memory_output_stream outputStream(encodingBuffer);
+
+    dp::ng::item_emitter emit(outputStream);
+    REQUIRE(emit.float_single(sample.value));
+
+    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+}
+
+namespace
+{
+
+constexpr item_sample<double> float_double_samples[] = {
+        {                        1.1,9, {0xfb, 0x3f, 0xf1, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a}                                     },
+        {                    1.e+300, 9, {0xfb, 0x7e, 0x37, 0xe4, 0x3c, 0x88, 0x00, 0x75, 0x9c}},
+        { limits<double>::infinity(),
+         9, {0xfb, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}                             },
+        {limits<double>::quiet_NaN(),
+         9, {0xfb, 0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}                             },
+        {-limits<double>::infinity(),
+         9, {0xfb, 0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}                             },
+};
+
+}
+
+TEST_CASE("float double emits correctly")
+{
+    auto sample = GENERATE(borrowed_range(float_double_samples));
+    INFO(sample);
+
+    std::vector<std::byte> encodingBuffer(sample.encoded_length);
+    dp::memory_output_stream outputStream(encodingBuffer);
+
+    dp::ng::item_emitter emit(outputStream);
+    REQUIRE(emit.float_double(sample.value));
+
+    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
 }
 
 } // namespace dp_tests

@@ -75,6 +75,42 @@ public:
         }
     }
 
+    [[nodiscard]] inline auto float_single(float const value) const
+            -> result<void>
+    {
+        constexpr auto encodedSize = 1U + sizeof(value);
+        if (mOut.size() < encodedSize) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        auto *const dest = mOut.data();
+        *dest = static_cast<std::byte>(type_code::float_single);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        detail::store(dest + 1, value);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
+    [[nodiscard]] inline auto float_double(double const value) const
+            -> result<void>
+    {
+        constexpr auto encodedSize = 1U + sizeof(value);
+        if (mOut.size() < encodedSize) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        auto *const dest = mOut.data();
+        *dest = static_cast<std::byte>(type_code::float_double);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        detail::store(dest + 1, value);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
 private:
     template <typename T>
         requires(!std::is_signed_v<T>)
