@@ -14,6 +14,13 @@
 namespace dplx::dp
 {
 
+class output_buffer;
+
+}
+
+namespace dplx::dp
+{
+
 static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
 template <typename T, output_stream Stream>

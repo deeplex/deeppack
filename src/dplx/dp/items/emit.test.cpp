@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/items/item_emitter.hpp"
+#include "dplx/dp/items/emit.hpp"
 
 #include <array>
 
@@ -86,8 +86,8 @@ TEST_CASE("boolean emits correctly")
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter const emit(outputStream);
-    REQUIRE(emit.boolean(sample.value));
+    dp::emit_context const ctx{outputStream};
+    REQUIRE(emit_boolean(ctx, sample.value));
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
 }
@@ -199,8 +199,8 @@ TEMPLATE_TEST_CASE("positive integers emit correctly",
         std::vector<std::byte> encodingBuffer(sample.encoded_length);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::ng::item_emitter const emit(outputStream);
-        REQUIRE(emit.integer(sample.value));
+        dp::emit_context const ctx{outputStream};
+        REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
                                  sample.encoded_bytes()));
@@ -211,8 +211,8 @@ TEMPLATE_TEST_CASE("positive integers emit correctly",
         std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::ng::item_emitter const emit(outputStream);
-        REQUIRE(emit.integer(sample.value));
+        dp::emit_context const ctx{outputStream};
+        REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
                                  sample.encoded_bytes()));
@@ -270,8 +270,8 @@ TEMPLATE_TEST_CASE("negative integers emit correctly",
         std::vector<std::byte> encodingBuffer(sample.encoded_length);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::ng::item_emitter const emit(outputStream);
-        REQUIRE(emit.integer(sample.value));
+        dp::emit_context const ctx{outputStream};
+        REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
                                  sample.encoded_bytes()));
@@ -282,8 +282,8 @@ TEMPLATE_TEST_CASE("negative integers emit correctly",
         std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::ng::item_emitter const emit(outputStream);
-        REQUIRE(emit.integer(sample.value));
+        dp::emit_context const ctx{outputStream};
+        REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
                                  sample.encoded_bytes()));
@@ -297,32 +297,32 @@ TEST_CASE("finite prefixes are emitted correctly")
 
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
-    dp::ng::item_emitter const emit(outputStream);
+    dp::emit_context const ctx{outputStream};
 
     SECTION("for binary")
     {
         sample.encoded[0] |= static_cast<std::uint8_t>(dp::type_code::binary);
-        REQUIRE(emit.binary(sample.value));
+        REQUIRE(emit_binary(ctx, sample.value));
     }
     SECTION("for text")
     {
         sample.encoded[0] |= static_cast<std::uint8_t>(dp::type_code::text);
-        REQUIRE(emit.u8string(sample.value));
+        REQUIRE(emit_u8string(ctx, sample.value));
     }
     SECTION("for array")
     {
         sample.encoded[0] |= static_cast<std::uint8_t>(dp::type_code::array);
-        REQUIRE(emit.array(sample.value));
+        REQUIRE(emit_array(ctx, sample.value));
     }
     SECTION("for map")
     {
         sample.encoded[0] |= static_cast<std::uint8_t>(dp::type_code::map);
-        REQUIRE(emit.map(sample.value));
+        REQUIRE(emit_map(ctx, sample.value));
     }
     SECTION("for tags")
     {
         sample.encoded[0] |= static_cast<std::uint8_t>(dp::type_code::tag);
-        REQUIRE(emit.tag(sample.value));
+        REQUIRE(emit_tag(ctx, sample.value));
     }
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
@@ -332,29 +332,29 @@ TEST_CASE("indefinite prefixes are emitted correctly")
 {
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
-    dp::ng::item_emitter const emit(outputStream);
+    dp::emit_context const ctx{outputStream};
 
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     std::byte expected{0x1f};
     SECTION("for binary")
     {
         expected |= static_cast<std::byte>(dp::type_code::binary);
-        REQUIRE(emit.binary_indefinite());
+        REQUIRE(emit_binary_indefinite(ctx));
     }
     SECTION("for text")
     {
         expected |= static_cast<std::byte>(dp::type_code::text);
-        REQUIRE(emit.u8string_indefinite());
+        REQUIRE(emit_u8string_indefinite(ctx));
     }
     SECTION("for array")
     {
         expected |= static_cast<std::byte>(dp::type_code::array);
-        REQUIRE(emit.array_indefinite());
+        REQUIRE(emit_array_indefinite(ctx));
     }
     SECTION("for map")
     {
         expected |= static_cast<std::byte>(dp::type_code::map);
-        REQUIRE(emit.map_indefinite());
+        REQUIRE(emit_map_indefinite(ctx));
     }
 
     REQUIRE(outputStream.written().size() == 1U);
@@ -383,8 +383,8 @@ TEST_CASE("float single emits correctly")
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter const emit(outputStream);
-    REQUIRE(emit.float_single(sample.value));
+    dp::emit_context const ctx{outputStream};
+    REQUIRE(emit_float_single(ctx, sample.value));
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
 }
@@ -413,8 +413,8 @@ TEST_CASE("float double emits correctly")
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter const emit(outputStream);
-    REQUIRE(emit.float_double(sample.value));
+    dp::emit_context const ctx{outputStream};
+    REQUIRE(emit_float_double(ctx, sample.value));
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
 }
@@ -424,8 +424,8 @@ TEST_CASE("null emits correctly")
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter const emit(outputStream);
-    REQUIRE(emit.null());
+    dp::emit_context const ctx{outputStream};
+    REQUIRE(emit_null(ctx));
 
     REQUIRE(outputStream.written().size() == 1U);
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
@@ -437,8 +437,8 @@ TEST_CASE("undefined emits correctly")
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter const emit(outputStream);
-    REQUIRE(emit.undefined());
+    dp::emit_context const ctx{outputStream};
+    REQUIRE(emit_undefined(ctx));
 
     REQUIRE(outputStream.written().size() == 1U);
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
@@ -450,8 +450,8 @@ TEST_CASE("break emits correctly")
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::ng::item_emitter const emit(outputStream);
-    REQUIRE(emit.break_());
+    dp::emit_context const ctx{outputStream};
+    REQUIRE(emit_break(ctx));
 
     REQUIRE(outputStream.written().size() == 1U);
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
