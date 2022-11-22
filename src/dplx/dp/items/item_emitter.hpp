@@ -32,6 +32,23 @@ public:
     {
     }
 
+    [[nodiscard]] inline auto boolean(bool const value) const noexcept
+            -> result<void>
+    {
+        constexpr std::size_t encodedSize = 1U;
+        if (mOut.empty()) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        *mOut.data() = static_cast<std::byte>(
+                static_cast<unsigned>(type_code::bool_false)
+                | static_cast<unsigned>(value));
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
     template <cncr::integer T>
     [[nodiscard]] inline auto integer(T const value) const noexcept
             -> result<void>

@@ -76,6 +76,22 @@ struct item_sample
 
 } // namespace
 
+TEST_CASE("boolean emits correctly")
+{
+    auto sample = GENERATE(gens::values<item_sample<bool>>({
+            {false, 1, {0b111'10100}},
+            { true, 1, {0b111'10101}},
+    }));
+
+    std::vector<std::byte> encodingBuffer(sample.encoded_length);
+    dp::memory_output_stream outputStream(encodingBuffer);
+
+    dp::ng::item_emitter emit(outputStream);
+    REQUIRE(emit.boolean(sample.value));
+
+    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+}
+
 namespace
 {
 

@@ -18,10 +18,12 @@
 namespace dp_tests
 {
 
+namespace gens = Catch::Generators;
+
 inline constexpr std::size_t iterator_generator_sbo_size = 128U;
 
 template <typename T>
-class iterator_generator final : public Catch::Generators::IGenerator<T>
+class iterator_generator final : public gens::IGenerator<T>
 {
 public:
     using container_type
@@ -74,14 +76,14 @@ public:
 template <std::ranges::input_range R>
     requires std::ranges::common_range<R>
 inline auto from_range(R &&range)
-        -> Catch::Generators::GeneratorWrapper<std::ranges::range_value_t<R>>
+        -> gens::GeneratorWrapper<std::ranges::range_value_t<R>>
 {
     return {new iterator_generator<std::ranges::range_value_t<R>>(
             static_cast<R &&>(range))};
 }
 template <typename It>
 inline auto from_range(It begin, It end)
-        -> Catch::Generators::GeneratorWrapper<std::iter_value_t<It>>
+        -> gens::GeneratorWrapper<std::iter_value_t<It>>
 {
     return {new iterator_generator<std::iter_value_t<It>>(begin, end)};
 }
@@ -89,7 +91,7 @@ inline auto from_range(It begin, It end)
 template <std::ranges::borrowed_range R>
     requires std::ranges::input_range<R>
 class borrowed_range_generator
-    : public Catch::Generators::IGenerator<std::ranges::range_value_t<R>>
+    : public gens::IGenerator<std::ranges::range_value_t<R>>
 {
     std::ranges::iterator_t<R> mIt;
     std::ranges::sentinel_t<R> mEnd;
@@ -122,7 +124,7 @@ public:
 template <std::ranges::input_range R>
     requires std::ranges::borrowed_range<R>
 inline auto borrowed_range(R &&range)
-        -> Catch::Generators::GeneratorWrapper<std::ranges::range_value_t<R>>
+        -> gens::GeneratorWrapper<std::ranges::range_value_t<R>>
 {
     return {new borrowed_range_generator<R>(range)};
 }
