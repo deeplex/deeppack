@@ -128,6 +128,46 @@ public:
         return oc::success();
     }
 
+    [[nodiscard]] inline auto null() const noexcept -> result<void>
+    {
+        constexpr std::size_t encodedSize = 1U;
+        if (mOut.empty()) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        *mOut.data() = static_cast<std::byte>(type_code::null);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+    [[nodiscard]] inline auto undefined() const noexcept -> result<void>
+    {
+        constexpr std::size_t encodedSize = 1U;
+        if (mOut.empty()) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        *mOut.data() = static_cast<std::byte>(type_code::undefined);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+    [[nodiscard]] inline auto break_() const noexcept -> result<void>
+    {
+        constexpr std::size_t encodedSize = 1U;
+        if (mOut.empty()) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        *mOut.data() = static_cast<std::byte>(type_code::special_break);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
 private:
     template <typename T>
         requires(!std::is_signed_v<T>)

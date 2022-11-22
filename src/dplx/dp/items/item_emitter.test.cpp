@@ -348,4 +348,43 @@ TEST_CASE("float double emits correctly")
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
 }
 
+TEST_CASE("null emits correctly")
+{
+    std::vector<std::byte> encodingBuffer(1U);
+    dp::memory_output_stream outputStream(encodingBuffer);
+
+    dp::ng::item_emitter emit(outputStream);
+    REQUIRE(emit.null());
+
+    REQUIRE(outputStream.written().size() == 1U);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+    REQUIRE(*outputStream.written().data() == std::byte{0b111'10110});
+}
+
+TEST_CASE("undefined emits correctly")
+{
+    std::vector<std::byte> encodingBuffer(1U);
+    dp::memory_output_stream outputStream(encodingBuffer);
+
+    dp::ng::item_emitter emit(outputStream);
+    REQUIRE(emit.undefined());
+
+    REQUIRE(outputStream.written().size() == 1U);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+    REQUIRE(*outputStream.written().data() == std::byte{0b111'10111});
+}
+
+TEST_CASE("break emits correctly")
+{
+    std::vector<std::byte> encodingBuffer(1U);
+    dp::memory_output_stream outputStream(encodingBuffer);
+
+    dp::ng::item_emitter emit(outputStream);
+    REQUIRE(emit.break_());
+
+    REQUIRE(outputStream.written().size() == 1U);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+    REQUIRE(*outputStream.written().data() == std::byte{0b111'11111});
+}
+
 } // namespace dp_tests
