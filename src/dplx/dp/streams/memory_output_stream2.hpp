@@ -40,8 +40,8 @@ private:
     {
         return errc::end_of_stream;
     }
-    auto do_bulk_write([[maybe_unused]] std::byte const *const bytes,
-                       [[maybe_unused]] std::size_t const bytesSize) noexcept
+    auto do_bulk_write([[maybe_unused]] std::byte const *const src,
+                       [[maybe_unused]] std::size_t const size) noexcept
             -> result<void> override
     {
         return errc::end_of_stream;
