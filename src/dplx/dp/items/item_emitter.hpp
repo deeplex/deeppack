@@ -45,6 +45,10 @@ public:
     {
     }
 
+private:
+    static constexpr unsigned indefinite_add_info = 0b000'11111U;
+
+public:
     template <detail::encodable_int T>
     [[nodiscard]] inline auto integer(T const value) const noexcept
             -> result<void>
@@ -52,9 +56,8 @@ public:
         using code_type = detail::encoder_uint_t<T>;
         if constexpr (!std::is_signed_v<T>)
         {
-            return store_var_uint<code_type>(
-                    static_cast<code_type>(value),
-                    static_cast<unsigned>(type_code::posint));
+            return store_var_uint<code_type>(static_cast<code_type>(value),
+                                             type_code::posint);
         }
         else
         {
@@ -65,12 +68,69 @@ public:
             uvalue_type const uvalue
                     = signmask ^ static_cast<uvalue_type>(value);
 
-            auto const category = static_cast<unsigned>(
-                    signmask & static_cast<unsigned>(type_code::negint));
+            auto const category = static_cast<type_code>(
+                    signmask & static_cast<uvalue_type>(type_code::negint));
 
             return store_var_uint<code_type>(static_cast<code_type>(uvalue),
                                              category);
         }
+    }
+
+    template <detail::encodable_int T>
+    [[nodiscard]] inline auto binary(T const byteSize) const noexcept
+            -> result<void>
+    {
+        using code_type = detail::encoder_uint_t<T>;
+        assert(byteSize >= 0);
+        return store_var_uint<code_type>(static_cast<code_type>(byteSize),
+                                         type_code::binary);
+    }
+    [[nodiscard]] inline auto binary_indefinite() const noexcept -> result<void>
+    {
+        return store_inline_value(indefinite_add_info, type_code::binary);
+    }
+
+    template <detail::encodable_int T>
+    [[nodiscard]] inline auto u8string(T const numCodeUnits) const noexcept
+            -> result<void>
+    {
+        using code_type = detail::encoder_uint_t<T>;
+        assert(numCodeUnits >= 0);
+        return store_var_uint<code_type>(static_cast<code_type>(numCodeUnits),
+                                         type_code::text);
+    }
+    [[nodiscard]] inline auto u8string_indefinite() const noexcept
+            -> result<void>
+    {
+        return store_inline_value(indefinite_add_info, type_code::text);
+    }
+
+    template <detail::encodable_int T>
+    [[nodiscard]] inline auto array(T const numElements) const noexcept
+            -> result<void>
+    {
+        using code_type = detail::encoder_uint_t<T>;
+        assert(numElements >= 0);
+        return store_var_uint<code_type>(static_cast<code_type>(numElements),
+                                         type_code::array);
+    }
+    [[nodiscard]] inline auto array_indefinite() const noexcept -> result<void>
+    {
+        return store_inline_value(indefinite_add_info, type_code::array);
+    }
+
+    template <detail::encodable_int T>
+    [[nodiscard]] inline auto map(T const numElements) const noexcept
+            -> result<void>
+    {
+        using code_type = detail::encoder_uint_t<T>;
+        assert(numElements >= 0);
+        return store_var_uint<code_type>(static_cast<code_type>(numElements),
+                                         type_code::map);
+    }
+    [[nodiscard]] inline auto map_indefinite() const noexcept -> result<void>
+    {
+        return store_inline_value(indefinite_add_info, type_code::map);
     }
 
     template <detail::encodable_int T>
@@ -79,66 +139,28 @@ public:
     {
         using code_type = detail::encoder_uint_t<T>;
         assert(tagValue >= 0);
-        return store_var_uint<code_type>(
-                static_cast<code_type>(tagValue),
-                static_cast<unsigned>(type_code::binary));
+        return store_var_uint<code_type>(static_cast<code_type>(tagValue),
+                                         type_code::tag);
     }
 
     [[nodiscard]] inline auto boolean(bool const value) const noexcept
             -> result<void>
     {
-        constexpr std::size_t encodedSize = 1U;
-        if (mOut.empty()) [[unlikely]]
-        {
-            DPLX_TRY(mOut.ensure_size(encodedSize));
-        }
-
-        *mOut.data() = static_cast<std::byte>(
-                static_cast<unsigned>(type_code::bool_false)
-                | static_cast<unsigned>(value));
-
-        mOut.commit_written(encodedSize);
-        return oc::success();
+        return store_inline_value(static_cast<unsigned>(value),
+                                  type_code::bool_false);
     }
 
     [[nodiscard]] inline auto null() const noexcept -> result<void>
     {
-        constexpr std::size_t encodedSize = 1U;
-        if (mOut.empty()) [[unlikely]]
-        {
-            DPLX_TRY(mOut.ensure_size(encodedSize));
-        }
-
-        *mOut.data() = static_cast<std::byte>(type_code::null);
-
-        mOut.commit_written(encodedSize);
-        return oc::success();
+        return store_inline_value(0U, type_code::null);
     }
     [[nodiscard]] inline auto undefined() const noexcept -> result<void>
     {
-        constexpr std::size_t encodedSize = 1U;
-        if (mOut.empty()) [[unlikely]]
-        {
-            DPLX_TRY(mOut.ensure_size(encodedSize));
-        }
-
-        *mOut.data() = static_cast<std::byte>(type_code::undefined);
-
-        mOut.commit_written(encodedSize);
-        return oc::success();
+        return store_inline_value(0U, type_code::undefined);
     }
     [[nodiscard]] inline auto break_() const noexcept -> result<void>
     {
-        constexpr std::size_t encodedSize = 1U;
-        if (mOut.empty()) [[unlikely]]
-        {
-            DPLX_TRY(mOut.ensure_size(encodedSize));
-        }
-
-        *mOut.data() = static_cast<std::byte>(type_code::special_break);
-
-        mOut.commit_written(encodedSize);
-        return oc::success();
+        return store_inline_value(0U, type_code::special_break);
     }
 
     [[nodiscard]] inline auto float_single(float const value) const
@@ -178,12 +200,30 @@ public:
     }
 
 private:
+    [[nodiscard]] inline auto
+    store_inline_value(unsigned const value,
+                       type_code const category) const noexcept -> result<void>
+    {
+        constexpr std::size_t encodedSize = 1U;
+        if (mOut.empty()) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        *mOut.data() = static_cast<std::byte>(
+                value | static_cast<unsigned>(category));
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
     template <typename T>
         requires(!std::is_signed_v<T>)
-    [[nodiscard]] inline auto store_var_uint(T value,
-                                             unsigned category) const noexcept
+    [[nodiscard]] inline auto
+    store_var_uint(T value, type_code const category) const noexcept
             -> result<void>
     {
+        auto rcategory = static_cast<unsigned>(category);
         // NOLINTBEGIN(cppcoreguidelines-init-variables)
         unsigned bytePowerPlus2;
         unsigned bitSize;
@@ -194,8 +234,8 @@ private:
             bytePowerPlus2 = 1U;
             bitSize = 1U;
             byteSize = 1U;
-            value += category;
-            category = static_cast<unsigned>(value - detail::inline_value_max);
+            value += rcategory;
+            rcategory = static_cast<unsigned>(value - detail::inline_value_max);
         }
         else
         {
@@ -211,11 +251,11 @@ private:
         if (mOut.size() < 1U + sizeof(T)) [[unlikely]]
         {
             return store_var_uint_eos(static_cast<std::uint64_t>(value),
-                                      category, bytePowerPlus2, byteSize);
+                                      rcategory, bytePowerPlus2, byteSize);
         }
 
         auto *const dest = mOut.data();
-        *dest = static_cast<std::byte>(category + detail::inline_value_max
+        *dest = static_cast<std::byte>(rcategory + detail::inline_value_max
                                        + bytePowerPlus2 - 1);
 
         T const encoded = value << (detail::digits_v<T> - bitSize);
