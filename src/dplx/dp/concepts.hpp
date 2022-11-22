@@ -18,9 +18,28 @@
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/fwd.hpp>
 #include <dplx/dp/stream.hpp>
 
 static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+
+namespace dplx::dp::ng
+{
+
+// clang-format off
+template <typename T>
+concept encodable
+    = !std::is_reference_v<T>
+    && !std::is_pointer_v<T>
+    && requires(T const &t, emit_context const &ctx)
+    {
+        typename codec<T>;
+        { codec<T>::encode(ctx, t) } noexcept
+            -> oc::concepts::basic_result;
+    };
+// clang-format on
+
+} // namespace dplx::dp::ng
 
 namespace dplx::dp
 {

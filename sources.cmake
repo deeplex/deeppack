@@ -1,6 +1,16 @@
 
 dplx_target_sources(deeppack
     TEST_TARGET deeppack-tests
+    MODE SMART_SOURCE MERGED_LAYOUT
+    BASE_DIR dplx
+    
+    PUBLIC
+        dp/core
+        dp/disappointment
+)
+
+dplx_target_sources(deeppack
+    TEST_TARGET deeppack-tests
     MODE SMART_HEADER_ONLY MERGED_LAYOUT
     BASE_DIR dplx
     
@@ -18,7 +28,6 @@ dplx_target_sources(deeppack
     
     PUBLIC
         dp
-        dp/disappointment
 )
 
 dplx_target_sources(deeppack

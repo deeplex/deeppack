@@ -16,7 +16,12 @@ namespace dplx::dp
 
 class output_buffer;
 
-}
+struct emit_context;
+
+template <typename T>
+class codec;
+
+} // namespace dplx::dp
 
 namespace dplx::dp
 {

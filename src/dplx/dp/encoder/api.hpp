@@ -17,6 +17,7 @@
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/encoder/arg_list.hpp>
 #include <dplx/dp/fwd.hpp>
+#include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/stream.hpp>
 
 namespace dplx::dp
@@ -32,6 +33,24 @@ inline constexpr struct encode_fn final
     {
         return basic_encoder<cncr::remove_cref_t<T>, Stream>()(
                 outStream, static_cast<T &&>(value));
+    }
+
+    template <typename T>
+        requires ng::encodable<std::remove_reference_t<T>>
+    inline auto operator()(output_buffer &outStream, T &&value) const noexcept
+            -> result<void>
+    {
+        emit_context const ctx{outStream};
+        return codec<T>::encode(
+                ctx, static_cast<std::remove_reference_t<T> const &>(value));
+    }
+    template <typename T>
+        requires ng::encodable<std::remove_reference_t<T>>
+    inline auto operator()(emit_context const &ctx, T &&value) const noexcept
+            -> result<void>
+    {
+        return codec<T>::encode(
+                ctx, static_cast<std::remove_reference_t<T> const &>(value));
     }
 
     template <typename T, output_stream Stream>
