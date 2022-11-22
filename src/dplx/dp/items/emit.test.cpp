@@ -21,60 +21,12 @@
 
 #include "dplx/dp/detail/workaround.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
+#include "item_sample.hpp"
 #include "range_generator.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
 {
-
-namespace
-{
-
-template <typename T>
-struct item_sample
-{
-    T value;
-    unsigned encoded_length;
-    std::array<std::uint8_t, dp::detail::var_uint_max_size> encoded;
-
-    template <typename U>
-    [[nodiscard]] constexpr auto as() const noexcept -> item_sample<U>
-    {
-        return {static_cast<U>(value), encoded_length, encoded};
-    }
-
-    [[nodiscard]] auto encoded_bytes() const -> std::span<std::byte const>
-    {
-        return as_bytes(std::span(encoded)).first(encoded_length);
-    }
-
-    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
-            -> std::ostream &
-    {
-        fmt::print(os, "{{item_value: <please specialize me>, {}, 0x{:02x}}}",
-                   sample.encoded_length,
-                   fmt::join(sample.encoded_bytes(), "'"));
-        return os;
-    }
-    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
-            -> std::ostream &requires(std::integral<T>)
-    {
-        fmt::print(os, "{{item_value: {:#x}, {}, 0x{:02x}}}", sample.value,
-                   sample.encoded_length,
-                   fmt::join(sample.encoded_bytes(), "'"));
-        return os;
-    }
-    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
-            -> std::ostream &requires(std::floating_point<T>)
-    {
-        fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,
-                   sample.encoded_length,
-                   fmt::join(sample.encoded_bytes(), "'"));
-        return os;
-    }
-};
-
-} // namespace
 
 TEST_CASE("boolean emits correctly")
 {
@@ -367,7 +319,6 @@ namespace
 constexpr item_sample<float> float_single_samples[] = {
         {                 100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}},
         {   3.4028234663852886e+38F, 5, {0xfa, 0x7f, 0x7f, 0xff, 0xff}},
-        {                 100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}},
         { limits<float>::infinity(), 5, {0xfa, 0x7f, 0x80, 0x00, 0x00}},
         {limits<float>::quiet_NaN(), 5, {0xfa, 0x7f, 0xc0, 0x00, 0x00}},
         {-limits<float>::infinity(), 5, {0xfa, 0xff, 0x80, 0x00, 0x00}},

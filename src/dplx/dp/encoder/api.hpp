@@ -36,21 +36,21 @@ inline constexpr struct encode_fn final
     }
 
     template <typename T>
-        requires ng::encodable<std::remove_reference_t<T>>
+        requires ng::encodable<cncr::remove_cref_t<T>>
     inline auto operator()(output_buffer &outStream, T &&value) const noexcept
             -> result<void>
     {
         emit_context const ctx{outStream};
-        return codec<T>::encode(
-                ctx, static_cast<std::remove_reference_t<T> const &>(value));
+        return codec<cncr::remove_cref_t<T>>::encode(
+                ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
     }
     template <typename T>
-        requires ng::encodable<std::remove_reference_t<T>>
+        requires ng::encodable<cncr::remove_cref_t<T>>
     inline auto operator()(emit_context const &ctx, T &&value) const noexcept
             -> result<void>
     {
-        return codec<T>::encode(
-                ctx, static_cast<std::remove_reference_t<T> const &>(value));
+        return codec<cncr::remove_cref_t<T>>::encode(
+                ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
     }
 
     template <typename T, output_stream Stream>

@@ -33,8 +33,8 @@ concept encodable
     && !std::is_pointer_v<T>
     && requires(T const &t, emit_context const &ctx)
     {
-        typename codec<T>;
-        { codec<T>::encode(ctx, t) } noexcept
+        typename codec<std::remove_const_t<T>>;
+        { codec<std::remove_const_t<T>>::encode(ctx, t) } noexcept
             -> oc::concepts::basic_result;
     };
 // clang-format on
