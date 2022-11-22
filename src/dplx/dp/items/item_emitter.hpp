@@ -19,6 +19,19 @@
 #include <dplx/dp/streams/output_buffer.hpp>
 #include <dplx/dp/type_code.hpp>
 
+namespace dplx::dp::detail
+{
+
+template <typename T>
+concept encodable_int = cncr::integer<T> && sizeof(T) <= sizeof(std::uint64_t);
+
+template <typename T>
+using encoder_uint_t = std::conditional_t<sizeof(T) <= sizeof(std::uint32_t),
+                                          std::uint32_t,
+                                          std::uint64_t>;
+
+} // namespace dplx::dp::detail
+
 namespace dplx::dp::ng
 {
 
@@ -32,23 +45,16 @@ public:
     {
     }
 
-    template <cncr::integer T>
-        requires(sizeof(T) <= sizeof(std::uint64_t))
+    template <detail::encodable_int T>
     [[nodiscard]] inline auto integer(T const value) const noexcept
             -> result<void>
     {
+        using code_type = detail::encoder_uint_t<T>;
         if constexpr (!std::is_signed_v<T>)
         {
-            if constexpr (sizeof(T) <= sizeof(std::uint32_t))
-            {
-                return store_var_uint(static_cast<std::uint32_t>(value),
-                                      static_cast<unsigned>(type_code::posint));
-            }
-            else
-            {
-                return store_var_uint(static_cast<std::uint64_t>(value),
-                                      static_cast<unsigned>(type_code::posint));
-            }
+            return store_var_uint<code_type>(
+                    static_cast<code_type>(value),
+                    static_cast<unsigned>(type_code::posint));
         }
         else
         {
@@ -62,34 +68,20 @@ public:
             auto const category = static_cast<unsigned>(
                     signmask & static_cast<unsigned>(type_code::negint));
 
-            if constexpr (sizeof(T) <= sizeof(std::uint32_t))
-            {
-                return store_var_uint(static_cast<std::uint32_t>(uvalue),
-                                      category);
-            }
-            else
-            {
-                return store_var_uint(static_cast<std::uint64_t>(uvalue),
-                                      category);
-            }
+            return store_var_uint<code_type>(static_cast<code_type>(uvalue),
+                                             category);
         }
     }
 
-    template <cncr::integer T>
-        requires(sizeof(T) <= sizeof(std::uint64_t))
+    template <detail::encodable_int T>
     [[nodiscard]] inline auto tag(T const tagValue) const noexcept
             -> result<void>
     {
-        if constexpr (sizeof(T) <= sizeof(std::uint32_t))
-        {
-            return store_var_uint(static_cast<std::uint32_t>(tagValue),
-                                  static_cast<unsigned>(type_code::tag));
-        }
-        else
-        {
-            return store_var_uint(static_cast<std::uint64_t>(tagValue),
-                                  static_cast<unsigned>(type_code::tag));
-        }
+        using code_type = detail::encoder_uint_t<T>;
+        assert(tagValue >= 0);
+        return store_var_uint<code_type>(
+                static_cast<code_type>(tagValue),
+                static_cast<unsigned>(type_code::binary));
     }
 
     [[nodiscard]] inline auto boolean(bool const value) const noexcept
