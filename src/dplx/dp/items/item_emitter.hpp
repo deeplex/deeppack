@@ -32,28 +32,11 @@ public:
     {
     }
 
-    [[nodiscard]] inline auto boolean(bool const value) const noexcept
-            -> result<void>
-    {
-        constexpr std::size_t encodedSize = 1U;
-        if (mOut.empty()) [[unlikely]]
-        {
-            DPLX_TRY(mOut.ensure_size(encodedSize));
-        }
-
-        *mOut.data() = static_cast<std::byte>(
-                static_cast<unsigned>(type_code::bool_false)
-                | static_cast<unsigned>(value));
-
-        mOut.commit_written(encodedSize);
-        return oc::success();
-    }
-
     template <cncr::integer T>
+        requires(sizeof(T) <= sizeof(std::uint64_t))
     [[nodiscard]] inline auto integer(T const value) const noexcept
             -> result<void>
     {
-        static_assert(sizeof(T) <= sizeof(std::uint64_t));
         if constexpr (!std::is_signed_v<T>)
         {
             if constexpr (sizeof(T) <= sizeof(std::uint32_t))
@@ -92,37 +75,35 @@ public:
         }
     }
 
-    [[nodiscard]] inline auto float_single(float const value) const
+    template <cncr::integer T>
+        requires(sizeof(T) <= sizeof(std::uint64_t))
+    [[nodiscard]] inline auto tag(T const tagValue) const noexcept
             -> result<void>
     {
-        constexpr auto encodedSize = 1U + sizeof(value);
-        if (mOut.size() < encodedSize) [[unlikely]]
+        if constexpr (sizeof(T) <= sizeof(std::uint32_t))
         {
-            DPLX_TRY(mOut.ensure_size(encodedSize));
+            return store_var_uint(static_cast<std::uint32_t>(tagValue),
+                                  static_cast<unsigned>(type_code::tag));
         }
-
-        auto *const dest = mOut.data();
-        *dest = static_cast<std::byte>(type_code::float_single);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        detail::store(dest + 1, value);
-
-        mOut.commit_written(encodedSize);
-        return oc::success();
+        else
+        {
+            return store_var_uint(static_cast<std::uint64_t>(tagValue),
+                                  static_cast<unsigned>(type_code::tag));
+        }
     }
 
-    [[nodiscard]] inline auto float_double(double const value) const
+    [[nodiscard]] inline auto boolean(bool const value) const noexcept
             -> result<void>
     {
-        constexpr auto encodedSize = 1U + sizeof(value);
-        if (mOut.size() < encodedSize) [[unlikely]]
+        constexpr std::size_t encodedSize = 1U;
+        if (mOut.empty()) [[unlikely]]
         {
             DPLX_TRY(mOut.ensure_size(encodedSize));
         }
 
-        auto *const dest = mOut.data();
-        *dest = static_cast<std::byte>(type_code::float_double);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        detail::store(dest + 1, value);
+        *mOut.data() = static_cast<std::byte>(
+                static_cast<unsigned>(type_code::bool_false)
+                | static_cast<unsigned>(value));
 
         mOut.commit_written(encodedSize);
         return oc::success();
@@ -163,6 +144,42 @@ public:
         }
 
         *mOut.data() = static_cast<std::byte>(type_code::special_break);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
+    [[nodiscard]] inline auto float_single(float const value) const
+            -> result<void>
+    {
+        constexpr auto encodedSize = 1U + sizeof(value);
+        if (mOut.size() < encodedSize) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        auto *const dest = mOut.data();
+        *dest = static_cast<std::byte>(type_code::float_single);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        detail::store(dest + 1, value);
+
+        mOut.commit_written(encodedSize);
+        return oc::success();
+    }
+
+    [[nodiscard]] inline auto float_double(double const value) const
+            -> result<void>
+    {
+        constexpr auto encodedSize = 1U + sizeof(value);
+        if (mOut.size() < encodedSize) [[unlikely]]
+        {
+            DPLX_TRY(mOut.ensure_size(encodedSize));
+        }
+
+        auto *const dest = mOut.data();
+        *dest = static_cast<std::byte>(type_code::float_double);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        detail::store(dest + 1, value);
 
         mOut.commit_written(encodedSize);
         return oc::success();
