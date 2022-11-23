@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iosfwd>
+#include <span>
 
 #include <fmt/core.h>
 #include <fmt/format.h>
