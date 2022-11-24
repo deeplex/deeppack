@@ -10,6 +10,9 @@
 
 #include <boost/unordered_map.hpp>
 
+#include <dplx/predef/compiler.h>
+
+#include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/encoder/core.hpp>
 #include <dplx/dp/encoder/narrow_strings.hpp>
 
@@ -17,6 +20,23 @@
 #include "encoder.test_utils.hpp"
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
+
+#if DPLX_DP_WORKAROUND(DPLX_COMP_CLANG, <, 15, 0, 0)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function" // std::size_t casts :(
+namespace
+{
+
+// see https://github.com/llvm/llvm-project/issues/55560
+// NOLINTNEXTLINE(clang-diagnostic-unused-function)
+std::u8string clang_string_workaround(char8_t const *a, char8_t const *b)
+{
+    return {a, b};
+}
+
+} // namespace
+#pragma clang diagnostic pop
+#endif
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
