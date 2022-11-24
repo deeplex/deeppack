@@ -7,7 +7,7 @@
 
 #include "dplx/dp/core.hpp"
 
-#include <dplx/dp/items/emit.hpp>
+#include <dplx/dp/items/emit_core.hpp>
 
 namespace dplx::dp
 {
@@ -18,27 +18,58 @@ auto codec<null_type>::encode(emit_context const &ctx, null_type) noexcept
     return dp::emit_null(ctx);
 }
 
-#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
-#else
-
-template <cncr::integer T>
-auto codec<T>::encode(emit_context const &ctx, T value) noexcept -> result<void>
+auto codec<signed char>::encode(emit_context const &ctx,
+                                signed char value) noexcept -> result<void>
 {
     return dp::emit_integer(ctx, value);
 }
-
-#endif
-
-template class codec<signed char>;
-template class codec<unsigned char>;
-template class codec<short>;
-template class codec<unsigned short>;
-template class codec<int>;
-template class codec<unsigned>;
-template class codec<long>;
-template class codec<unsigned long>;
-template class codec<long long>;
-template class codec<unsigned long long>;
+auto codec<unsigned char>::encode(emit_context const &ctx,
+                                  unsigned char value) noexcept -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<short>::encode(emit_context const &ctx, short value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<unsigned short>::encode(emit_context const &ctx,
+                                   unsigned short value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<int>::encode(emit_context const &ctx, int value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<unsigned>::encode(emit_context const &ctx, unsigned value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<long>::encode(emit_context const &ctx, long value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<unsigned long>::encode(emit_context const &ctx,
+                                  unsigned long value) noexcept -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<long long>::encode(emit_context const &ctx, long long value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
+auto codec<unsigned long long>::encode(emit_context const &ctx,
+                                       unsigned long long value) noexcept
+        -> result<void>
+{
+    return dp::emit_integer(ctx, value);
+}
 
 auto codec<bool>::encode(emit_context const &ctx, bool value) noexcept
         -> result<void>

@@ -15,8 +15,8 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
     
     PUBLIC
-        dp/items/emit
         dp/items/emit_context
+        dp/items/emit_core
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
 )

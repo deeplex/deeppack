@@ -13,16 +13,8 @@
 //  * integer
 //  * iec559 floating point
 
-#include <dplx/cncr/math_supplement.hpp>
-#include <dplx/predef/compiler.h>
-
-#include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
-
-#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
-#include <dplx/dp/items/emit.hpp>
-#endif
 
 namespace dplx::dp
 {
@@ -35,35 +27,76 @@ public:
             -> result<void>;
 };
 
-template <cncr::integer T>
-class codec<T>
+template <>
+class codec<signed char>
 {
 public:
-    // https://github.com/llvm/llvm-project/issues/49620
-    // or
-    // https://github.com/llvm/llvm-project/issues/58124
-#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
-    static auto encode(emit_context const &ctx, T value) noexcept
-            -> result<void>
-    {
-        return dp::emit_integer(ctx, value);
-    }
-#else
-    static auto encode(emit_context const &ctx, T value) noexcept
+    static auto encode(emit_context const &ctx, signed char value) noexcept
             -> result<void>;
-#endif
 };
-
-extern template class codec<signed char>;
-extern template class codec<unsigned char>;
-extern template class codec<short>;
-extern template class codec<unsigned short>;
-extern template class codec<int>;
-extern template class codec<unsigned>;
-extern template class codec<long>;
-extern template class codec<unsigned long>;
-extern template class codec<long long>;
-extern template class codec<unsigned long long>;
+template <>
+class codec<unsigned char>
+{
+public:
+    static auto encode(emit_context const &ctx, unsigned char value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<short>
+{
+public:
+    static auto encode(emit_context const &ctx, short value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<unsigned short>
+{
+public:
+    static auto encode(emit_context const &ctx, unsigned short value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<int>
+{
+public:
+    static auto encode(emit_context const &ctx, int value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<unsigned>
+{
+public:
+    static auto encode(emit_context const &ctx, unsigned value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<long>
+{
+public:
+    static auto encode(emit_context const &ctx, long value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<unsigned long>
+{
+public:
+    static auto encode(emit_context const &ctx, unsigned long value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<long long>
+{
+public:
+    static auto encode(emit_context const &ctx, long long value) noexcept
+            -> result<void>;
+};
+template <>
+class codec<unsigned long long>
+{
+public:
+    static auto encode(emit_context const &ctx,
+                       unsigned long long value) noexcept -> result<void>;
+};
 
 template <>
 class codec<bool>
