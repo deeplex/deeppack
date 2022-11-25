@@ -7,6 +7,7 @@ dplx_target_sources(deeppack
     PUBLIC
         dp/core
         dp/disappointment
+        dp/std-string
 )
 
 dplx_target_sources(deeppack

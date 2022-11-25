@@ -38,7 +38,8 @@ struct item_sample
 
     [[nodiscard]] auto encoded_bytes() const -> std::span<std::byte const>
     {
-        return as_bytes(std::span(encoded)).first(encoded_length);
+        return as_bytes(std::span(encoded))
+                .first(std::min<std::size_t>(encoded_length, encoded.size()));
     }
 
     friend inline auto operator<<(std::ostream &os, item_sample const &sample)

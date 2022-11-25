@@ -13,7 +13,7 @@
 
 #include <dplx/cncr/math_supplement.hpp>
 
-#include <dplx/dp/detail/item_size.hpp>
+#include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/items/emit_context.hpp>
@@ -203,6 +203,24 @@ inline auto emit_u8string(emit_context const &ctx,
     assert(numCodeUnits >= 0);
     return detail::store_var_uint<code_type>(
             ctx.out, static_cast<code_type>(numCodeUnits), type_code::text);
+}
+inline auto emit_u8string(emit_context const &ctx,
+                          char8_t const *data,
+                          std::size_t size) noexcept -> result<void>
+{
+    DPLX_TRY(detail::store_var_uint<std::size_t>(ctx.out, size,
+                                                 type_code::text));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    return ctx.out.bulk_write(reinterpret_cast<std::byte const *>(data), size);
+}
+inline auto emit_u8string(emit_context const &ctx,
+                          char const *data,
+                          std::size_t size) noexcept -> result<void>
+{
+    DPLX_TRY(detail::store_var_uint<std::size_t>(ctx.out, size,
+                                                 type_code::text));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    return ctx.out.bulk_write(reinterpret_cast<std::byte const *>(data), size);
 }
 inline auto emit_u8string_indefinite(emit_context const &ctx) noexcept
         -> result<void>

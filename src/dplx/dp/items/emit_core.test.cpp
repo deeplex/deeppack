@@ -8,6 +8,8 @@
 #include "dplx/dp/items/emit_core.hpp"
 
 #include <array>
+#include <string>
+#include <string_view>
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -278,6 +280,59 @@ TEST_CASE("finite prefixes are emitted correctly")
     }
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+}
+
+namespace
+{
+using namespace std::string_view_literals;
+
+// clang-format off
+constexpr item_sample<std::u8string_view> u8string_samples[] = {
+        {
+         u8""sv,  1,
+         {0x60},
+         },
+        {
+         u8"some"sv,  5,
+         {0x64, u8's', u8'o', u8'm', u8'e'},
+         },
+        {
+         u8"hello world"sv, 12,
+         {0x6b, u8'h', u8'e', u8'l', u8'l', u8'o', u8' ', u8'w', u8'o'},
+         },
+        {
+         u8".hello world.hello world"sv, 26,
+         {0x78, 0x18, u8'.', u8'h', u8'e', u8'l', u8'l', u8'o', u8' '},
+}
+};
+// clang-format on
+} // namespace
+
+TEST_CASE("emit_u8string writes a short string")
+{
+    auto const sample = GENERATE(borrowed_range(u8string_samples));
+
+    std::vector<std::byte> buffer(sample.encoded_length);
+    dp::memory_output_stream outputStream(buffer);
+    dp::emit_context const ctx{outputStream};
+
+    SECTION("for char8_t const *")
+    {
+        REQUIRE(emit_u8string(ctx, sample.value.data(), sample.value.size()));
+    }
+    SECTION("for char const *")
+    {
+        auto const *const narrow
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+                = reinterpret_cast<char const *>(sample.value.data());
+        REQUIRE(emit_u8string(ctx, narrow, sample.value.size()));
+    }
+
+    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    auto const prefix_length
+            = std::min(outputStream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+                             sample.encoded_bytes()));
 }
 
 TEST_CASE("indefinite prefixes are emitted correctly")
