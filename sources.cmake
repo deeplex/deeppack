@@ -21,6 +21,7 @@ dplx_target_sources(deeppack
         dp/streams/output_buffer
 
         dp/indefinite_range
+        dp/map_pair
 )
 
 dplx_target_sources(deeppack
@@ -75,7 +76,6 @@ dplx_target_sources(deeppack
 
         dp/customization
         dp/customization.std
-        dp/map_pair
 
         dp/streams/chunked_input_stream
         dp/streams/chunked_output_stream

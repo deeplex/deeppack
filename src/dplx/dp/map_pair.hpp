@@ -9,6 +9,10 @@
 
 #include <utility>
 
+#include <dplx/predef/compiler/clang.h>
+
+#include <dplx/dp/detail/workaround.hpp>
+
 namespace dplx::dp
 {
 
@@ -21,65 +25,73 @@ struct map_pair final
     key_type key;
     value_type value;
 
-    auto operator==(map_pair const &) const noexcept -> bool = default;
-    auto operator<=>(map_pair const &) const noexcept = default;
+    friend constexpr auto operator==(map_pair const &,
+                                     map_pair const &) noexcept -> bool
+            = default;
+    friend constexpr auto operator<=>(map_pair const &,
+                                      map_pair const &) noexcept = default;
+
+    template <std::size_t I>
+        requires(I <= 1U)
+    friend constexpr auto get(map_pair &mapPair) noexcept -> decltype(auto)
+    {
+        if constexpr (I == 0U)
+        {
+            return static_cast<Key &>(mapPair.key);
+        }
+        else
+        {
+            return static_cast<Value &>(mapPair.value);
+        }
+    }
+    template <std::size_t I>
+        requires(I <= 1U)
+    friend constexpr auto get(map_pair const &mapPair) noexcept
+            -> decltype(auto)
+    {
+        if constexpr (I == 0U)
+        {
+            return static_cast<Key const &>(mapPair.key);
+        }
+        else
+        {
+            return static_cast<Value const &>(mapPair.value);
+        }
+    }
+    template <std::size_t I>
+        requires(I <= 1U)
+    friend constexpr auto get(map_pair &&mapPair) noexcept -> decltype(auto)
+    {
+        if constexpr (I == 0U)
+        {
+            return static_cast<Key &&>(mapPair.key);
+        }
+        else
+        {
+            return static_cast<Value &&>(mapPair.value);
+        }
+    }
+    template <std::size_t I>
+        requires(I <= 1U)
+    friend constexpr auto get(map_pair const &&mapPair) noexcept
+            -> decltype(auto)
+    {
+        if constexpr (I == 0U)
+        {
+            return static_cast<Key const &&>(mapPair.key);
+        }
+        else
+        {
+            return static_cast<Value const &&>(mapPair.value);
+        }
+    }
 };
 
+#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 16, 0, 0)
+// clang doesn't support class template argument deduction for aggreggates
 template <typename Key, typename Value>
 map_pair(Key, Value) -> map_pair<Key, Value>;
-
-template <std::size_t I, typename Key, typename Value>
-inline auto get(map_pair<Key, Value> &mapPair) noexcept -> decltype(auto)
-{
-    static_assert(I < 2U);
-    if constexpr (I == 0U)
-    {
-        return static_cast<Key &>(mapPair.key);
-    }
-    else
-    {
-        return static_cast<Value &>(mapPair.value);
-    }
-}
-template <std::size_t I, typename Key, typename Value>
-inline auto get(map_pair<Key, Value> const &mapPair) noexcept -> decltype(auto)
-{
-    static_assert(I < 2U);
-    if constexpr (I == 0U)
-    {
-        return static_cast<Key const &>(mapPair.key);
-    }
-    else
-    {
-        return static_cast<Value const &>(mapPair.value);
-    }
-}
-template <std::size_t I, typename Key, typename Value>
-inline auto get(map_pair<Key, Value> &&mapPair) noexcept -> decltype(auto)
-{
-    static_assert(I < 2U);
-    if constexpr (I == 0U)
-    {
-        return static_cast<Key &&>(mapPair.key);
-    }
-    else
-    {
-        return static_cast<Value &&>(mapPair.value);
-    }
-}
-template <std::size_t I, typename Key, typename Value>
-inline auto get(map_pair<Key, Value> const &&mapPair) noexcept -> decltype(auto)
-{
-    static_assert(I < 2U);
-    if constexpr (I == 0U)
-    {
-        return static_cast<Key const &&>(mapPair.key);
-    }
-    else
-    {
-        return static_cast<Value const &&>(mapPair.value);
-    }
-}
+#endif
 
 } // namespace dplx::dp
 
