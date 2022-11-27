@@ -8,6 +8,7 @@
 #include "dplx/dp/items/emit_core.hpp"
 
 #include <array>
+#include <numeric>
 #include <string>
 #include <string_view>
 
@@ -19,6 +20,7 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 
+#include <dplx/cncr/misc.hpp>
 #include <dplx/predef/compiler.h>
 
 #include "dplx/dp/detail/workaround.hpp"
@@ -284,6 +286,40 @@ TEST_CASE("finite prefixes are emitted correctly")
 
 namespace
 {
+constexpr item_sample<unsigned> binary_samples[] = {
+        { 0U,      1,                           {0x40}},
+        { 4U,      5,               {0x44, 1, 2, 3, 4}},
+        {23U, 23 + 1,   {0x57, 1, 2, 3, 4, 5, 6, 7, 8}},
+        {24U, 24 + 2, {0x58, 24U, 1, 2, 3, 4, 5, 6, 7}},
+};
+}
+
+TEST_CASE("emit_binary writes a short blob")
+{
+    item_sample<unsigned> const sample
+            = GENERATE(borrowed_range(binary_samples));
+
+    std::vector<unsigned char> generated(sample.value);
+    std::iota(generated.begin(), generated.end(),
+              static_cast<unsigned char>(1));
+
+    std::vector<std::byte> buffer(sample.encoded_length);
+    dp::memory_output_stream outputStream(buffer);
+    dp::emit_context const ctx{outputStream};
+
+    REQUIRE(emit_binary(ctx,
+                        reinterpret_cast<std::byte const *>(generated.data()),
+                        generated.size()));
+
+    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    auto const prefix_length
+            = std::min(outputStream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+                             sample.encoded_bytes()));
+}
+
+namespace
+{
 using namespace std::string_view_literals;
 
 // clang-format off
@@ -303,7 +339,7 @@ constexpr item_sample<std::u8string_view> u8string_samples[] = {
         {
          u8".hello world.hello world"sv, 26,
          {0x78, 0x18, u8'.', u8'h', u8'e', u8'l', u8'l', u8'o', u8' '},
-}
+         }
 };
 // clang-format on
 } // namespace

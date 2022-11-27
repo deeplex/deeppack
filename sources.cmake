@@ -18,6 +18,7 @@ dplx_target_sources(deeppack
     PUBLIC
         dp/items/emit_context
         dp/items/emit_core
+        dp/items/emit_ranges
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
 
@@ -104,6 +105,7 @@ if (BUILD_TESTING)
         PRIVATE
             item_sample.hpp
             range_generator.hpp
+            simple_encodable.hpp
             test_utils.hpp
     )
 

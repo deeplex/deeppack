@@ -14,29 +14,64 @@
 #include <utility>
 
 #include <dplx/cncr/mp_lite.hpp>
+#include <dplx/cncr/type_utils.hpp>
+#include <dplx/cncr/utils.hpp>
+
+namespace dplx::detail::cpo
+{
+
+template <std::size_t I, typename T>
+void get(T &) = delete;
+template <std::size_t I, typename T>
+void get(T const &) = delete;
+
+// clang-format off
+template <typename T, std::size_t I>
+concept has_tuple_get_adl = requires(T t)
+{
+    typename std::tuple_size<cncr::remove_cref_t<T>>::type;
+    requires I < std::tuple_size_v<cncr::remove_cref_t<T>>;
+    typename std::tuple_element<I, cncr::remove_cref_t<T>>::type;
+    { get<I>(t) }
+        -> std::convertible_to<
+            std::conditional_t<std::is_const_v<std::remove_reference_t<T>>,
+                std::tuple_element_t<I, cncr::remove_cref_t<T>> const &,
+                std::tuple_element_t<I, cncr::remove_cref_t<T>> &>
+            >;
+};
+// clang-format on
+
+template <std::size_t I>
+struct get_fn
+{
+    template <has_tuple_get_adl<I> T>
+    DPLX_ATTR_FORCE_INLINE auto operator()(T &&t) const
+            noexcept(noexcept(get<I>(t))) -> decltype(auto)
+    {
+        return get<I>(t);
+    }
+};
+
+} // namespace dplx::detail::cpo
 
 namespace dplx::dp
 {
 
-// gcc 10.1 is a bit too eager looking up get and needs a little assurance
-// that everything is alrighty
-template <std::size_t>
-void get(...) noexcept = delete;
+inline namespace cpo
+{
+
+template <std::size_t I>
+inline constexpr ::dplx::detail::cpo::get_fn<I> get{};
+
+}
 
 template <typename T>
-concept pair_like = requires(T &&t)
+concept pair_like = requires(T t)
 {
     typename std::tuple_size<T>::type;
-    requires std::derived_from<std::tuple_size<T>,
-                               std::integral_constant<std::size_t, 2>>;
-    typename std::tuple_element<0, T>::type;
-    typename std::tuple_element<1, T>::type;
-    {
-        get<0>(t)
-        } -> std::convertible_to<std::tuple_element_t<0, T> &>;
-    {
-        get<1>(t)
-        } -> std::convertible_to<std::tuple_element_t<1, T> &>;
+    requires 2U == std::tuple_size_v<T>;
+    dp::get<0U>(t);
+    dp::get<1U>(t);
 };
 
 template <typename T>
@@ -93,10 +128,10 @@ concept tuple_sized = requires
 template <typename F, typename T, std::size_t... Is>
 constexpr auto
 apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
-        noexcept(static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...)))
+        noexcept(static_cast<F &&>(f)(dp::get<Is>(static_cast<T &&>(t))...)))
         -> decltype(auto)
 {
-    return static_cast<F &&>(f)(get<Is>(static_cast<T &&>(t))...);
+    return static_cast<F &&>(f)(dp::get<Is>(static_cast<T &&>(t))...);
 }
 // a poor man's std::apply() which however uses unqualified get<I>()
 // instead of std::get<I>(). This allows it to cope with custom tuple types.

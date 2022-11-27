@@ -153,6 +153,14 @@ concept encodable_pair_like
                                                                          type>,
                                      Stream>;
 
+// clang-format off
+template <typename T>
+concept encodable_pair_like2
+        = pair_like<T>
+        && ng::encodable<std::tuple_element_t<0U, T>>
+        && ng::encodable<std::tuple_element_t<1U, T>>;
+// clang-format on
+
 template <typename T, typename Stream>
 concept decodable_pair_like = pair_like<T> && input_stream<Stream> && decodable<
         typename std::tuple_element<0, T>::type,

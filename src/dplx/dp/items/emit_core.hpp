@@ -188,6 +188,14 @@ inline auto emit_binary(emit_context const &ctx, T const byteSize) noexcept
     return detail::store_var_uint<code_type>(
             ctx.out, static_cast<code_type>(byteSize), type_code::binary);
 }
+inline auto emit_binary(emit_context const &ctx,
+                        std::byte const *data,
+                        std::size_t size) noexcept -> result<void>
+{
+    DPLX_TRY(detail::store_var_uint<std::size_t>(ctx.out, size,
+                                                 type_code::binary));
+    return ctx.out.bulk_write(data, size);
+}
 inline auto emit_binary_indefinite(emit_context const &ctx) noexcept
         -> result<void>
 {
