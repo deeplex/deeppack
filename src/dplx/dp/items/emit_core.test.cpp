@@ -307,9 +307,11 @@ TEST_CASE("emit_binary writes a short blob")
     dp::memory_output_stream outputStream(buffer);
     dp::emit_context const ctx{outputStream};
 
-    REQUIRE(emit_binary(ctx,
-                        reinterpret_cast<std::byte const *>(generated.data()),
-                        generated.size()));
+    REQUIRE(emit_binary(
+            ctx,
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            reinterpret_cast<std::byte const *>(generated.data()),
+            generated.size()));
 
     REQUIRE(outputStream.written().size() == sample.encoded_length);
     auto const prefix_length

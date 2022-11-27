@@ -73,6 +73,7 @@ template <std::ranges::input_range R>
     requires((std::ranges::forward_range<R> || std::ranges::sized_range<R>)
             && detail::encodable_pair_like2<std::ranges::range_value_t<R>>)
 // clang-format on
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto emit_map(emit_context const &ctx, R const &vs) noexcept
         -> result<void>
 {
