@@ -8,6 +8,7 @@ dplx_target_sources(deeppack
         dp/core
         dp/disappointment
         dp/std-chrono
+        dp/std-filesystem
         dp/std-string
 )
 
