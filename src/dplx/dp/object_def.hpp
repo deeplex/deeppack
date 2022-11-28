@@ -354,7 +354,7 @@ struct object_def
             typename cncr::remove_cref_t<decltype(Properties)>::id_type...>;
     using id_runtime_type = std::common_type_t<typename cncr::remove_cref_t<
             decltype(Properties)>::id_runtime_type...>;
-    using class_type = detail::contravariance_t<
+    using class_type = detail::covariance_t<
             typename cncr::remove_cref_t<decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);

@@ -17,6 +17,9 @@
 #include <dplx/cncr/type_utils.hpp>
 #include <dplx/cncr/utils.hpp>
 
+////////////////////////////////////////////////////////////////////////////////
+// dp::get CPO
+
 namespace dplx::detail::cpo
 {
 
@@ -65,59 +68,13 @@ inline constexpr ::dplx::detail::cpo::get_fn<I> get{};
 
 }
 
-template <typename T>
-concept pair_like = requires(T t)
-{
-    typename std::tuple_size<T>::type;
-    requires 2U == std::tuple_size_v<T>;
-    dp::get<0U>(t);
-    dp::get<1U>(t);
-};
-
-template <typename T>
-concept member_accessor = std::is_default_constructible_v<T> && requires(
-        T &&x, typename T::class_type &ref, typename T::class_type const &cref)
-{
-    {
-        x(ref)
-        } -> std::same_as<typename T::value_type *>;
-    {
-        x(cref)
-        } -> std::same_as<typename T::value_type const *>;
-};
-
-template <typename ClassType, typename ValueType>
-struct member_accessor_base
-{
-    using class_type = ClassType;
-    using value_type = ValueType;
-};
-
 } // namespace dplx::dp
+
+////////////////////////////////////////////////////////////////////////////////
+// tuple_like & pair_like
 
 namespace dplx::dp::detail
 {
-
-template <typename T>
-struct member_object_pointer_type_traits
-{
-};
-
-template <typename T, typename C>
-struct member_object_pointer_type_traits<T C::*>
-{
-    using type = T C::*;
-    using value_type = T;
-    using class_type = C;
-};
-
-template <typename T>
-using member_object_pointer_value_type =
-        typename member_object_pointer_type_traits<T>::value_type;
-
-template <typename T>
-using member_object_pointer_class_type =
-        typename member_object_pointer_type_traits<T>::class_type;
 
 template <typename T>
 concept tuple_sized = requires
@@ -138,7 +95,7 @@ apply_simply_impl(F &&f, T &&t, std::index_sequence<Is...>) noexcept(
 template <typename F, typename T>
     requires tuple_sized<std::remove_cvref_t<T>>
 constexpr auto
-apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl(
+apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl<F, T>(
         static_cast<F &&>(f),
         static_cast<T &&>(t),
         std::make_index_sequence<
@@ -183,54 +140,113 @@ struct arg_sink
     }
 };
 
+} // namespace dplx::dp::detail
+
+namespace dplx::dp
+{
+
+template <typename T>
+concept pair_like = requires(T t)
+{
+    typename std::tuple_size<T>::type;
+    requires 2U == std::tuple_size_v<T>;
+    dp::get<0U>(t);
+    dp::get<1U>(t);
+};
+
 // clang-format off
 template <typename T>
 concept tuple_like
-    = !std::ranges::range<T> && tuple_sized<T> &&
-        requires(T && t)
-        {
-            typename tuple_element_list<T>::type;
-            ::dplx::dp::detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
-        };
+    = !std::ranges::range<T>
+    && detail::tuple_sized<T>
+    && requires(T && t)
+{
+    typename detail::tuple_element_list<T>::type;
+    detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
+};
 // clang-format on
 
-template <typename... Ts>
-struct contravariance;
+} // namespace dplx::dp
 
-template <typename... Ts>
-using contravariance_t = typename contravariance<Ts...>::type;
+////////////////////////////////////////////////////////////////////////////////
+// member accessor utilities
 
-template <>
-struct contravariance<>
+namespace dplx::dp
+{
+
+// clang-format off
+template <typename T>
+concept member_accessor
+    = std::is_default_constructible_v<T>
+    && requires(
+        T &&x, typename T::class_type &ref, typename T::class_type const &cref)
+{
+    { x(ref) }
+        -> std::same_as<typename T::value_type *>;
+    { x(cref) }
+        -> std::same_as<typename T::value_type const *>;
+};
+// clang-format on
+
+template <typename ClassType, typename ValueType>
+struct member_accessor_base
+{
+    using class_type = ClassType;
+    using value_type = ValueType;
+};
+
+} // namespace dplx::dp
+
+namespace dplx::dp::detail
+{
+
+template <typename T>
+struct member_object_pointer_type_traits
 {
 };
+
+template <typename T, typename C>
+struct member_object_pointer_type_traits<T C::*>
+{
+    using type = T C::*;
+    using value_type = T;
+    using class_type = C;
+};
+
 template <typename T>
-struct contravariance<T>
+using member_object_pointer_value_type =
+        typename member_object_pointer_type_traits<T>::value_type;
+
+template <typename T>
+using member_object_pointer_class_type =
+        typename member_object_pointer_type_traits<T>::class_type;
+
+template <typename T>
+struct covariance_combiner
 {
     using type = T;
 };
-template <typename T, typename... Ts>
-struct contravariance<T, T, Ts...> : contravariance<T, Ts...>
-{
-};
-template <typename T1, typename T2, typename... Ts>
-    requires std::is_base_of_v<T1, T2>
-struct contravariance<T1, T2, Ts...> : contravariance<T2, Ts...>
-{
-};
-template <typename T1, typename T2, typename... Ts>
-    requires std::is_base_of_v<T2, T1>
-struct contravariance<T1, T2, Ts...> : contravariance<T1, Ts...>
-{
-};
+
+template <typename T>
+auto operator,(covariance_combiner<T>, covariance_combiner<T>)
+                      -> covariance_combiner<T>;
+template <typename T, typename U>
+    requires(std::is_base_of_v<T, U>)
+auto operator,(covariance_combiner<T>, covariance_combiner<U>)
+                      -> covariance_combiner<U>;
+template <typename T, typename U>
+    requires(std::is_base_of_v<U, T>)
+auto operator,(covariance_combiner<T>, covariance_combiner<U>)
+                      -> covariance_combiner<T>;
+
 template <typename... Ts>
-struct contravariance<void, Ts...> : contravariance<Ts...>
+struct covariance
 {
+    using type = typename decltype((..., covariance_combiner<Ts>{}))::type;
 };
-template <typename T, typename... Ts>
-struct contravariance<T, void, Ts...> : contravariance<T, Ts...>
-{
-};
+
+template <typename... Ts>
+using covariance_t = typename covariance<Ts...>::type;
 
 template <typename T>
 struct is_type_identity : std::false_type

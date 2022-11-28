@@ -97,7 +97,7 @@ struct tuple_member_fun
 template <auto... Properties>
 struct tuple_def
 {
-    using class_type = detail::contravariance_t<
+    using class_type = detail::covariance_t<
             typename cncr::remove_cref_t<decltype(Properties)>::class_type...>;
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
