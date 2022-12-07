@@ -24,6 +24,7 @@ dplx_target_sources(deeppack
         dp/std-container
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
+        dp/tuple
 
         dp/indefinite_range
         dp/map_pair
