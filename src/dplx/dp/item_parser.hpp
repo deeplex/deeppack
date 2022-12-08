@@ -21,8 +21,8 @@
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/items/type_code.hpp>
 #include <dplx/dp/stream.hpp>
-#include <dplx/dp/type_code.hpp>
 
 namespace dplx::dp
 {

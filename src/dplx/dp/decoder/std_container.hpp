@@ -18,8 +18,8 @@
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
+#include <dplx/dp/items/type_code.hpp>
 #include <dplx/dp/stream.hpp>
-#include <dplx/dp/type_code.hpp>
 
 // sequence container
 namespace dplx::dp

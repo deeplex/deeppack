@@ -18,7 +18,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-#include "dplx/dp/type_code.hpp"
+#include "dplx/dp/items/type_code.hpp"
 
 namespace dp_tests
 {

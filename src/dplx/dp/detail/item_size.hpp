@@ -13,7 +13,7 @@
 
 #include <dplx/dp/config.hpp>
 #include <dplx/dp/detail/bit.hpp>
-#include <dplx/dp/type_code.hpp>
+#include <dplx/dp/items/type_code.hpp>
 
 namespace dplx::dp::detail
 {

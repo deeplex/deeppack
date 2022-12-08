@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/std-filesystem.hpp"
+#include "dplx/dp/codecs/std-filesystem.hpp"
 
 #include <new>
 

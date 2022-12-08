@@ -29,7 +29,7 @@
 
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
-#include <dplx/dp/type_code.hpp>
+#include <dplx/dp/items/type_code.hpp>
 
 namespace dplx::dp
 {

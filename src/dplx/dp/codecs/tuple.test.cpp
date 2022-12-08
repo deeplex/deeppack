@@ -5,11 +5,11 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/tuple.hpp"
+#include "dplx/dp/codecs/tuple.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "dplx/dp/core.hpp"
+#include "dplx/dp/codecs/core.hpp"
 #include "dplx/dp/encoder/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample.hpp"

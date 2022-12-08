@@ -5,14 +5,14 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/std-container.hpp"
+#include "dplx/dp/codecs/std-container.hpp"
 
 #include <array>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "dplx/dp/core.hpp"
+#include "dplx/dp/codecs/core.hpp"
 #include "dplx/dp/encoder/api.hpp"
 #include "dplx/dp/indefinite_range.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"

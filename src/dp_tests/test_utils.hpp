@@ -22,7 +22,7 @@
 #include <fmt/format.h>
 
 #include <dplx/dp/disappointment.hpp>
-#include <dplx/dp/type_code.hpp>
+#include <dplx/dp/items/type_code.hpp>
 
 #include "boost-test.hpp"
 

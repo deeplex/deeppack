@@ -5,11 +5,12 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
     
     PUBLIC
-        dp/core
         dp/disappointment
-        dp/std-chrono
-        dp/std-filesystem
-        dp/std-string
+        
+        dp/codecs/core
+        dp/codecs/std-chrono
+        dp/codecs/std-filesystem
+        dp/codecs/std-string
 )
 
 dplx_target_sources(deeppack
@@ -18,16 +19,20 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
     
     PUBLIC
+        dp/indefinite_range
+        dp/map_pair
+
+        dp/codecs/std-container
+        dp/codecs/tuple
+
         dp/items/emit_context
         dp/items/emit_core
         dp/items/emit_ranges
-        dp/std-container
+        dp/items/type_code
+
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
-        dp/tuple
 
-        dp/indefinite_range
-        dp/map_pair
 )
 
 dplx_target_sources(deeppack
@@ -54,7 +59,6 @@ dplx_target_sources(deeppack
         dp/object_def
         dp/stream
         dp/tuple_def
-        dp/type_code
 
         dp/detail/item_size
         dp/encoder/api
