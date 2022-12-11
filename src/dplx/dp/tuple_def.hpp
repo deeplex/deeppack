@@ -16,6 +16,7 @@
 
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/fwd.hpp>
 
 namespace dplx::dp
 {
@@ -102,8 +103,7 @@ struct tuple_def
 
     static constexpr std::size_t num_properties = sizeof...(Properties);
 
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-    std::uint32_t version = 0xffff'ffff;
+    version_type version = null_def_version;
     bool allow_versioned_auto_decoder = false;
 
     template <std::size_t N>
@@ -139,17 +139,5 @@ struct tuple_def
                                              tuple_def const &) noexcept
             -> std::strong_ordering = default;
 };
-
-template <typename>
-struct is_tuple_def : std::false_type
-{
-};
-template <auto... Properties>
-struct is_tuple_def<tuple_def<Properties...>> : std::true_type
-{
-};
-
-template <typename T>
-concept is_tuple_def_v = is_tuple_def<T>::value;
 
 } // namespace dplx::dp

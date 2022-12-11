@@ -8,6 +8,7 @@
 #pragma once
 
 #include <climits>
+#include <cstdint>
 
 #include <dplx/dp/stream.hpp>
 
@@ -53,3 +54,69 @@ template <typename T>
 inline constexpr as_value_t<T> as_value;
 
 } // namespace dplx::dp
+
+#pragma region auto tuple
+
+namespace dplx::dp
+{
+
+template <auto... Properties>
+struct tuple_def;
+
+template <typename>
+struct is_tuple_def : std::false_type
+{
+};
+template <auto... Properties>
+struct is_tuple_def<tuple_def<Properties...>> : std::true_type
+{
+};
+
+template <typename T>
+concept tuple_definition = is_tuple_def<T>::value;
+
+template <typename T>
+concept is_tuple_def_v = tuple_definition<T>;
+
+} // namespace dplx::dp
+
+#pragma endregion
+
+#pragma region auto object
+
+namespace dplx::dp
+{
+
+template <auto... Properties>
+struct object_def;
+
+template <typename>
+struct is_object_def : std::false_type
+{
+};
+template <auto... Properties>
+struct is_object_def<object_def<Properties...>> : std::true_type
+{
+};
+
+template <typename T>
+concept object_definition = is_object_def<T>::value;
+
+template <typename T>
+concept is_object_def_v = object_definition<T>;
+
+} // namespace dplx::dp
+
+#pragma endregion
+
+#pragma region layout descriptor support
+
+namespace dplx::dp
+{
+
+using version_type = std::uint32_t;
+inline constexpr version_type null_def_version = 0xffff'ffffU;
+
+} // namespace dplx::dp
+
+#pragma endregion

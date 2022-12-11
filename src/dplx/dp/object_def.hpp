@@ -29,6 +29,7 @@
 
 #include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
+#include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/type_code.hpp>
 
 namespace dplx::dp
@@ -362,8 +363,7 @@ struct object_def
             = !(... && Properties.required);
     static constexpr std::array<id_type, num_properties> ids{Properties.id...};
 
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-    std::uint32_t version = 0xffff'ffff;
+    std::uint32_t version = null_def_version;
     bool allow_versioned_auto_decoder = false;
 
     template <std::size_t N>
@@ -399,17 +399,5 @@ struct object_def
                                              object_def const &) noexcept
             -> std::strong_ordering = default;
 };
-
-template <typename>
-struct is_object_def : std::false_type
-{
-};
-template <auto... Properties>
-struct is_object_def<object_def<Properties...>> : std::true_type
-{
-};
-
-template <typename T>
-concept is_object_def_v = is_object_def<T>::value;
 
 } // namespace dplx::dp
