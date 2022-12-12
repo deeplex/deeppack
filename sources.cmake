@@ -24,6 +24,9 @@ dplx_target_sources(deeppack
 
         dp/codecs/std-container
         dp/codecs/tuple
+        
+        dp/detail/type_utils
+        dp/detail/utils
 
         dp/items/emit_context
         dp/items/emit_core
@@ -32,7 +35,6 @@ dplx_target_sources(deeppack
 
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
-
 )
 
 dplx_target_sources(deeppack
@@ -96,8 +98,6 @@ dplx_target_sources(deeppack
         dp/detail/hash
         dp/detail/mp_for_dots
         dp/detail/perfect_hash
-        dp/detail/type_utils
-        dp/detail/utils
         dp/detail/workaround
 )
 

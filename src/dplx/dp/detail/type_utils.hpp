@@ -8,8 +8,6 @@
 #pragma once
 
 #include <concepts>
-#include <limits>
-#include <ranges>
 #include <type_traits>
 #include <utility>
 
@@ -33,7 +31,7 @@ template <typename T, std::size_t I>
 concept has_tuple_get_adl = requires(T t)
 {
     typename std::tuple_size<cncr::remove_cref_t<T>>::type;
-    requires I < std::tuple_size_v<cncr::remove_cref_t<T>>;
+    requires I < std::tuple_size<cncr::remove_cref_t<T>>::value;
     typename std::tuple_element<I, cncr::remove_cref_t<T>>::type;
     { get<I>(t) }
         -> std::convertible_to<
@@ -99,13 +97,13 @@ apply_simply(F &&f, T &&t) noexcept(noexcept(detail::apply_simply_impl<F, T>(
         static_cast<F &&>(f),
         static_cast<T &&>(t),
         std::make_index_sequence<
-                std::tuple_size_v<std::remove_reference_t<T>>>())))
+                std::tuple_size<std::remove_reference_t<T>>::value>())))
         -> decltype(auto)
 {
     return detail::apply_simply_impl<F, T>(
             static_cast<F &&>(f), static_cast<T &&>(t),
             std::make_index_sequence<
-                    std::tuple_size_v<std::remove_reference_t<T>>>());
+                    std::tuple_size<std::remove_reference_t<T>>::value>());
 }
 
 template <typename T, typename IS>
@@ -126,7 +124,7 @@ struct tuple_element_list<T>
 {
     using type = typename tuple_element_list_deducer<
             T,
-            std::make_index_sequence<std::tuple_size_v<T>>>::type;
+            std::make_index_sequence<std::tuple_size<T>::value>>::type;
 };
 
 template <typename T>
@@ -149,22 +147,10 @@ template <typename T>
 concept pair_like = requires(T t)
 {
     typename std::tuple_size<T>::type;
-    requires 2U == std::tuple_size_v<T>;
+    requires 2U == std::tuple_size<T>::value;
     dp::get<0U>(t);
     dp::get<1U>(t);
 };
-
-// clang-format off
-template <typename T>
-concept tuple_like
-    = !std::ranges::range<T>
-    && detail::tuple_sized<T>
-    && requires(T && t)
-{
-    typename detail::tuple_element_list<T>::type;
-    detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
-};
-// clang-format on
 
 } // namespace dplx::dp
 

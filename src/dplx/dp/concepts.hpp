@@ -88,6 +88,18 @@ concept decodable
     };
 // clang-format on
 
+// clang-format off
+template <typename T>
+concept tuple_like
+    = !std::ranges::range<T>
+    && detail::tuple_sized<T>
+    && requires(T && t)
+{
+    typename detail::tuple_element_list<T>::type;
+    detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
+};
+// clang-format on
+
 template <typename T>
 inline constexpr bool disable_range
         // ranges which are type recursive w.r.t. their iterator value type

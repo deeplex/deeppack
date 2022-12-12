@@ -18,9 +18,6 @@ namespace dplx::dp::ng
 
 inline constexpr struct encode_varargs_fn final
 {
-    // does not output anything if called without value arguments
-    // encodes a single value argument directly without an enclosing array
-    // encodes multiple value arguments into a CBOR array data item.
     template <typename... Ts>
         requires(... &&encodable<cncr::remove_cref_t<Ts>>)
     inline auto operator()(emit_context const &ctx,
