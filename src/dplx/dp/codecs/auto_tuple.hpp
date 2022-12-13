@@ -36,10 +36,6 @@ struct mp_encode_tuple_member_fn
     }
 };
 
-template <auto const &descriptor>
-using descriptor_class_type =
-        typename cncr::remove_cref_t<decltype(descriptor)>::class_type;
-
 } // namespace dplx::dp::detail
 
 namespace dplx::dp

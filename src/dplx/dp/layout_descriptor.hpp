@@ -82,4 +82,8 @@ constexpr auto versioned_decoder_enabled(T const &descriptor) noexcept -> bool
         || descriptor.version == null_def_version;
 }
 
+template <auto const &descriptor>
+using descriptor_class_type =
+        typename cncr::remove_cref_t<decltype(descriptor)>::class_type;
+
 } // namespace dplx::dp::detail
