@@ -22,6 +22,7 @@ dplx_target_sources(deeppack
         dp/indefinite_range
         dp/map_pair
 
+        dp/codecs/auto_tuple
         dp/codecs/std-container
         dp/codecs/tuple
         
