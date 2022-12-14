@@ -104,10 +104,8 @@ jobs:
 
       - name: Configure x64-linux-clang preset
         uses: lukka/run-cmake@v10
-        env:
-          CMAKE_EXPORT_COMPILE_COMMANDS: '1'
         with:
-          configurePreset: x64-linux-clang
+          configurePreset: x64-linux-ci-lint
 
       - uses: cpp-linter/cpp-linter-action@v2
         name: Lint with clang-format and clang-tidy
@@ -120,8 +118,8 @@ jobs:
             tidy-checks: '' # use .clang-tidy settings
             extensions: cpp,hpp
             ignore: '.github|build|external'
-            files-changed-only: false
-            database: build/x64-linux-clang
+            files-changed-only: true
+            database: build/x64-linux-ci-lint
 
       - name: Fail if issues have been raised
         if: steps.linter.outputs.checks-failed > 0
