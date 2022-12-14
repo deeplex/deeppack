@@ -27,12 +27,14 @@ dplx_target_sources(deeppack
         dp/codecs/std-container
         dp/codecs/tuple
         
+        dp/detail/item_size
         dp/detail/type_utils
         dp/detail/utils
 
         dp/items/emit_context
         dp/items/emit_core
         dp/items/emit_ranges
+        dp/items/encoded_item_head_size
         dp/items/type_code
 
         dp/streams/memory_output_stream2
@@ -64,7 +66,6 @@ dplx_target_sources(deeppack
         dp/stream
         dp/tuple_def
 
-        dp/detail/item_size
         dp/encoder/api
         dp/encoder/arg_list
         dp/encoder/chrono
