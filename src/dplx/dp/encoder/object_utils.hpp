@@ -88,9 +88,7 @@ inline auto encode_object(Stream &outStream, T const &value) -> result<void>
         DPLX_TRY(emit::integer(outStream, descriptor.version));
     }
 
-    DPLX_TRY(descriptor.mp_for_dots(encode_property_fn{outStream, value}));
-
-    return success();
+    return descriptor.mp_for_dots(encode_property_fn{outStream, value});
 }
 
 template <auto const &descriptor, typename T, output_stream Stream>
@@ -114,9 +112,7 @@ inline auto encode_object(Stream &outStream,
     }
     DPLX_TRY(item_emitter<Stream>::integer(outStream, version));
 
-    DPLX_TRY(descriptor.mp_for_dots(encode_property_fn{outStream, value}));
-
-    return success();
+    return descriptor.mp_for_dots(encode_property_fn{outStream, value});
 }
 
 template <packable_object T, output_stream Stream>

@@ -59,9 +59,7 @@ inline auto encode_tuple(Stream &outStream, T const &value) -> result<void>
         DPLX_TRY(emit::integer(outStream, descriptor.version));
     }
 
-    DPLX_TRY(descriptor.mp_for_dots(encode_value_fn{outStream, value}));
-
-    return success();
+    return descriptor.mp_for_dots(encode_value_fn{outStream, value});
 }
 
 template <auto const &descriptor, typename T, output_stream Stream>
@@ -75,9 +73,7 @@ inline auto encode_tuple(Stream &outStream,
     DPLX_TRY(emit::array(outStream, descriptor.num_properties + 1));
     DPLX_TRY(emit::integer(outStream, version));
 
-    DPLX_TRY(descriptor.mp_for_dots(encode_value_fn{outStream, value}));
-
-    return success();
+    return descriptor.mp_for_dots(encode_value_fn{outStream, value});
 }
 
 template <packable_tuple T, output_stream Stream>

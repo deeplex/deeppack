@@ -29,7 +29,8 @@ namespace
 
 // see https://github.com/llvm/llvm-project/issues/55560
 // NOLINTNEXTLINE(clang-diagnostic-unused-function)
-std::u8string clang_string_workaround(char8_t const *a, char8_t const *b)
+auto clang_string_workaround(char8_t const *a, char8_t const *b)
+        -> std::u8string
 {
     return {a, b};
 }

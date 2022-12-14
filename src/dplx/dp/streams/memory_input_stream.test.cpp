@@ -15,6 +15,7 @@
 #include "test_utils.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 namespace dp_tests
 {
@@ -237,4 +238,5 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
 
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

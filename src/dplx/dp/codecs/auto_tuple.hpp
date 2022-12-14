@@ -60,9 +60,7 @@ encode_tuple(emit_context const &ctx,
         DPLX_TRY(dp::emit_integer(ctx, descriptor.version));
     }
 
-    DPLX_TRY(descriptor.mp_for_dots(encode_value_fn{ctx, value}));
-
-    return dp::success();
+    return descriptor.mp_for_dots(encode_value_fn{ctx, value});
 }
 
 template <packable_tuple T>
