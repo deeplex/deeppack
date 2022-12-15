@@ -40,47 +40,48 @@ public:
     using difference_type = std::ptrdiff_t;
 
 protected:
-    ~output_buffer() noexcept = default;
-    output_buffer() noexcept
+    constexpr ~output_buffer() noexcept = default;
+    constexpr output_buffer() noexcept
         : mOutputBuffer(nullptr)
         , mOutputBufferSize(0U)
     {
     }
-    output_buffer(output_buffer const &) noexcept = default;
-    auto operator=(output_buffer const &) noexcept -> output_buffer & = default;
+    constexpr output_buffer(output_buffer const &) noexcept = default;
+    constexpr auto operator=(output_buffer const &) noexcept
+            -> output_buffer & = default;
 
 public:
     output_buffer(output_buffer &&) noexcept = delete;
     auto operator=(output_buffer &&) noexcept -> output_buffer & = delete;
 
 protected:
-    explicit output_buffer(std::byte *const buffer,
-                           size_type const size) noexcept
+    constexpr explicit output_buffer(std::byte *const buffer,
+                                     size_type const size) noexcept
         : mOutputBuffer(buffer)
         , mOutputBufferSize(size)
     {
     }
 
 public:
-    [[nodiscard]] auto begin() noexcept -> iterator
+    [[nodiscard]] constexpr auto begin() noexcept -> iterator
     {
         return mOutputBuffer;
     }
-    [[nodiscard]] auto end() noexcept -> iterator
+    [[nodiscard]] constexpr auto end() noexcept -> iterator
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return mOutputBuffer + mOutputBufferSize;
     }
 
-    [[nodiscard]] auto data() noexcept -> pointer
+    [[nodiscard]] constexpr auto data() noexcept -> pointer
     {
         return mOutputBuffer;
     }
-    [[nodiscard]] auto size() const noexcept -> size_type
+    [[nodiscard]] constexpr auto size() const noexcept -> size_type
     {
         return mOutputBufferSize;
     }
-    [[nodiscard]] auto empty() const noexcept -> bool
+    [[nodiscard]] constexpr auto empty() const noexcept -> bool
     {
         return mOutputBufferSize == 0U;
     }
@@ -129,12 +130,12 @@ public:
     }
 
 protected:
-    void reset() noexcept
+    constexpr void reset() noexcept
     {
         mOutputBuffer = nullptr;
         mOutputBufferSize = 0;
     }
-    void reset(std::byte *const buffer, size_type const size) noexcept
+    constexpr void reset(std::byte *const buffer, size_type const size) noexcept
     {
         mOutputBuffer = buffer;
         mOutputBufferSize = size;
