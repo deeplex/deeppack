@@ -56,5 +56,6 @@ namespace dplx::dp::detail
 
 inline constexpr int var_uint_max_size = 9;
 inline constexpr unsigned int inline_value_max = 23;
+inline constexpr unsigned indefinite_add_info = 0b000'11111U;
 
 } // namespace dplx::dp::detail

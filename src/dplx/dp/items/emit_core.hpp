@@ -17,6 +17,7 @@
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/items/emit_context.hpp>
+#include <dplx/dp/items/item_size_of_core.hpp>
 #include <dplx/dp/items/type_code.hpp>
 #include <dplx/dp/streams/output_buffer.hpp>
 
@@ -132,21 +133,6 @@ inline auto store_inline_value(output_buffer &out,
     out.commit_written(encodedSize);
     return oc::success();
 }
-
-} // namespace dplx::dp::detail
-
-namespace dplx::dp::detail
-{
-
-template <typename T>
-concept encodable_int = cncr::integer<T> && sizeof(T) <= sizeof(std::uint64_t);
-
-template <typename T>
-using encoder_uint_t = std::conditional_t<sizeof(T) <= sizeof(std::uint32_t),
-                                          std::uint32_t,
-                                          std::uint64_t>;
-
-inline constexpr unsigned indefinite_add_info = 0b000'11111U;
 
 } // namespace dplx::dp::detail
 
