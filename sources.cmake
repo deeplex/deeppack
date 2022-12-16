@@ -115,6 +115,7 @@ if (BUILD_TESTING)
         BASE_DIR dp_tests-ng
 
         PRIVATE
+            core_samples.hpp
             item_sample.hpp
             range_generator.hpp
             simple_encodable.hpp
