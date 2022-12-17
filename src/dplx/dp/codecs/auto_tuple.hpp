@@ -13,6 +13,8 @@
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/emit_core.hpp>
+#include <dplx/dp/items/encoded_item_head_size.hpp>
+#include <dplx/dp/items/item_size_of_core.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
 #include <dplx/dp/tuple_def.hpp>
 
@@ -31,6 +33,24 @@ struct mp_encode_tuple_member_fn
         using element_type = typename PropDefType::value_type;
 
         return codec<element_type>::encode(
+                ctx,
+                static_cast<element_type const &>(propertyDef.access(value)));
+    }
+};
+
+template <typename T>
+struct mp_size_of_tuple_element_fn
+{
+    emit_context const &ctx;
+    T const &value;
+
+    template <typename PropDefType>
+    constexpr auto operator()(PropDefType const &propertyDef) const noexcept
+            -> std::uint64_t
+    {
+        using element_type = typename PropDefType::value_type;
+
+        return codec<element_type>::size_of(
                 ctx,
                 static_cast<element_type const &>(propertyDef.access(value)));
     }
@@ -68,6 +88,39 @@ inline auto encode_tuple(emit_context const &ctx, T const &value) noexcept
         -> result<void>
 {
     return dp::encode_tuple<layout_descriptor_for_v<T>>(ctx, value);
+}
+
+template <auto const &descriptor>
+inline auto
+size_of_tuple(emit_context const &ctx,
+              detail::descriptor_class_type<descriptor> const &value) noexcept
+        -> std::uint64_t
+{
+    using size_of_element_fn = detail::mp_size_of_tuple_element_fn<
+            detail::descriptor_class_type<descriptor>>;
+
+    std::uint64_t prefixSize = 0U;
+    if constexpr (descriptor.version == null_def_version)
+    {
+        prefixSize += dp::encoded_item_head_size<type_code::array>(
+                descriptor.num_properties);
+    }
+    else
+    {
+        prefixSize += dp::encoded_item_head_size<type_code::array>(
+                descriptor.num_properties + 1U);
+        prefixSize += dp::item_size_of_integer(ctx, descriptor.version);
+    }
+
+    return prefixSize
+         + descriptor.mp_map_fold_left(size_of_element_fn{ctx, value});
+}
+
+template <packable_tuple T>
+inline auto size_of_tuple(emit_context const &ctx, T const &value) noexcept
+        -> std::uint64_t
+{
+    return dp::size_of_tuple<layout_descriptor_for_v<T>>(ctx, value);
 }
 
 } // namespace dplx::dp
