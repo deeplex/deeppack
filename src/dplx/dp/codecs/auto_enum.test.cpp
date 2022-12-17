@@ -106,6 +106,10 @@ TEMPLATE_TEST_CASE("enums have an auto codec",
         CHECK(std::ranges::equal(outputStream.written(),
                                  sample.encoded_bytes()));
     }
+    SECTION("with size_of")
+    {
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
 }
 
 } // namespace dp_tests
