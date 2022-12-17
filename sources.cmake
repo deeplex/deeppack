@@ -19,6 +19,7 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
     
     PUBLIC
+        dp/api
         dp/indefinite_range
         dp/map_pair
 

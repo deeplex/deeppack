@@ -12,6 +12,7 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
+#include <dplx/dp/api.hpp>
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/disappointment.hpp>
@@ -22,87 +23,6 @@
 
 namespace dplx::dp
 {
-
-// the encode APIs are not meant to participate in ADL and are therefore
-// niebloids
-inline constexpr struct encode_fn final
-{
-    template <typename T, output_stream Stream>
-        requires encodable<cncr::remove_cref_t<T>, Stream>
-    inline auto operator()(Stream &outStream, T &&value) const -> result<void>
-    {
-        return basic_encoder<cncr::remove_cref_t<T>, Stream>()(
-                outStream, static_cast<T &&>(value));
-    }
-
-    template <typename T>
-        requires ng::encodable<cncr::remove_cref_t<T>>
-    inline auto operator()(output_buffer &outStream, T &&value) const noexcept
-            -> result<void>
-    {
-        emit_context const ctx{outStream};
-        return codec<cncr::remove_cref_t<T>>::encode(
-                ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
-    }
-    template <typename T>
-        requires ng::encodable<cncr::remove_cref_t<T>>
-    inline auto operator()(emit_context const &ctx, T &&value) const noexcept
-            -> result<void>
-    {
-        return codec<cncr::remove_cref_t<T>>::encode(
-                ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
-    }
-
-    template <typename T, output_stream Stream>
-    class bound_type
-    {
-        Stream *mOutStream;
-
-    public:
-        inline explicit bound_type(Stream &outStream) noexcept
-            : mOutStream(&outStream)
-        {
-        }
-
-        inline auto operator()(detail::select_proper_param_type<T> value) const
-                -> result<void>
-        {
-            return basic_encoder<cncr::remove_cref_t<T>, Stream>()(*mOutStream,
-                                                                   value);
-        }
-    };
-    template <output_stream Stream>
-    class bound_type<void, Stream>
-    {
-        Stream *mOutStream;
-
-    public:
-        inline explicit bound_type(Stream &outStream) noexcept
-            : mOutStream(&outStream)
-        {
-        }
-
-        template <typename T>
-            requires encodable<cncr::remove_cref_t<T>, Stream>
-        inline auto operator()(T &&value) const -> result<void>
-        {
-            return basic_encoder<cncr::remove_cref_t<T>, Stream>()(*mOutStream,
-                                                                   value);
-        }
-    };
-
-    template <output_stream Stream>
-    static inline auto bind(Stream &outStream) -> bound_type<void, Stream>
-    {
-        return bound_type<void, Stream>(outStream);
-    }
-    template <typename T, output_stream Stream>
-        requires encodable<cncr::remove_cref_t<T>, Stream>
-    static inline auto bind(Stream &outStream) -> bound_type<T, Stream>
-    {
-        return bound_type<T, Stream>(outStream);
-    }
-} encode{};
 
 inline constexpr struct encode_array_fn final
 {
@@ -307,17 +227,5 @@ inline constexpr struct encode_varargs_t final
         return bound_type<Stream>(outStream);
     }
 } encode_varargs{};
-
-inline constexpr struct encoded_size_of_fn
-{
-    template <typename T>
-        requires cncr::tag_invocable<encoded_size_of_fn, T &&>
-    constexpr auto operator()(T &&value) const
-            noexcept(cncr::nothrow_tag_invocable<encoded_size_of_fn, T &&>)
-                    -> cncr::tag_invoke_result_t<encoded_size_of_fn, T &&>
-    {
-        return cncr::tag_invoke(*this, static_cast<T &&>(value));
-    }
-} encoded_size_of{};
 
 } // namespace dplx::dp
