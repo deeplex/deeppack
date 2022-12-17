@@ -9,9 +9,9 @@
 
 #include <type_traits>
 
+#include <dplx/dp/api.hpp>
 #include <dplx/dp/codecs/core.hpp>
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/fwd.hpp>
 
 namespace dplx::dp

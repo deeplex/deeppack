@@ -9,8 +9,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "dplx/dp/api.hpp"
 #include "dplx/dp/codecs/core.hpp"
-#include "dplx/dp/encoder/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample.hpp"
 #include "test_utils.hpp"

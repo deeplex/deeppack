@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include <dplx/dp/api.hpp>
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/emit_core.hpp>

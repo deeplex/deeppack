@@ -14,7 +14,7 @@
 
 #include <dplx/cncr/mp_lite.hpp>
 
-#include "dplx/dp/encoder/api.hpp"
+#include "dplx/dp/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample.hpp"
 #include "test_utils.hpp"

@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "dplx/dp/encoder/api.hpp"
+#include "dplx/dp/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample.hpp"
 #include "range_generator.hpp"

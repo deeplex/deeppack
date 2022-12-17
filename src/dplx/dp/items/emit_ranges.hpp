@@ -12,8 +12,8 @@
 #include <ranges>
 #include <span>
 
+#include <dplx/dp/api.hpp>
 #include <dplx/dp/disappointment.hpp>
-#include <dplx/dp/encoder/api.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/emit_core.hpp>
 #include <dplx/dp/streams/output_buffer.hpp>
