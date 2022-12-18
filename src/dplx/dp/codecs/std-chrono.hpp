@@ -13,6 +13,7 @@
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/emit_core.hpp>
+#include <dplx/dp/items/item_size_of_core.hpp>
 
 namespace dplx::dp
 {
@@ -21,6 +22,12 @@ template <typename Rep, typename Period>
 class codec<std::chrono::duration<Rep, Period>>
 {
 public:
+    static auto size_of(emit_context const &ctx,
+                        std::chrono::duration<Rep, Period> value) noexcept
+            -> std::uint64_t
+    {
+        return dp::item_size_of_integer(ctx, value.count());
+    }
     static auto encode(emit_context const &ctx,
                        std::chrono::duration<Rep, Period> value) noexcept
             -> result<void>
