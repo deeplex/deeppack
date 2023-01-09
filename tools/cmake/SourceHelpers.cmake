@@ -60,3 +60,32 @@ function(dplx_target_sources TARGET)
         message(FATAL_ERROR "Specified smart mode without a test target.")
     endif ()
 endfunction()
+
+function(dplx_target_data TARGET)
+    set(OPTIONS)
+    set(ONE_VALUE_ARGS SOURCE_DIR BINARY_DIR)
+    set(MULTI_VALUE_ARGS FILES)
+    cmake_parse_arguments(PARSE_ARGV 1 _
+        "${OPTIONS}"
+        "${ONE_VALUE_ARGS}"
+        "${MULTI_VALUE_ARGS}")
+
+    cmake_path(SET __SOURCE_DIR NORMALIZE "${CMAKE_CURRENT_SOURCE_DIR}/data/${__SOURCE_DIR}")
+    
+    if (NOT DEFINED __BINARY_DIR)
+        set(__BINARY_DIR "$<TARGET_FILE_DIR:${TARGET}>")
+    elseif(NOT __BINARY_DIR MATCHES [[.*\$<.*]])
+        cmake_path(SET __BINARY_DIR NORMALIZE "${CMAKE_CURRENT_BINARY_DIR}/${__BINARY_DIR}")
+    endif()
+    
+    foreach (file IN LISTS __FILES)
+        add_custom_command(
+            TARGET "${TARGET}" POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E make_directory
+                        ${__BINARY_DIR}
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                    "${__SOURCE_DIR}/${file}"
+                        ${__BINARY_DIR}
+        )
+    endforeach()
+endfunction()

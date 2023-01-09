@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <dplx/predef/compiler.h>
 
 #ifdef DPLX_COMP_GNUC_AVAILABLE
@@ -22,4 +24,12 @@ namespace dp_tests
 
 using namespace dplx;
 
+namespace detail
+{
+
+template <typename T>
+concept is_fmt_formattable = fmt::is_formattable<T>::value;
+
 }
+
+} // namespace dp_tests

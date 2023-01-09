@@ -120,9 +120,17 @@ if (BUILD_TESTING)
         PRIVATE
             core_samples.hpp
             item_sample_ct.hpp
+            item_sample_rt.hpp
             range_generator.hpp
             simple_encodable.hpp
             test_utils.hpp
+            yaml_sample_generator.hpp
+    )
+
+    dplx_target_data(deeppack-tests
+        SOURCE_DIR test-samples
+
+        FILES
     )
 
     dplx_target_sources(deeppack-legacy-tests PRIVATE

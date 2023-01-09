@@ -19,6 +19,7 @@
 #include <fmt/ostream.h>
 
 #include "dplx/dp/items/type_code.hpp"
+#include "test_utils.hpp"
 
 namespace dp_tests
 {
@@ -42,15 +43,26 @@ struct item_sample_ct
                 .first(std::min<std::size_t>(encoded_length, encoded.size()));
     }
 
-    friend inline auto operator<<(std::ostream &os, item_sample_ct const &sample)
-            -> std::ostream &
+    friend inline auto operator<<(std::ostream &os,
+                                  item_sample_ct const &sample)
+            -> std::ostream &requires(!detail::is_fmt_formattable<T const &>)
     {
         fmt::print(os, "{{item_value: <please specialize me>, {}, 0x{:02x}}}",
                    sample.encoded_length,
                    fmt::join(sample.encoded_bytes(), "'"));
         return os;
     }
-    friend inline auto operator<<(std::ostream &os, item_sample_ct const &sample)
+    friend inline auto operator<<(std::ostream &os,
+                                  item_sample_ct const &sample)
+            -> std::ostream &
+    {
+        fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,
+                   sample.encoded_length,
+                   fmt::join(sample.encoded_bytes(), "'"));
+        return os;
+    }
+    friend inline auto operator<<(std::ostream &os,
+                                  item_sample_ct const &sample)
             -> std::ostream &requires(std::integral<T>)
     {
         fmt::print(os, "{{item_value: {:#x}, {}, 0x{:02x}}}", sample.value,
@@ -58,7 +70,8 @@ struct item_sample_ct
                    fmt::join(sample.encoded_bytes(), "'"));
         return os;
     }
-    friend inline auto operator<<(std::ostream &os, item_sample_ct const &sample)
+    friend inline auto operator<<(std::ostream &os,
+                                  item_sample_ct const &sample)
             -> std::ostream &requires(std::floating_point<T>)
     {
         fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,

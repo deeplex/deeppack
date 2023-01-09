@@ -67,12 +67,17 @@ find_package(Boost 1.71 REQUIRED COMPONENTS
     ${DP_REQUIRE_UNIT_TEST_FRAMEWORK}
 )
 
+find_package(yaml-cpp CONFIG)
+set_package_properties(yaml-cpp PROPERTIES
+    TYPE OPTIONAL
+    PURPOSE "Allows to build the test suite"
+)
 find_package(Catch2 CONFIG)
-cmake_dependent_option(BUILD_TESTING "Build the documentation using sphinx" ON Catch2_FOUND OFF)
 set_package_properties(Catch2 PROPERTIES
     TYPE OPTIONAL
     PURPOSE "Allows to build the test suite"
 )
+cmake_dependent_option(BUILD_TESTING "Build the test suite" ON Catch2_FOUND;yaml-cpp_FOUND OFF)
 
 find_package(Sphinx)
 cmake_dependent_option(BUILD_DOCS "Build the documentation using sphinx" ON Sphinx_FOUND OFF)
@@ -136,6 +141,7 @@ if (BUILD_TESTING)
         Deeplex::deeppack
 
         Catch2::Catch2 Catch2::Catch2WithMain
+        yaml-cpp
     )
     
     target_include_directories(deeppack-tests PRIVATE
