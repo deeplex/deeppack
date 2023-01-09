@@ -21,7 +21,7 @@
 
 #include "core_samples.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -29,7 +29,7 @@ namespace dp_tests
 
 TEST_CASE("boolean emits correctly")
 {
-    auto sample = GENERATE(gens::values<item_sample<bool>>({
+    auto sample = GENERATE(gens::values<item_sample_ct<bool>>({
             {false, 1, {0b111'10100}},
             { true, 1, {0b111'10101}},
     }));
@@ -160,7 +160,7 @@ TEST_CASE("finite prefixes are emitted correctly")
 
 TEST_CASE("emit_binary writes a short blob")
 {
-    item_sample<unsigned> const sample
+    item_sample_ct<unsigned> const sample
             = GENERATE(borrowed_range(binary_samples));
 
     std::vector<unsigned char> generated(sample.value);

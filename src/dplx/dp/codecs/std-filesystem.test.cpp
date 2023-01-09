@@ -12,7 +12,7 @@
 
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "test_utils.hpp"
 
@@ -22,7 +22,7 @@ namespace dp_tests
 namespace
 {
 using namespace std::string_view_literals;
-constexpr item_sample<std::u8string_view> path_samples[] = {
+constexpr item_sample_ct<std::u8string_view> path_samples[] = {
         {
          u8""sv, 1,
          {0x60},

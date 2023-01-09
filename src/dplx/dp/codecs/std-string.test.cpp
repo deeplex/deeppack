@@ -14,7 +14,7 @@
 #include <dplx/dp/api.hpp>
 
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -26,7 +26,7 @@ namespace dp_tests
 
 TEST_CASE("std::u8string_view should be encodable")
 {
-    item_sample<std::u8string_view> const sample{
+    item_sample_ct<std::u8string_view> const sample{
             u8"some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
@@ -40,7 +40,7 @@ TEST_CASE("std::u8string_view should be encodable")
 
 TEST_CASE("std::u8string should be encodable")
 {
-    item_sample<std::u8string> const sample{
+    item_sample_ct<std::u8string> const sample{
             u8"some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
@@ -54,7 +54,7 @@ TEST_CASE("std::u8string should be encodable")
 
 TEST_CASE("std::string_view should be encodable")
 {
-    item_sample<std::string_view> const sample{
+    item_sample_ct<std::string_view> const sample{
             "some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
@@ -68,7 +68,7 @@ TEST_CASE("std::string_view should be encodable")
 
 TEST_CASE("std::string should be encodable")
 {
-    item_sample<std::string> const sample{
+    item_sample_ct<std::string> const sample{
             "some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 

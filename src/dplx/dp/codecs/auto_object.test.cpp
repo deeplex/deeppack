@@ -12,7 +12,7 @@
 #include "dplx/dp/codecs/core.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "dplx/dp/streams/void_stream.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -54,7 +54,7 @@ static_assert(test_object_def_3_with_optional.has_optional_properties);
 TEST_CASE("object codec helpers with layout descriptor")
 {
     constexpr auto const &descriptor = test_object_def_2;
-    item_sample<test_object> const sample{
+    item_sample_ct<test_object> const sample{
             {0xdeadbeafU, 0x07U, 0xfefeU},
             9,
             {0xa2, 0x01, 0x1a, 0xde, 0xad, 0xbe, 0xaf, 0x17, 0x07}
@@ -149,7 +149,7 @@ static_assert(dp::packable_object<custom_with_layout_descriptor>);
 
 TEST_CASE("object codec helpers with auto numeric layout descriptor")
 {
-    item_sample<custom_with_layout_descriptor> const sample{
+    item_sample_ct<custom_with_layout_descriptor> const sample{
             {0x13, 0x07, 0x04, 0x14, {0, 0, 0x2a}},
             14,
             {0xa5, 1, 0x13, 2, 7, 5, 0x18, 0x2a, 0x18}
@@ -235,7 +235,7 @@ static_assert(dp::packable_object<custom_with_named_layout_descriptor>);
 
 TEST_CASE("object codec helpers with auto named layout descriptor")
 {
-    item_sample<custom_with_named_layout_descriptor> const sample{
+    item_sample_ct<custom_with_named_layout_descriptor> const sample{
             {0x13, 0x07, 0x04, 0x14},
             17,
             {0xa4, 0x61, 'b', 7, 0x61, 'c', 0x04, 0x61, 'd'}

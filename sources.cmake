@@ -3,10 +3,10 @@ dplx_target_sources(deeppack
     TEST_TARGET deeppack-tests
     MODE SMART_SOURCE MERGED_LAYOUT
     BASE_DIR dplx
-    
+
     PUBLIC
         dp/disappointment
-        
+
         dp/codecs/core
         dp/codecs/std-chrono
         dp/codecs/std-filesystem
@@ -17,7 +17,7 @@ dplx_target_sources(deeppack
     TEST_TARGET deeppack-tests
     MODE SMART_HEADER_ONLY MERGED_LAYOUT
     BASE_DIR dplx
-    
+
     PUBLIC
         dp/api
         dp/indefinite_range
@@ -28,7 +28,7 @@ dplx_target_sources(deeppack
         dp/codecs/auto_tuple
         dp/codecs/std-container
         dp/codecs/tuple
-        
+
         dp/detail/item_size
         dp/detail/type_utils
         dp/detail/utils
@@ -49,7 +49,7 @@ dplx_target_sources(deeppack
     TEST_TARGET deeppack-legacy-tests
     MODE SMART_SOURCE MERGED_LAYOUT
     BASE_DIR dplx
-    
+
     PUBLIC
         dp
 )
@@ -119,7 +119,7 @@ if (BUILD_TESTING)
 
         PRIVATE
             core_samples.hpp
-            item_sample.hpp
+            item_sample_ct.hpp
             range_generator.hpp
             simple_encodable.hpp
             test_utils.hpp

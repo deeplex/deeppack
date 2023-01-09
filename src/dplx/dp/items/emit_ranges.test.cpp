@@ -19,7 +19,7 @@
 #include <dplx/dp/map_pair.hpp>
 #include <dplx/dp/streams/memory_output_stream2.hpp>
 
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "simple_encodable.hpp"
 #include "test_utils.hpp"
@@ -29,7 +29,7 @@ namespace dp_tests
 
 namespace
 {
-constexpr item_sample<unsigned> array_samples[] = {
+constexpr item_sample_ct<unsigned> array_samples[] = {
         { 0,  1,                          {0x80}},
         { 1,  2,                       {0x81, 1}},
         {23, 24,  {0x97, 1, 2, 3, 4, 5, 6, 7, 8}},
@@ -39,7 +39,7 @@ constexpr item_sample<unsigned> array_samples[] = {
 
 TEST_CASE("emit_array loops over a sized range of encodables and emits them")
 {
-    item_sample<unsigned> const sample
+    item_sample_ct<unsigned> const sample
             = GENERATE(borrowed_range(array_samples));
 
     std::vector<simple_encodable> generated(sample.value);
@@ -60,7 +60,7 @@ TEST_CASE("emit_array loops over a sized range of encodables and emits them")
 
 TEST_CASE("emit_array loops over a forward range of encodables and emits them")
 {
-    item_sample<unsigned> const sample
+    item_sample_ct<unsigned> const sample
             = GENERATE(borrowed_range(array_samples));
 
     std::forward_list<simple_encodable> generated(sample.value);
@@ -104,7 +104,7 @@ TEST_CASE("emit_array can handle various data types")
 
 namespace
 {
-constexpr item_sample<unsigned> indefinite_array_samples[] = {
+constexpr item_sample_ct<unsigned> indefinite_array_samples[] = {
         { 0,  2,                   {0x9f, 0xff}},
         { 1,  3,                {0x9f, 1, 0xff}},
         {23, 25, {0x9f, 1, 2, 3, 4, 5, 6, 7, 8}},
@@ -115,7 +115,7 @@ constexpr item_sample<unsigned> indefinite_array_samples[] = {
 TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
           "emits them")
 {
-    item_sample<unsigned> const sample
+    item_sample_ct<unsigned> const sample
             = GENERATE(borrowed_range(indefinite_array_samples));
 
     std::forward_list<simple_encodable> generated(sample.value);
@@ -136,7 +136,7 @@ TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
 
 namespace
 {
-constexpr item_sample<unsigned> map_samples[] = {
+constexpr item_sample_ct<unsigned> map_samples[] = {
         { 0,  1,  {0xa0, 0, 0, 0, 0, 0, 0, 0, 0}},
         { 1,  3,  {0xa1, 0, 1, 0, 0, 0, 0, 0, 0}},
         {23, 47,  {0xb7, 0, 1, 1, 2, 2, 3, 3, 4}},
@@ -146,7 +146,8 @@ constexpr item_sample<unsigned> map_samples[] = {
 
 TEST_CASE("emit_map loops over a sized range of encodable pairs and emits them")
 {
-    item_sample<unsigned> const sample = GENERATE(borrowed_range(map_samples));
+    item_sample_ct<unsigned> const sample
+            = GENERATE(borrowed_range(map_samples));
 
     // clang won't support ranges::views till version 16
     std::vector<simple_encodable> generated(sample.value);
@@ -176,7 +177,8 @@ TEST_CASE("emit_map loops over a sized range of encodable pairs and emits them")
 TEST_CASE(
         "emit_map loops over a forward range of encodable pairs and emits them")
 {
-    item_sample<unsigned> const sample = GENERATE(borrowed_range(map_samples));
+    item_sample_ct<unsigned> const sample
+            = GENERATE(borrowed_range(map_samples));
 
     // clang won't support ranges::views till version 16
     std::vector<simple_encodable> generated(sample.value);
@@ -205,7 +207,7 @@ TEST_CASE(
 
 namespace
 {
-constexpr item_sample<unsigned> indefinite_map_samples[] = {
+constexpr item_sample_ct<unsigned> indefinite_map_samples[] = {
         { 0,  2, {0xbf, 0xFF, 0, 0, 0, 0, 0, 0, 0}},
         { 1,  4, {0xbf, 0, 1, 0xFF, 0, 0, 0, 0, 0}},
         {23, 48,    {0xbf, 0, 1, 1, 2, 2, 3, 3, 4}},
@@ -216,7 +218,7 @@ constexpr item_sample<unsigned> indefinite_map_samples[] = {
 TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
           "and emits them")
 {
-    item_sample<unsigned> const sample
+    item_sample_ct<unsigned> const sample
             = GENERATE(borrowed_range(indefinite_map_samples));
 
     // clang won't support ranges::views till version 16

@@ -16,7 +16,7 @@
 
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -35,7 +35,7 @@ using duration_types = dplx::cncr::mp_list<std::chrono::nanoseconds,
 
 TEMPLATE_LIST_TEST_CASE("duration values have a codec", "", duration_types)
 {
-    constexpr item_sample<int> sample{
+    constexpr item_sample_ct<int> sample{
             0xfe, 2, {0x18, 0xFE}
     };
 

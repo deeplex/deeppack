@@ -13,7 +13,7 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "test_utils.hpp"
 
@@ -36,7 +36,7 @@ static_assert(dplx::dp::ng::encodable<signed_test_enum>);
 template <>
 struct enum_samples<signed_test_enum>
 {
-    static constexpr dp_tests::item_sample<signed_test_enum> values[] = {
+    static constexpr dp_tests::item_sample_ct<signed_test_enum> values[] = {
             {signed_test_enum::neg2, 1, {0x21}},
             {signed_test_enum::neg1, 1, {0x20}},
             {signed_test_enum::zero, 1, {0x00}},
@@ -56,7 +56,7 @@ static_assert(dplx::dp::ng::encodable<unsigned_test_enum>);
 template <>
 struct enum_samples<unsigned_test_enum>
 {
-    static constexpr dp_tests::item_sample<unsigned_test_enum> values[] = {
+    static constexpr dp_tests::item_sample_ct<unsigned_test_enum> values[] = {
             {unsigned_test_enum::zero, 1, {0x00}},
             {unsigned_test_enum::pos1, 1, {0x01}},
             {unsigned_test_enum::pos2, 1, {0x02}},
@@ -73,7 +73,7 @@ static_assert(dplx::dp::ng::encodable<unscoped_test_enum>);
 template <>
 struct enum_samples<unscoped_test_enum>
 {
-    static constexpr dp_tests::item_sample<unscoped_test_enum> values[] = {
+    static constexpr dp_tests::item_sample_ct<unscoped_test_enum> values[] = {
             { UTE_zero, 1,             {0x00}},
             {UTE_bound, 3, {0x19, 0x01, 0x00}},
     };

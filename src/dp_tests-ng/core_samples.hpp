@@ -15,7 +15,7 @@
 #include <dplx/predef/compiler.h>
 
 #include "dplx/dp/detail/workaround.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 
 namespace dp_tests
@@ -27,10 +27,10 @@ template <typename T>
 using limits = std::numeric_limits<T>;
 
 template <typename R, typename T, std::size_t N>
-auto integer_samples(item_sample<T> const (&samples)[N])
+auto integer_samples(item_sample_ct<T> const (&samples)[N])
 {
 #if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_CLANG, 15, 0, 0)
-    typename iterator_generator<item_sample<R>>::container_type values;
+    typename iterator_generator<item_sample_ct<R>>::container_type values;
     values.reserve(N);
     for (auto &sample : samples)
     {
@@ -46,14 +46,14 @@ auto integer_samples(item_sample<T> const (&samples)[N])
 
     return dp_tests::from_range(
             samples
-            | filter([](item_sample<T> const &sample)
+            | filter([](item_sample_ct<T> const &sample)
                      { return std::in_range<R>(sample.value); })
-            | transform([](item_sample<T> const &sample)
+            | transform([](item_sample_ct<T> const &sample)
                         { return sample.template as<R>(); }));
 #endif
 }
 
-constexpr item_sample<unsigned long long> posint_samples[] = {
+constexpr item_sample_ct<unsigned long long> posint_samples[] = {
   // Appendix A.Examples
         {        0x00, 1, {0b000'00000}},
         {                 0x01, 1,                          {0b000'00001}},
@@ -99,7 +99,7 @@ constexpr item_sample<unsigned long long> posint_samples[] = {
          },
 };
 
-constexpr item_sample<long long> negint_samples[] = {
+constexpr item_sample_ct<long long> negint_samples[] = {
   // Appendix A.Examples
         {              -10LL,1,                                           {0b001'01001}},
         {                      -100LL, 2,                                            {0x38, 0x63}},
@@ -129,7 +129,7 @@ constexpr item_sample<long long> negint_samples[] = {
          },
 };
 
-constexpr item_sample<unsigned> binary_samples[] = {
+constexpr item_sample_ct<unsigned> binary_samples[] = {
         { 0U,      1,                           {0x40}},
         { 4U,      5,               {0x44, 1, 2, 3, 4}},
         {23U, 23 + 1,   {0x57, 1, 2, 3, 4, 5, 6, 7, 8}},
@@ -137,7 +137,7 @@ constexpr item_sample<unsigned> binary_samples[] = {
 };
 
 // clang-format off
-constexpr item_sample<std::u8string_view> u8string_samples[] = {
+constexpr item_sample_ct<std::u8string_view> u8string_samples[] = {
         {
          u8""sv,  1,
          {0x60},
@@ -157,7 +157,7 @@ constexpr item_sample<std::u8string_view> u8string_samples[] = {
 };
 // clang-format on
 
-constexpr item_sample<float> float_single_samples[] = {
+constexpr item_sample_ct<float> float_single_samples[] = {
         {                 100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}},
         {   3.4028234663852886e+38F, 5, {0xfa, 0x7f, 0x7f, 0xff, 0xff}},
         { limits<float>::infinity(), 5, {0xfa, 0x7f, 0x80, 0x00, 0x00}},
@@ -165,7 +165,7 @@ constexpr item_sample<float> float_single_samples[] = {
         {-limits<float>::infinity(), 5, {0xfa, 0xff, 0x80, 0x00, 0x00}},
 };
 
-constexpr item_sample<double> float_double_samples[] = {
+constexpr item_sample_ct<double> float_double_samples[] = {
         {                        1.1,9, {0xfb, 0x3f, 0xf1, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a}                                     },
         {                    1.e+300, 9, {0xfb, 0x7e, 0x37, 0xe4, 0x3c, 0x88, 0x00, 0x75, 0x9c}},
         { limits<double>::infinity(),

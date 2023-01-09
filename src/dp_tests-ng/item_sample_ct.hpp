@@ -24,14 +24,14 @@ namespace dp_tests
 {
 
 template <typename T>
-struct item_sample
+struct item_sample_ct
 {
     T value;
     unsigned encoded_length;
     std::array<std::uint8_t, dplx::dp::detail::var_uint_max_size> encoded;
 
     template <typename U>
-    [[nodiscard]] constexpr auto as() const noexcept -> item_sample<U>
+    [[nodiscard]] constexpr auto as() const noexcept -> item_sample_ct<U>
     {
         return {static_cast<U>(value), encoded_length, encoded};
     }
@@ -42,7 +42,7 @@ struct item_sample
                 .first(std::min<std::size_t>(encoded_length, encoded.size()));
     }
 
-    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
+    friend inline auto operator<<(std::ostream &os, item_sample_ct const &sample)
             -> std::ostream &
     {
         fmt::print(os, "{{item_value: <please specialize me>, {}, 0x{:02x}}}",
@@ -50,7 +50,7 @@ struct item_sample
                    fmt::join(sample.encoded_bytes(), "'"));
         return os;
     }
-    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
+    friend inline auto operator<<(std::ostream &os, item_sample_ct const &sample)
             -> std::ostream &requires(std::integral<T>)
     {
         fmt::print(os, "{{item_value: {:#x}, {}, 0x{:02x}}}", sample.value,
@@ -58,7 +58,7 @@ struct item_sample
                    fmt::join(sample.encoded_bytes(), "'"));
         return os;
     }
-    friend inline auto operator<<(std::ostream &os, item_sample const &sample)
+    friend inline auto operator<<(std::ostream &os, item_sample_ct const &sample)
             -> std::ostream &requires(std::floating_point<T>)
     {
         fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,

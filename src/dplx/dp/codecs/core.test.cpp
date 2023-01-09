@@ -14,7 +14,7 @@
 
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -34,7 +34,7 @@ TEMPLATE_TEST_CASE("integers have a codec",
                    long long)
 {
     static_assert(dp::ng::encodable<TestType>);
-    item_sample<unsigned char> const sample{
+    item_sample_ct<unsigned char> const sample{
             0x7e, 2, {0x18, 0x7e}
     };
 
@@ -57,7 +57,7 @@ TEMPLATE_TEST_CASE("integers have a codec",
 TEST_CASE("bool is encodable")
 {
     static_assert(dp::ng::encodable<bool>);
-    item_sample<bool> const sample{true, 1, {0xf5}};
+    item_sample_ct<bool> const sample{true, 1, {0xf5}};
 
     SECTION("with encode")
     {
@@ -78,7 +78,7 @@ TEST_CASE("bool is encodable")
 TEST_CASE("float has a codec")
 {
     static_assert(dp::ng::encodable<float>);
-    item_sample<float> const sample{
+    item_sample_ct<float> const sample{
             100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}
     };
 
@@ -101,7 +101,7 @@ TEST_CASE("float has a codec")
 TEST_CASE("double has a codec")
 {
     static_assert(dp::ng::encodable<double>);
-    item_sample<double> const sample{
+    item_sample_ct<double> const sample{
             1.e+300, 9, {0xfb, 0x7e, 0x37, 0xe4, 0x3c, 0x88, 0x00, 0x75, 0x9c}
     };
 

@@ -14,7 +14,7 @@
 
 #include "core_samples.hpp"
 #include "dplx/dp/streams/void_stream.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -61,7 +61,7 @@ TEMPLATE_TEST_CASE("negative integers' size is correctly estimated",
 
 TEST_CASE("binary item size is correctly estimated")
 {
-    item_sample<unsigned> const sample
+    item_sample_ct<unsigned> const sample
             = GENERATE(borrowed_range(binary_samples));
 
     dp::void_stream testStream;
@@ -74,7 +74,7 @@ TEST_CASE("binary item size is correctly estimated")
 
 TEST_CASE("u8string item size is correctly estimated")
 {
-    item_sample<std::u8string_view> const sample
+    item_sample_ct<std::u8string_view> const sample
             = GENERATE(borrowed_range(u8string_samples));
 
     dp::void_stream testStream;

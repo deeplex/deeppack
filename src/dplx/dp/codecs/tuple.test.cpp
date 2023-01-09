@@ -12,7 +12,7 @@
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/codecs/core.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
-#include "item_sample.hpp"
+#include "item_sample_ct.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -22,7 +22,7 @@ static_assert(dp::ng::encodable<std::pair<int, long>>);
 
 TEST_CASE("encodes two tuples")
 {
-    constexpr item_sample<std::array<int, 2>> sample{
+    constexpr item_sample_ct<std::array<int, 2>> sample{
             {   3, 22},
             3, { 0x82,  3,  22}
     };
@@ -46,7 +46,7 @@ TEST_CASE("encodes two tuples")
 
 TEST_CASE("encodes three tuples")
 {
-    constexpr item_sample<std::array<int, 3>> sample{
+    constexpr item_sample_ct<std::array<int, 3>> sample{
             {   3, 22,  5},
             4, { 0x83,  3, 22,   5}
     };
