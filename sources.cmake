@@ -38,6 +38,7 @@ dplx_target_sources(deeppack
         dp/items/emit_ranges
         dp/items/encoded_item_head_size
         dp/items/item_size_of_core
+        dp/items/item_size_of_ranges
         dp/items/type_code
 
         dp/streams/memory_output_stream2

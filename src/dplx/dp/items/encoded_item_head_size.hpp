@@ -10,11 +10,25 @@
 #include <cassert>
 #include <cstdint>
 
+#include <dplx/cncr/math_supplement.hpp>
 #include <dplx/cncr/utils.hpp>
 
 #include <dplx/dp/detail/item_size.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/type_code.hpp>
+
+namespace dplx::dp::detail
+{
+
+template <typename T>
+concept encodable_int = cncr::integer<T> && sizeof(T) <= sizeof(std::uint64_t);
+
+template <typename T>
+using encoder_uint_t = std::conditional_t<sizeof(T) <= sizeof(std::uint32_t),
+                                          std::uint32_t,
+                                          std::uint64_t>;
+
+} // namespace dplx::dp::detail
 
 namespace dplx::dp
 {

@@ -10,23 +10,8 @@
 #include <cassert>
 #include <cstdint>
 
-#include <dplx/cncr/math_supplement.hpp>
-
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/encoded_item_head_size.hpp>
-
-namespace dplx::dp::detail
-{
-
-template <typename T>
-concept encodable_int = cncr::integer<T> && sizeof(T) <= sizeof(std::uint64_t);
-
-template <typename T>
-using encoder_uint_t = std::conditional_t<sizeof(T) <= sizeof(std::uint32_t),
-                                          std::uint32_t,
-                                          std::uint64_t>;
-
-} // namespace dplx::dp::detail
 
 namespace dplx::dp
 {

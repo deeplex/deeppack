@@ -16,6 +16,7 @@
 #include <dplx/dp/api.hpp>
 #include <dplx/dp/codecs/core.hpp>
 #include <dplx/dp/indefinite_range.hpp>
+#include <dplx/dp/items/item_size_of_ranges.hpp>
 #include <dplx/dp/map_pair.hpp>
 
 #include "blob_matcher.hpp"
@@ -25,6 +26,8 @@
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 #include "yaml_sample_generator.hpp"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 namespace dp_tests
 {
@@ -50,6 +53,12 @@ TEST_CASE("emit_array loops over a range of encodables and emits them")
                            dp::indefinite_range(sample.value)));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
+    }
+    SECTION("and has a corresponding size_of")
+    {
+        CHECK(dp::item_size_of_array(ctx.as_emit_context(), sample.value)
+              == sample.encoded.size());
+        CHECK(ctx.stream.written().empty());
     }
 }
 
@@ -87,10 +96,20 @@ TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
 
     simple_test_emit_context ctx(sample.encoded.size());
 
-    REQUIRE(emit_array_indefinite(ctx.as_emit_context(),
-                                  dp::indefinite_range(sample.value)));
+    SECTION("with indefinite range")
+    {
+        REQUIRE(emit_array_indefinite(ctx.as_emit_context(),
+                                      dp::indefinite_range(sample.value)));
 
-    CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
+    }
+    SECTION("and has a corresponding size_of")
+    {
+        CHECK(dp::item_size_of_array_indefinite(
+                      ctx.as_emit_context(), dp::indefinite_range(sample.value))
+              == sample.encoded.size());
+        CHECK(ctx.stream.written().empty());
+    }
 }
 
 TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
@@ -115,6 +134,12 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
+    SECTION("and has a corresponding size_of")
+    {
+        CHECK(dp::item_size_of_map(ctx.as_emit_context(), sample.value)
+              == sample.encoded.size());
+        CHECK(ctx.stream.written().empty());
+    }
 }
 
 TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
@@ -127,10 +152,22 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
 
     simple_test_emit_context ctx(sample.encoded.size());
 
-    REQUIRE(emit_map_indefinite(ctx.as_emit_context(),
-                                dp::indefinite_range(sample.value)));
+    SECTION("with indefinite range")
+    {
+        REQUIRE(emit_map_indefinite(ctx.as_emit_context(),
+                                    dp::indefinite_range(sample.value)));
 
-    CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
+    }
+    SECTION("and has a corresponding size_of")
+    {
+        CHECK(dp::item_size_of_map_indefinite(
+                      ctx.as_emit_context(), dp::indefinite_range(sample.value))
+              == sample.encoded.size());
+        CHECK(ctx.stream.written().empty());
+    }
 }
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-function-cognitive-complexity)
