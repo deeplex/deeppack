@@ -148,7 +148,9 @@ if (BUILD_TESTING)
         src/dp_tests-ng
     )
     
-    add_test(NAME deeppack-tests COMMAND deeppack-tests)
+    add_test(NAME deeppack-tests COMMAND deeppack-tests
+             WORKING_DIRECTORY $<TARGET_FILE_DIR:deeppack-tests>
+    )
 
     ## legacy tests ####################################################
     add_executable(deeppack-legacy-tests)
