@@ -17,11 +17,11 @@
 
 #include <dplx/dp/indefinite_range.hpp>
 #include <dplx/dp/map_pair.hpp>
-#include <dplx/dp/streams/memory_output_stream2.hpp>
 
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "simple_encodable.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -45,16 +45,14 @@ TEST_CASE("emit_array loops over a sized range of encodables and emits them")
     std::vector<simple_encodable> generated(sample.value);
     std::iota(generated.begin(), generated.end(), simple_encodable{1});
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(sample.encoded_length);
 
-    REQUIRE(emit_array(ctx, generated));
+    REQUIRE(emit_array(ctx.as_emit_context(), generated));
 
-    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
     auto const prefix_length
-            = std::min(outputStream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+            = std::min(ctx.stream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
                              sample.encoded_bytes()));
 }
 
@@ -66,16 +64,14 @@ TEST_CASE("emit_array loops over a forward range of encodables and emits them")
     std::forward_list<simple_encodable> generated(sample.value);
     std::iota(generated.begin(), generated.end(), simple_encodable{1});
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(sample.encoded_length);
 
-    REQUIRE(emit_array(ctx, dp::indefinite_range(generated)));
+    REQUIRE(emit_array(ctx.as_emit_context(), dp::indefinite_range(generated)));
 
-    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
     auto const prefix_length
-            = std::min(outputStream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+            = std::min(ctx.stream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
                              sample.encoded_bytes()));
 }
 
@@ -86,20 +82,18 @@ TEST_CASE("emit_array can handle various data types")
                                   std::byte{sample[0].value},
                                   std::byte{sample[1].value}};
 
-    std::vector<std::byte> buffer(3U);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(3U);
 
     SECTION("standard C-Array")
     {
-        REQUIRE(emit_array(ctx, sample));
+        REQUIRE(emit_array(ctx.as_emit_context(), sample));
     }
     SECTION("std array")
     {
         constexpr std::array<simple_encodable, 2> input{sample[0], sample[1]};
-        REQUIRE(emit_array(ctx, input));
+        REQUIRE(emit_array(ctx.as_emit_context(), input));
     }
-    CHECK(std::ranges::equal(std::span(buffer), expected));
+    CHECK(std::ranges::equal(ctx.stream.written(), expected));
 }
 
 namespace
@@ -121,16 +115,15 @@ TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
     std::forward_list<simple_encodable> generated(sample.value);
     std::iota(generated.begin(), generated.end(), simple_encodable{1});
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(sample.encoded_length);
 
-    REQUIRE(emit_array_indefinite(ctx, dp::indefinite_range(generated)));
+    REQUIRE(emit_array_indefinite(ctx.as_emit_context(),
+                                  dp::indefinite_range(generated)));
 
-    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
     auto const prefix_length
-            = std::min(outputStream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+            = std::min(ctx.stream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
                              sample.encoded_bytes()));
 }
 
@@ -161,16 +154,14 @@ TEST_CASE("emit_map loops over a sized range of encodable pairs and emits them")
                 return {o, ++o};
             });
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(sample.encoded_length);
 
-    REQUIRE(emit_map(ctx, enlarged));
+    REQUIRE(emit_map(ctx.as_emit_context(), enlarged));
 
-    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
     auto const prefix_length
-            = std::min(outputStream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+            = std::min(ctx.stream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
                              sample.encoded_bytes()));
 }
 
@@ -192,16 +183,14 @@ TEST_CASE(
                 return {o, ++o};
             });
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(sample.encoded_length);
 
-    REQUIRE(emit_map(ctx, dp::indefinite_range(enlarged)));
+    REQUIRE(emit_map(ctx.as_emit_context(), dp::indefinite_range(enlarged)));
 
-    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
     auto const prefix_length
-            = std::min(outputStream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+            = std::min(ctx.stream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
                              sample.encoded_bytes()));
 }
 
@@ -233,16 +222,15 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
                 return {o, ++o};
             });
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    simple_test_emit_context ctx(sample.encoded_length);
 
-    REQUIRE(emit_map_indefinite(ctx, dp::indefinite_range(enlarged)));
+    REQUIRE(emit_map_indefinite(ctx.as_emit_context(),
+                                dp::indefinite_range(enlarged)));
 
-    REQUIRE(outputStream.written().size() == sample.encoded_length);
+    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
     auto const prefix_length
-            = std::min(outputStream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(std::span(buffer).first(prefix_length),
+            = std::min(ctx.stream.written().size(), sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
                              sample.encoded_bytes()));
 }
 

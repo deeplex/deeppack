@@ -123,6 +123,7 @@ if (BUILD_TESTING)
             item_sample_rt.hpp
             range_generator.hpp
             simple_encodable.hpp
+            test_output_stream.hpp
             test_utils.hpp
             yaml_sample_generator.hpp
     )

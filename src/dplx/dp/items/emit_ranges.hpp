@@ -13,6 +13,7 @@
 #include <span>
 
 #include <dplx/dp/api.hpp>
+#include <dplx/dp/concepts.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/emit_core.hpp>
@@ -106,7 +107,6 @@ inline auto emit_map(emit_context const &ctx, R const &vs) noexcept
         return oc::success();
     }
 }
-
 template <std::ranges::input_range R>
     requires(detail::encodable_pair_like2<std::ranges::range_value_t<R>>)
 inline auto emit_map_indefinite(emit_context const &ctx, R const &vs) noexcept
