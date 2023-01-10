@@ -7,9 +7,15 @@
 
 #pragma once
 
+#include <string>
+
+#include <catch2/catch_tostring.hpp>
+#include <fmt/core.h>
 #include <fmt/format.h>
 
 #include <dplx/predef/compiler.h>
+
+#include <dplx/dp/disappointment.hpp>
 
 #ifdef DPLX_COMP_GNUC_AVAILABLE
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
@@ -30,6 +36,47 @@ namespace detail
 template <typename T>
 concept is_fmt_formattable = fmt::is_formattable<T>::value;
 
+inline auto format_error(dp::system_error::status_code<void> const &esc)
+        -> std::string
+{
+    auto const domainNameRef = esc.domain().name();
+    auto const messageRef = esc.message();
+    return fmt::format(
+            "{{fail[{}]: {}}}",
+            std::string_view(domainNameRef.data(), domainNameRef.size()),
+            std::string_view(messageRef.data(), messageRef.size()));
 }
 
+} // namespace detail
+
 } // namespace dp_tests
+
+template <typename T>
+    requires dp_tests::detail::is_fmt_formattable<T const &>
+struct Catch::StringMaker<dplx::dp::result<T>>
+{
+    static auto convert(dplx::dp::result<T> const &rx) -> std::string
+    {
+        if (rx.has_value())
+        {
+            return fmt::format("{{rx: {}}}", rx.assume_value());
+        }
+
+        return dp_tests::detail::format_error(rx.assume_error());
+    }
+};
+
+template <>
+struct Catch::StringMaker<dplx::dp::result<void>>
+{
+    static auto convert(dplx::dp::result<void> const &rx) -> std::string
+    {
+        using namespace std::string_literals;
+        if (rx.has_value())
+        {
+            return "{rx: success<void>}"s;
+        }
+
+        return dp_tests::detail::format_error(rx.assume_error());
+    }
+};
