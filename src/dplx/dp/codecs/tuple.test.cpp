@@ -9,11 +9,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "blob_matcher.hpp"
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/codecs/core.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 namespace dp_tests
 {
@@ -27,38 +30,63 @@ TEST_CASE("encodes two tuples")
             3, { 0x82,  3,  22}
     };
 
-    std::vector<std::byte> encodingBuffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(encodingBuffer);
-
     SECTION("with std::pair")
     {
         std::pair<int, long long> subject{sample.value[0], sample.value[1]};
-        REQUIRE(dp::encode(outputStream, subject));
+
+        SECTION("to a stream")
+        {
+            simple_test_output_stream outputStream(sample.encoded_length);
+
+            REQUIRE(dp::encode(outputStream, subject));
+
+            CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+        }
+        SECTION("with a size_of operator")
+        {
+            CHECK(dp::encoded_size_of(subject) == sample.encoded_length);
+        }
     }
     SECTION("with std::tuple")
     {
         std::tuple<int, long long> subject{sample.value[0], sample.value[1]};
-        REQUIRE(dp::encode(outputStream, subject));
-    }
 
-    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+        SECTION("to a stream")
+        {
+            simple_test_output_stream outputStream(sample.encoded_length);
+
+            REQUIRE(dp::encode(outputStream, subject));
+
+            CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+        }
+        SECTION("with a size_of operator")
+        {
+            CHECK(dp::encoded_size_of(subject) == sample.encoded_length);
+        }
+    }
 }
 
 TEST_CASE("encodes three tuples")
 {
-    constexpr item_sample_ct<std::array<int, 3>> sample{
+    constexpr item_sample_ct<std::tuple<int, long long, long>> sample{
             {   3, 22,  5},
             4, { 0x83,  3, 22,   5}
     };
 
-    std::vector<std::byte> encodingBuffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(encodingBuffer);
+    SECTION("to a stream")
+    {
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-    std::tuple<int, long long, long> subject{sample.value[0], sample.value[1],
-                                             sample.value[2]};
-    REQUIRE(dp::encode(outputStream, subject));
+        REQUIRE(dp::encode(outputStream, sample.value));
 
-    CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+    }
+    SECTION("with as size_of operator")
+    {
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
 }
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-function-cognitive-complexity)

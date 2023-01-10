@@ -68,6 +68,45 @@ inline constexpr struct encode_varargs_fn final
     }
 } encode_varargs{};
 
+constexpr struct encoded_size_of_varargs_fn
+{
+    template <typename... Ts>
+        requires(... &&detail::has_codec_size_of<cncr::remove_cref_t<Ts>>)
+    inline auto operator()(emit_context const &ctx,
+                           Ts &&...values) const noexcept -> result<void>
+    {
+        return bound_type(ctx)(static_cast<Ts &&>(values)...);
+    }
+
+    class bound_type
+    {
+        emit_context const *mCtx;
+
+    public:
+        constexpr explicit bound_type(emit_context const &ctx)
+            : mCtx(&ctx)
+        {
+        }
+
+        template <typename... Ts>
+            requires(... &&detail::has_codec_size_of<cncr::remove_cref_t<Ts>>)
+        inline auto operator()(Ts &&...vs) const noexcept -> std::uint64_t
+        {
+            auto const &ctx = *mCtx;
+            auto const headSize = dp::encoded_item_head_size(type_code::array,
+                                                             sizeof...(Ts));
+
+            return (headSize + ...
+                    + dp::encoded_size_of(ctx, static_cast<Ts &&>(vs)));
+        }
+    };
+
+    static constexpr auto bind(emit_context const &ctx) -> bound_type
+    {
+        return bound_type{ctx};
+    }
+} encoded_size_of_varargs;
+
 } // namespace dplx::dp::ng
 
 namespace dplx::dp::detail
@@ -89,6 +128,12 @@ template <detail::encodable_tuple_like2 T>
 class codec<T>
 {
 public:
+    static auto size_of(emit_context const &ctx, T const &tuple) noexcept
+            -> std::uint64_t
+    {
+        return detail::apply_simply(
+                ng::encoded_size_of_varargs_fn::bound_type(ctx), tuple);
+    }
     static auto encode(emit_context const &ctx, T const &tuple) noexcept
             -> result<void>
     {
