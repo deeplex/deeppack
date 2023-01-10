@@ -32,7 +32,7 @@ TEST_CASE("std::span of bytes has a codec")
     item_sample_ct<std::array<unsigned char, 2U>> const sample{
             .value = {0xfe, 0xfe},
             .encoded_length = 3,
-            .encoded = {0x42, 0xfe, 0xfe},
+            .encoded = { 0x42, 0xfe,0xfe},
     };
     dp::bytes const value = as_bytes(std::span(sample.value));
 
@@ -53,9 +53,9 @@ TEST_CASE("std::span of bytes has a codec")
 TEST_CASE("a range gets encoded")
 {
     item_sample_ct<std::array<unsigned char, 2U>> const sample{
-            .value = {0xfe, 0xfe},
+            .value = {0xfe, 0xfe },
             .encoded_length = 5,
-            .encoded = {0x82, 0x18, 0xfe, 0x18, 0xfe},
+            .encoded = { 0x82, 0x18, 0xfe, 0x18, 0xfe},
     };
 
     std::vector<std::byte> buffer(sample.encoded_length);
@@ -69,9 +69,9 @@ TEST_CASE("a range gets encoded")
 TEST_CASE("an indefinite range gets encoded")
 {
     item_sample_ct<std::array<unsigned char const, 2U>> const sample{
-            .value = {0xfe, 0xfe},
+            .value = {0xfe, 0xfe },
             .encoded_length = 6,
-            .encoded = {0x9f, 0x18, 0xfe, 0x18, 0xfe, 0xff},
+            .encoded = { 0x9f, 0x18, 0xfe, 0x18, 0xfe, 0xff},
     };
 
     std::vector<std::byte> buffer(sample.encoded_length);
@@ -87,7 +87,7 @@ TEST_CASE("a custom associative range gets encoded")
     item_sample_ct<std::array<std::pair<int, unsigned>, 2>> const sample{
             .value = {{{0x04, 0x02}, {0x01, 0x03}}},
             .encoded_length = 5,
-            .encoded = {0xa2, 0x04, 0x2, 0x01, 0x03},
+            .encoded = { 0xa2, 0x04, 0x2, 0x01, 0x03},
     };
 
     std::vector<std::byte> buffer(sample.encoded_length);
@@ -103,7 +103,7 @@ TEST_CASE("a custom indefinite associative range gets encoded")
     item_sample_ct<std::array<std::pair<int, unsigned>, 2>> const sample{
             .value = {{{0x04, 0x02}, {0x01, 0x03}}},
             .encoded_length = 6,
-            .encoded = {0xbf, 0x04, 0x2, 0x01, 0x03, 0xff},
+            .encoded = { 0xbf, 0x04, 0x2, 0x01, 0x03, 0xff},
     };
 
     std::vector<std::byte> buffer(sample.encoded_length);
