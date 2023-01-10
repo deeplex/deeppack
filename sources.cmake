@@ -118,6 +118,7 @@ if (BUILD_TESTING)
         BASE_DIR dp_tests-ng
 
         PRIVATE
+            blob_matcher.hpp
             core_samples.hpp
             item_sample_ct.hpp
             item_sample_rt.hpp

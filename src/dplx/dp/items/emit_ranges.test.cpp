@@ -7,9 +7,6 @@
 
 #include "dplx/dp/items/emit_ranges.hpp"
 
-#include <algorithm>
-#include <forward_list>
-#include <numeric>
 #include <utility>
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,6 +18,7 @@
 #include <dplx/dp/indefinite_range.hpp>
 #include <dplx/dp/map_pair.hpp>
 
+#include "blob_matcher.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "simple_encodable.hpp"
@@ -44,16 +42,14 @@ TEST_CASE("emit_array loops over a range of encodables and emits them")
     {
         REQUIRE(emit_array(ctx.as_emit_context(), sample.value));
 
-        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
-        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("with a forward range")
     {
         REQUIRE(emit_array(ctx.as_emit_context(),
                            dp::indefinite_range(sample.value)));
 
-        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
-        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
 }
 
@@ -70,14 +66,14 @@ TEST_CASE("emit_array can handle various data types")
     {
         REQUIRE(emit_array(ctx.as_emit_context(), sample));
 
-        CHECK(std::ranges::equal(ctx.stream.written(), expected));
+        CHECK_BLOB_EQ(ctx.stream.written(), expected);
     }
     SECTION("std array")
     {
         constexpr std::array<simple_encodable, 2> input{sample[0], sample[1]};
         REQUIRE(emit_array(ctx.as_emit_context(), input));
 
-        CHECK(std::ranges::equal(ctx.stream.written(), expected));
+        CHECK_BLOB_EQ(ctx.stream.written(), expected);
     }
 }
 
@@ -94,8 +90,7 @@ TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
     REQUIRE(emit_array_indefinite(ctx.as_emit_context(),
                                   dp::indefinite_range(sample.value)));
 
-    REQUIRE(ctx.stream.written().size() == sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+    CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
 }
 
 TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
@@ -111,16 +106,14 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
     {
         REQUIRE(emit_map(ctx.as_emit_context(), sample.value));
 
-        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
-        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("with a forward range")
     {
         REQUIRE(emit_map(ctx.as_emit_context(),
                          dp::indefinite_range(sample.value)));
 
-        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
-        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
 }
 
@@ -137,8 +130,7 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
     REQUIRE(emit_map_indefinite(ctx.as_emit_context(),
                                 dp::indefinite_range(sample.value)));
 
-    REQUIRE(ctx.stream.written().size() == sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+    CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
 }
 
 } // namespace dp_tests
