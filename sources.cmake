@@ -132,6 +132,8 @@ if (BUILD_TESTING)
         SOURCE_DIR test-samples
 
         FILES
+            arrays.yaml
+            maps.yaml
     )
 
     dplx_target_sources(deeppack-legacy-tests PRIVATE

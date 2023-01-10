@@ -14,7 +14,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <fmt/ranges.h>
 
+#include <dplx/dp/api.hpp>
+#include <dplx/dp/codecs/core.hpp>
 #include <dplx/dp/indefinite_range.hpp>
 #include <dplx/dp/map_pair.hpp>
 
@@ -23,56 +26,35 @@
 #include "simple_encodable.hpp"
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
+#include "yaml_sample_generator.hpp"
 
 namespace dp_tests
 {
 
-namespace
+TEST_CASE("emit_array loops over a range of encodables and emits them")
 {
-constexpr item_sample_ct<unsigned> array_samples[] = {
-        { 0,  1,                          {0x80}},
-        { 1,  2,                       {0x81, 1}},
-        {23, 24,  {0x97, 1, 2, 3, 4, 5, 6, 7, 8}},
-        {24, 26, {0x98, 24, 1, 2, 3, 4, 5, 6, 7}},
-};
-}
+    item_sample_rt<std::vector<int>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<int>>("arrays.yaml",
+                                                                "int arrays"));
+    INFO(sample);
 
-TEST_CASE("emit_array loops over a sized range of encodables and emits them")
-{
-    item_sample_ct<unsigned> const sample
-            = GENERATE(borrowed_range(array_samples));
+    simple_test_emit_context ctx(sample.encoded.size());
 
-    std::vector<simple_encodable> generated(sample.value);
-    std::iota(generated.begin(), generated.end(), simple_encodable{1});
+    SECTION("with a sized range")
+    {
+        REQUIRE(emit_array(ctx.as_emit_context(), sample.value));
 
-    simple_test_emit_context ctx(sample.encoded_length);
+        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
+        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+    }
+    SECTION("with a forward range")
+    {
+        REQUIRE(emit_array(ctx.as_emit_context(),
+                           dp::indefinite_range(sample.value)));
 
-    REQUIRE(emit_array(ctx.as_emit_context(), generated));
-
-    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
-    auto const prefix_length
-            = std::min(ctx.stream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
-                             sample.encoded_bytes()));
-}
-
-TEST_CASE("emit_array loops over a forward range of encodables and emits them")
-{
-    item_sample_ct<unsigned> const sample
-            = GENERATE(borrowed_range(array_samples));
-
-    std::forward_list<simple_encodable> generated(sample.value);
-    std::iota(generated.begin(), generated.end(), simple_encodable{1});
-
-    simple_test_emit_context ctx(sample.encoded_length);
-
-    REQUIRE(emit_array(ctx.as_emit_context(), dp::indefinite_range(generated)));
-
-    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
-    auto const prefix_length
-            = std::min(ctx.stream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
-                             sample.encoded_bytes()));
+        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
+        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+    }
 }
 
 TEST_CASE("emit_array can handle various data types")
@@ -87,151 +69,76 @@ TEST_CASE("emit_array can handle various data types")
     SECTION("standard C-Array")
     {
         REQUIRE(emit_array(ctx.as_emit_context(), sample));
+
+        CHECK(std::ranges::equal(ctx.stream.written(), expected));
     }
     SECTION("std array")
     {
         constexpr std::array<simple_encodable, 2> input{sample[0], sample[1]};
         REQUIRE(emit_array(ctx.as_emit_context(), input));
-    }
-    CHECK(std::ranges::equal(ctx.stream.written(), expected));
-}
 
-namespace
-{
-constexpr item_sample_ct<unsigned> indefinite_array_samples[] = {
-        { 0,  2,                   {0x9f, 0xff}},
-        { 1,  3,                {0x9f, 1, 0xff}},
-        {23, 25, {0x9f, 1, 2, 3, 4, 5, 6, 7, 8}},
-        {24, 26, {0x9f, 1, 2, 3, 4, 5, 6, 7, 8}},
-};
+        CHECK(std::ranges::equal(ctx.stream.written(), expected));
+    }
 }
 
 TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
           "emits them")
 {
-    item_sample_ct<unsigned> const sample
-            = GENERATE(borrowed_range(indefinite_array_samples));
+    item_sample_rt<std::vector<int>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<int>>(
+                    "arrays.yaml", "indefinite int arrays"));
+    INFO(sample);
 
-    std::forward_list<simple_encodable> generated(sample.value);
-    std::iota(generated.begin(), generated.end(), simple_encodable{1});
-
-    simple_test_emit_context ctx(sample.encoded_length);
+    simple_test_emit_context ctx(sample.encoded.size());
 
     REQUIRE(emit_array_indefinite(ctx.as_emit_context(),
-                                  dp::indefinite_range(generated)));
+                                  dp::indefinite_range(sample.value)));
 
-    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
-    auto const prefix_length
-            = std::min(ctx.stream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
-                             sample.encoded_bytes()));
+    REQUIRE(ctx.stream.written().size() == sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
 }
 
-namespace
+TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
 {
-constexpr item_sample_ct<unsigned> map_samples[] = {
-        { 0,  1,  {0xa0, 0, 0, 0, 0, 0, 0, 0, 0}},
-        { 1,  3,  {0xa1, 0, 1, 0, 0, 0, 0, 0, 0}},
-        {23, 47,  {0xb7, 0, 1, 1, 2, 2, 3, 3, 4}},
-        {24, 50, {0xb8, 24, 0, 1, 1, 2, 2, 3, 3}},
-};
-}
+    item_sample_rt<std::vector<std::pair<int, int>>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<std::pair<int, int>>>(
+                    "maps.yaml", "int maps"));
+    INFO(sample);
 
-TEST_CASE("emit_map loops over a sized range of encodable pairs and emits them")
-{
-    item_sample_ct<unsigned> const sample
-            = GENERATE(borrowed_range(map_samples));
+    simple_test_emit_context ctx(sample.encoded.size());
 
-    // clang won't support ranges::views till version 16
-    std::vector<simple_encodable> generated(sample.value);
-    std::iota(generated.begin(), generated.end(), simple_encodable{0});
-    std::vector<dp::map_pair<simple_encodable, simple_encodable>> enlarged(
-            sample.value);
-    std::ranges::transform(
-            generated, enlarged.begin(),
-            [](simple_encodable o)
-                    -> dp::map_pair<simple_encodable, simple_encodable> {
-                return {o, ++o};
-            });
+    SECTION("with a sized range")
+    {
+        REQUIRE(emit_map(ctx.as_emit_context(), sample.value));
 
-    simple_test_emit_context ctx(sample.encoded_length);
+        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
+        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+    }
+    SECTION("with a forward range")
+    {
+        REQUIRE(emit_map(ctx.as_emit_context(),
+                         dp::indefinite_range(sample.value)));
 
-    REQUIRE(emit_map(ctx.as_emit_context(), enlarged));
-
-    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
-    auto const prefix_length
-            = std::min(ctx.stream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
-                             sample.encoded_bytes()));
-}
-
-TEST_CASE(
-        "emit_map loops over a forward range of encodable pairs and emits them")
-{
-    item_sample_ct<unsigned> const sample
-            = GENERATE(borrowed_range(map_samples));
-
-    // clang won't support ranges::views till version 16
-    std::vector<simple_encodable> generated(sample.value);
-    std::iota(generated.begin(), generated.end(), simple_encodable{0});
-    std::forward_list<dp::map_pair<simple_encodable, simple_encodable>>
-            enlarged(sample.value);
-    std::ranges::transform(
-            generated, enlarged.begin(),
-            [](simple_encodable o)
-                    -> dp::map_pair<simple_encodable, simple_encodable> {
-                return {o, ++o};
-            });
-
-    simple_test_emit_context ctx(sample.encoded_length);
-
-    REQUIRE(emit_map(ctx.as_emit_context(), dp::indefinite_range(enlarged)));
-
-    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
-    auto const prefix_length
-            = std::min(ctx.stream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
-                             sample.encoded_bytes()));
-}
-
-namespace
-{
-constexpr item_sample_ct<unsigned> indefinite_map_samples[] = {
-        { 0,  2, {0xbf, 0xFF, 0, 0, 0, 0, 0, 0, 0}},
-        { 1,  4, {0xbf, 0, 1, 0xFF, 0, 0, 0, 0, 0}},
-        {23, 48,    {0xbf, 0, 1, 1, 2, 2, 3, 3, 4}},
-        {24, 50,    {0xbf, 0, 1, 1, 2, 2, 3, 3, 4}},
-};
+        REQUIRE(ctx.stream.written().size() == sample.encoded.size());
+        CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
+    }
 }
 
 TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
           "and emits them")
 {
-    item_sample_ct<unsigned> const sample
-            = GENERATE(borrowed_range(indefinite_map_samples));
+    item_sample_rt<std::vector<std::pair<int, int>>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<std::pair<int, int>>>(
+                    "maps.yaml", "indefinite int maps"));
+    INFO(sample);
 
-    // clang won't support ranges::views till version 16
-    std::vector<simple_encodable> generated(sample.value);
-    std::iota(generated.begin(), generated.end(), simple_encodable{0});
-    std::forward_list<dp::map_pair<simple_encodable, simple_encodable>>
-            enlarged(sample.value);
-    std::ranges::transform(
-            generated, enlarged.begin(),
-            [](simple_encodable o)
-                    -> dp::map_pair<simple_encodable, simple_encodable> {
-                return {o, ++o};
-            });
-
-    simple_test_emit_context ctx(sample.encoded_length);
+    simple_test_emit_context ctx(sample.encoded.size());
 
     REQUIRE(emit_map_indefinite(ctx.as_emit_context(),
-                                dp::indefinite_range(enlarged)));
+                                dp::indefinite_range(sample.value)));
 
-    REQUIRE(ctx.stream.written().size() == sample.encoded_length);
-    auto const prefix_length
-            = std::min(ctx.stream.written().size(), sample.encoded.size());
-    CHECK(std::ranges::equal(ctx.stream.written().first(prefix_length),
-                             sample.encoded_bytes()));
+    REQUIRE(ctx.stream.written().size() == sample.encoded.size());
+    CHECK(std::ranges::equal(ctx.stream.written(), sample.encoded_bytes()));
 }
 
 } // namespace dp_tests
