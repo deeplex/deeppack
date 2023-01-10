@@ -13,25 +13,34 @@
 
 namespace dplx::dp
 {
-
+auto codec<std::filesystem::path>::size_of(
+        emit_context const &ctx, std::filesystem::path const &path) noexcept
+        -> std::uint64_t
+try
+{
+    auto const generic = path.generic_u8string();
+    return dp::item_size_of_u8string(ctx, generic.size());
+}
+catch (...)
+{
+    return 0U;
+}
 auto codec<std::filesystem::path>::encode(
         emit_context const &ctx, std::filesystem::path const &path) noexcept
         -> result<void>
+try
 {
-    DPLX_TRY(auto const generic,
-             [&path]() noexcept -> result<std::u8string>
-             {
-                 try
-                 {
-                     return path.generic_u8string();
-                 }
-                 catch (std::bad_alloc const &)
-                 {
-                     return dp::errc::not_enough_memory;
-                 }
-             }());
+    auto const generic = path.generic_u8string();
 
     return dp::emit_u8string(ctx, generic.data(), generic.size());
+}
+catch (std::bad_alloc const &)
+{
+    return dp::errc::not_enough_memory;
+}
+catch (...)
+{
+    return dp::errc::bad;
 }
 
 } // namespace dplx::dp

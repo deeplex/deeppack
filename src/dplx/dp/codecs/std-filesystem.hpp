@@ -19,6 +19,9 @@ template <>
 class codec<std::filesystem::path>
 {
 public:
+    static auto size_of(emit_context const &ctx,
+                        std::filesystem::path const &path) noexcept
+            -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        std::filesystem::path const &path) noexcept
             -> result<void>;

@@ -10,10 +10,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "blob_matcher.hpp"
 #include "dplx/dp/api.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -39,12 +40,18 @@ TEST_CASE("std::filesystem::path can be encoded")
     auto const sample = GENERATE(borrowed_range(path_samples));
     std::filesystem::path const value(sample.value);
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
+    SECTION("to a stream")
+    {
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-    REQUIRE(dp::encode(outputStream, value));
+        REQUIRE(dp::encode(outputStream, value));
 
-    CHECK(std::ranges::equal(buffer, sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+    }
+    SECTION("with a size_of operator")
+    {
+        CHECK(dp::encoded_size_of(value) == sample.encoded_length);
+    }
 }
 
 } // namespace dp_tests
