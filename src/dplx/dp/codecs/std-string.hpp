@@ -20,6 +20,8 @@ template <>
 class codec<std::u8string_view>
 {
 public:
+    static auto size_of(emit_context const &ctx,
+                        std::u8string_view value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        std::u8string_view value) noexcept -> result<void>;
 };
@@ -28,6 +30,8 @@ template <>
 class codec<std::u8string>
 {
 public:
+    static auto size_of(emit_context const &ctx,
+                        std::u8string const &value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        std::u8string const &value) noexcept -> result<void>;
 };
@@ -36,6 +40,8 @@ template <>
 class codec<std::string_view>
 {
 public:
+    static auto size_of(emit_context const &ctx,
+                        std::string_view value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx, std::string_view value) noexcept
             -> result<void>;
 };
@@ -44,6 +50,8 @@ template <>
 class codec<std::string>
 {
 public:
+    static auto size_of(emit_context const &ctx,
+                        std::string const &value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        std::string const &value) noexcept -> result<void>;
 };

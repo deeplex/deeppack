@@ -13,8 +13,9 @@
 
 #include <dplx/dp/api.hpp>
 
-#include "dplx/dp/streams/memory_output_stream2.hpp"
+#include "blob_matcher.hpp"
 #include "item_sample_ct.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -30,12 +31,18 @@ TEST_CASE("std::u8string_view should be encodable")
             u8"some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
+    SECTION("to a stream")
+    {
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-    REQUIRE(dp::encode(outputStream, sample.value));
+        REQUIRE(dp::encode(outputStream, sample.value));
 
-    CHECK(std::ranges::equal(buffer, sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+    }
+    SECTION("with a size_of operator")
+    {
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
 }
 
 TEST_CASE("std::u8string should be encodable")
@@ -44,12 +51,18 @@ TEST_CASE("std::u8string should be encodable")
             u8"some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
+    SECTION("to a stream")
+    {
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-    REQUIRE(dp::encode(outputStream, sample.value));
+        REQUIRE(dp::encode(outputStream, sample.value));
 
-    CHECK(std::ranges::equal(buffer, sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+    }
+    SECTION("with a size_of operator")
+    {
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
 }
 
 TEST_CASE("std::string_view should be encodable")
@@ -58,12 +71,18 @@ TEST_CASE("std::string_view should be encodable")
             "some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
+    SECTION("to a stream")
+    {
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-    REQUIRE(dp::encode(outputStream, sample.value));
+        REQUIRE(dp::encode(outputStream, sample.value));
 
-    CHECK(std::ranges::equal(buffer, sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+    }
+    SECTION("with a size_of operator")
+    {
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
 }
 
 TEST_CASE("std::string should be encodable")
@@ -72,12 +91,18 @@ TEST_CASE("std::string should be encodable")
             "some", 5, {0x64, u8's', u8'o', u8'm', u8'e'}
     };
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
+    SECTION("to a stream")
+    {
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-    REQUIRE(dp::encode(outputStream, sample.value));
+        REQUIRE(dp::encode(outputStream, sample.value));
 
-    CHECK(std::ranges::equal(buffer, sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
+    }
+    SECTION("with a size_of operator")
+    {
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
 }
 
 } // namespace dp_tests
