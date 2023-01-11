@@ -71,16 +71,6 @@ dplx_target_sources(deeppack
         dp/stream
         dp/tuple_def
 
-        dp/encoder/api
-        dp/encoder/arg_list
-        dp/encoder/chrono
-        dp/encoder/core
-        dp/encoder/narrow_strings
-        dp/encoder/object_utils
-        dp/encoder/std_path
-        dp/encoder/tuple_utils
-        dp/item_emitter
-
         dp/decoder/api
         dp/decoder/chrono
         dp/decoder/core
@@ -100,7 +90,6 @@ dplx_target_sources(deeppack
         dp/streams/chunked_input_stream
         dp/streams/chunked_output_stream
         dp/streams/memory_input_stream
-        dp/streams/memory_output_stream
 
         dp/detail/bit
         dp/detail/hash
@@ -147,15 +136,8 @@ if (BUILD_TESTING)
     )
 
     target_sources(deeppack-legacy-tests PRIVATE
-        tests/encoder.blob.test.cpp
-        tests/encoder.map.test.cpp
-        tests/encoder.range.test.cpp
-        tests/encoder.string.test.cpp
-        tests/encoder.tuple.test.cpp
-
         tests/enum_codec.test.cpp
 
-        tests/item_emitter.integer.test.cpp
         tests/item_parser.array.test.cpp
         tests/item_parser.binary.test.cpp
         tests/item_parser.expect.test.cpp

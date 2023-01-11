@@ -7,13 +7,9 @@
 
 #include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/core.hpp>
-#include <dplx/dp/encoder/api.hpp>
-#include <dplx/dp/encoder/core.hpp>
 
 #include "boost-test.hpp"
-#include "encoder.test_utils.hpp"
 #include "test_input_stream.hpp"
-#include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
@@ -31,11 +27,7 @@ enum class signed_test_enum : int
     pos2 = 2,
 };
 static_assert(
-        dplx::dp::encodable<signed_test_enum, dp_tests::test_output_stream<>>);
-static_assert(
         dplx::dp::decodable<signed_test_enum, dp_tests::test_input_stream>);
-static_assert(dplx::cncr::tag_invocable<dplx::dp::encoded_size_of_fn,
-                                        signed_test_enum const &>);
 
 enum class unsigned_test_enum : unsigned
 {
@@ -43,12 +35,8 @@ enum class unsigned_test_enum : unsigned
     pos1 = 1,
     pos2 = 2,
 };
-static_assert(dplx::dp::encodable<unsigned_test_enum,
-                                  dp_tests::test_output_stream<>>);
 static_assert(
         dplx::dp::decodable<unsigned_test_enum, dp_tests::test_input_stream>);
-static_assert(dplx::cncr::tag_invocable<dplx::dp::encoded_size_of_fn,
-                                        unsigned_test_enum const &>);
 
 enum unscoped_test_enum
 {
@@ -56,12 +44,8 @@ enum unscoped_test_enum
     UTE_bound = 256,
 };
 
-static_assert(dplx::dp::encodable<unscoped_test_enum,
-                                  dp_tests::test_output_stream<>>);
 static_assert(
         dplx::dp::decodable<unscoped_test_enum, dp_tests::test_input_stream>);
-static_assert(dplx::cncr::tag_invocable<dplx::dp::encoded_size_of_fn,
-                                        unscoped_test_enum const &>);
 
 inline auto operator<<(std::ostream &stream, signed_test_enum value) noexcept
         -> std::ostream &
@@ -105,76 +89,6 @@ BOOST_AUTO_TEST_SUITE(enum_codec)
 
 static_assert(!dp::codable_enum<std::byte>);
 static_assert(!dp::decodable<std::byte, test_input_stream>);
-static_assert(!dp::encodable<std::byte, test_output_stream<>>);
-static_assert(!cncr::tag_invocable<dp::encoded_size_of_fn, std::byte>);
-
-BOOST_FIXTURE_TEST_SUITE(encoder, default_encoding_fixture)
-
-BOOST_AUTO_TEST_CASE(signed_neg2)
-{
-    auto const testValue = signed_test_enum::neg2;
-
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0]
-               == (to_byte(dp::type_code::negint) | std::byte{1}));
-}
-BOOST_AUTO_TEST_CASE(signed_neg1)
-{
-    auto testValue = signed_test_enum::neg1;
-
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0]
-               == (to_byte(dp::type_code::negint) | std::byte{0}));
-}
-BOOST_AUTO_TEST_CASE(signed_zero)
-{
-    auto const testValue = signed_test_enum::zero;
-
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0]
-               == (to_byte(dp::type_code::posint) | std::byte{0}));
-}
-BOOST_AUTO_TEST_CASE(signed_pos2)
-{
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, signed_test_enum::pos2));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0]
-               == (to_byte(dp::type_code::posint) | std::byte{2}));
-}
-
-BOOST_AUTO_TEST_CASE(unsigned_zero)
-{
-    auto const testValue = unsigned_test_enum::zero;
-
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, testValue));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0});
-}
-BOOST_AUTO_TEST_CASE(unsigned_pos2)
-{
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, unsigned_test_enum::pos2));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0] == std::byte{2});
-}
-
-BOOST_AUTO_TEST_CASE(unscoped)
-{
-    DPLX_REQUIRE_RESULT(dp::encode(encodingBuffer, unscoped_test_enum{}));
-
-    BOOST_TEST(encodingBuffer.size() == 1U);
-    BOOST_TEST(encodingBuffer.data()[0] == std::byte{0});
-}
-
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(decoder)
 

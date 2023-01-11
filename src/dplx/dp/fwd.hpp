@@ -29,9 +29,6 @@ namespace dplx::dp
 
 static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
-template <typename T, output_stream Stream>
-class basic_encoder;
-
 template <typename T, input_stream Stream>
 class basic_decoder;
 

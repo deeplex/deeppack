@@ -44,27 +44,10 @@ concept encodable
 namespace dplx::dp
 {
 
-template <typename T, output_stream Stream>
-class basic_encoder;
-
 template <typename T>
 inline constexpr bool enable_pass_by_value
         = std::is_trivially_copy_constructible_v<T> &&
                   std::is_trivially_copyable_v<T> && sizeof(T) <= 32;
-
-// clang-format off
-template <typename T, typename Stream>
-concept encodable
-    = output_stream<Stream>
-    && !std::is_reference_v<T>
-    && !std::is_pointer_v<T>
-    && requires(Stream &outStream, T const &value)
-    {
-        typename basic_encoder<T, Stream>;
-        { basic_encoder<T, Stream>()(outStream, value) }
-            -> oc::concepts::basic_result;
-    };
-// clang-format on
 
 template <typename Range>
 inline constexpr bool enable_indefinite_encoding
@@ -138,32 +121,6 @@ using select_proper_param_type_impl
 template <typename T>
 using select_proper_param_type
         = select_proper_param_type_impl<cncr::remove_cref_t<T>>;
-
-template <typename T, output_stream Stream>
-struct are_tuple_elements_encodable : std::false_type
-{
-};
-template <typename... Ts, output_stream Stream>
-struct are_tuple_elements_encodable<cncr::mp_list<Ts...>, Stream>
-    : std::bool_constant<(encodable<Ts, Stream> && ...)>
-{
-};
-
-template <typename T, typename Stream>
-concept encodable_tuple_like = tuple_like<T> && output_stream<
-        Stream> && are_tuple_elements_encodable<tuple_element_list_t<T>,
-                                                Stream>::value;
-
-template <typename T, typename Stream>
-concept encodable_pair_like
-        = pair_like<T> && output_stream<Stream> && encodable<
-                cncr::remove_cref_t<typename std::tuple_element<0, T>::type>,
-                Stream> && encodable<cncr::remove_cref_t<typename std::
-                                                                 tuple_element<
-                                                                         1,
-                                                                         T>::
-                                                                         type>,
-                                     Stream>;
 
 // clang-format off
 template <typename T>
