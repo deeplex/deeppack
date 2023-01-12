@@ -15,6 +15,7 @@
 namespace dplx::dp
 {
 
+class input_buffer;
 class output_buffer;
 
 struct emit_context;

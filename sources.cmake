@@ -41,6 +41,7 @@ dplx_target_sources(deeppack
         dp/items/item_size_of_ranges
         dp/items/type_code
 
+        dp/streams/input_buffer
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
         dp/streams/void_stream
