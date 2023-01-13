@@ -39,6 +39,8 @@ dplx_target_sources(deeppack
         dp/items/encoded_item_head_size
         dp/items/item_size_of_core
         dp/items/item_size_of_ranges
+        dp/items/parse_context
+        dp/items/parse_core
         dp/items/type_code
 
         dp/streams/input_buffer
@@ -115,6 +117,7 @@ if (BUILD_TESTING)
             item_sample_rt.hpp
             range_generator.hpp
             simple_encodable.hpp
+            test_input_stream.hpp
             test_output_stream.hpp
             test_utils.hpp
             yaml_sample_generator.hpp
