@@ -7,13 +7,17 @@
 
 #include "dplx/dp/items/parse_core.hpp"
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "core_samples.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 namespace dp_tests
 {
@@ -203,4 +207,235 @@ TEST_CASE("parse_item_head can parse basic item_heads")
     }
 }
 
+// NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
+struct expect_acceptance_sample
+{
+    dp::type_code type;
+    std::uint64_t value;
+    std::array<std::uint8_t, dp::detail::var_uint_max_size> encoded;
+
+    [[nodiscard]] auto encoded_bytes() const noexcept
+            -> std::span<std::byte const>
+    {
+        return as_bytes(std::span(encoded));
+    }
+};
+
+constexpr expect_acceptance_sample expect_acceptance_samples[] = {
+        { dp::type_code::posint,    0U,       {0x00}},
+        { dp::type_code::negint,   24U, {0x38, 0x18}},
+        {dp::type_code::special, 0x1fU,       {0xff}},
+        { dp::type_code::posint,   23U, {0x18, 0x17}}
+};
+
+TEST_CASE("expect_item_head accepts valid input")
+{
+    auto const sample = GENERATE(borrowed_range(expect_acceptance_samples));
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+
+    CHECK(dp::expect_item_head(ctx.as_parse_context(), sample.type,
+                               sample.value));
+}
+
+// NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
+struct expect_rejection_sample
+{
+    dp::errc code;
+    dp::type_code type;
+    std::uint64_t value;
+    std::array<std::uint8_t, dp::detail::var_uint_max_size> encoded;
+
+    [[nodiscard]] auto encoded_bytes() const noexcept
+            -> std::span<std::byte const>
+    {
+        return as_bytes(std::span(encoded));
+    }
+};
+
+constexpr expect_rejection_sample expect_rejection_samples[] = {
+        {
+         dp::errc::item_type_mismatch,
+         dp::type_code::special,
+         0U,       {0x00},
+         },
+        {
+         dp::errc::item_type_mismatch,
+         dp::type_code::special,
+         22U,       {0xff},
+         },
+        {
+         dp::errc::invalid_additional_information,
+         dp::type_code::negint,
+         24U, {0x3f, 0x18},
+         },
+        {
+         dp::errc::indefinite_item,
+         dp::type_code::binary,
+         21U,       {0x5f},
+         },
+        {
+         dp::errc::item_value_out_of_range,
+         dp::type_code::array,
+         21U,       {0x82},
+         },
+};
+
+TEST_CASE("expect_item_head rejects invalid input")
+{
+    auto const sample = GENERATE(borrowed_range(expect_rejection_samples));
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+
+    CHECK(dp::expect_item_head(ctx.as_parse_context(), sample.type,
+                               sample.value)
+                  .error()
+          == sample.code);
+}
+
+TEMPLATE_TEST_CASE("parse_integer parses positive integers",
+                   "",
+                   unsigned char,
+                   signed char,
+                   unsigned short,
+                   short,
+                   unsigned,
+                   int,
+                   unsigned long,
+                   long,
+                   unsigned long long,
+                   long long)
+{
+    item_sample_ct<unsigned long long> const sample
+            = GENERATE(borrowed_range(posint_samples));
+    INFO(sample);
+
+    SECTION("with a fitting buffer")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<TestType> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        if (std::in_range<TestType>(sample.value))
+        {
+            REQUIRE(rx);
+
+            CHECK(ctx.stream.discarded() == sample.encoded_length);
+            CHECK(rx.assume_value() == sample.as<TestType>().value);
+        }
+        else
+        {
+            CHECK(rx.error() == dp::errc::item_value_out_of_range);
+        }
+    }
+    SECTION("with an oversized buffer")
+    {
+        simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
+
+        dp::result<TestType> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        if (std::in_range<TestType>(sample.value))
+        {
+            REQUIRE(rx);
+
+            CHECK(ctx.stream.discarded() == sample.encoded_length);
+            CHECK(rx.assume_value() == sample.as<TestType>().value);
+        }
+        else
+        {
+            CHECK(rx.error() == dp::errc::item_value_out_of_range);
+        }
+    }
+}
+
+TEMPLATE_TEST_CASE("parse_integer parses negative integers correctly",
+                   "",
+                   signed char,
+                   short,
+                   int,
+                   long,
+                   long long)
+{
+    item_sample_ct<long long> const sample
+            = GENERATE(borrowed_range(negint_samples));
+    INFO(sample);
+
+    SECTION("with a fitting buffer")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<TestType> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        if (std::in_range<TestType>(sample.value))
+        {
+            REQUIRE(rx);
+
+            CHECK(ctx.stream.discarded() == sample.encoded_length);
+            CHECK(rx.assume_value() == sample.as<TestType>().value);
+        }
+        else
+        {
+            CHECK(rx.error() == dp::errc::item_value_out_of_range);
+        }
+    }
+    SECTION("with an oversized buffer")
+    {
+        simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
+
+        dp::result<TestType> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        if (std::in_range<TestType>(sample.value))
+        {
+            REQUIRE(rx);
+
+            CHECK(ctx.stream.discarded() == sample.encoded_length);
+            CHECK(rx.assume_value() == sample.as<TestType>().value);
+        }
+        else
+        {
+            CHECK(rx.error() == dp::errc::item_value_out_of_range);
+        }
+    }
+}
+
+constexpr dp::type_code unsigned_type_rejections[] = {
+        dp::type_code::negint,     dp::type_code::binary,
+        dp::type_code::text,       dp::type_code::array,
+        dp::type_code::map,        dp::type_code::tag,
+        dp::type_code::bool_false, dp::type_code::null,
+        dp::type_code::undefined,
+};
+
+TEST_CASE("parse_integer<unsigned> rejects other major types")
+{
+    auto const majorType = GENERATE(borrowed_range(unsigned_type_rejections));
+    std::byte memory[] = {to_byte(majorType)};
+
+    simple_test_parse_context ctx(memory);
+
+    dp::result<unsigned> rx
+            = dp::parse_integer<unsigned>(ctx.as_parse_context());
+    REQUIRE(rx.error() == dp::errc::item_type_mismatch);
+}
+
+constexpr dp::type_code signed_type_rejections[] = {
+        dp::type_code::binary, dp::type_code::text,
+        dp::type_code::array,  dp::type_code::map,
+        dp::type_code::tag,    dp::type_code::bool_false,
+        dp::type_code::null,   dp::type_code::undefined,
+};
+
+TEST_CASE("parse_integer<int> rejects other major types")
+{
+    auto const majorType = GENERATE(borrowed_range(signed_type_rejections));
+    std::byte memory[] = {to_byte(majorType)};
+
+    simple_test_parse_context ctx(memory);
+
+    REQUIRE(dp::parse_integer<int>(ctx.as_parse_context()).error()
+            == dp::errc::item_type_mismatch);
+}
+
 } // namespace dp_tests
+
+// NOLINTEND(readability-function-cognitive-complexity)

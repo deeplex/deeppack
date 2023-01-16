@@ -10,6 +10,7 @@
 #include <cstdint>
 
 #include <dplx/dp/detail/utils.hpp>
+#include <dplx/dp/items/encoded_item_head_size.hpp>
 #include <dplx/dp/items/parse_context.hpp>
 #include <dplx/dp/items/type_code.hpp>
 #include <dplx/dp/streams/input_buffer.hpp>
@@ -107,6 +108,16 @@ inline auto parse_item_head_speculative(parse_context &ctx) noexcept
 
         info.encoded_length = 1U + (1U << sizeBytesPower);
         info.value = encodedValue >> varLenShift;
+
+        if (info.type == type_code::special
+            && sizeBytesPower == 0
+            // encoding type 7 (special) values [0..32] with two bytes is
+            // forbidden as per RFC8949 section 3.3
+            // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+            && info.value < 0x20) [[unlikely]]
+        {
+            rx = errc::invalid_additional_information;
+        }
     }
     // the one value which may also be well formed
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
@@ -123,6 +134,7 @@ inline auto parse_item_head_speculative(parse_context &ctx) noexcept
     {
         rx = errc::invalid_additional_information;
     }
+
     if (rx.has_value())
     {
         ctx.in.discard_buffered(info.encoded_length);
@@ -166,6 +178,14 @@ inline auto parse_item_head_safe(parse_context &ctx) noexcept
             {
             case 0U:
                 info.value = static_cast<std::uint64_t>(*payload);
+                if (info.type == type_code::special
+                    // encoding type 7 (special) values [0..32] with two bytes
+                    // is forbidden as per RFC8949 section 3.3
+                    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+                    && info.value < 0x20) [[unlikely]]
+                {
+                    rx = errc::invalid_additional_information;
+                }
                 break;
             case 1U:
                 info.value = detail::load<std::uint16_t>(payload);
@@ -199,6 +219,7 @@ inline auto parse_item_head_safe(parse_context &ctx) noexcept
     {
         rx = errc::invalid_additional_information;
     }
+
     if (rx.has_value())
     {
         ctx.in.discard_buffered(info.encoded_length);
@@ -222,6 +243,100 @@ inline auto parse_item_head(parse_context &ctx) noexcept -> result<item_head>
         return detail::parse_item_head_speculative(ctx);
     }
     return detail::parse_item_head_safe(ctx);
+}
+
+inline auto expect_item_head(parse_context &ctx,
+                             type_code const type,
+                             std::uint64_t const value) noexcept -> result<void>
+{
+    DPLX_TRY(item_head const &head, dp::parse_item_head(ctx));
+
+    if (head.type != type) [[unlikely]]
+    {
+        return errc::item_type_mismatch;
+    }
+    if (head.indefinite()) [[unlikely]]
+    {
+        if (type == type_code::special)
+        {
+            // note that this isn't ambiguous due to 0x1f being a reserved
+            // special value
+            // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+            if (value == 0x1fU)
+            {
+                return oc::success();
+            }
+            // unwanted special break.
+            return errc::item_type_mismatch;
+        }
+        return errc::indefinite_item;
+    }
+    if (head.value != value) [[unlikely]]
+    {
+        return errc::item_value_out_of_range;
+    }
+    return oc::success();
+}
+
+template <detail::encodable_int T>
+    requires std::signed_integral<T>
+inline auto parse_integer(parse_context &ctx) noexcept -> result<T>
+{
+    auto parseRx = dp::parse_item_head(ctx);
+    if (parseRx.has_error())
+    {
+        return static_cast<result<item_head> &&>(parseRx).as_failure();
+    }
+    item_head const &head = parseRx.assume_value();
+    // DPLX_TRY(item_head const &head, dp::parse_item_head(ctx));
+
+    if (head.type != type_code::posint && head.type != type_code::negint)
+    {
+        return errc::item_type_mismatch;
+    }
+
+    // fused check for both positive and negative integers
+    // negative integers are encoded as (-1 -n)
+    // therefore the largest representable additional
+    // information value is the same as the smallest one
+    // e.g. a signed 8bit two's complement min() is -128 which
+    // would be encoded as (-1 -[n=127])
+    if (head.value
+        > static_cast<std::make_unsigned_t<T>>(std::numeric_limits<T>::max()))
+    {
+        return errc::item_value_out_of_range;
+    }
+
+    auto const signBit = static_cast<std::uint64_t>(head.type) << 58;
+    auto const signExtended = static_cast<std::int64_t>(signBit) >> 63;
+    auto const xorpad = static_cast<std::uint64_t>(signExtended);
+
+    return static_cast<T>(head.value ^ xorpad);
+}
+
+template <detail::encodable_int T>
+    requires std::unsigned_integral<T>
+inline auto parse_integer(parse_context &ctx,
+                          T limit = std::numeric_limits<T>::max()) noexcept
+        -> result<T>
+{
+    auto parseRx = dp::parse_item_head(ctx);
+    if (parseRx.has_error())
+    {
+        return static_cast<result<item_head> &&>(parseRx).as_failure();
+    }
+    item_head const &head = parseRx.assume_value();
+    // DPLX_TRY(item_head const &head, dp::parse_item_head(ctx));
+
+    if (head.type != type_code::posint)
+    {
+        return errc::item_type_mismatch;
+    }
+    if (head.value > limit)
+    {
+        return errc::item_value_out_of_range;
+    }
+    return static_cast<T>(head.value);
 }
 
 } // namespace dplx::dp
