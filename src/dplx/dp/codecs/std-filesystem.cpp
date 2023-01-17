@@ -10,6 +10,7 @@
 #include <new>
 
 #include <dplx/dp/items/emit_core.hpp>
+#include <dplx/dp/items/parse_ranges.hpp>
 
 namespace dplx::dp
 {
@@ -42,5 +43,22 @@ catch (...)
 {
     return dp::errc::bad;
 }
-
+auto codec<std::filesystem::path>::decode(parse_context &ctx,
+                                          std::filesystem::path &path) noexcept
+        -> result<void>
+try
+{
+    std::u8string generic;
+    DPLX_TRY(dp::parse_text(ctx, generic));
+    path.assign(static_cast<std::u8string &&>(generic));
+    return dp::success();
+}
+catch (std::bad_alloc const &)
+{
+    return dp::errc::not_enough_memory;
+}
+catch (...)
+{
+    return dp::errc::bad;
+}
 } // namespace dplx::dp

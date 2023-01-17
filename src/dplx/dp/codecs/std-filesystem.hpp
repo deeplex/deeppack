@@ -25,6 +25,8 @@ public:
     static auto encode(emit_context const &ctx,
                        std::filesystem::path const &path) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, std::filesystem::path &path) noexcept
+            -> result<void>;
 };
 
 } // namespace dplx::dp

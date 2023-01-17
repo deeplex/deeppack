@@ -14,8 +14,11 @@
 #include "dplx/dp/api.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
+#include "test_input_stream.hpp"
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 namespace dp_tests
 {
@@ -35,12 +38,12 @@ constexpr item_sample_ct<std::u8string_view> path_samples[] = {
 };
 } // namespace
 
-TEST_CASE("std::filesystem::path can be encoded")
+TEST_CASE("std::filesystem::path has a codec")
 {
     auto const sample = GENERATE(borrowed_range(path_samples));
     std::filesystem::path const value(sample.value);
 
-    SECTION("to a stream")
+    SECTION("with encode support")
     {
         simple_test_output_stream outputStream(sample.encoded_length);
 
@@ -52,6 +55,19 @@ TEST_CASE("std::filesystem::path can be encoded")
     {
         CHECK(dp::encoded_size_of(value) == sample.encoded_length);
     }
+    SECTION("with decode support")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        std::filesystem::path decodedValue;
+        REQUIRE(dp::decode(inputStream, decodedValue));
+
+        auto genericDecodedValue = decodedValue.generic_u8string();
+        CHECK_BLOB_EQ(as_bytes(std::span(genericDecodedValue)),
+                      as_bytes(std::span(sample.value)));
+    }
 }
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-function-cognitive-complexity)
