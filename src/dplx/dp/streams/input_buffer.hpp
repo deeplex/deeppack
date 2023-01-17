@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <type_traits>
 #include <utility>
@@ -21,6 +22,7 @@ class input_buffer
 {
     std::byte const *mInputBuffer;
     std::size_t mInputBufferSize;
+    std::uint64_t mInputSize;
 
 public:
     using element_type = std::byte const;
@@ -37,6 +39,7 @@ protected:
     input_buffer() noexcept
         : mInputBuffer(nullptr)
         , mInputBufferSize(0U)
+        , mInputSize(0U)
     {
     }
     input_buffer(input_buffer const &) noexcept = default;
@@ -47,9 +50,24 @@ public:
     auto operator=(input_buffer &&) noexcept -> input_buffer & = delete;
 
 protected:
-    explicit input_buffer(pointer writeBuffer, size_type const size) noexcept
-        : mInputBuffer(writeBuffer)
-        , mInputBufferSize(size)
+    static constexpr struct indefinite_input_size_t
+    {
+    } indefinite_input_size{};
+
+    explicit input_buffer(pointer const inputBuffer,
+                          size_type const inputBufferSize,
+                          std::uint64_t const inputSize) noexcept
+        : mInputBuffer(inputBuffer)
+        , mInputBufferSize(inputBufferSize)
+        , mInputSize(inputSize)
+    {
+    }
+    explicit input_buffer(pointer const inputBuffer,
+                          size_type const inputBufferSize,
+                          indefinite_input_size_t) noexcept
+        : mInputBuffer(inputBuffer)
+        , mInputBufferSize(inputBufferSize)
+        , mInputSize(UINT64_MAX)
     {
     }
 
@@ -77,6 +95,11 @@ public:
         return mInputBufferSize == 0U;
     }
 
+    [[nodiscard]] auto input_size() const noexcept -> std::uint64_t
+    {
+        return mInputSize;
+    }
+
     auto require_input(size_type const requiredSize) noexcept -> result<void>
     {
         result<void> rx = oc::success();
@@ -92,9 +115,10 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         mInputBuffer += numBytes;
         mInputBufferSize -= numBytes;
+        mInputSize -= numBytes;
     }
 
-    auto discard_input(size_type const amount) noexcept -> result<void>
+    auto discard_input(std::uint64_t const amount) noexcept -> result<void>
     {
         if (amount <= mInputBufferSize)
         {
@@ -123,6 +147,7 @@ public:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             mInputBuffer += copyAmount;
             mInputBufferSize -= copyAmount;
+            mInputSize -= copyAmount;
         }
         if (amount == 0U)
         {
@@ -135,12 +160,24 @@ protected:
     void reset() noexcept
     {
         mInputBuffer = nullptr;
+        mInputSize -= mInputBufferSize;
         mInputBufferSize = 0;
     }
-    void reset(pointer const buffer, size_type const size) noexcept
+    void reset(pointer const buffer,
+               size_type const size,
+               std::uint64_t const inputSize) noexcept
     {
         mInputBuffer = buffer;
         mInputBufferSize = size;
+        mInputSize = inputSize;
+    }
+    void reset(pointer const buffer,
+               size_type const size,
+               indefinite_input_size_t) noexcept
+    {
+        mInputBuffer = buffer;
+        mInputBufferSize = size;
+        mInputSize = UINT64_MAX;
     }
 
 private:

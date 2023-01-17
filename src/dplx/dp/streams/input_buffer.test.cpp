@@ -33,7 +33,7 @@ public:
     test_input_buffer() = default;
     explicit test_input_buffer(pointer const writeBuffer,
                                size_type const size) noexcept
-        : input_buffer(writeBuffer, size)
+        : input_buffer(writeBuffer, size, size)
     {
     }
 
@@ -85,7 +85,7 @@ TEST_CASE("input_buffer can be default constructed")
     {
         constexpr std::size_t testMemorySize = 64U;
         std::array<std::byte, testMemorySize> storage{};
-        subject.reset(storage.data(), storage.size());
+        subject.reset(storage.data(), storage.size(), storage.size());
 
         CHECK(subject.data() == storage.data());
         CHECK(subject.size() == storage.size());

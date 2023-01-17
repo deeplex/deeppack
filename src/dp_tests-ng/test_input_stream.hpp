@@ -33,13 +33,13 @@ public:
 
     simple_test_input_stream(std::span<std::byte const> const readBuffer,
                              bool const initiallyEmpty = false)
-        : input_buffer()
+        : input_buffer(nullptr, 0U, readBuffer.size())
         , mReadBuffer(readBuffer)
         , mInitiallyEmpty(initiallyEmpty)
     {
         if (!initiallyEmpty)
         {
-            reset(mReadBuffer.data(), mReadBuffer.size());
+            reset(mReadBuffer.data(), mReadBuffer.size(), mReadBuffer.size());
         }
     }
 
@@ -57,7 +57,7 @@ private:
         {
             return dp::errc::end_of_stream;
         }
-        reset(mReadBuffer.data(), mReadBuffer.size());
+        reset(mReadBuffer.data(), mReadBuffer.size(), mReadBuffer.size());
         return dp::oc::success();
     }
     auto do_discard_input(size_type amount) noexcept
@@ -69,7 +69,7 @@ private:
             return dp::errc::end_of_stream;
         }
         auto const remaining = mReadBuffer.subspan(amount);
-        reset(remaining.data(), remaining.size());
+        reset(remaining.data(), remaining.size(), remaining.size());
         return dp::oc::success();
     }
     auto do_bulk_read(std::byte *dest, std::size_t size) noexcept
@@ -83,7 +83,7 @@ private:
         std::memcpy(dest, mReadBuffer.data(), size);
 
         auto const remaining = mReadBuffer.subspan(size);
-        reset(remaining.data(), remaining.size());
+        reset(remaining.data(), remaining.size(), remaining.size());
         return dp::oc::success();
     }
 };
