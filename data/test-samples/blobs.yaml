@@ -1,0 +1,20 @@
+# these samples have been encoded using https://cbor.me
+
+definite blobs:
+  empty blob:
+    value: ""
+    encoded: "40"
+  single element:
+    value: "zA=="
+    encoded: "41cc"
+  Appendix. A sample:
+    value: "AQIDBA=="
+    encoded: "4401020304"
+
+indefinite blobs:
+  empty blob:
+    value: ""
+    encoded: "5fff"
+  simple blob:
+    value: "AQIDBAUGBwg="
+    encoded: 5f45010203040543060708ff

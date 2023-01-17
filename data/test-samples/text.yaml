@@ -1,0 +1,29 @@
+# these samples have been encoded using https://cbor.me
+
+definite texts:
+  empty text:
+    value: ""
+    encoded: "60"
+  some:
+    value: "some"
+    encoded: "64736f6d65"
+  hello world:
+    value: "hello world"
+    encoded: "6b68656c6c6f20776f726c64"
+  hello world²:
+    value: ".hello world.hello world²"
+    encoded: "781a2e68656c6c6f20776f726c642e68656c6c6f20776f726c64c2b2"
+
+indefinite texts:
+  empty text:
+    value: ""
+    encoded: "7fff"
+  some:
+    value: "some"
+    encoded: "7f64736f6d65ff"
+  hello world:
+    value: "hello world"
+    encoded: "7f6b68656c6c6f20776f726c64ff"
+  hello world²:
+    value: ".hello world.hello world²"
+    encoded: "7f6c2e68656c6c6f20776f726c646e2e68656c6c6f20776f726c64c2b2ff"

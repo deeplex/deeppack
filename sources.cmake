@@ -41,6 +41,7 @@ dplx_target_sources(deeppack
         dp/items/item_size_of_ranges
         dp/items/parse_context
         dp/items/parse_core
+        dp/items/parse_ranges
         dp/items/type_code
 
         dp/streams/input_buffer
@@ -128,7 +129,9 @@ if (BUILD_TESTING)
 
         FILES
             arrays.yaml
+            blobs.yaml
             maps.yaml
+            text.yaml
     )
 
     dplx_target_sources(deeppack-legacy-tests PRIVATE
