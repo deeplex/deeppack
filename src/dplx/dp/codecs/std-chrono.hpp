@@ -14,6 +14,8 @@
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/emit_core.hpp>
 #include <dplx/dp/items/item_size_of_core.hpp>
+#include <dplx/dp/items/parse_context.hpp>
+#include <dplx/dp/items/parse_core.hpp>
 
 namespace dplx::dp
 {
@@ -33,6 +35,15 @@ public:
             -> result<void>
     {
         return dp::emit_integer(ctx, value.count());
+    }
+    static auto decode(parse_context &ctx,
+                       std::chrono::duration<Rep, Period> &value) noexcept
+            -> result<void>
+    {
+        Rep count; // NOLINT(cppcoreguidelines-init-variables)
+        DPLX_TRY(dp::parse_integer<Rep>(ctx, count));
+        value = std::chrono::duration<Rep, Period>(count);
+        return dp::success();
     }
 };
 
