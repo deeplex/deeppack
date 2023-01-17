@@ -194,6 +194,11 @@ auto codec<bool>::encode(emit_context const &ctx, bool value) noexcept
 {
     return dp::emit_boolean(ctx, value);
 }
+auto codec<bool>::decode(parse_context &ctx, bool &value) noexcept
+        -> result<void>
+{
+    return dp::parse_boolean(ctx, value);
+}
 
 auto codec<float>::size_of(emit_context const &ctx, float value) noexcept
         -> std::uint64_t

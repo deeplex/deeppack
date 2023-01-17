@@ -343,4 +343,26 @@ inline auto parse_integer(parse_context &ctx,
     return oc::success();
 }
 
+inline auto parse_boolean(parse_context &ctx, bool &outValue) noexcept
+        -> result<void>
+{
+    constexpr auto boolPattern = static_cast<unsigned>(type_code::bool_false);
+
+    if (ctx.in.empty()) [[unlikely]]
+    {
+        DPLX_TRY(ctx.in.require_input(1U));
+    }
+
+    auto const value = static_cast<unsigned>(*ctx.in.data());
+    auto const rolled = value - boolPattern;
+
+    if (rolled > 1U) [[unlikely]]
+    {
+        return errc::item_type_mismatch;
+    }
+    outValue = rolled == 1U;
+    ctx.in.discard_buffered(1U);
+    return oc::success();
+}
+
 } // namespace dplx::dp

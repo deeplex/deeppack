@@ -441,6 +441,21 @@ TEST_CASE("parse_integer<int> rejects other major types")
             == dp::errc::item_type_mismatch);
 }
 
+TEST_CASE("boolean parses correctly")
+{
+    auto const sample = GENERATE(gens::values<item_sample_ct<bool>>({
+            {false, 1, {0b111'10100}},
+            { true, 1, {0b111'10101}},
+    }));
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+    bool value; // NOLINT(cppcoreguidelines-init-variables)
+    REQUIRE(dp::parse_boolean(ctx.as_parse_context(), value));
+
+    CHECK(value == sample.value);
+    CHECK(ctx.stream.discarded() == sample.encoded_length);
+}
+
 } // namespace dp_tests
 
 // NOLINTEND(readability-function-cognitive-complexity)

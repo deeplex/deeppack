@@ -148,6 +148,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, bool value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, bool &value) noexcept
+            -> result<void>;
 };
 
 template <>

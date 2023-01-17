@@ -87,6 +87,16 @@ TEST_CASE("bool is encodable")
     {
         CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
     }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        bool decoded; // NOLINT(cppcoreguidelines-init-variables)
+        REQUIRE(dp::decode(inputStream, decoded));
+
+        CHECK(decoded == sample.value);
+        CHECK(inputStream.discarded() == sample.encoded_length);
+    }
 }
 
 TEST_CASE("float has a codec")
