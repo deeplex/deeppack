@@ -10,6 +10,7 @@
 #include <dplx/dp/items/emit_core.hpp>
 #include <dplx/dp/items/encoded_item_head_size.hpp>
 #include <dplx/dp/items/item_size_of_core.hpp>
+#include <dplx/dp/items/parse_core.hpp>
 
 namespace dplx::dp
 {
@@ -35,6 +36,12 @@ auto codec<signed char>::encode(emit_context const &ctx,
 {
     return dp::emit_integer(ctx, value);
 }
+auto codec<signed char>::decode(parse_context &ctx, signed char &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<signed char>(ctx));
+    return oc::success();
+}
 auto codec<unsigned char>::size_of(emit_context const &ctx,
                                    unsigned char value) noexcept
         -> std::uint64_t
@@ -46,6 +53,12 @@ auto codec<unsigned char>::encode(emit_context const &ctx,
 {
     return dp::emit_integer(ctx, value);
 }
+auto codec<unsigned char>::decode(parse_context &ctx,
+                                  unsigned char &value) noexcept -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<unsigned char>(ctx));
+    return oc::success();
+}
 auto codec<short>::size_of(emit_context const &ctx, short value) noexcept
         -> std::uint64_t
 {
@@ -55,6 +68,12 @@ auto codec<short>::encode(emit_context const &ctx, short value) noexcept
         -> result<void>
 {
     return dp::emit_integer(ctx, value);
+}
+auto codec<short>::decode(parse_context &ctx, short &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<short>(ctx));
+    return oc::success();
 }
 auto codec<unsigned short>::size_of(emit_context const &ctx,
                                     unsigned short value) noexcept
@@ -68,6 +87,13 @@ auto codec<unsigned short>::encode(emit_context const &ctx,
 {
     return dp::emit_integer(ctx, value);
 }
+auto codec<unsigned short>::decode(parse_context &ctx,
+                                   unsigned short &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<unsigned short>(ctx));
+    return oc::success();
+}
 auto codec<int>::size_of(emit_context const &ctx, int value) noexcept
         -> std::uint64_t
 {
@@ -77,6 +103,11 @@ auto codec<int>::encode(emit_context const &ctx, int value) noexcept
         -> result<void>
 {
     return dp::emit_integer(ctx, value);
+}
+auto codec<int>::decode(parse_context &ctx, int &value) noexcept -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<int>(ctx));
+    return oc::success();
 }
 auto codec<unsigned>::size_of(emit_context const &ctx, unsigned value) noexcept
         -> std::uint64_t
@@ -88,6 +119,12 @@ auto codec<unsigned>::encode(emit_context const &ctx, unsigned value) noexcept
 {
     return dp::emit_integer(ctx, value);
 }
+auto codec<unsigned>::decode(parse_context &ctx, unsigned &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<unsigned>(ctx));
+    return oc::success();
+}
 auto codec<long>::size_of(emit_context const &ctx, long value) noexcept
         -> std::uint64_t
 {
@@ -97,6 +134,12 @@ auto codec<long>::encode(emit_context const &ctx, long value) noexcept
         -> result<void>
 {
     return dp::emit_integer(ctx, value);
+}
+auto codec<long>::decode(parse_context &ctx, long &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<long>(ctx));
+    return oc::success();
 }
 auto codec<unsigned long>::size_of(emit_context const &ctx,
                                    unsigned long value) noexcept
@@ -109,6 +152,12 @@ auto codec<unsigned long>::encode(emit_context const &ctx,
 {
     return dp::emit_integer(ctx, value);
 }
+auto codec<unsigned long>::decode(parse_context &ctx,
+                                  unsigned long &value) noexcept -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<unsigned long>(ctx));
+    return oc::success();
+}
 auto codec<long long>::size_of(emit_context const &ctx,
                                long long value) noexcept -> std::uint64_t
 {
@@ -118,6 +167,12 @@ auto codec<long long>::encode(emit_context const &ctx, long long value) noexcept
         -> result<void>
 {
     return dp::emit_integer(ctx, value);
+}
+auto codec<long long>::decode(parse_context &ctx, long long &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<long long>(ctx));
+    return oc::success();
 }
 auto codec<unsigned long long>::size_of(emit_context const &ctx,
                                         unsigned long long value) noexcept
@@ -130,6 +185,13 @@ auto codec<unsigned long long>::encode(emit_context const &ctx,
         -> result<void>
 {
     return dp::emit_integer(ctx, value);
+}
+auto codec<unsigned long long>::decode(parse_context &ctx,
+                                       unsigned long long &value) noexcept
+        -> result<void>
+{
+    DPLX_TRY(value, dp::parse_integer<unsigned long long>(ctx));
+    return oc::success();
 }
 
 auto codec<bool>::size_of(emit_context const &ctx, bool value) noexcept

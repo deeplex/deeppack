@@ -15,6 +15,8 @@
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
+#include "test_input_stream.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
@@ -33,15 +35,17 @@ TEMPLATE_TEST_CASE("integers have a codec",
                    unsigned long long,
                    long long)
 {
+    static_assert(dp::ng::decodable<TestType>);
     static_assert(dp::ng::encodable<TestType>);
-    item_sample_ct<unsigned char> const sample{
-            0x7e, 2, {0x18, 0x7e}
-    };
+    auto const sample = item_sample_ct<unsigned char>{
+            0x7e,
+            2,
+            {0x18, 0x7e}
+    }.as<TestType>();
 
     SECTION("with encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
+        simple_test_output_stream outputStream(sample.encoded_length);
 
         REQUIRE(dp::encode(outputStream, static_cast<TestType>(sample.value)));
 
@@ -51,6 +55,16 @@ TEMPLATE_TEST_CASE("integers have a codec",
     SECTION("with size_of")
     {
         CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        TestType decoded;
+        REQUIRE(dp::decode(inputStream, decoded));
+
+        CHECK(decoded == sample.value);
+        CHECK(inputStream.discarded() == sample.encoded_length);
     }
 }
 

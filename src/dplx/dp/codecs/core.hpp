@@ -37,6 +37,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, signed char value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, signed char &outValue) noexcept
+            -> result<void>;
 };
 template <>
 class codec<unsigned char>
@@ -45,6 +47,8 @@ public:
     static auto size_of(emit_context const &ctx, unsigned char value) noexcept
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, unsigned char value) noexcept
+            -> result<void>;
+    static auto decode(parse_context &ctx, unsigned char &outValue) noexcept
             -> result<void>;
 };
 template <>
@@ -55,6 +59,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, short value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, short &outValue) noexcept
+            -> result<void>;
 };
 template <>
 class codec<unsigned short>
@@ -63,6 +69,8 @@ public:
     static auto size_of(emit_context const &ctx, unsigned short value) noexcept
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, unsigned short value) noexcept
+            -> result<void>;
+    static auto decode(parse_context &ctx, unsigned short &outValue) noexcept
             -> result<void>;
 };
 template <>
@@ -73,6 +81,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, int value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, int &outValue) noexcept
+            -> result<void>;
 };
 template <>
 class codec<unsigned>
@@ -81,6 +91,8 @@ public:
     static auto size_of(emit_context const &ctx, unsigned value) noexcept
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, unsigned value) noexcept
+            -> result<void>;
+    static auto decode(parse_context &ctx, unsigned &outValue) noexcept
             -> result<void>;
 };
 template <>
@@ -91,6 +103,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, long value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, long &outValue) noexcept
+            -> result<void>;
 };
 template <>
 class codec<unsigned long>
@@ -99,6 +113,8 @@ public:
     static auto size_of(emit_context const &ctx, unsigned long value) noexcept
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, unsigned long value) noexcept
+            -> result<void>;
+    static auto decode(parse_context &ctx, unsigned long &outValue) noexcept
             -> result<void>;
 };
 template <>
@@ -109,6 +125,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, long long value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, long long &outValue) noexcept
+            -> result<void>;
 };
 template <>
 class codec<unsigned long long>
@@ -118,6 +136,8 @@ public:
                         unsigned long long value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        unsigned long long value) noexcept -> result<void>;
+    static auto decode(parse_context &ctx,
+                       unsigned long long &outValue) noexcept -> result<void>;
 };
 
 template <>
