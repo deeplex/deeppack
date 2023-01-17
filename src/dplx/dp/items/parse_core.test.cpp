@@ -314,14 +314,15 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<TestType> rx
-                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        TestType value;
+        dp::result<void> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
             REQUIRE(rx);
 
             CHECK(ctx.stream.discarded() == sample.encoded_length);
-            CHECK(rx.assume_value() == sample.as<TestType>().value);
+            CHECK(value == sample.as<TestType>().value);
         }
         else
         {
@@ -332,14 +333,15 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
     {
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
-        dp::result<TestType> rx
-                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        TestType value;
+        dp::result<void> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
             REQUIRE(rx);
 
             CHECK(ctx.stream.discarded() == sample.encoded_length);
-            CHECK(rx.assume_value() == sample.as<TestType>().value);
+            CHECK(value == sample.as<TestType>().value);
         }
         else
         {
@@ -364,14 +366,15 @@ TEMPLATE_TEST_CASE("parse_integer parses negative integers correctly",
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<TestType> rx
-                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        TestType value;
+        dp::result<void> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
             REQUIRE(rx);
 
             CHECK(ctx.stream.discarded() == sample.encoded_length);
-            CHECK(rx.assume_value() == sample.as<TestType>().value);
+            CHECK(value == sample.as<TestType>().value);
         }
         else
         {
@@ -382,14 +385,15 @@ TEMPLATE_TEST_CASE("parse_integer parses negative integers correctly",
     {
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
-        dp::result<TestType> rx
-                = dp::parse_integer<TestType>(ctx.as_parse_context());
+        TestType value;
+        dp::result<void> rx
+                = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
             REQUIRE(rx);
 
             CHECK(ctx.stream.discarded() == sample.encoded_length);
-            CHECK(rx.assume_value() == sample.as<TestType>().value);
+            CHECK(value == sample.as<TestType>().value);
         }
         else
         {
@@ -413,9 +417,9 @@ TEST_CASE("parse_integer<unsigned> rejects other major types")
 
     simple_test_parse_context ctx(memory);
 
-    dp::result<unsigned> rx
-            = dp::parse_integer<unsigned>(ctx.as_parse_context());
-    REQUIRE(rx.error() == dp::errc::item_type_mismatch);
+    unsigned value; // NOLINT(cppcoreguidelines-init-variables)
+    REQUIRE(dp::parse_integer<unsigned>(ctx.as_parse_context(), value).error()
+            == dp::errc::item_type_mismatch);
 }
 
 constexpr dp::type_code signed_type_rejections[] = {
@@ -432,7 +436,8 @@ TEST_CASE("parse_integer<int> rejects other major types")
 
     simple_test_parse_context ctx(memory);
 
-    REQUIRE(dp::parse_integer<int>(ctx.as_parse_context()).error()
+    int value; // NOLINT(cppcoreguidelines-init-variables)
+    REQUIRE(dp::parse_integer<int>(ctx.as_parse_context(), value).error()
             == dp::errc::item_type_mismatch);
 }
 

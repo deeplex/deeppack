@@ -280,7 +280,8 @@ inline auto expect_item_head(parse_context &ctx,
 
 template <detail::encodable_int T>
     requires std::signed_integral<T>
-inline auto parse_integer(parse_context &ctx) noexcept -> result<T>
+inline auto parse_integer(parse_context &ctx, T &outValue) noexcept
+        -> result<void>
 {
     auto parseRx = dp::parse_item_head(ctx);
     if (parseRx.has_error())
@@ -311,14 +312,16 @@ inline auto parse_integer(parse_context &ctx) noexcept -> result<T>
     auto const signExtended = static_cast<std::int64_t>(signBit) >> 63;
     auto const xorpad = static_cast<std::uint64_t>(signExtended);
 
-    return static_cast<T>(head.value ^ xorpad);
+    outValue = static_cast<T>(head.value ^ xorpad);
+    return oc::success();
 }
 
 template <detail::encodable_int T>
     requires std::unsigned_integral<T>
 inline auto parse_integer(parse_context &ctx,
+                          T &outValue,
                           T limit = std::numeric_limits<T>::max()) noexcept
-        -> result<T>
+        -> result<void>
 {
     auto parseRx = dp::parse_item_head(ctx);
     if (parseRx.has_error())
@@ -336,7 +339,8 @@ inline auto parse_integer(parse_context &ctx,
     {
         return errc::item_value_out_of_range;
     }
-    return static_cast<T>(head.value);
+    outValue = static_cast<T>(head.value);
+    return oc::success();
 }
 
 } // namespace dplx::dp
