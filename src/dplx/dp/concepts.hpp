@@ -39,6 +39,20 @@ concept encodable
     };
 // clang-format on
 
+// clang-format off
+template <typename T>
+concept decodable
+    = !std::is_reference_v<T>
+    && !std::is_pointer_v<T>
+    && !std::is_const_v<T>
+    && requires(T &t, parse_context &ctx)
+    {
+        typename codec<T>;
+        { codec<T>::decode(ctx, t) } noexcept
+            -> oc::concepts::basic_result;
+    };
+// clang-format on
+
 } // namespace dplx::dp::ng
 
 namespace dplx::dp

@@ -9,6 +9,7 @@
 
 #include <type_traits>
 
+#include <dplx/dp/api.hpp>
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
@@ -16,29 +17,4 @@
 
 namespace dplx::dp
 {
-
-// the decode APIs are not meant to participate in ADL and are therefore
-// niebloids
-inline constexpr struct decode_fn final
-{
-    template <typename T, input_stream Stream>
-        requires decodable<T, Stream>
-    inline auto operator()(Stream &inStream, T &dest) const -> result<void>
-    {
-        DPLX_TRY((basic_decoder<T, Stream>()(inStream, dest)));
-        return success();
-    }
-
-    template <typename T, input_stream Stream>
-        requires(decodable<T, Stream> &&std::is_default_constructible_v<T>
-                         &&std::is_move_constructible_v<T>)
-    inline auto operator()(as_value_t<T>, Stream &inStream) const -> result<T>
-    {
-        auto value = T();
-        DPLX_TRY((basic_decoder<T, Stream>()(inStream, value)));
-        return dp::success(std::move(value));
-    }
-
-} decode{};
-
 } // namespace dplx::dp

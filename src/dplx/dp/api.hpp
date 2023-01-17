@@ -11,8 +11,10 @@
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/concepts.hpp>
+#include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/emit_context.hpp>
+#include <dplx/dp/items/parse_context.hpp>
 #include <dplx/dp/stream.hpp>
 #include <dplx/dp/streams/void_stream.hpp>
 
@@ -78,5 +80,74 @@ inline constexpr struct encode_fn final
                 ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
     }
 } encode{};
+
+// the decode APIs are not meant to participate in ADL and are therefore
+// niebloids
+inline constexpr struct decode_fn final
+{
+    template <typename T>
+        requires ng::decodable<T>
+    inline auto operator()(input_buffer &inStream, T &outValue) const noexcept
+            -> result<void>
+    {
+        parse_context ctx{inStream};
+        return codec<T>::decode(ctx, outValue);
+    }
+    template <typename T>
+        requires ng::decodable<T>
+    inline auto operator()(parse_context &ctx, T &outValue) const noexcept
+            -> result<void>
+    {
+        return codec<T>::decode(ctx, outValue);
+    }
+
+    template <typename T>
+        requires(ng::decodable<T> &&std::is_default_constructible_v<T>)
+    inline auto operator()(as_value_t<T>, input_buffer &inStream) const noexcept
+            -> result<T>
+    {
+        parse_context ctx{inStream};
+        result<T> rx(oc::success());
+        if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
+            parseRx.has_failure()) [[unlikely]]
+        {
+            rx = static_cast<decltype(parseRx) &&>(parseRx).as_failure();
+        }
+        return rx;
+    }
+    template <typename T>
+        requires(ng::decodable<T> &&std::is_default_constructible_v<T>)
+    inline auto operator()(as_value_t<T>, parse_context &ctx) const noexcept
+            -> result<T>
+    {
+        result<T> rx(oc::success());
+        if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
+            parseRx.has_failure()) [[unlikely]]
+        {
+            rx = static_cast<decltype(parseRx) &&>(parseRx).as_failure();
+        }
+        return rx;
+    }
+
+    // legacy begin
+    template <typename T, input_stream Stream>
+        requires decodable<T, Stream>
+    inline auto operator()(Stream &inStream, T &dest) const -> result<void>
+    {
+        DPLX_TRY((basic_decoder<T, Stream>()(inStream, dest)));
+        return success();
+    }
+
+    template <typename T, input_stream Stream>
+        requires(decodable<T, Stream> &&std::is_default_constructible_v<T>
+                         &&std::is_move_constructible_v<T>)
+    inline auto operator()(as_value_t<T>, Stream &inStream) const -> result<T>
+    {
+        auto value = T();
+        DPLX_TRY((basic_decoder<T, Stream>()(inStream, value)));
+        return dp::success(std::move(value));
+    }
+    // legacy end
+} decode{};
 
 } // namespace dplx::dp
