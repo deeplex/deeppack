@@ -34,6 +34,8 @@ public:
                         std::u8string const &value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        std::u8string const &value) noexcept -> result<void>;
+    static auto decode(parse_context &ctx, std::u8string &value) noexcept
+            -> result<void>;
 };
 
 template <>
@@ -54,6 +56,8 @@ public:
                         std::string const &value) noexcept -> std::uint64_t;
     static auto encode(emit_context const &ctx,
                        std::string const &value) noexcept -> result<void>;
+    static auto decode(parse_context &ctx, std::string &value) noexcept
+            -> result<void>;
 };
 
 } // namespace dplx::dp
