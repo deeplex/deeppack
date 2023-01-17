@@ -160,6 +160,8 @@ public:
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, float value) noexcept
             -> result<void>;
+    static auto decode(parse_context &ctx, float &value) noexcept
+            -> result<void>;
 };
 
 template <>
@@ -169,6 +171,8 @@ public:
     static auto size_of(emit_context const &ctx, double value) noexcept
             -> std::uint64_t;
     static auto encode(emit_context const &ctx, double value) noexcept
+            -> result<void>;
+    static auto decode(parse_context &ctx, double &value) noexcept
             -> result<void>;
 };
 

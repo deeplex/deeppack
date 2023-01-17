@@ -7,9 +7,12 @@
 
 #pragma once
 
+#include <bit>
+#include <cmath>
 #include <cstdint>
 
 #include <dplx/dp/detail/utils.hpp>
+#include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/items/encoded_item_head_size.hpp>
 #include <dplx/dp/items/parse_context.hpp>
 #include <dplx/dp/items/type_code.hpp>
@@ -363,6 +366,104 @@ inline auto parse_boolean(parse_context &ctx, bool &outValue) noexcept
     outValue = rolled == 1U;
     ctx.in.discard_buffered(1U);
     return oc::success();
+}
+
+namespace detail
+{
+
+inline auto load_iec559_half(unsigned bits) noexcept -> double
+{
+    // IEC 60559:2011 half precision
+    // 1bit sign | 5bit exponent | 10bit significand
+    // 0x8000    | 0x7C00        | 0x3ff
+
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+
+    unsigned const significand = bits & 0x3ffU;
+    auto const exponent = static_cast<int>((bits >> 10) & 0x1fU);
+
+    double value;      // NOLINT(cppcoreguidelines-init-variables)
+    if (exponent == 0) // zero | subnormal
+    {
+        value = std::ldexp(significand, -24);
+    }
+    else if (exponent != 0x1F) // normalized values
+    {
+        // 0x400 => implicit lead bit
+        // 25 = 15 exponent bias + 10bit significand
+        value = std::ldexp(significand + 0x400U, exponent - 25);
+    }
+    else if (significand == 0U)
+    {
+        value = std::numeric_limits<double>::infinity();
+    }
+    else
+    {
+        value = std::numeric_limits<double>::quiet_NaN();
+    }
+    // respect sign bit
+    return (bits & 0x8000U) == 0U ? value : -value;
+
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
+}
+
+} // namespace detail
+
+template <typename T>
+inline auto parse_floating_point(parse_context &ctx, T &outValue) noexcept
+        -> result<void>
+{
+    auto parseRx = dp::parse_item_head(ctx);
+    if (parseRx.has_error())
+    {
+        return static_cast<result<item_head> &&>(parseRx).as_failure();
+    }
+    item_head const &head = parseRx.assume_value();
+
+    if (head.type != type_code::special || head.encoded_length < 3U)
+            [[unlikely]]
+    {
+        return errc::item_type_mismatch;
+    }
+
+    if (head.encoded_length == 1U + sizeof(std::uint64_t))
+    {
+        if constexpr (sizeof(T) >= sizeof(std::uint64_t))
+        {
+            outValue = std::bit_cast<double>(
+                    static_cast<std::uint64_t>(head.value));
+        }
+        else
+        {
+            return errc::item_value_out_of_range;
+        }
+    }
+    else if (head.encoded_length == 1U + sizeof(std::uint32_t))
+    {
+        if constexpr (sizeof(T) >= sizeof(std::uint32_t))
+        {
+            if constexpr (std::is_same_v<T, float>)
+            {
+                outValue = std::bit_cast<float>(
+                        static_cast<std::uint32_t>(head.value));
+            }
+            else
+            {
+                outValue = static_cast<T>(std::bit_cast<float>(
+                        static_cast<std::uint32_t>(head.value)));
+            }
+        }
+        else
+        {
+            return errc::item_value_out_of_range;
+        }
+    }
+    else
+    {
+        outValue = static_cast<T>(
+                detail::load_iec559_half(static_cast<unsigned>(head.value)));
+    }
+    return dp::success();
 }
 
 } // namespace dplx::dp

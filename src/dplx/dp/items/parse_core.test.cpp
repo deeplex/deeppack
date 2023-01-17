@@ -456,6 +456,68 @@ TEST_CASE("boolean parses correctly")
     CHECK(ctx.stream.discarded() == sample.encoded_length);
 }
 
+TEST_CASE("parse_floating_point parses large double")
+{
+    auto const sample = GENERATE(borrowed_range(float_double_samples));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+
+    double value; // NOLINT(cppcoreguidelines-init-variables)
+    REQUIRE(dp::parse_floating_point(ctx.as_parse_context(), value));
+
+    if (std::isnan(sample.value))
+    {
+        CHECK(std::isnan(value));
+    }
+    else
+    {
+        CHECK(value == sample.value);
+    }
+    CHECK(ctx.stream.discarded() == sample.encoded_length);
+}
+TEST_CASE("parse_floating_point parses small double")
+{
+    auto const sample = GENERATE(borrowed_range(float_single_samples));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+
+    double value; // NOLINT(cppcoreguidelines-init-variables)
+    REQUIRE(dp::parse_floating_point(ctx.as_parse_context(), value));
+
+    if (std::isnan(sample.value))
+    {
+        CHECK(std::isnan(value));
+    }
+    else
+    {
+        CHECK(value == sample.as<double>().value);
+    }
+    CHECK(ctx.stream.discarded() == sample.encoded_length);
+}
+
+TEST_CASE("parse_floating_point parses float")
+{
+    auto const sample = GENERATE(borrowed_range(float_single_samples));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+
+    float value; // NOLINT(cppcoreguidelines-init-variables)
+    REQUIRE(dp::parse_floating_point(ctx.as_parse_context(), value));
+
+    if (std::isnan(sample.value))
+    {
+        CHECK(std::isnan(value));
+    }
+    else
+    {
+        CHECK(value == sample.value);
+    }
+    CHECK(ctx.stream.discarded() == sample.encoded_length);
+}
+
 } // namespace dp_tests
 
 // NOLINTEND(readability-function-cognitive-complexity)

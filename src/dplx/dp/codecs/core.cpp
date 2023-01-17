@@ -210,6 +210,11 @@ auto codec<float>::encode(emit_context const &ctx, float value) noexcept
 {
     return dp::emit_float_single(ctx, value);
 }
+auto codec<float>::decode(parse_context &ctx, float &value) noexcept
+        -> result<void>
+{
+    return dp::parse_floating_point<float>(ctx, value);
+}
 
 auto codec<double>::size_of(emit_context const &ctx, double value) noexcept
         -> std::uint64_t
@@ -220,6 +225,11 @@ auto codec<double>::encode(emit_context const &ctx, double value) noexcept
         -> result<void>
 {
     return dp::emit_float_double(ctx, value);
+}
+auto codec<double>::decode(parse_context &ctx, double &value) noexcept
+        -> result<void>
+{
+    return dp::parse_floating_point<double>(ctx, value);
 }
 
 } // namespace dplx::dp

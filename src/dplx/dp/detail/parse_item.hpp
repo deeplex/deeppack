@@ -19,6 +19,7 @@
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/items/parse_core.hpp>
 #include <dplx/dp/items/type_code.hpp>
 #include <dplx/dp/stream.hpp>
 
@@ -238,44 +239,6 @@ inline auto parse_item(Stream &stream) noexcept(
         }
         return rx;
     }
-}
-
-// NOLINTNEXTLINE(clang-diagnostic-unused-function)
-inline auto load_iec559_half(std::uint16_t bits) noexcept -> double
-{
-    // IEC 60559:2011 half precision
-    // 1bit sign | 5bit exponent | 10bit significand
-    // 0x8000    | 0x7C00        | 0x3ff
-
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-
-    // #TODO check whether I got the endianess right
-    unsigned const significand = bits & 0x3FFU;
-    int const exponent = (bits >> 10) & 0x1F;
-
-    double value;      // NOLINT(cppcoreguidelines-init-variables)
-    if (exponent == 0) // zero | subnormal
-    {
-        value = std::ldexp(significand, -24);
-    }
-    else if (exponent != 0x1F) // normalized values
-    {
-        // 0x400 => implicit lead bit
-        // 25 = 15 exponent bias + 10bit significand
-        value = std::ldexp(significand + 0x400U, exponent - 25);
-    }
-    else if (significand == 0U)
-    {
-        value = std::numeric_limits<double>::infinity();
-    }
-    else
-    {
-        value = std::numeric_limits<double>::quiet_NaN();
-    }
-    // respect sign bit
-    return (bits & 0x8000U) == 0U ? value : -value;
-
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 } // namespace dplx::dp::detail

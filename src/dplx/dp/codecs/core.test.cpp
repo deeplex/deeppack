@@ -120,6 +120,16 @@ TEST_CASE("float has a codec")
     {
         CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
     }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        float decoded; // NOLINT(cppcoreguidelines-init-variables)
+        REQUIRE(dp::decode(inputStream, decoded));
+
+        CHECK(decoded == sample.value);
+        CHECK(inputStream.discarded() == sample.encoded_length);
+    }
 }
 
 TEST_CASE("double has a codec")
@@ -142,6 +152,16 @@ TEST_CASE("double has a codec")
     SECTION("with size_of")
     {
         CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        double decoded; // NOLINT(cppcoreguidelines-init-variables)
+        REQUIRE(dp::decode(inputStream, decoded));
+
+        CHECK(decoded == sample.value);
+        CHECK(inputStream.discarded() == sample.encoded_length);
     }
 }
 
