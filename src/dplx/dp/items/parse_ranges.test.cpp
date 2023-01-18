@@ -15,6 +15,8 @@
 #include <dplx/dp/customization.std.hpp>
 
 #include "blob_matcher.hpp"
+#include "dplx/dp/api.hpp"
+#include "dplx/dp/codecs/core.hpp"
 #include "item_sample_rt.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
@@ -137,6 +139,154 @@ TEST_CASE("parse a short indefinite text")
     {
         REQUIRE(dp::parse_text_finite(ctx.as_parse_context(), value).error()
                 == dp::errc::indefinite_item);
+    }
+}
+
+TEST_CASE("parse_array parses a finite array of integers into a vector")
+{
+    item_sample_rt<std::vector<int>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<int>>("arrays.yaml",
+                                                                "int arrays"));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+    std::vector<int> value;
+    auto decodeElement = [](dp::parse_context &lctx, std::vector<int> &dest,
+                            std::size_t const) -> dp::result<void>
+    {
+        return dp::decode(lctx, dest.emplace_back());
+    };
+
+    SECTION("with flexible")
+    {
+        auto parseRx
+                = dp::parse_array(ctx.as_parse_context(), value, decodeElement);
+
+        REQUIRE(parseRx);
+        CHECK(parseRx.assume_value() == sample.value.size());
+
+        CHECK(std::ranges::equal(value, sample.value));
+    }
+    SECTION("with finite")
+    {
+        auto parseRx = dp::parse_array_finite(ctx.as_parse_context(), value,
+                                              decodeElement);
+
+        REQUIRE(parseRx);
+        CHECK(parseRx.assume_value() == sample.value.size());
+
+        CHECK(std::ranges::equal(value, sample.value));
+    }
+}
+
+TEST_CASE("parse_array parses an indefinite array of integers into a vector")
+{
+    item_sample_rt<std::vector<int>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<int>>(
+                    "arrays.yaml", "indefinite int arrays"));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+    std::vector<int> value;
+    auto decodeElement = [](dp::parse_context &lctx, std::vector<int> &dest,
+                            std::size_t const) -> dp::result<void>
+    {
+        return dp::decode(lctx, dest.emplace_back());
+    };
+
+    SECTION("with flexible")
+    {
+        auto parseRx
+                = dp::parse_array(ctx.as_parse_context(), value, decodeElement);
+
+        REQUIRE(parseRx);
+        CHECK(parseRx.assume_value() == sample.value.size());
+
+        CHECK(std::ranges::equal(value, sample.value));
+    }
+    SECTION("with finite rejection")
+    {
+        CHECK(dp::parse_array_finite(ctx.as_parse_context(), value,
+                                     decodeElement)
+                      .error()
+              == dp::errc::indefinite_item);
+    }
+}
+
+TEST_CASE("parse_map parses a finite map of integers into a vector of pairs")
+{
+    item_sample_rt<std::vector<std::pair<int, int>>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<std::pair<int, int>>>(
+                    "maps.yaml", "int maps"));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+    std::vector<std::pair<int, int>> value;
+    auto decodePair = [](dp::parse_context &lctx,
+                         std::vector<std::pair<int, int>> &dest,
+                         std::size_t const) -> dp::result<void>
+    {
+        auto &pair = dest.emplace_back();
+        DPLX_TRY(dp::decode(lctx, pair.first));
+        DPLX_TRY(dp::decode(lctx, pair.second));
+        return dp::success();
+    };
+
+    SECTION("with flexible")
+    {
+        auto parseRx = dp::parse_map(ctx.as_parse_context(), value, decodePair);
+
+        REQUIRE(parseRx);
+        CHECK(parseRx.assume_value() == sample.value.size());
+
+        CHECK(std::ranges::equal(value, sample.value));
+    }
+    SECTION("with finite")
+    {
+        auto parseRx = dp::parse_map_finite(ctx.as_parse_context(), value,
+                                            decodePair);
+
+        REQUIRE(parseRx);
+        CHECK(parseRx.assume_value() == sample.value.size());
+
+        CHECK(std::ranges::equal(value, sample.value));
+    }
+}
+
+TEST_CASE(
+        "parse_map parses an indefinite map of integers into a vector of pairs")
+{
+    item_sample_rt<std::vector<std::pair<int, int>>> const sample
+            = GENERATE(load_samples_from_yaml<std::vector<std::pair<int, int>>>(
+                    "maps.yaml", "indefinite int maps"));
+    INFO(sample);
+
+    simple_test_parse_context ctx(sample.encoded_bytes());
+    std::vector<std::pair<int, int>> value;
+    auto decodePair = [](dp::parse_context &lctx,
+                         std::vector<std::pair<int, int>> &dest,
+                         std::size_t const) -> dp::result<void>
+    {
+        auto &pair = dest.emplace_back();
+        DPLX_TRY(dp::decode(lctx, pair.first));
+        DPLX_TRY(dp::decode(lctx, pair.second));
+        return dp::success();
+    };
+
+    SECTION("with flexible")
+    {
+        auto parseRx = dp::parse_map(ctx.as_parse_context(), value, decodePair);
+
+        REQUIRE(parseRx);
+        CHECK(parseRx.assume_value() == sample.value.size());
+
+        CHECK(std::ranges::equal(value, sample.value));
+    }
+    SECTION("with finite rejection")
+    {
+        CHECK(dp::parse_map_finite(ctx.as_parse_context(), value, decodePair)
+                      .error()
+              == dp::errc::indefinite_item);
     }
 }
 
