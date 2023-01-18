@@ -34,7 +34,7 @@ inline auto parse_blob_indefinite(parse_context &ctx,
                                   type_code expectedType) noexcept
         -> result<std::size_t>;
 
-template <typename Container>
+template <bool AllowIndefiniteEncoding, typename Container>
 inline auto parse_blob(parse_context &ctx,
                        Container &dest,
                        std::size_t const maxSize,
@@ -47,37 +47,41 @@ inline auto parse_blob(parse_context &ctx,
         return static_cast<result<item_head> &&>(headParseRx).as_failure();
     }
     item_head const &head = headParseRx.assume_value();
+
     if (head.type != expectedType)
     {
         return errc::item_type_mismatch;
     }
-
-    if (!head.indefinite()) [[likely]]
+    if (head.indefinite()) [[unlikely]]
     {
-        if (ctx.in.input_size() < head.value)
+        if constexpr (AllowIndefiniteEncoding)
         {
-            // defend against amplification attacks exhausting main memory
-            return errc::missing_data;
+            return detail::parse_blob_indefinite<Container>(ctx, dest, maxSize,
+                                                            expectedType);
         }
-        if (head.value > maxSize)
+        else
         {
-            return errc::string_exceeds_size_limit;
+            return errc::indefinite_item;
         }
-
-        auto const size = static_cast<std::size_t>(head.value);
-        DPLX_TRY(container_resize_for_overwrite(dest, size));
-
-        auto const memory = std::ranges::data(dest);
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-        DPLX_TRY(ctx.in.bulk_read(reinterpret_cast<std::byte *>(memory), size));
-        return size;
     }
-    else
+    if (ctx.in.input_size() < head.value)
     {
-        return detail::parse_blob_indefinite<Container>(ctx, dest, maxSize,
-                                                        expectedType);
+        // defend against amplification attacks exhausting main memory
+        return errc::missing_data;
     }
+    if (head.value > maxSize)
+    {
+        return errc::string_exceeds_size_limit;
+    }
+
+    auto const size = static_cast<std::size_t>(head.value);
+    DPLX_TRY(container_resize_for_overwrite(dest, size));
+
+    auto const memory = std::ranges::data(dest);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+    DPLX_TRY(ctx.in.bulk_read(reinterpret_cast<std::byte *>(memory), size));
+    return size;
 }
 
 template <typename Container>
@@ -134,55 +138,6 @@ inline auto parse_blob_indefinite(parse_context &ctx,
     return size;
 }
 
-template <typename Container>
-inline auto parse_blob_finite(parse_context &ctx,
-                              Container &dest,
-                              std::size_t const maxSize,
-                              type_code const expectedType) noexcept
-        -> result<std::size_t>
-{
-
-    result<item_head> parseRx = dp::parse_item_head(ctx);
-    if (parseRx.has_error())
-    {
-        return static_cast<result<item_head> &&>(parseRx).as_failure();
-    }
-    item_head const &head = parseRx.assume_value();
-    // DPLX_TRY(item_head const &head, dp::parse_item_head(ctx));
-    if (head.type != expectedType)
-    {
-        return errc::item_type_mismatch;
-    }
-    if (head.indefinite())
-    {
-        return errc::indefinite_item;
-    }
-
-    if (ctx.in.input_size() < head.value)
-    {
-        return errc::missing_data;
-    }
-    if (head.value > maxSize)
-    {
-        return errc::string_exceeds_size_limit;
-    }
-
-    auto const byteSize = static_cast<std::size_t>(head.value);
-    DPLX_TRY(container_resize_for_overwrite(dest, byteSize));
-
-    auto const memory = std::ranges::data(dest);
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    DPLX_TRY(ctx.in.bulk_read(reinterpret_cast<std::byte *>(memory), byteSize));
-
-    // if (ctx.mode == parse_mode::strict && expectedType == type_code::text)
-    //{
-    //    // TODO: verify UTF-8 content
-    //}
-
-    return byteSize;
-}
-
 } // namespace detail
 
 template <detail::string_output_container Container>
@@ -191,7 +146,7 @@ inline auto parse_binary(parse_context &ctx,
                          std::size_t const maxSize = SIZE_MAX) noexcept
         -> result<std::size_t>
 {
-    return detail::parse_blob(ctx, dest, maxSize, type_code::binary);
+    return detail::parse_blob<true>(ctx, dest, maxSize, type_code::binary);
 }
 template <detail::string_output_container Container>
 inline auto parse_binary_finite(parse_context &ctx,
@@ -199,7 +154,7 @@ inline auto parse_binary_finite(parse_context &ctx,
                                 std::size_t const maxSize = SIZE_MAX) noexcept
         -> result<std::size_t>
 {
-    return detail::parse_blob_finite(ctx, dest, maxSize, type_code::binary);
+    return detail::parse_blob<false>(ctx, dest, maxSize, type_code::binary);
 }
 
 template <detail::string_output_container Container>
@@ -208,7 +163,7 @@ inline auto parse_text(parse_context &ctx,
                        std::size_t const maxSize = SIZE_MAX) noexcept
         -> result<std::size_t>
 {
-    return detail::parse_blob(ctx, dest, maxSize, type_code::text);
+    return detail::parse_blob<true>(ctx, dest, maxSize, type_code::text);
 }
 template <detail::string_output_container Container>
 inline auto parse_text_finite(parse_context &ctx,
@@ -216,7 +171,7 @@ inline auto parse_text_finite(parse_context &ctx,
                               std::size_t const maxSize = SIZE_MAX) noexcept
         -> result<std::size_t>
 {
-    return detail::parse_blob_finite(ctx, dest, maxSize, type_code::text);
+    return detail::parse_blob<false>(ctx, dest, maxSize, type_code::text);
 }
 
 } // namespace dplx::dp
