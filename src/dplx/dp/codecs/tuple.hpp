@@ -71,7 +71,7 @@ inline constexpr struct encode_varargs_fn final
 constexpr struct encoded_size_of_varargs_fn
 {
     template <typename... Ts>
-        requires(... &&detail::has_codec_size_of<cncr::remove_cref_t<Ts>>)
+        requires(... &&ng::encodable<cncr::remove_cref_t<Ts>>)
     inline auto operator()(emit_context const &ctx,
                            Ts &&...values) const noexcept -> result<void>
     {
@@ -89,7 +89,7 @@ constexpr struct encoded_size_of_varargs_fn
         }
 
         template <typename... Ts>
-            requires(... &&detail::has_codec_size_of<cncr::remove_cref_t<Ts>>)
+            requires(... &&ng::encodable<cncr::remove_cref_t<Ts>>)
         inline auto operator()(Ts &&...vs) const noexcept -> std::uint64_t
         {
             auto const &ctx = *mCtx;

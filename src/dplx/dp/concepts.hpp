@@ -23,7 +23,10 @@
 
 static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
-namespace dplx::dp::ng
+namespace dplx::dp
+{
+
+namespace ng // TODO: unwrap
 {
 
 // clang-format off
@@ -34,7 +37,9 @@ concept encodable
     && requires(T const &t, emit_context const &ctx)
     {
         { codec<std::remove_const_t<T>>::encode(ctx, t) } noexcept
-            -> oc::concepts::basic_result;
+            -> oc::concepts::basic_result;    
+        { codec<std::remove_const_t<T>>::size_of(ctx, t) } noexcept
+            -> std::same_as<std::uint64_t>;
     };
 // clang-format on
 
@@ -51,7 +56,16 @@ concept decodable
     };
 // clang-format on
 
-} // namespace dplx::dp::ng
+} // namespace ng
+
+// clang-format off
+template <typename T>
+concept codable
+    = ng::decodable<T>
+    || ng::encodable<T>;
+// clang-format on
+
+} // namespace dplx::dp
 
 namespace dplx::dp
 {
@@ -177,66 +191,3 @@ concept decodable_pair_like = pair<T> && input_stream<Stream> && decodable<
         Stream> && decodable<typename std::tuple_element<1, T>::type, Stream>;
 
 } // namespace dplx::dp::detail
-
-namespace dplx::dp
-{
-
-template <typename T>
-concept pair = requires(T t)
-{
-    typename std::tuple_size<T>::type;
-    requires 2U == std::tuple_size<T>::value;
-    dp::get<0U>(t);
-    dp::get<1U>(t);
-};
-
-// clang-format off
-template <typename T>
-concept encodable_pair
-    = pair<T>
-        && ng::encodable<std::tuple_element_t<0U, T>>
-        && ng::encodable<std::tuple_element_t<1U, T>>;
-// clang-format on
-
-// clang-format off
-template <typename T>
-concept decodable_pair
-    = pair<T>
-        && ng::decodable<std::tuple_element_t<0U, T>>
-        && ng::decodable<std::tuple_element_t<1U, T>>;
-// clang-format on
-
-// clang-format off
-template <typename T>
-concept codable_pair
-    = encodable_pair<T>
-    || decodable_pair<T>;
-// clang-format on
-
-} // namespace dplx::dp
-
-// TODO: remove and replace with *pair
-namespace dplx::dp
-{
-
-template <typename T>
-concept pair_like = requires(T t)
-{
-    typename std::tuple_size<T>::type;
-    requires 2U == std::tuple_size<T>::value;
-    dp::get<0U>(t);
-    dp::get<1U>(t);
-};
-
-namespace dplx::dp::detail
-{
-
-// clang-format off
-template <typename T>
-concept encodable_pair_like2
-        = encodable_pair<T>;
-// clang-format on
-
-} // namespace dplx::dp::detail
-
-} // namespace dplx::dp

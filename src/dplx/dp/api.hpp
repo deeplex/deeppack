@@ -18,27 +18,13 @@
 #include <dplx/dp/stream.hpp>
 #include <dplx/dp/streams/void_stream.hpp>
 
-namespace dplx::dp::detail
-{
-
-// clang-format off
-template <typename T>
-concept has_codec_size_of = requires(T const &t, emit_context const &ctx) // TODO: remove
-{
-    { codec<T>::size_of(ctx, t) } noexcept
-        -> std::same_as<std::uint64_t>;
-};
-// clang-format on
-
-} // namespace dplx::dp::detail
-
 namespace dplx::dp
 {
 
 inline constexpr struct encoded_size_of_fn
 {
     template <typename T>
-        requires detail::has_codec_size_of<cncr::remove_cref_t<T>>
+        requires ng::encodable<cncr::remove_cref_t<T>>
     constexpr auto operator()(T &&value) const noexcept
     {
         using unqualified_type = cncr::remove_cref_t<T>;
@@ -48,7 +34,7 @@ inline constexpr struct encoded_size_of_fn
                 ctx, static_cast<unqualified_type const &>(value));
     }
     template <typename T>
-        requires detail::has_codec_size_of<cncr::remove_cref_t<T>>
+        requires ng::encodable<cncr::remove_cref_t<T>>
     constexpr auto operator()(emit_context const &ctx, T &&value) const noexcept
     {
         using unqualified_type = cncr::remove_cref_t<T>;
