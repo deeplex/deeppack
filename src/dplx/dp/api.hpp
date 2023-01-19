@@ -23,9 +23,8 @@ namespace dplx::dp::detail
 
 // clang-format off
 template <typename T>
-concept has_codec_size_of = requires(T const &t, emit_context const &ctx)
+concept has_codec_size_of = requires(T const &t, emit_context const &ctx) // TODO: remove
 {
-    typename codec<T>;
     { codec<T>::size_of(ctx, t) } noexcept
         -> std::same_as<std::uint64_t>;
 };

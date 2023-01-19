@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020.
+// Copyright Henrik Steffen Gaßmann 2020-2023
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -21,8 +21,14 @@ class output_buffer;
 struct emit_context;
 struct parse_context;
 
+class no_codec_available
+{
+};
+
 template <typename T>
-class codec;
+class codec final : public no_codec_available
+{
+};
 
 } // namespace dplx::dp
 
@@ -54,8 +60,7 @@ inline constexpr as_value_t<T> as_value;
 
 } // namespace dplx::dp
 
-#pragma region auto tuple
-
+// auto tuple
 namespace dplx::dp
 {
 
@@ -79,10 +84,7 @@ concept is_tuple_def_v = tuple_definition<T>;
 
 } // namespace dplx::dp
 
-#pragma endregion
-
-#pragma region auto object
-
+// auto object
 namespace dplx::dp
 {
 
@@ -106,10 +108,7 @@ concept is_object_def_v = object_definition<T>;
 
 } // namespace dplx::dp
 
-#pragma endregion
-
-#pragma region layout descriptor support
-
+// layout descriptor support
 namespace dplx::dp
 {
 

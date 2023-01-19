@@ -33,7 +33,6 @@ concept encodable
     && !std::is_pointer_v<T>
     && requires(T const &t, emit_context const &ctx)
     {
-        typename codec<std::remove_const_t<T>>;
         { codec<std::remove_const_t<T>>::encode(ctx, t) } noexcept
             -> oc::concepts::basic_result;
     };
@@ -47,7 +46,6 @@ concept decodable
     && !std::is_const_v<T>
     && requires(T &t, parse_context &ctx)
     {
-        typename codec<T>;
         { codec<T>::decode(ctx, t) } noexcept
             -> oc::concepts::basic_result;
     };
