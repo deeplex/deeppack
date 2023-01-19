@@ -24,7 +24,7 @@ namespace detail
 {
 
 template <typename Container>
-concept string_output_container = container_traits<
+concept blob_output_container = container_traits<
         Container>::resize && std::ranges::contiguous_range<Container>;
 
 template <typename Container>
@@ -140,7 +140,15 @@ inline auto parse_blob_indefinite(parse_context &ctx,
 
 } // namespace detail
 
-template <detail::string_output_container Container>
+// clang-format off
+template <typename Container>
+concept binary_item_container
+    = detail::blob_output_container<Container>
+    && (std::ranges::output_range<Container, std::byte>
+        || std::ranges::output_range<Container, std::uint8_t>);
+// clang-format on
+
+template <binary_item_container Container>
 inline auto parse_binary(parse_context &ctx,
                          Container &dest,
                          std::size_t const maxSize = SIZE_MAX) noexcept
@@ -148,7 +156,7 @@ inline auto parse_binary(parse_context &ctx,
 {
     return detail::parse_blob<true>(ctx, dest, maxSize, type_code::binary);
 }
-template <detail::string_output_container Container>
+template <binary_item_container Container>
 inline auto parse_binary_finite(parse_context &ctx,
                                 Container &dest,
                                 std::size_t const maxSize = SIZE_MAX) noexcept
@@ -157,7 +165,15 @@ inline auto parse_binary_finite(parse_context &ctx,
     return detail::parse_blob<false>(ctx, dest, maxSize, type_code::binary);
 }
 
-template <detail::string_output_container Container>
+// clang-format off
+template <typename Container>
+concept text_item_container 
+    = detail::blob_output_container<Container>
+    && (std::ranges::output_range<Container, char>
+        || std::ranges::output_range<Container, char8_t>);
+// clang-format on
+
+template <text_item_container Container>
 inline auto parse_text(parse_context &ctx,
                        Container &dest,
                        std::size_t const maxSize = SIZE_MAX) noexcept
@@ -165,7 +181,7 @@ inline auto parse_text(parse_context &ctx,
 {
     return detail::parse_blob<true>(ctx, dest, maxSize, type_code::text);
 }
-template <detail::string_output_container Container>
+template <text_item_container Container>
 inline auto parse_text_finite(parse_context &ctx,
                               Container &dest,
                               std::size_t const maxSize = SIZE_MAX) noexcept
@@ -185,8 +201,11 @@ namespace detail
 // clang-format off
 template <typename Fn, typename Container>
 concept subitem_parslet
-    = std::invocable<Fn, parse_context &, Container &, std::size_t const>
-            && tryable<std::invoke_result_t<Fn, parse_context &, Container &, std::size_t const>>;
+    = requires(Fn &&decodeFn, parse_context &ctx, Container &dest, std::size_t const i)
+    {
+        { static_cast<Fn &&>(decodeFn)(ctx, dest, i) } noexcept
+            -> tryable;
+    };
 // clang-format on
 
 template <typename Container, typename DecodeElementFn>
