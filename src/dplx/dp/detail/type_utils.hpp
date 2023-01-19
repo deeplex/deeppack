@@ -69,7 +69,7 @@ inline constexpr ::dplx::detail::cpo::get_fn<I> get{};
 } // namespace dplx::dp
 
 ////////////////////////////////////////////////////////////////////////////////
-// tuple_like & pair_like
+// tuple utilities
 
 namespace dplx::dp::detail
 {
@@ -139,20 +139,6 @@ struct arg_sink
 };
 
 } // namespace dplx::dp::detail
-
-namespace dplx::dp
-{
-
-template <typename T>
-concept pair_like = requires(T t)
-{
-    typename std::tuple_size<T>::type;
-    requires 2U == std::tuple_size<T>::value;
-    dp::get<0U>(t);
-    dp::get<1U>(t);
-};
-
-} // namespace dplx::dp
 
 ////////////////////////////////////////////////////////////////////////////////
 // member accessor utilities

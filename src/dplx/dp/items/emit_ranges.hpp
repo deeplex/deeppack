@@ -72,7 +72,7 @@ inline auto emit_array_indefinite(emit_context const &ctx, R const &vs) noexcept
 template <std::ranges::input_range R>
     // clang-format off
     requires((std::ranges::forward_range<R> || std::ranges::sized_range<R>)
-            && detail::encodable_pair_like2<std::ranges::range_value_t<R>>)
+            && encodable_pair<std::ranges::range_value_t<R>>)
 // clang-format on
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto emit_map(emit_context const &ctx, R const &vs) noexcept
@@ -108,7 +108,7 @@ inline auto emit_map(emit_context const &ctx, R const &vs) noexcept
     }
 }
 template <std::ranges::input_range R>
-    requires(detail::encodable_pair_like2<std::ranges::range_value_t<R>>)
+    requires(encodable_pair<std::ranges::range_value_t<R>>)
 inline auto emit_map_indefinite(emit_context const &ctx, R const &vs) noexcept
         -> result<void>
 {

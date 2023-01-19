@@ -109,7 +109,7 @@ namespace detail
 // clang-format off
 template <typename T, typename Iterator>
 concept associative_container_emplacement_result
-    = pair_like<T> &&
+    = pair<T> &&
         std::same_as<typename std::tuple_element<0, T>::type, Iterator> &&
         std::same_as<typename std::tuple_element<1, T>::type, bool>;
 // clang-format on
@@ -136,7 +136,7 @@ concept associative_container
 template <typename X>
 concept map_like_associative_container
     = associative_container<X> &&
-      pair_like<typename X::value_type> &&
+      pair<typename X::value_type> &&
       std::default_initializable<typename X::key_type> &&
       std::default_initializable<typename X::mapped_type> &&
       requires(X &&t, typename X::key_type &&k, typename X::mapped_type &&m, std::ranges::iterator_t<X> hint)

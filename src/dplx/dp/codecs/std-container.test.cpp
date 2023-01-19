@@ -24,8 +24,8 @@
 namespace dp_tests
 {
 
-static_assert(dp::pair_like<std::pair<int, unsigned>>);
-static_assert(dp::detail::encodable_pair_like2<std::pair<int, unsigned>>);
+static_assert(dp::pair<std::pair<int, unsigned>>);
+static_assert(dp::encodable_pair<std::pair<int, unsigned>>);
 
 TEST_CASE("std::span of bytes has a codec")
 {

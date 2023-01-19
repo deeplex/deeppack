@@ -57,6 +57,43 @@ namespace dplx::dp
 {
 
 template <typename T>
+concept pair = requires(T t)
+{
+    typename std::tuple_size<T>::type;
+    requires 2U == std::tuple_size<T>::value;
+    dp::get<0U>(t);
+    dp::get<1U>(t);
+};
+
+// clang-format off
+template <typename T>
+concept encodable_pair
+    = pair<T>
+        && ng::encodable<std::tuple_element_t<0U, T>>
+        && ng::encodable<std::tuple_element_t<1U, T>>;
+// clang-format on
+
+// clang-format off
+template <typename T>
+concept decodable_pair
+    = pair<T>
+        && ng::decodable<std::tuple_element_t<0U, T>>
+        && ng::decodable<std::tuple_element_t<1U, T>>;
+// clang-format on
+
+// clang-format off
+template <typename T>
+concept codable_pair
+    = encodable_pair<T>
+    || decodable_pair<T>;
+// clang-format on
+
+} // namespace dplx::dp
+
+namespace dplx::dp
+{
+
+template <typename T>
 inline constexpr bool enable_pass_by_value
         = std::is_trivially_copy_constructible_v<T> &&
                   std::is_trivially_copyable_v<T> && sizeof(T) <= 32;
@@ -110,7 +147,7 @@ template <typename T>
 inline constexpr bool disable_associative_range = false;
 
 template <typename T>
-concept associative_range = range<T> && pair_like<
+concept associative_range = range<T> && pair<
         std::ranges::range_value_t<T>> && !disable_associative_range<T>;
 
 template <typename Enum>
@@ -134,17 +171,72 @@ template <typename T>
 using select_proper_param_type
         = select_proper_param_type_impl<cncr::remove_cref_t<T>>;
 
-// clang-format off
-template <typename T>
-concept encodable_pair_like2
-        = pair_like<T>
-        && ng::encodable<std::tuple_element_t<0U, T>>
-        && ng::encodable<std::tuple_element_t<1U, T>>;
-// clang-format on
-
 template <typename T, typename Stream>
-concept decodable_pair_like = pair_like<T> && input_stream<Stream> && decodable<
+concept decodable_pair_like = pair<T> && input_stream<Stream> && decodable<
         typename std::tuple_element<0, T>::type,
         Stream> && decodable<typename std::tuple_element<1, T>::type, Stream>;
 
 } // namespace dplx::dp::detail
+
+namespace dplx::dp
+{
+
+template <typename T>
+concept pair = requires(T t)
+{
+    typename std::tuple_size<T>::type;
+    requires 2U == std::tuple_size<T>::value;
+    dp::get<0U>(t);
+    dp::get<1U>(t);
+};
+
+// clang-format off
+template <typename T>
+concept encodable_pair
+    = pair<T>
+        && ng::encodable<std::tuple_element_t<0U, T>>
+        && ng::encodable<std::tuple_element_t<1U, T>>;
+// clang-format on
+
+// clang-format off
+template <typename T>
+concept decodable_pair
+    = pair<T>
+        && ng::decodable<std::tuple_element_t<0U, T>>
+        && ng::decodable<std::tuple_element_t<1U, T>>;
+// clang-format on
+
+// clang-format off
+template <typename T>
+concept codable_pair
+    = encodable_pair<T>
+    || decodable_pair<T>;
+// clang-format on
+
+} // namespace dplx::dp
+
+// TODO: remove and replace with *pair
+namespace dplx::dp
+{
+
+template <typename T>
+concept pair_like = requires(T t)
+{
+    typename std::tuple_size<T>::type;
+    requires 2U == std::tuple_size<T>::value;
+    dp::get<0U>(t);
+    dp::get<1U>(t);
+};
+
+namespace dplx::dp::detail
+{
+
+// clang-format off
+template <typename T>
+concept encodable_pair_like2
+        = encodable_pair<T>;
+// clang-format on
+
+} // namespace dplx::dp::detail
+
+} // namespace dplx::dp

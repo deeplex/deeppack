@@ -9,14 +9,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <dplx/dp/detail/type_utils.hpp>
+#include <dplx/predef/compiler/visualc.h>
+
+#include <dplx/dp/concepts.hpp>
+#include <dplx/dp/detail/workaround.hpp>
 
 #include "test_utils.hpp"
 
 namespace dp_tests
 {
 
-static_assert(dp::pair_like<dp::map_pair<int, int>>);
+static_assert(dp::pair<dp::map_pair<int, int>>);
 static_assert(std::is_trivial_v<dp::map_pair<int, int>>);
 
 TEST_CASE("map_pair can be constructed with CTAD")
@@ -27,8 +30,13 @@ TEST_CASE("map_pair can be constructed with CTAD")
 
     CHECK(subject.key == 1);
     CHECK(subject.value == 2L);
-    CHECK(get<0>(subject) == 1);
-    CHECK(get<1>(subject) == 2L);
+#if DPLX_DP_WORKAROUND_TESTED_AT(DPLX_COMP_MSVC, 19, 34, 31937)
+    CHECK(dp::cpo::get<0>(subject) == 1);
+    CHECK(dp::cpo::get<1>(subject) == 2L);
+#else
+    CHECK(dp::get<0>(subject) == 1);
+    CHECK(dp::get<1>(subject) == 2L);
+#endif
 }
 
 } // namespace dp_tests
