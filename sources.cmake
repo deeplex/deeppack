@@ -33,6 +33,7 @@ dplx_target_sources(deeppack
         dp/detail/type_utils
         dp/detail/utils
 
+        dp/items
         dp/items/emit_context
         dp/items/emit_core
         dp/items/emit_ranges
