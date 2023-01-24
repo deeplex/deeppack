@@ -143,7 +143,7 @@ concept boolean_testable
 // clang-format off
 template <typename T>
 concept tryable
-    = requires(T &&t)
+    = requires(T t)
 {
     { oc::try_operation_has_value(t) }
         -> boolean_testable;
@@ -158,9 +158,16 @@ using result_value_t
         = std::remove_cvref_t<decltype(oc::try_operation_extract_value(
                 std::declval<T &&>()))>;
 
+// clang-format off
 template <typename T, typename R>
 concept tryable_result
-        = tryable<T> && std::convertible_to<result_value_t<T>, R>;
+    = tryable<T>
+    && requires(T rx)
+    {
+        { oc::try_operation_extract_value(static_cast<T &&>(rx)) }
+            -> std::convertible_to<R>;
+    };
+// clang-format on
 
 inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
 {

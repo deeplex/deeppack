@@ -38,13 +38,17 @@ inline constexpr struct container_reserve_fn
                                   StdContainer &container,
                                   std::size_t const reservationSize) noexcept
             -> result<void>
-        requires std::is_nothrow_move_constructible_v<
-                typename StdContainer::value_type> && requires
+        // clang-format off
+        requires requires
         {
-            {
-                container.reserve(reservationSize)
-                } -> std::same_as<void>;
+            typename StdContainer;
+            typename StdContainer::value_type;
+            requires std::is_nothrow_move_constructible_v<
+                typename StdContainer::value_type>;
+            { container.reserve(reservationSize) }
+                -> std::same_as<void>;
         }
+    // clang-format on
     {
         try
         {
@@ -82,12 +86,17 @@ inline constexpr struct container_resize_fn
                                   StdContainer &container,
                                   std::size_t const newSize) noexcept
             -> result<void>
+        // clang-format off
         requires requires
-        {
-            {
-                container.resize(newSize)
-                } -> std::same_as<void>;
+        {                 
+            typename StdContainer;
+            typename StdContainer::value_type;
+            requires std::is_nothrow_move_constructible_v<
+                typename StdContainer::value_type>;
+            { container.resize(newSize) }
+                -> std::same_as<void>;
         }
+    // clang-format on
     {
         try
         {

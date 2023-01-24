@@ -12,6 +12,7 @@
 #include <ranges>
 #include <span>
 
+#include <dplx/dp/codecs/std-container.hpp>
 #include <dplx/dp/concepts.hpp>
 #include <dplx/dp/customization.std.hpp>
 #include <dplx/dp/decoder/api.hpp>
@@ -24,39 +25,6 @@
 // sequence container
 namespace dplx::dp
 {
-
-template <typename T>
-inline constexpr bool disable_sequence_container = false;
-
-// clang-format off
-template <typename X>
-concept sequence_container
-    = !disable_sequence_container<X> &&
-      std::ranges::range<X> &&
-      std::same_as<typename X::value_type, std::ranges::range_value_t<X>> &&
-      requires(X c,
-            std::ranges::sentinel_t<X> p)
-        {
-            typename X::value_type;
-            { c.emplace(p) }
-                -> std::same_as<std::ranges::iterator_t<X>>;
-        };
-// clang-format on
-
-template <typename T>
-inline constexpr bool disable_back_insertion_sequence_container = false;
-
-// clang-format off
-template <typename X>
-concept back_insertion_sequence_container
-    = !disable_back_insertion_sequence_container<X> &&
-      sequence_container<X> &&
-      requires(X c)
-        {
-            c.emplace_back();
-            { c.back() } -> std::same_as<typename X::value_type &>;
-        };
-// clang-format on
 
 template <sequence_container T, input_stream Stream>
     requires decodable<typename T::value_type, Stream>
@@ -77,17 +45,7 @@ private:
     static auto decode_element(Stream &stream, T &value, std::size_t const)
             -> result<void>
     {
-        element_type *e; // NOLINT(cppcoreguidelines-init-variables)
-        if constexpr (back_insertion_sequence_container<T>)
-        {
-            value.emplace_back();
-            e = &value.back();
-        }
-        else
-        {
-            auto it = value.emplace(std::ranges::end(value));
-            e = &(*it);
-        }
+        element_type *e = &value.emplace_back();
 
         DPLX_TRY(element_decoder()(stream, *e));
         return oc::success();
@@ -99,56 +57,6 @@ private:
 // associative containers
 namespace dplx::dp
 {
-
-template <typename T>
-inline constexpr bool disable_associative_container = false;
-
-namespace detail
-{
-
-// clang-format off
-template <typename T, typename Iterator>
-concept associative_container_emplacement_result
-    = pair<T> &&
-        std::same_as<typename std::tuple_element<0, T>::type, Iterator> &&
-        std::same_as<typename std::tuple_element<1, T>::type, bool>;
-// clang-format on
-
-} // namespace detail
-
-// clang-format off
-template <typename X>
-concept associative_container
-    = !disable_associative_container<X> &&
-      std::ranges::range<X> &&
-      std::same_as<typename X::value_type, std::ranges::range_value_t<X>> &&
-      std::default_initializable<typename X::value_type> &&
-      requires(X &&t, typename X::value_type v, std::ranges::iterator_t<X> hint)
-        {
-            typename X::value_type;
-            { t.emplace(static_cast<typename X::value_type &&>(v)) }
-                -> detail::associative_container_emplacement_result<
-                        std::ranges::iterator_t<X>>;
-        };
-// clang-format on
-
-// clang-format off
-template <typename X>
-concept map_like_associative_container
-    = associative_container<X> &&
-      pair<typename X::value_type> &&
-      std::default_initializable<typename X::key_type> &&
-      std::default_initializable<typename X::mapped_type> &&
-      requires(X &&t, typename X::key_type &&k, typename X::mapped_type &&m, std::ranges::iterator_t<X> hint)
-        {
-            typename X::key_type;
-            typename X::mapped_type;
-            { t.emplace(static_cast<typename X::key_type &&>(k),
-                        static_cast<typename X::mapped_type &&>(m)) }
-                -> detail::associative_container_emplacement_result<
-                        std::ranges::iterator_t<X>>;
-        };
-// clang-format on
 
 template <associative_container T, input_stream Stream>
     requires decodable<typename T::value_type, Stream>
@@ -181,7 +89,7 @@ private:
     }
 };
 
-template <map_like_associative_container T, input_stream Stream>
+template <mapping_associative_container T, input_stream Stream>
     requires(decodable<typename T::key_type, Stream>
                      &&decodable<typename T::mapped_type, Stream>)
 class basic_decoder<T, Stream>

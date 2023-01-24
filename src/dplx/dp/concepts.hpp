@@ -11,6 +11,7 @@
 #include <limits>
 #include <ranges>
 #include <type_traits>
+#include <utility>
 
 #include <dplx/cncr/mp_lite.hpp>
 #include <dplx/cncr/type_utils.hpp>
@@ -32,12 +33,12 @@ namespace ng // TODO: unwrap
 // clang-format off
 template <typename T>
 concept encodable
-    = !std::is_reference_v<T>
-    && !std::is_pointer_v<T>
-    && requires(T const &t, emit_context const &ctx)
+    = requires(T const t, emit_context const ctx)
     {
+        requires !std::is_reference_v<T>;
+        requires !std::is_pointer_v<T>;
         { codec<std::remove_const_t<T>>::encode(ctx, t) } noexcept
-            -> oc::concepts::basic_result;    
+            -> oc::concepts::basic_result;
         { codec<std::remove_const_t<T>>::size_of(ctx, t) } noexcept
             -> std::same_as<std::uint64_t>;
     };
@@ -46,11 +47,11 @@ concept encodable
 // clang-format off
 template <typename T>
 concept decodable
-    = !std::is_reference_v<T>
-    && !std::is_pointer_v<T>
-    && !std::is_const_v<T>
-    && requires(T &t, parse_context &ctx)
+    = requires(T t, parse_context ctx)
     {
+        requires !std::is_reference_v<T>;
+        requires !std::is_pointer_v<T>;
+        requires !std::is_const_v<T>;
         { codec<T>::decode(ctx, t) } noexcept
             -> oc::concepts::basic_result;
     };
@@ -67,55 +68,9 @@ concept codable
 
 } // namespace dplx::dp
 
+// legacy
 namespace dplx::dp
 {
-
-template <typename T>
-concept pair = requires(T t)
-{
-    typename std::tuple_size<T>::type;
-    requires 2U == std::tuple_size<T>::value;
-    dp::get<0U>(t);
-    dp::get<1U>(t);
-};
-
-// clang-format off
-template <typename T>
-concept encodable_pair
-    = pair<T>
-        && ng::encodable<std::tuple_element_t<0U, T>>
-        && ng::encodable<std::tuple_element_t<1U, T>>;
-// clang-format on
-
-// clang-format off
-template <typename T>
-concept decodable_pair
-    = pair<T>
-        && ng::decodable<std::tuple_element_t<0U, T>>
-        && ng::decodable<std::tuple_element_t<1U, T>>;
-// clang-format on
-
-// clang-format off
-template <typename T>
-concept codable_pair
-    = encodable_pair<T>
-    || decodable_pair<T>;
-// clang-format on
-
-} // namespace dplx::dp
-
-namespace dplx::dp
-{
-
-template <typename T>
-inline constexpr bool enable_pass_by_value
-        = std::is_trivially_copy_constructible_v<T> &&
-                  std::is_trivially_copyable_v<T> && sizeof(T) <= 32;
-
-template <typename Range>
-inline constexpr bool enable_indefinite_encoding
-        = std::ranges::input_range<
-                  Range> && !std::ranges::sized_range<Range> && !std::ranges::forward_range<Range>;
 
 template <typename T, input_stream Stream>
 class basic_decoder;
@@ -146,6 +101,16 @@ concept tuple_like
 };
 // clang-format on
 
+} // namespace dplx::dp
+
+namespace dplx::dp
+{
+
+template <typename Range>
+inline constexpr bool enable_indefinite_encoding
+        = std::ranges::input_range<
+                  Range> && !std::ranges::sized_range<Range> && !std::ranges::forward_range<Range>;
+
 template <typename T>
 inline constexpr bool disable_range
         // ranges which are type recursive w.r.t. their iterator value type
@@ -157,12 +122,84 @@ inline constexpr bool disable_range
 template <typename T>
 concept range = std::ranges::range<T> && !disable_range<T>;
 
-template <typename T>
-inline constexpr bool disable_associative_range = false;
+// clang-format off
+template <typename C>
+concept container
+    = range<C>
+    && std::ranges::forward_range<C>
+    && requires(C const a, C b)
+    {
+        requires std::regular<C>;
+        requires std::destructible<C>;
+        requires std::swappable<C>;
+        typename C::size_type;
+        requires std::unsigned_integral<typename C::size_type>;
 
-template <typename T>
-concept associative_range = range<T> && pair<
-        std::ranges::range_value_t<T>> && !disable_associative_range<T>;
+        typename C::iterator;
+        requires std::same_as<typename C::iterator, std::ranges::iterator_t<C>>;
+        typename C::const_iterator;
+        requires std::same_as<
+            typename C::const_iterator,
+            std::ranges::iterator_t<C const>
+        >;
+
+        typename C::value_type;
+        requires std::destructible<typename C::value_type>;
+        requires std::same_as<typename C::value_type, std::ranges::range_value_t<C>>;
+        typename C::reference;
+
+        { a.size() }
+            -> std::same_as<typename C::size_type>;
+        { a.max_size() }
+            -> std::same_as<typename C::size_type>;
+        { a.empty() }
+            -> std::same_as<bool>;
+
+        // this isn't required by the standard -- it excludes the array oddball.
+        { b.clear() }
+            -> std::same_as<void>;
+    };
+// clang-format on
+
+// clang-format off
+template <typename C>
+concept sequence_container
+    = container<C>
+    && requires(C a)
+    {
+        { a.emplace_back() }
+            -> std::same_as<typename C::reference>;
+    };
+// clang-format on
+
+// clang-format off
+template <typename C>
+concept associative_container
+    = container<C>
+    && requires { typename C::key_type; }
+    && requires(C a, typename C::key_type k)
+    {
+        { a.emplace(static_cast<typename C::key_type &&>(k)) }
+            -> std::same_as<std::pair<typename C::iterator, bool>>;
+    };
+// clang-format on
+//
+// clang-format off
+template <typename C>
+concept mapping_associative_container
+    = container<C>
+    && requires
+    {
+        typename C::key_type;
+        typename C::mapped_type;
+    }
+    && requires(C a, typename C::key_type k, typename C::mapped_type m)
+    {
+        { a.emplace(static_cast<typename C::key_type &&>(k),
+                    static_cast<typename C::mapped_type &&>(m)) }
+            -> std::same_as<std::pair<typename C::iterator, bool>>;
+    };
+// clang-format on
 
 template <typename Enum>
 inline constexpr bool disable_enum_codec = false;
@@ -173,21 +210,3 @@ template <typename Enum>
 concept codable_enum = std::is_enum_v<Enum> && !disable_enum_codec<Enum>;
 
 } // namespace dplx::dp
-
-namespace dplx::dp::detail
-{
-
-template <typename T>
-using select_proper_param_type_impl
-        = std::conditional_t<enable_pass_by_value<T>, T const, T const &>;
-
-template <typename T>
-using select_proper_param_type
-        = select_proper_param_type_impl<cncr::remove_cref_t<T>>;
-
-template <typename T, typename Stream>
-concept decodable_pair_like = pair<T> && input_stream<Stream> && decodable<
-        typename std::tuple_element<0, T>::type,
-        Stream> && decodable<typename std::tuple_element<1, T>::type, Stream>;
-
-} // namespace dplx::dp::detail

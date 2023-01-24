@@ -43,20 +43,21 @@ TEST_CASE("emit_array loops over a range of encodables and emits them")
 
     SECTION("with a sized range")
     {
-        REQUIRE(emit_array(ctx.as_emit_context(), sample.value));
+        REQUIRE(emit_array(ctx.as_emit_context(), sample.value, dp::encode));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("with a forward range")
     {
         REQUIRE(emit_array(ctx.as_emit_context(),
-                           dp::indefinite_range(sample.value)));
+                           dp::indefinite_range(sample.value), dp::encode));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("and has a corresponding size_of")
     {
-        CHECK(dp::item_size_of_array(ctx.as_emit_context(), sample.value)
+        CHECK(dp::item_size_of_array(ctx.as_emit_context(), sample.value,
+                                     dp::encoded_size_of)
               == sample.encoded.size());
         CHECK(ctx.stream.written().empty());
     }
@@ -73,14 +74,14 @@ TEST_CASE("emit_array can handle various data types")
 
     SECTION("standard C-Array")
     {
-        REQUIRE(emit_array(ctx.as_emit_context(), sample));
+        REQUIRE(emit_array(ctx.as_emit_context(), sample, dp::encode));
 
         CHECK_BLOB_EQ(ctx.stream.written(), expected);
     }
     SECTION("std array")
     {
         constexpr std::array<simple_encodable, 2> input{sample[0], sample[1]};
-        REQUIRE(emit_array(ctx.as_emit_context(), input));
+        REQUIRE(emit_array(ctx.as_emit_context(), input, dp::encode));
 
         CHECK_BLOB_EQ(ctx.stream.written(), expected);
     }
@@ -99,14 +100,16 @@ TEST_CASE("emit_array_indefinite loops over an input range of encodables and "
     SECTION("with indefinite range")
     {
         REQUIRE(emit_array_indefinite(ctx.as_emit_context(),
-                                      dp::indefinite_range(sample.value)));
+                                      dp::indefinite_range(sample.value),
+                                      dp::encode));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("and has a corresponding size_of")
     {
         CHECK(dp::item_size_of_array_indefinite(
-                      ctx.as_emit_context(), dp::indefinite_range(sample.value))
+                      ctx.as_emit_context(), dp::indefinite_range(sample.value),
+                      dp::encoded_size_of)
               == sample.encoded.size());
         CHECK(ctx.stream.written().empty());
     }
@@ -120,23 +123,36 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
     INFO(sample);
 
     simple_test_emit_context ctx(sample.encoded.size());
+    auto encodePair = [](dp::emit_context const &lctx,
+                         std::pair<int, int> const &pair) -> dp::result<void>
+    {
+        DPLX_TRY(dp::encode(lctx, pair.first));
+        return dp::encode(lctx, pair.second);
+    };
 
     SECTION("with a sized range")
     {
-        REQUIRE(emit_map(ctx.as_emit_context(), sample.value));
+        REQUIRE(emit_map(ctx.as_emit_context(), sample.value, encodePair));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("with a forward range")
     {
         REQUIRE(emit_map(ctx.as_emit_context(),
-                         dp::indefinite_range(sample.value)));
+                         dp::indefinite_range(sample.value), encodePair));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("and has a corresponding size_of")
     {
-        CHECK(dp::item_size_of_map(ctx.as_emit_context(), sample.value)
+        CHECK(dp::item_size_of_map(
+                      ctx.as_emit_context(), sample.value,
+                      [](dp::emit_context const &lctx,
+                         std::pair<int, int> const &pair) -> std::uint64_t
+                      {
+                          return dp::encoded_size_of(lctx, pair.first)
+                               + dp::encoded_size_of(lctx, pair.second);
+                      })
               == sample.encoded.size());
         CHECK(ctx.stream.written().empty());
     }
@@ -151,18 +167,31 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
     INFO(sample);
 
     simple_test_emit_context ctx(sample.encoded.size());
+    auto encodePair = [](dp::emit_context const &lctx,
+                         std::pair<int, int> const &pair) -> dp::result<void>
+    {
+        DPLX_TRY(dp::encode(lctx, pair.first));
+        return dp::encode(lctx, pair.second);
+    };
 
     SECTION("with indefinite range")
     {
         REQUIRE(emit_map_indefinite(ctx.as_emit_context(),
-                                    dp::indefinite_range(sample.value)));
+                                    dp::indefinite_range(sample.value),
+                                    encodePair));
 
         CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("and has a corresponding size_of")
     {
         CHECK(dp::item_size_of_map_indefinite(
-                      ctx.as_emit_context(), dp::indefinite_range(sample.value))
+                      ctx.as_emit_context(), dp::indefinite_range(sample.value),
+                      [](dp::emit_context const &lctx,
+                         std::pair<int, int> const &pair) -> std::uint64_t
+                      {
+                          return dp::encoded_size_of(lctx, pair.first)
+                               + dp::encoded_size_of(lctx, pair.second);
+                      })
               == sample.encoded.size());
         CHECK(ctx.stream.written().empty());
     }

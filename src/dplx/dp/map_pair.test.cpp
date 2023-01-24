@@ -19,7 +19,6 @@
 namespace dp_tests
 {
 
-static_assert(dp::pair<dp::map_pair<int, int>>);
 static_assert(std::is_trivial_v<dp::map_pair<int, int>>);
 
 TEST_CASE("map_pair can be constructed with CTAD")
