@@ -27,7 +27,7 @@ dplx_target_sources(deeppack
         dp/codecs/auto_object
         dp/codecs/auto_tuple
         dp/codecs/std-container
-        dp/codecs/tuple
+        dp/codecs/std-tuple
 
         dp/detail/item_size
         dp/detail/type_utils

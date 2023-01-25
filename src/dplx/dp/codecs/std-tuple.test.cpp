@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/codecs/tuple.hpp"
+#include "dplx/dp/codecs/std-tuple.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -13,6 +13,7 @@
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/codecs/core.hpp"
 #include "item_sample_ct.hpp"
+#include "test_input_stream.hpp"
 #include "test_output_stream.hpp"
 #include "test_utils.hpp"
 
@@ -21,48 +22,35 @@
 namespace dp_tests
 {
 
-static_assert(dp::ng::encodable<std::pair<int, long>>);
+static_assert(dp::ng::encodable<std::tuple<int, long>>);
 
-TEST_CASE("encodes two tuples")
+TEST_CASE("std::tuple has a codec")
 {
-    constexpr item_sample_ct<std::array<int, 2>> sample{
+    constexpr item_sample_ct<std::tuple<int, long long>> sample{
             {   3, 22},
             3, { 0x82,  3,  22}
     };
 
-    SECTION("with std::pair")
+    SECTION("with encode")
     {
-        std::pair<int, long long> subject{sample.value[0], sample.value[1]};
+        simple_test_output_stream outputStream(sample.encoded_length);
 
-        SECTION("to a stream")
-        {
-            simple_test_output_stream outputStream(sample.encoded_length);
+        REQUIRE(dp::encode(outputStream, sample.value));
 
-            REQUIRE(dp::encode(outputStream, subject));
-
-            CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
-        }
-        SECTION("with a size_of operator")
-        {
-            CHECK(dp::encoded_size_of(subject) == sample.encoded_length);
-        }
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
     }
-    SECTION("with std::tuple")
+    SECTION("with a size_of operator")
     {
-        std::tuple<int, long long> subject{sample.value[0], sample.value[1]};
+        CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
 
-        SECTION("to a stream")
-        {
-            simple_test_output_stream outputStream(sample.encoded_length);
+        std::remove_cvref_t<decltype(sample.value)> value;
+        REQUIRE(dp::decode(inputStream, value));
 
-            REQUIRE(dp::encode(outputStream, subject));
-
-            CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
-        }
-        SECTION("with a size_of operator")
-        {
-            CHECK(dp::encoded_size_of(subject) == sample.encoded_length);
-        }
+        CHECK(value == sample.value);
     }
 }
 
@@ -84,6 +72,15 @@ TEST_CASE("encodes three tuples")
     SECTION("with as size_of operator")
     {
         CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
+    }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        std::remove_cvref_t<decltype(sample.value)> value;
+        REQUIRE(dp::decode(inputStream, value));
+
+        CHECK(value == sample.value);
     }
 }
 
