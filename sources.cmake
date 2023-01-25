@@ -29,6 +29,8 @@ dplx_target_sources(deeppack
         dp/codecs/std-container
         dp/codecs/std-tuple
 
+        dp/cpos/property_id_hash
+
         dp/detail/item_size
         dp/detail/type_utils
         dp/detail/utils

@@ -9,6 +9,7 @@
 
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <new>
 
 #include <dplx/cncr/tag_invoke.hpp>

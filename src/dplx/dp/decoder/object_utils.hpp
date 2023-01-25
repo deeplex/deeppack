@@ -20,6 +20,7 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
+#include <dplx/dp/cpos/property_id_hash.hpp>
 #include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/std_string.hpp>
 #include <dplx/dp/decoder/utils.hpp>
@@ -32,52 +33,6 @@
 
 namespace dplx::dp
 {
-
-inline constexpr struct property_id_hash_fn
-{
-    template <typename T>
-        requires cncr::tag_invocable<property_id_hash_fn, T const &>
-    constexpr auto operator()(T const &value) const noexcept(
-            cncr::nothrow_tag_invocable<property_id_hash_fn, T const &>)
-            -> std::uint64_t
-    {
-        return cncr::tag_invoke(*this, value);
-    }
-    template <typename T>
-        requires cncr::
-                tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
-    constexpr auto operator()(T const &value, std::uint64_t seed) const
-            noexcept(cncr::nothrow_tag_invocable<property_id_hash_fn,
-                                                 T const &,
-                                                 std::uint64_t>)
-                    -> std::uint64_t
-    {
-        return cncr::tag_invoke(*this, value, seed);
-    }
-
-    template <cncr::integer T>
-    friend constexpr auto tag_invoke(property_id_hash_fn, T value) noexcept
-            -> std::uint64_t
-    {
-        return static_cast<std::uint64_t>(value);
-    }
-    template <cncr::integer T>
-    friend constexpr auto
-    tag_invoke(property_id_hash_fn, T value, std::uint64_t seed) noexcept
-            -> std::uint64_t
-    {
-        return detail::xxhash3(value, seed);
-    }
-
-    friend constexpr auto tag_invoke(property_id_hash_fn,
-                                     std::u8string_view str,
-                                     std::uint64_t const seed = 0) noexcept
-            -> std::uint64_t
-    {
-        return detail::fnvx_hash(str.data(), str.size(), seed);
-    }
-
-} property_id_hash;
 
 template <std::size_t N, input_stream Stream>
 class basic_decoder<fixed_u8string<N>, Stream>
