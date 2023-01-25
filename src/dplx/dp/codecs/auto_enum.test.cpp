@@ -12,10 +12,15 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "blob_matcher.hpp"
 #include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
+#include "test_input_stream.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 namespace
 {
@@ -94,22 +99,33 @@ TEMPLATE_TEST_CASE("enums have an auto codec",
                    unscoped_test_enum)
 {
     static_assert(dp::ng::encodable<TestType>);
-    auto sample = GENERATE(borrowed_range(enum_samples<TestType>::values));
+    static_assert(dp::ng::decodable<TestType>);
+    auto const sample
+            = GENERATE(borrowed_range(enum_samples<TestType>::values));
 
     SECTION("with encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
+        simple_test_output_stream outputStream(sample.encoded_length);
 
         REQUIRE(dp::encode(outputStream, sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
     }
     SECTION("with size_of")
     {
         CHECK(dp::encoded_size_of(sample.value) == sample.encoded_length);
     }
+    SECTION("with decode")
+    {
+        simple_test_input_stream inputStream(sample.encoded_bytes());
+
+        TestType value;
+        REQUIRE(dp::decode(inputStream, value));
+
+        CHECK(value == sample.value);
+    }
 }
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-function-cognitive-complexity)

@@ -32,6 +32,17 @@ public:
     {
         return dp::encode(ctx, static_cast<std::underlying_type_t<T>>(value));
     }
+    static auto decode(parse_context &ctx, T &value) noexcept -> result<void>
+    {
+        std::underlying_type_t<T> underlyingValue;
+        if (result<void> parseRx = dp::decode(ctx, underlyingValue);
+            parseRx.has_failure())
+        {
+            return static_cast<result<void> &&>(parseRx).as_failure();
+        }
+        value = static_cast<T>(underlyingValue);
+        return oc::success();
+    }
 };
 
 } // namespace dplx::dp
