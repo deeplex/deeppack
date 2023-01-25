@@ -87,31 +87,56 @@ inline constexpr struct decode_fn final
     }
 
     template <typename T>
-        requires(ng::decodable<T> &&std::is_default_constructible_v<T>)
+        requires ng::value_decodable<T>
     inline auto operator()(as_value_t<T>, input_buffer &inStream) const noexcept
             -> result<T>
     {
         parse_context ctx{inStream};
-        result<T> rx(oc::success());
-        if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
-            parseRx.has_failure()) [[unlikely]]
-        {
-            rx = static_cast<decltype(parseRx) &&>(parseRx).as_failure();
-        }
-        return rx;
+        return (*this)(as_value<T>, ctx);
     }
     template <typename T>
-        requires(ng::decodable<T> &&std::is_default_constructible_v<T>)
+        requires ng::value_decodable<T>
     inline auto operator()(as_value_t<T>, parse_context &ctx) const noexcept
             -> result<T>
     {
-        result<T> rx(oc::success());
-        if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
-            parseRx.has_failure()) [[unlikely]]
+        // clang-format off
+        if constexpr (requires {
+                          { codec<T>::decode(ctx) } noexcept
+                              -> std::same_as<result<T>>;
+                      })
+        // clang-format on
         {
-            rx = static_cast<decltype(parseRx) &&>(parseRx).as_failure();
+            return codec<T>::decode(ctx);
         }
-        return rx;
+        // clang-format off
+        else if constexpr (requires {
+                              { codec<T>::decode(ctx) } noexcept
+                                  -> detail::tryable_result<T>;
+                           })
+        // clang-format on
+        {
+            if (auto parseRx = codec<T>::decode(ctx);
+                oc::try_operation_has_value(parseRx)) [[likely]]
+            {
+                return oc::try_operation_extract_value(
+                        static_cast<decltype(parseRx) &&>(parseRx));
+            }
+            else [[unlikely]]
+            {
+                return oc::try_operation_return_as(
+                        static_cast<decltype(parseRx) &&>(parseRx));
+            }
+        }
+        else
+        {
+            result<T> rx(oc::success());
+            if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
+                parseRx.has_failure()) [[unlikely]]
+            {
+                rx = static_cast<decltype(parseRx) &&>(parseRx).as_failure();
+            }
+            return rx;
+        }
     }
 
     // legacy begin

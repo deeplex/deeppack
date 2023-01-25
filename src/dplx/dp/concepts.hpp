@@ -57,6 +57,19 @@ concept decodable
     };
 // clang-format on
 
+// clang-format off
+template <typename T>
+concept value_decodable
+    = decodable<T>
+    && requires { typename T; }
+    && ((std::default_initializable<T> && std::movable<T>)
+        || requires(parse_context ctx)
+           {
+               { codec<T>::decode(ctx) } noexcept
+                   -> detail::tryable_result<T>;
+           });
+// clang-format on
+
 } // namespace ng
 
 // clang-format off
