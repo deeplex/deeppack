@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <dplx/dp/codecs/auto_tuple.hpp>
 #include <dplx/dp/decoder/utils.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/item_parser.hpp>
@@ -15,12 +16,6 @@
 
 namespace dplx::dp
 {
-
-struct tuple_head_info
-{
-    std::int32_t num_properties;
-    std::uint32_t version;
-};
 
 template <input_stream Stream, bool isVersioned = false>
 inline auto parse_tuple_head(Stream &inStream,

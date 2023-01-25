@@ -9,11 +9,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "blob_matcher.hpp"
 #include "dplx/dp/codecs/core.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "dplx/dp/streams/void_stream.hpp"
 #include "item_sample_ct.hpp"
+#include "test_input_stream.hpp"
+#include "test_output_stream.hpp"
 #include "test_utils.hpp"
+
+// NOLINTBEGIN(readability-function-cognitive-complexity)
 
 namespace dp_tests
 {
@@ -23,6 +27,10 @@ struct test_tuple
     std::uint32_t ma;
     std::uint64_t mb;
     std::uint32_t mc;
+
+    friend inline auto operator==(test_tuple const &,
+                                  test_tuple const &) noexcept -> bool
+            = default;
 };
 
 constexpr dp::tuple_def<dp::tuple_member_def<&test_tuple::ma>{}>
@@ -70,20 +78,40 @@ TEST_CASE("encode tuple with layout descriptor 1")
 
     SECTION("can encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
-        dp::emit_context ctx{outputStream};
+        simple_test_emit_context ctx(sample.encoded_length);
 
-        REQUIRE(dp::encode_tuple<descriptor>(ctx, sample.value));
+        REQUIRE(dp::encode_tuple<descriptor>(ctx.as_emit_context(),
+                                             sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("can estimate size")
     {
         dp::void_stream outputStream;
         dp::emit_context ctx{outputStream};
-        CHECK(dp::size_of_tuple<descriptor>(ctx, sample.value));
+        CHECK(dp::size_of_tuple<descriptor>(ctx, sample.value)
+              == sample.encoded_length);
+    }
+    SECTION("can decode")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<dp::tuple_head_info> headParseRx
+                = dp::decode_tuple_head(ctx.as_parse_context());
+        REQUIRE(headParseRx);
+        auto const &head = headParseRx.assume_value();
+        REQUIRE(head.version == descriptor.version);
+
+        std::remove_cvref_t<decltype(sample.value)> value{};
+        REQUIRE(dp::decode_tuple_properties<descriptor>(
+                ctx.as_parse_context(), value, head.num_properties));
+
+        CHECK(value
+              == test_tuple{
+                      .ma = sample.value.ma,
+                      .mb = {},
+                      .mc = {},
+              });
     }
 }
 
@@ -98,20 +126,39 @@ TEST_CASE("encode tuple with layout descriptor 2")
 
     SECTION("can encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
-        dp::emit_context ctx{outputStream};
+        simple_test_emit_context ctx(sample.encoded_length);
 
-        REQUIRE(dp::encode_tuple<descriptor>(ctx, sample.value));
+        REQUIRE(dp::encode_tuple<descriptor>(ctx.as_emit_context(),
+                                             sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("can estimate size")
     {
         dp::void_stream outputStream;
         dp::emit_context ctx{outputStream};
         CHECK(dp::size_of_tuple<descriptor>(ctx, sample.value));
+    }
+    SECTION("can decode")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<dp::tuple_head_info> headParseRx
+                = dp::decode_tuple_head(ctx.as_parse_context());
+        REQUIRE(headParseRx);
+        auto const &head = headParseRx.assume_value();
+        REQUIRE(head.version == descriptor.version);
+
+        std::remove_cvref_t<decltype(sample.value)> value{};
+        REQUIRE(dp::decode_tuple_properties<descriptor>(
+                ctx.as_parse_context(), value, head.num_properties));
+
+        CHECK(value
+              == test_tuple{
+                      .ma = sample.value.ma,
+                      .mb = sample.value.mb,
+                      .mc = {},
+              });
     }
 }
 
@@ -126,20 +173,34 @@ TEST_CASE("encode tuple with layout descriptor 3")
 
     SECTION("can encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
-        dp::emit_context ctx{outputStream};
+        simple_test_emit_context ctx(sample.encoded_length);
 
-        REQUIRE(dp::encode_tuple<descriptor>(ctx, sample.value));
+        REQUIRE(dp::encode_tuple<descriptor>(ctx.as_emit_context(),
+                                             sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("can estimate size")
     {
         dp::void_stream outputStream;
         dp::emit_context ctx{outputStream};
         CHECK(dp::size_of_tuple<descriptor>(ctx, sample.value));
+    }
+    SECTION("can decode")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<dp::tuple_head_info> headParseRx
+                = dp::decode_tuple_head(ctx.as_parse_context());
+        REQUIRE(headParseRx);
+        auto const &head = headParseRx.assume_value();
+        REQUIRE(head.version == descriptor.version);
+
+        std::remove_cvref_t<decltype(sample.value)> value{};
+        REQUIRE(dp::decode_tuple_properties<descriptor>(
+                ctx.as_parse_context(), value, head.num_properties));
+
+        CHECK(value == sample.value);
     }
 }
 
@@ -154,20 +215,34 @@ TEST_CASE("encode tuple with layout descriptor 4")
 
     SECTION("can encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
-        dp::emit_context ctx{outputStream};
+        simple_test_emit_context ctx(sample.encoded_length);
 
-        REQUIRE(dp::encode_tuple<descriptor>(ctx, sample.value));
+        REQUIRE(dp::encode_tuple<descriptor>(ctx.as_emit_context(),
+                                             sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("can estimate size")
     {
         dp::void_stream outputStream;
         dp::emit_context ctx{outputStream};
         CHECK(dp::size_of_tuple<descriptor>(ctx, sample.value));
+    }
+    SECTION("can decode")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<dp::tuple_head_info> headParseRx = dp::decode_tuple_head(
+                ctx.as_parse_context(), std::true_type{});
+        REQUIRE(headParseRx);
+        auto const &head = headParseRx.assume_value();
+        REQUIRE(head.version == descriptor.version);
+
+        std::remove_cvref_t<decltype(sample.value)> value{};
+        REQUIRE(dp::decode_tuple_properties<descriptor>(
+                ctx.as_parse_context(), value, head.num_properties));
+
+        CHECK(value == sample.value);
     }
 }
 
@@ -182,20 +257,39 @@ TEST_CASE("encode tuple with layout descriptor 5")
 
     SECTION("can encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
-        dp::emit_context ctx{outputStream};
+        simple_test_emit_context ctx(sample.encoded_length);
 
-        REQUIRE(dp::encode_tuple<descriptor>(ctx, sample.value));
+        REQUIRE(dp::encode_tuple<descriptor>(ctx.as_emit_context(),
+                                             sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("can estimate size")
     {
         dp::void_stream outputStream;
         dp::emit_context ctx{outputStream};
         CHECK(dp::size_of_tuple<descriptor>(ctx, sample.value));
+    }
+    SECTION("can decode")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        dp::result<dp::tuple_head_info> headParseRx
+                = dp::decode_tuple_head(ctx.as_parse_context());
+        REQUIRE(headParseRx);
+        auto const &head = headParseRx.assume_value();
+        REQUIRE(head.version == descriptor.version);
+
+        std::remove_cvref_t<decltype(sample.value)> value{};
+        REQUIRE(dp::decode_tuple_properties<descriptor>(
+                ctx.as_parse_context(), value, head.num_properties));
+
+        CHECK(value
+              == test_tuple{
+                      .ma = sample.value.ma,
+                      .mb = sample.value.mb,
+                      .mc = {},
+              });
     }
 }
 
@@ -234,6 +328,11 @@ public:
         , msub(sub)
     {
     }
+
+    friend inline auto
+    operator==(custom_with_layout_descriptor const &,
+               custom_with_layout_descriptor const &) noexcept -> bool
+            = default;
 
     static constexpr dp::tuple_def<
             dp::tuple_member_def<&custom_with_layout_descriptor::mb>{},
@@ -281,14 +380,11 @@ TEST_CASE("encode tuple with auto layout descriptor")
 
     SECTION("can encode")
     {
-        std::vector<std::byte> encodingBuffer(sample.encoded_length);
-        dp::memory_output_stream outputStream(encodingBuffer);
-        dp::emit_context ctx{outputStream};
+        simple_test_emit_context ctx(sample.encoded_length);
 
-        REQUIRE(dp::encode_tuple(ctx, sample.value));
+        REQUIRE(dp::encode_tuple(ctx.as_emit_context(), sample.value));
 
-        CHECK(std::ranges::equal(outputStream.written(),
-                                 sample.encoded_bytes()));
+        CHECK_BLOB_EQ(ctx.stream.written(), sample.encoded_bytes());
     }
     SECTION("can estimate size")
     {
@@ -296,6 +392,17 @@ TEST_CASE("encode tuple with auto layout descriptor")
         dp::emit_context ctx{outputStream};
         CHECK(dp::size_of_tuple(ctx, sample.value));
     }
+    SECTION("can decode")
+    {
+        simple_test_parse_context ctx(sample.encoded_bytes());
+
+        std::remove_cvref_t<decltype(sample.value)> value{};
+        REQUIRE(dp::decode_tuple(ctx.as_parse_context(), value));
+
+        CHECK(value == sample.value);
+    }
 }
 
 } // namespace dp_tests
+
+// NOLINTEND(readability-function-cognitive-complexity)
