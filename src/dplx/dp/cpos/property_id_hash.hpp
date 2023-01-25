@@ -9,12 +9,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 #include <dplx/cncr/math_supplement.hpp>
 #include <dplx/cncr/tag_invoke.hpp>
 
+#include <dplx/dp/codecs/fixed_u8string.hpp>
 #include <dplx/dp/detail/hash.hpp>
-#include <dplx/dp/object_def.hpp>
 
 namespace dplx::dp
 {

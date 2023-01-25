@@ -93,7 +93,7 @@ constexpr auto xxhash3_ui64(std::uint64_t const value,
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
-template <cncr::unsigned_integer T>
+template <cncr::integer T>
     requires(sizeof(T) <= sizeof(std::uint64_t))
 constexpr auto xxhash3(T const value, std::uint64_t const seed) noexcept
         -> std::uint64_t

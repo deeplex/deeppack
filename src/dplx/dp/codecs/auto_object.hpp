@@ -69,23 +69,6 @@ struct mp_size_of_object_property_fn2
 namespace dplx::dp
 {
 
-template <std::size_t N>
-class codec<fixed_u8string<N>>
-{
-public:
-    static auto size_of(emit_context const &ctx,
-                        fixed_u8string<N> const &value) noexcept
-            -> std::uint64_t
-    {
-        return dp::item_size_of_u8string(ctx, value.size());
-    }
-    static auto encode(emit_context const &ctx,
-                       fixed_u8string<N> const &value) noexcept -> result<void>
-    {
-        return dp::emit_u8string(ctx, value.data(), value.size());
-    }
-};
-
 template <auto const &descriptor>
 inline auto
 encode_object(emit_context const &ctx,

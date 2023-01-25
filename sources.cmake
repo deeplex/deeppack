@@ -8,6 +8,7 @@ dplx_target_sources(deeppack
         dp/disappointment
 
         dp/codecs/core
+        dp/codecs/fixed_u8string
         dp/codecs/std-chrono
         dp/codecs/std-filesystem
         dp/codecs/std-string
