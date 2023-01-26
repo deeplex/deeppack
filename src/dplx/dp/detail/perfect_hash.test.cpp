@@ -10,9 +10,10 @@
 #include <array>
 #include <cstdint>
 
+#include <catch2/catch_test_macros.hpp>
+
 #include <dplx/dp/detail/hash.hpp>
 
-#include "boost-test.hpp"
 #include "test_utils.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
@@ -20,8 +21,6 @@
 
 namespace dp_tests
 {
-
-BOOST_AUTO_TEST_SUITE(perfect_hashing)
 
 using dp::detail::perfect_hasher;
 
@@ -54,73 +53,71 @@ constexpr auto failing_hash(std::array<T, N> const &spec) noexcept
     return 0;
 }
 
-BOOST_AUTO_TEST_CASE(h_01n_0)
+TEST_CASE("perfect has with #01 elements #0")
 {
     constexpr std::array subject{0U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_02_0)
+TEST_CASE("perfect has with #02 elements #0")
 {
     constexpr std::array subject{0U, 1U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_02_1)
+TEST_CASE("perfect has with #02 elements #1")
 {
     constexpr std::array subject{2U, 4U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_03_0)
+TEST_CASE("perfect has with #03 elements #0")
 {
     constexpr std::array subject{2U, 3U, 4U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_03_1)
+TEST_CASE("perfect has with #03 elements #1")
 {
     constexpr std::array subject{2U, 4U, 6U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_06_0)
+TEST_CASE("perfect has with #06 elements #0")
 {
     constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 46U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_06_1)
+TEST_CASE("perfect has with #06 elements #1")
 {
     constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 47U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_16_0)
+TEST_CASE("perfect has with #16 elements #0")
 {
     constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 47U, 51U, 54U,
                                  67U, 69U, 70U, 77U, 79U, 81U, 83U, 89U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
 
-BOOST_AUTO_TEST_CASE(h_20_0)
+TEST_CASE("perfect has with #20 elements #0")
 {
     constexpr std::array subject{25U, 36U, 37U, 40U, 44U, 47U, 51U,
                                  54U, 67U, 69U, 70U, 77U, 79U, 81U,
                                  83U, 89U, 93U, 95U, 98U, 100U};
-    static_assert(!failing_hash(subject));
-    BOOST_TEST(!failing_hash(subject));
+    static_assert(failing_hash(subject) == 0U);
+    CHECK(failing_hash(subject) == 0U);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace dp_tests
 

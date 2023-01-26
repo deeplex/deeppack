@@ -33,6 +33,7 @@ dplx_target_sources(deeppack
         dp/cpos/property_id_hash
 
         dp/detail/item_size
+        dp/detail/perfect_hash
         dp/detail/type_utils
         dp/detail/utils
 
@@ -102,7 +103,6 @@ dplx_target_sources(deeppack
         dp/detail/bit
         dp/detail/hash
         dp/detail/mp_for_dots
-        dp/detail/perfect_hash
         dp/detail/workaround
 )
 

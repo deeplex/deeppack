@@ -8,7 +8,9 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
+#include <span>
 
 #include <dplx/predef/compiler.h>
 
@@ -20,6 +22,26 @@
 
 namespace dplx::dp::detail
 {
+
+constexpr auto approx_integer_sqrt(std::size_t const v) noexcept -> std::size_t
+{
+    constexpr std::size_t x = std::size_t{1}
+                           << (sizeof(std::size_t) * CHAR_BIT / 2);
+    std::size_t r = v / 2 < x ? v : x - 1;
+    for (std::size_t l = 1U; l != r;)
+    {
+        std::size_t const mid = (l + r) / 2U;
+        if (mid * mid >= v)
+        {
+            r = mid;
+        }
+        else
+        {
+            l = mid + 1;
+        }
+    }
+    return r;
+}
 
 constexpr auto is_prime(std::uint64_t const i) noexcept -> bool
 {
@@ -89,6 +111,32 @@ constexpr auto next_prime(std::uint64_t const i) noexcept -> std::uint64_t
     }
 }
 
+template <std::size_t N>
+struct least_uint
+{
+    using type = std::size_t;
+};
+template <std::size_t N>
+    requires(N <= 0xffU)
+struct least_uint<N>
+{
+    using type = std::uint8_t;
+};
+template <std::size_t N>
+    requires(0xffU < N && N <= 0xffffU)
+struct least_uint<N>
+{
+    using type = std::uint16_t;
+};
+template <std::size_t N>
+    requires(0xffffU < N && N <= 0xffff'ffffU)
+struct least_uint<N>
+{
+    using type = std::uint32_t;
+};
+template <std::size_t N>
+using least_int_t = typename least_uint<N>::type;
+
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-constant-array-index)
 
 // maps N keys of type T uniquely to the integer interval [0, N)
@@ -96,18 +144,21 @@ template <typename T, std::size_t N, typename KeyHash>
 struct perfect_hasher
 {
     static constexpr KeyHash key_hash{};
-    static constexpr std::uint64_t initial_seed = 0x8000'0000'0000'0000U;
-    static constexpr std::size_t remap_size = detail::next_prime(N / 5U);
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-    static_assert(remap_size >= (N / 5U));
+    static constexpr std::uint64_t seed_flag = 0x8000'0000'0000'0000U;
+    static constexpr std::uint64_t initial_seed = seed_flag;
+    static constexpr std::uint64_t seed_reroll_mask = 0x7fff'ffff'0000'0000U;
+    static constexpr std::size_t remap_size
+            = detail::next_prime(detail::approx_integer_sqrt(N));
+
+    using value_type = least_int_t<N>;
 
     std::array<std::uint64_t, remap_size> remap;
-    std::array<std::size_t, N> values;
+    std::array<value_type, N> values;
 
 public:
-    static constexpr auto invalid_value = ~static_cast<std::size_t>(0U);
+    static constexpr value_type invalid_value = static_cast<value_type>(~0ULL);
 
-    constexpr explicit perfect_hasher(std::array<T, N> const &keys) noexcept
+    constexpr explicit perfect_hasher(std::span<T const, N> keys) noexcept
         : remap{}
         , values{}
     {
@@ -162,9 +213,8 @@ public:
                 {
                     // current seed would generate a collision => reroll
                     j = 0;
+                    seed ^= (hash & seed_reroll_mask);
                     seed += 1;
-                    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-                    seed ^= (hash & 0x7fff'ffff'0000'0000);
                 }
                 else
                 {
@@ -180,7 +230,7 @@ public:
 
             for (std::size_t j = 0; j < pattern.back(); ++j)
             {
-                values[slots[j]] = pattern[j];
+                values[slots[j]] = static_cast<value_type>(pattern[j]);
             }
         }
 
@@ -205,11 +255,11 @@ public:
 #if DPLX_DP_WORKAROUND(DPLX_COMP_GNUC, <=, 10, 1, 0)
             // gcc has a problem with the defaulted <=> over structs containing
             // arrays
-            values[slot] = static_cast<std::size_t>(
+            values[slot] = static_cast<value_type>(
                     std::find(keys.data(), keys.data() + keys.size(), key)
                     - keys.data());
 #else
-            values[slot] = static_cast<std::size_t>(
+            values[slot] = static_cast<value_type>(
                     std::lower_bound(keys.data(), keys.data() + keys.size(),
                                      key)
                     - keys.data());
@@ -218,11 +268,10 @@ public:
     }
 
     template <typename TLike>
-    constexpr auto operator()(TLike &&key) const -> std::size_t
+    constexpr auto operator()(TLike &&key) const noexcept -> value_type
     {
         std::uint64_t const remapped = remap[key_hash(key) % remap_size];
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        if ((remapped & 0x8000'0000'0000'0000U) == 0U)
+        if ((remapped & seed_flag) == 0U)
         {
             return values[remapped];
         }
