@@ -5,6 +5,8 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
 
     PUBLIC
+        dp
+
         dp/codecs/core
         dp/codecs/fixed_u8string
         dp/codecs/std-chrono
@@ -65,26 +67,9 @@ dplx_target_sources(deeppack
         dp/streams/output_buffer
         dp/streams/void_stream
 
-        dp/legacy/memory_buffer
-)
-
-dplx_target_sources(deeppack
-    TEST_TARGET deeppack-legacy-tests
-    MODE SMART_SOURCE MERGED_LAYOUT
-    BASE_DIR dplx
-
-    PUBLIC
-        dp
-)
-
-dplx_target_sources(deeppack
-    TEST_TARGET deeppack-legacy-tests
-    MODE SMART_HEADER_ONLY MERGED_LAYOUT
-    BASE_DIR dplx
-
-    PUBLIC
         dp/legacy/chunked_input_stream
         dp/legacy/chunked_output_stream
+        dp/legacy/memory_buffer
         dp/legacy/memory_input_stream
         dp/legacy/stream
 )
@@ -96,7 +81,7 @@ target_sources(deeppack PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gen
 if (BUILD_TESTING)
     dplx_target_sources(deeppack-tests PRIVATE
         MODE VERBATIM
-        BASE_DIR dp_tests-ng
+        BASE_DIR dp_tests
 
         PRIVATE
             blob_matcher.hpp
@@ -119,13 +104,5 @@ if (BUILD_TESTING)
             blobs.yaml
             maps.yaml
             text.yaml
-    )
-
-    dplx_target_sources(deeppack-legacy-tests PRIVATE
-        MODE VERBATIM
-        BASE_DIR dp_tests
-
-        PRIVATE
-            test_utils.hpp
     )
 endif ()

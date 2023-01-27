@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020
+// Copyright Henrik Steffen Gaßmann 2022
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -7,177 +7,266 @@
 
 #pragma once
 
-#include <array>
-#include <span>
+#include <cstddef>
+#include <cstring>
+#include <initializer_list>
+#include <vector>
 
-#include <dplx/dp/concepts.hpp>
+#include <dplx/dp/items/emit_context.hpp>
+#include <dplx/dp/streams/output_buffer.hpp>
 
-#include "boost-test.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
 {
 
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-template <std::size_t MaxSize = 56>
-class test_output_stream final
+// the class is final and none of its base classes have public destructors
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+class simple_test_output_stream final : public dp::output_buffer
 {
-    std::size_t mCurrentSize = 0;
-    int mWriteCounter = 0;
-    int mCommitCounter = 0;
-    std::array<std::byte, MaxSize> mBuffer{};
-
-    enum class ctag
-    {
-    };
+    std::vector<std::byte> mBuffer;
+    bool mInitiallyEmpty;
 
 public:
-    ~test_output_stream()
+    ~simple_test_output_stream() = default;
+
+    simple_test_output_stream(std::size_t const bufferSize,
+                              bool const initiallyEmpty = false)
+        : output_buffer()
+        , mBuffer(bufferSize, std::byte{})
+        , mInitiallyEmpty(initiallyEmpty)
     {
-        BOOST_TEST(mWriteCounter == mCommitCounter);
-    }
-
-    class write_proxy final : public std::span<std::byte>
-    {
-        std::size_t mInitSize{};
-
-        static constexpr std::size_t invalidated_init_size
-                = ~static_cast<std::size_t>(0);
-
-    public:
-        write_proxy() noexcept = default;
-        write_proxy(std::span<std::byte> mem, std::size_t currentSize, ctag)
-            : std::span<std::byte>(mem)
-            , mInitSize(currentSize)
+        if (!initiallyEmpty)
         {
+            reset(mBuffer.data(), bufferSize);
         }
+    }
 
-        using stream_type = test_output_stream;
-
-        friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
-                                      test_output_stream &stream,
-                                      write_proxy &self) -> dp::result<void>
+    [[nodiscard]] auto written() const noexcept -> std::span<std::byte const>
+    {
+        std::span<std::byte const> bytes{};
+        if (!mInitiallyEmpty)
         {
-            return write_proxy::commit(stream, self);
+            bytes = mBuffer;
+            bytes = bytes.first(mBuffer.size() - size());
         }
+        return bytes;
+    }
 
-        friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
-                                      test_output_stream &stream,
-                                      write_proxy &self,
-                                      std::size_t const actualSize)
-                -> dp::result<void>
+private:
+    auto do_grow(size_type const requested) noexcept
+            -> dp::result<void> override
+    {
+        if (!std::exchange(mInitiallyEmpty, false)
+            || requested > mBuffer.size())
         {
-            return write_proxy::commit(stream, self, actualSize);
+            return dp::errc::end_of_stream;
         }
+        reset(mBuffer.data(), mBuffer.size());
+        return dp::oc::success();
+    }
 
-    private:
-        static auto commit(test_output_stream &owner, write_proxy &self)
-                -> dp::result<void>
+    auto do_bulk_write(std::byte const *const src,
+                       std::size_t const srcSize) noexcept
+            -> dp::result<void> override
+    {
+        if (!std::exchange(mInitiallyEmpty, false) || srcSize > mBuffer.size())
         {
-            BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
-            self.mInitSize = invalidated_init_size;
-            owner.mCommitCounter += 1;
-            return dp::success();
+            return dp::errc::end_of_stream;
         }
-
-        static auto commit(test_output_stream &owner,
-                           write_proxy &self,
-                           std::size_t const actualSize) -> dp::result<void>
+        std::memcpy(mBuffer.data(), src, srcSize);
+        if (srcSize != mBuffer.size())
         {
-            BOOST_TEST_REQUIRE(self.mInitSize == owner.mCurrentSize);
-            BOOST_TEST_REQUIRE(actualSize <= self.size());
-
-            auto const absoluteSize
-                    = static_cast<std::size_t>(
-                              std::distance(owner.mBuffer.data(), self.data()))
-                    + actualSize;
-            static_cast<std::span<std::byte> &>(self) = self.first(actualSize);
-
-            owner.mCurrentSize = absoluteSize;
-            owner.mCommitCounter += 1;
-            self.mInitSize = invalidated_init_size;
-            return dp::success();
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            reset(mBuffer.data() + srcSize, mBuffer.size() - srcSize);
         }
-    };
-
-    [[nodiscard]] auto begin() noexcept
-    {
-        return std::ranges::begin(mBuffer);
-    }
-    [[nodiscard]] auto begin() const noexcept
-    {
-        return std::ranges::begin(mBuffer);
-    }
-    [[nodiscard]] auto end() noexcept
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return std::ranges::begin(mBuffer) + mCurrentSize;
-    }
-    [[nodiscard]] auto end() const noexcept
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return std::ranges::begin(mBuffer) + mCurrentSize;
-    }
-
-    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
-                                  test_output_stream &self,
-                                  std::size_t const amount)
-            -> dp::result<write_proxy>
-    {
-        BOOST_TEST_REQUIRE(self.mWriteCounter == self.mCommitCounter);
-
-        auto start = self.mCurrentSize;
-        self.mCurrentSize += amount;
-        BOOST_TEST_REQUIRE(start + amount <= std::ranges::size(self.mBuffer));
-        self.mWriteCounter += 1;
-        return write_proxy({self.mBuffer.data() + start, amount},
-                           self.mCurrentSize, ctag{});
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
-                                  test_output_stream &self,
-                                  std::byte const *bytes,
-                                  std::size_t const amount) -> dp::result<void>
-    {
-        BOOST_TEST_REQUIRE(self.mWriteCounter == self.mCommitCounter);
-        BOOST_TEST_REQUIRE(self.mCurrentSize + amount
-                           <= std::ranges::size(self.mBuffer));
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::memcpy(std::ranges::data(self.mBuffer) + self.mCurrentSize, bytes,
-                    amount);
-        self.mCurrentSize += amount;
-
-        return dp::success();
-    }
-
-    [[nodiscard]] auto data() noexcept -> std::byte *
-    {
-        return mBuffer.data();
-    }
-    [[nodiscard]] auto data() const noexcept -> std::byte const *
-    {
-        return mBuffer.data();
-    }
-    [[nodiscard]] auto size() const noexcept -> std::size_t
-    {
-        return mCurrentSize;
-    }
-
-    [[nodiscard]] auto write_counter() const noexcept -> int
-    {
-        return mWriteCounter;
-    }
-    [[nodiscard]] auto commit_counter() const noexcept -> int
-    {
-        return mCommitCounter;
+        return dp::oc::success();
     }
 };
-static_assert(dp::lazy_output_stream<test_output_stream<>>);
-static_assert(std::ranges::contiguous_range<test_output_stream<>>);
 
-struct default_encoding_fixture
+class simple_test_emit_context final : private dp::emit_context
 {
-    test_output_stream<> encodingBuffer;
+public:
+    simple_test_output_stream stream;
+
+    explicit simple_test_emit_context(std::size_t const bufferSize,
+                                      bool const initiallyEmpty = false)
+        : emit_context{stream}
+        , stream(bufferSize, initiallyEmpty)
+    {
+    }
+
+    auto as_emit_context() noexcept -> dp::emit_context const &
+    {
+        return *this;
+    }
+};
+
+// the class is final and none of its base classes have public destructors
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+class test_output_stream final : public dp::output_buffer
+{
+    using buffers_type = std::vector<std::vector<std::byte>>;
+    buffers_type mGatherBuffers;
+    typename buffers_type::iterator mCurrentBuffer;
+    bool mInitiallyEmpty;
+
+public:
+    ~test_output_stream() noexcept = default;
+
+    explicit test_output_stream(
+            std::initializer_list<std::size_t> const gatherBufferSizes,
+            bool const initiallyEmpty = false)
+        : output_buffer()
+        , mGatherBuffers(allocate_buffers(gatherBufferSizes))
+        , mCurrentBuffer(mGatherBuffers.begin())
+        , mInitiallyEmpty(initiallyEmpty)
+    {
+        if (!initiallyEmpty && mCurrentBuffer != mGatherBuffers.end())
+        {
+            auto &startBuffer = *mCurrentBuffer;
+            reset(startBuffer.data(), startBuffer.size());
+        }
+    }
+
+    [[nodiscard]] auto written() const -> std::vector<std::byte>
+    {
+        std::vector<std::byte> bytes;
+        if (mInitiallyEmpty)
+        {
+            // do_grow() hasn't been called
+        }
+        else if (!mGatherBuffers.empty())
+        {
+            std::size_t accumulatedSize = 0U;
+            auto gatherBuffersIt = mGatherBuffers.begin();
+            for (; gatherBuffersIt != mCurrentBuffer; ++gatherBuffersIt)
+            {
+                accumulatedSize += gatherBuffersIt->size();
+            }
+            if (gatherBuffersIt != mGatherBuffers.end())
+            {
+                accumulatedSize += gatherBuffersIt->size() - size();
+            }
+            bytes.resize(accumulatedSize);
+
+            gatherBuffersIt = mGatherBuffers.begin();
+            auto *writePos = bytes.data();
+            for (; gatherBuffersIt != mCurrentBuffer; ++gatherBuffersIt)
+            {
+                std::memcpy(writePos, gatherBuffersIt->data(),
+                            gatherBuffersIt->size());
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                writePos += gatherBuffersIt->size();
+            }
+            if (gatherBuffersIt != mGatherBuffers.end())
+            {
+                auto const lastBufferSize = gatherBuffersIt->size() - size();
+                std::memcpy(writePos, gatherBuffersIt->data(), lastBufferSize);
+            }
+        }
+        return bytes;
+    }
+
+private:
+    static auto allocate_buffers(std::initializer_list<std::size_t> bufferSizes)
+            -> std::vector<std::vector<std::byte>>
+    {
+        std::vector<std::vector<std::byte>> gatherBuffers;
+        gatherBuffers.reserve(bufferSizes.size());
+        for (auto const gatherBufferSize : bufferSizes)
+        {
+            gatherBuffers.emplace_back(gatherBufferSize);
+        }
+        return gatherBuffers;
+    }
+
+    auto do_grow(size_type const requestedSize) noexcept
+            -> dp::result<void> override
+    {
+        if (!std::exchange(mInitiallyEmpty, false))
+        {
+            finalize_current_buffer();
+        }
+        for (; mCurrentBuffer != mGatherBuffers.end(); ++mCurrentBuffer)
+        {
+            auto &currentBuffer = *mCurrentBuffer;
+            if (currentBuffer.size() < requestedSize)
+            {
+                currentBuffer.resize(0U);
+            }
+            else
+            {
+                reset(currentBuffer.data(), currentBuffer.size());
+                return dp::oc::success();
+            }
+        }
+        reset();
+        return dp::errc::end_of_stream;
+    }
+    auto do_bulk_write(std::byte const *src, std::size_t size) noexcept
+            -> dp::result<void> override
+    {
+        if (!std::exchange(mInitiallyEmpty, false))
+        {
+            finalize_current_buffer();
+        }
+        for (; size > 0U && mCurrentBuffer != mGatherBuffers.end();
+             ++mCurrentBuffer)
+        {
+            auto &currentBuffer = *mCurrentBuffer;
+            auto chunkSize = std::min(size, currentBuffer.size());
+            if (chunkSize == 0U)
+            {
+                // skip empty buffers
+                continue;
+            }
+
+            std::memcpy(currentBuffer.data(), src, chunkSize);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            src += chunkSize;
+            size -= chunkSize;
+
+            if (auto const remainingSize = currentBuffer.size() - chunkSize;
+                remainingSize > 0U)
+            {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                reset(currentBuffer.data() + chunkSize, remainingSize);
+            }
+        }
+        if (size > 0U)
+        {
+            return dp::errc::end_of_stream;
+        }
+        return dp::oc::success();
+    }
+
+    void finalize_current_buffer() noexcept
+    {
+        auto const remainingSize = size();
+        auto const bufferSize = mCurrentBuffer->size();
+        mCurrentBuffer->resize(bufferSize - remainingSize);
+        ++mCurrentBuffer;
+    }
+};
+
+class test_emit_context final : private dp::emit_context
+{
+public:
+    test_output_stream stream;
+
+    explicit test_emit_context(
+            std::initializer_list<std::size_t> const gatherBufferSizes,
+            bool const initiallyEmpty = false)
+        : emit_context{stream}
+        , stream(gatherBufferSizes, initiallyEmpty)
+    {
+    }
+
+    auto as_emit_context() noexcept -> dp::emit_context const &
+    {
+        return *this;
+    }
 };
 
 } // namespace dp_tests

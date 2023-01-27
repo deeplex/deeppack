@@ -16,7 +16,7 @@
         "tests": {
             "description": "Build the test suite",
             "dependencies": [
-                "boost-test",
+                "boost-algorithm",
                 "catch2",
                 "yaml-cpp"
             ]

@@ -6,6 +6,3 @@
 //           https://www.boost.org/LICENSE_1_0.txt)
 
 #include "dplx/dp.hpp"
-
-#define BOOST_TEST_MODULE deeppack tests
-#include "boost-test.hpp"

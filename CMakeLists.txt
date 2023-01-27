@@ -60,12 +60,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(status-code CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
 
-if (BUILD_TESTING)
-    set(DP_REQUIRE_UNIT_TEST_FRAMEWORK unit_test_framework)
-endif()
-find_package(Boost 1.71 REQUIRED COMPONENTS
-    ${DP_REQUIRE_UNIT_TEST_FRAMEWORK}
-)
+find_package(Boost 1.71 REQUIRED)
 
 find_package(yaml-cpp CONFIG)
 set_package_properties(yaml-cpp PROPERTIES
@@ -145,45 +140,12 @@ if (BUILD_TESTING)
     )
     
     target_include_directories(deeppack-tests PRIVATE
-        src/dp_tests-ng
+        src/dp_tests
     )
     
     add_test(NAME deeppack-tests COMMAND deeppack-tests
              WORKING_DIRECTORY $<TARGET_FILE_DIR:deeppack-tests>
     )
-
-    ## legacy tests ####################################################
-    add_executable(deeppack-legacy-tests)
-    source_group(TREE src/dp_tests PREFIX test_utils)
-
-    target_link_libraries(deeppack-legacy-tests PRIVATE
-        Deeplex::deeppack
-        
-        Boost::unit_test_framework
-        fmt::fmt
-    )
-
-    target_include_directories(deeppack-legacy-tests PRIVATE
-        src/dp_tests
-    )
-
-    if (DPLX_DP_TESTS_PCH)
-        target_precompile_headers(deeppack-legacy-tests PRIVATE
-            <algorithm>
-            <array>
-            <bit>
-            <cmath>
-            <concepts>
-            <cstddef>
-            <cstdint>
-            <limits>
-            <ranges>
-            <span>
-            <type_traits>
-        )
-    endif()
-
-    add_test(NAME deeppack-legacy-tests COMMAND deeppack-legacy-tests)
 endif()
 
 ########################################################################
