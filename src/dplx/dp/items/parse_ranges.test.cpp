@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include <dplx/dp/customization.std.hpp>
+#include <dplx/dp/cpos/container.std.hpp>
 
 #include "blob_matcher.hpp"
 #include "dplx/dp/api.hpp"

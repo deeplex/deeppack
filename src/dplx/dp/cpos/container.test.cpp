@@ -5,12 +5,8 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/customization.hpp"
-
-#include "boost-test.hpp"
-#include "test_utils.hpp"
+#include "dplx/dp/cpos/container.hpp"
 
 namespace dp_tests
 {
-// Tests TBA
 }

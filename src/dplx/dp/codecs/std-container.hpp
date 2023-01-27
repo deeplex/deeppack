@@ -13,7 +13,7 @@
 
 #include <dplx/dp/api.hpp>
 #include <dplx/dp/concepts.hpp>
-#include <dplx/dp/customization.std.hpp>
+#include <dplx/dp/cpos/container.std.hpp>
 #include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>

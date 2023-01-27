@@ -36,6 +36,9 @@ dplx_target_sources(deeppack
         dp/codecs/std-container
         dp/codecs/std-tuple
 
+       
+        dp/cpos/container
+        dp/cpos/container.std
         dp/cpos/property_id_hash
 
         dp/detail/bit
@@ -80,9 +83,6 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
 
     PUBLIC
-        dp/customization
-        dp/customization.std
-
         dp/legacy/chunked_input_stream
         dp/legacy/chunked_output_stream
         dp/legacy/memory_input_stream

@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <ranges>
 
-#include <dplx/dp/customization.hpp>
+#include <dplx/dp/cpos/container.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/parse_context.hpp>
@@ -167,7 +167,7 @@ inline auto parse_binary_finite(parse_context &ctx,
 
 // clang-format off
 template <typename Container>
-concept text_item_container 
+concept text_item_container
     = detail::blob_output_container<Container>
     && (std::ranges::output_range<Container, char>
         || std::ranges::output_range<Container, char8_t>);
