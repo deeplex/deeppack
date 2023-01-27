@@ -14,7 +14,6 @@
 
 #include <dplx/predef/compiler.h>
 
-#include <dplx/dp/decoder/core.hpp>
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/workaround.hpp>

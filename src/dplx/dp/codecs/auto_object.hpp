@@ -21,6 +21,8 @@
 #include <dplx/dp/items/emit_core.hpp>
 #include <dplx/dp/items/encoded_item_head_size.hpp>
 #include <dplx/dp/items/item_size_of_core.hpp>
+#include <dplx/dp/items/parse_context.hpp>
+#include <dplx/dp/items/parse_core.hpp>
 #include <dplx/dp/layout_descriptor.hpp>
 #include <dplx/dp/object_def.hpp>
 

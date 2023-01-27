@@ -82,18 +82,6 @@ dplx_target_sources(deeppack
         dp/stream
         dp/tuple_def
 
-        dp/decoder/api
-        dp/decoder/chrono
-        dp/decoder/core
-        dp/decoder/object_utils
-        dp/decoder/std_container
-        dp/decoder/std_path
-        dp/decoder/std_string
-        dp/decoder/tuple_utils
-        dp/decoder/utils
-        dp/detail/parse_item
-        dp/item_parser
-
         dp/customization
         dp/customization.std
 
@@ -145,14 +133,5 @@ if (BUILD_TESTING)
 
         PRIVATE
             test_utils.hpp
-    )
-
-    target_sources(deeppack-legacy-tests PRIVATE
-        tests/enum_codec.test.cpp
-
-        tests/item_parser.array.test.cpp
-        tests/item_parser.binary.test.cpp
-        tests/item_parser.expect.test.cpp
-        tests/item_parser.integer.test.cpp
     )
 endif ()
