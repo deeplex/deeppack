@@ -71,11 +71,11 @@ namespace detail
 
 template <typename C>
 concept decodable_sequence_container
-        = sequence_container<C> && ng::decodable<typename C::value_type>;
+        = sequence_container<C> && decodable<typename C::value_type>;
 
 template <typename C>
 concept decodable_associative_container
-        = associative_container<C> && ng::decodable<typename C::value_type>;
+        = associative_container<C> && decodable<typename C::value_type>;
 
 } // namespace detail
 #endif
@@ -87,7 +87,7 @@ public:
     static auto size_of(emit_context const &ctx, R const &vs) noexcept
             -> std::uint64_t
             requires(std::ranges::input_range<R>
-                             &&ng::encodable<std::ranges::range_value_t<R>>)
+                             &&encodable<std::ranges::range_value_t<R>>)
     {
         if constexpr (enable_indefinite_encoding<R>)
         {
@@ -102,7 +102,7 @@ public:
     static auto encode(emit_context const &ctx, R const &vs) noexcept
             -> result<void>
         requires(std::ranges::input_range<R>
-                         &&ng::encodable<std::ranges::range_value_t<R>>)
+                         &&encodable<std::ranges::range_value_t<R>>)
     {
         if constexpr (enable_indefinite_encoding<R>)
         {
@@ -118,7 +118,7 @@ public:
 #if DPLX_DP_WORKAROUND_CLANG_44178
                 detail::decodable_sequence_container<R>
 #else
-                sequence_container<R> && ng::decodable<typename R::value_type>
+                sequence_container<R> && decodable<typename R::value_type>
 #endif
         {
             c.clear();
@@ -130,7 +130,7 @@ public:
 #if DPLX_DP_WORKAROUND_CLANG_44178
                 detail::decodable_associative_container<R>
 #else
-                associative_container<R> && ng::decodable<typename R::key_type>
+                associative_container<R> && decodable<typename R::key_type>
 #endif
         {
             c.clear();
@@ -146,7 +146,7 @@ private:
 #if DPLX_DP_WORKAROUND_CLANG_44178
                 detail::decodable_sequence_container<R>
 #else
-                sequence_container<R> && ng::decodable<typename R::value_type>
+                sequence_container<R> && decodable<typename R::value_type>
 #endif
         {
             try
@@ -166,7 +166,7 @@ private:
 #if DPLX_DP_WORKAROUND_CLANG_44178
                 detail::decodable_associative_container<R>
 #else
-                associative_container<R> && ng::decodable<typename R::key_type>
+                associative_container<R> && decodable<typename R::key_type>
 #endif
         {
             try
@@ -196,7 +196,7 @@ class codec<C>
 public:
     static auto size_of(emit_context const &ctx, C const &vs) noexcept
             -> std::uint64_t requires
-            ng::encodable<typename C::key_type> && ng::encodable<
+            encodable<typename C::key_type> && encodable<
                     typename C::mapped_type>
     {
         if constexpr (enable_indefinite_encoding<C>)
@@ -210,7 +210,7 @@ public:
     }
     static auto encode(emit_context const &ctx, C const &vs) noexcept
             -> result<void>
-        requires ng::encodable<typename C::key_type> && ng::encodable<
+        requires encodable<typename C::key_type> && encodable<
                 typename C::mapped_type>
         {
             if constexpr (enable_indefinite_encoding<C>)
@@ -223,7 +223,7 @@ public:
             }
         }
     static auto decode(parse_context &ctx, C &vs) noexcept -> result<void>
-        requires ng::decodable<typename C::key_type> && ng::decodable<
+        requires decodable<typename C::key_type> && decodable<
                 typename C::mapped_type>
         {
             vs.clear();
@@ -235,7 +235,7 @@ private:
     static auto size_of_pair(emit_context const &ctx,
                              typename C::value_type const &pair) noexcept
             -> std::uint64_t requires
-            ng::encodable<typename C::key_type> && ng::encodable<
+            encodable<typename C::key_type> && encodable<
                     typename C::mapped_type>
     {
         auto const &[key, mapped] = pair;
@@ -244,7 +244,7 @@ private:
     static auto encode_pair(emit_context const &ctx,
                             typename C::value_type const &pair) noexcept
             -> result<void>
-        requires ng::encodable<typename C::key_type> && ng::encodable<
+        requires encodable<typename C::key_type> && encodable<
                 typename C::mapped_type>
         {
             auto const &[key, mapped] = pair;
@@ -255,7 +255,7 @@ private:
     static auto decode_pair(parse_context &ctx,
                             C &vs,
                             std::size_t const) noexcept -> result<void>
-        requires ng::decodable<typename C::key_type> && ng::decodable<
+        requires decodable<typename C::key_type> && decodable<
                 typename C::mapped_type>
         {
             try
@@ -331,19 +331,19 @@ class fixed_size_container_codec
 {
 public:
     static auto size_of(emit_context const &ctx, std::span<T const> vs) noexcept
-            -> std::uint64_t requires(ng::encodable<T>)
+            -> std::uint64_t requires(encodable<T>)
     {
         return dp::item_size_of_array(ctx, vs, dp::encoded_size_of);
     }
     static auto encode(emit_context const &ctx, std::span<T const> vs) noexcept
             -> result<void>
-        requires(ng::encodable<T>)
+        requires(encodable<T>)
     {
         return dp::emit_array(ctx, vs, dp::encode);
     }
     static auto decode(parse_context &ctx, std::span<T> value) noexcept
             -> result<void>
-        requires(ng::decodable<T>)
+        requires(decodable<T>)
     {
         result<std::size_t> parseRx
                 = dp::parse_array(ctx, value, value.size(), decode_element);
@@ -362,7 +362,7 @@ private:
     static auto decode_element(parse_context &ctx,
                                std::span<T> const value,
                                std::size_t const i) noexcept -> result<void>
-        requires(ng::decodable<T>)
+        requires(decodable<T>)
     {
         return dp::decode(ctx, value[i]);
     }

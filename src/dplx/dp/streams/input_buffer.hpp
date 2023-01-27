@@ -18,6 +18,13 @@
 namespace dplx::dp
 {
 
+inline constexpr unsigned minimum_guaranteed_read_size = 40;
+
+}
+
+namespace dplx::dp
+{
+
 class input_buffer
 {
     std::byte const *mInputBuffer;

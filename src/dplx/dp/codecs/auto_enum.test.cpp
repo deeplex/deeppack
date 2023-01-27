@@ -36,7 +36,7 @@ enum class signed_test_enum : int
     pos1 = 1,
     pos2 = 2,
 };
-static_assert(dplx::dp::ng::encodable<signed_test_enum>);
+static_assert(dplx::dp::encodable<signed_test_enum>);
 
 template <>
 struct enum_samples<signed_test_enum>
@@ -56,7 +56,7 @@ enum class unsigned_test_enum : unsigned
     pos1 = 1,
     pos2 = 2,
 };
-static_assert(dplx::dp::ng::encodable<unsigned_test_enum>);
+static_assert(dplx::dp::encodable<unsigned_test_enum>);
 
 template <>
 struct enum_samples<unsigned_test_enum>
@@ -73,7 +73,7 @@ enum unscoped_test_enum
     UTE_zero = 0,
     UTE_bound = 256,
 };
-static_assert(dplx::dp::ng::encodable<unscoped_test_enum>);
+static_assert(dplx::dp::encodable<unscoped_test_enum>);
 
 template <>
 struct enum_samples<unscoped_test_enum>
@@ -90,7 +90,7 @@ namespace dp_tests
 {
 
 static_assert(!dp::codable_enum<std::byte>);
-static_assert(!dp::ng::encodable<std::byte>);
+static_assert(!dp::encodable<std::byte>);
 
 TEMPLATE_TEST_CASE("enums have an auto codec",
                    "",
@@ -98,8 +98,8 @@ TEMPLATE_TEST_CASE("enums have an auto codec",
                    unsigned_test_enum,
                    unscoped_test_enum)
 {
-    static_assert(dp::ng::encodable<TestType>);
-    static_assert(dp::ng::decodable<TestType>);
+    static_assert(dp::encodable<TestType>);
+    static_assert(dp::decodable<TestType>);
     auto const sample
             = GENERATE(borrowed_range(enum_samples<TestType>::values));
 

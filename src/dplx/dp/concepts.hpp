@@ -17,17 +17,12 @@
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/detail/type_utils.hpp>
-#include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
-#include <dplx/dp/stream.hpp>
 
 static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
 namespace dplx::dp
-{
-
-namespace ng // TODO: unwrap
 {
 
 // clang-format off
@@ -70,48 +65,11 @@ concept value_decodable
            });
 // clang-format on
 
-} // namespace ng
-
 // clang-format off
 template <typename T>
 concept codable
-    = ng::decodable<T>
-    || ng::encodable<T>;
-// clang-format on
-
-} // namespace dplx::dp
-
-// legacy
-namespace dplx::dp
-{
-
-template <typename T, input_stream Stream>
-class basic_decoder;
-
-// clang-format off
-template <typename T, typename Stream>
-concept decodable
-    = input_stream<Stream>
-    && !std::is_reference_v<T>
-    && !std::is_pointer_v<T>
-    && requires(Stream &inStream, T &dest)
-    {
-        typename basic_decoder<T, Stream>;
-        { basic_decoder<T, Stream>()(inStream, dest) }
-            -> oc::concepts::basic_result;
-    };
-// clang-format on
-
-// clang-format off
-template <typename T>
-concept tuple_like
-    = !std::ranges::range<T>
-    && detail::tuple_sized<T>
-    && requires(T && t)
-{
-    typename detail::tuple_element_list<T>::type;
-    detail::apply_simply(::dplx::dp::detail::arg_sink(), t);
-};
+    = decodable<T>
+    || encodable<T>;
 // clang-format on
 
 } // namespace dplx::dp

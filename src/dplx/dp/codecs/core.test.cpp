@@ -35,8 +35,8 @@ TEMPLATE_TEST_CASE("integers have a codec",
                    unsigned long long,
                    long long)
 {
-    static_assert(dp::ng::decodable<TestType>);
-    static_assert(dp::ng::encodable<TestType>);
+    static_assert(dp::decodable<TestType>);
+    static_assert(dp::encodable<TestType>);
     auto const sample = item_sample_ct<unsigned char>{
             0x7e,
             2,
@@ -70,7 +70,7 @@ TEMPLATE_TEST_CASE("integers have a codec",
 
 TEST_CASE("bool is encodable")
 {
-    static_assert(dp::ng::encodable<bool>);
+    static_assert(dp::encodable<bool>);
     item_sample_ct<bool> const sample{true, 1, {0xf5}};
 
     SECTION("with encode")
@@ -101,7 +101,7 @@ TEST_CASE("bool is encodable")
 
 TEST_CASE("float has a codec")
 {
-    static_assert(dp::ng::encodable<float>);
+    static_assert(dp::encodable<float>);
     item_sample_ct<float> const sample{
             100000.0F, 5, {0xfa, 0x47, 0xc3, 0x50, 0x00}
     };
@@ -134,7 +134,7 @@ TEST_CASE("float has a codec")
 
 TEST_CASE("double has a codec")
 {
-    static_assert(dp::ng::encodable<double>);
+    static_assert(dp::encodable<double>);
     item_sample_ct<double> const sample{
             1.e+300, 9, {0xfb, 0x7e, 0x37, 0xe4, 0x3c, 0x88, 0x00, 0x75, 0x9c}
     };

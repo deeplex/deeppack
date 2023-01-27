@@ -9,11 +9,12 @@
 
 #include <climits>
 #include <cstdint>
-
-#include <dplx/dp/stream.hpp>
+#include <type_traits>
 
 namespace dplx::dp
 {
+
+static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
 class input_buffer;
 class output_buffer;
@@ -27,21 +28,6 @@ class no_codec_available
 
 template <typename T>
 class codec final : public no_codec_available
-{
-};
-
-} // namespace dplx::dp
-
-namespace dplx::dp
-{
-
-static_assert(CHAR_BIT == 8); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
-
-template <typename T, input_stream Stream>
-class basic_decoder;
-
-template <typename... TArgs>
-class mp_varargs
 {
 };
 

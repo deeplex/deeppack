@@ -30,7 +30,7 @@ namespace dplx::dp::detail
 {
 
 template <typename T>
-struct mp_encode_object_property_fn2
+struct mp_encode_object_property_fn
 {
     emit_context const &ctx;
     T const &value;
@@ -51,7 +51,7 @@ struct mp_encode_object_property_fn2
 };
 
 template <typename T>
-struct mp_size_of_object_property_fn2
+struct mp_size_of_object_property_fn
 {
     emit_context const &ctx;
     T const &value;
@@ -83,7 +83,7 @@ encode_object(emit_context const &ctx,
               detail::descriptor_class_type<descriptor> const &value) noexcept
         -> result<void>
 {
-    using encode_property_fn = detail::mp_encode_object_property_fn2<
+    using encode_property_fn = detail::mp_encode_object_property_fn<
             detail::descriptor_class_type<descriptor>>;
 
     if constexpr (descriptor.version == null_def_version)
@@ -115,7 +115,7 @@ size_of_object(emit_context const &ctx,
                detail::descriptor_class_type<descriptor> const &value) noexcept
         -> std::uint64_t
 {
-    using size_of_property_fn = detail::mp_size_of_object_property_fn2<
+    using size_of_property_fn = detail::mp_size_of_object_property_fn<
             detail::descriptor_class_type<descriptor>>;
 
     std::uint64_t prefixSize = 0U;
@@ -227,7 +227,7 @@ public:
 } // namespace dplx::dp::detail
 
 // decode_object_property
-namespace dplx::dp::detail::ng
+namespace dplx::dp::detail
 {
 
 template <auto const &descriptor, std::size_t Offset = 0U>
@@ -319,7 +319,7 @@ class decode_object_property_fn<descriptor>
     static_assert(detail::digits_v<id_type> <= detail::digits_v<std::uint64_t>);
 
     static constexpr id_type small_id_limit = detail::inline_value_max + 1;
-    static constexpr auto small_ids_end = detail::ng::index_of_limit(
+    static constexpr auto small_ids_end = detail::index_of_limit(
             descriptor.ids.data(), descriptor.ids.size(), small_id_limit);
 
     static constexpr std::size_t id_map_size
@@ -389,7 +389,7 @@ public:
 };
 // */
 
-} // namespace dplx::dp::detail::ng
+} // namespace dplx::dp::detail
 
 // required_prop_mask_for
 namespace dplx::dp::detail
@@ -512,7 +512,7 @@ inline auto decode_object_properties(
         for (std::int32_t i = 0; i < numProperties; ++i)
         {
             DPLX_TRY(auto &&which,
-                     detail::ng::decode_object_property<descriptor>(ctx, dest));
+                     detail::decode_object_property<descriptor>(ctx, dest));
 
             auto const offset = which / detail::digits_v<std::size_t>;
             auto const shift = which % detail::digits_v<std::size_t>;
@@ -545,7 +545,7 @@ inline auto decode_object_properties(
 
         for (std::int32_t i = 0; i < numProperties; ++i)
         {
-            DPLX_TRY(detail::ng::decode_object_property<descriptor>(ctx, dest));
+            DPLX_TRY(detail::decode_object_property<descriptor>(ctx, dest));
         }
     }
     return success();

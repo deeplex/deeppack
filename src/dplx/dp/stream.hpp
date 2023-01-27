@@ -16,6 +16,7 @@
 #include <dplx/cncr/tag_invoke.hpp>
 
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/streams/input_buffer.hpp>
 #include <dplx/dp/streams/output_buffer.hpp>
 
 namespace dplx::dp
@@ -238,8 +239,6 @@ inline constexpr struct read_fn
         return cncr::tag_invoke(*this, stream, data, size);
     }
 } read{};
-
-inline constexpr unsigned minimum_guaranteed_read_size = 40;
 
 inline constexpr struct consume_fn
 {

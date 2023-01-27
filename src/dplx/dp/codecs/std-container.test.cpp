@@ -58,47 +58,47 @@ static_assert(dp::sequence_container<boost::container::vector<int>>);
 
 ////////////////////////////////////////////////////////////////////////////////
 // encodable
-static_assert(dp::ng::encodable<std::deque<int>>);
-static_assert(dp::ng::encodable<std::list<int>>);
-static_assert(dp::ng::encodable<std::vector<int>>);
-static_assert(dp::ng::encodable<boost::container::deque<int>>);
-static_assert(dp::ng::encodable<boost::container::list<int>>);
-static_assert(dp::ng::encodable<boost::container::small_vector<int, 33>>);
-static_assert(dp::ng::encodable<boost::container::static_vector<int, 37>>);
-static_assert(dp::ng::encodable<boost::container::vector<int>>);
+static_assert(dp::encodable<std::deque<int>>);
+static_assert(dp::encodable<std::list<int>>);
+static_assert(dp::encodable<std::vector<int>>);
+static_assert(dp::encodable<boost::container::deque<int>>);
+static_assert(dp::encodable<boost::container::list<int>>);
+static_assert(dp::encodable<boost::container::small_vector<int, 33>>);
+static_assert(dp::encodable<boost::container::static_vector<int, 37>>);
+static_assert(dp::encodable<boost::container::vector<int>>);
 
-static_assert(dp::ng::encodable<std::set<int>>);
-static_assert(dp::ng::encodable<std::map<int, int>>);
-static_assert(dp::ng::encodable<std::unordered_map<int, int>>);
-static_assert(dp::ng::encodable<boost::container::map<int, int>>);
-static_assert(dp::ng::encodable<boost::container::flat_map<int, int>>);
+static_assert(dp::encodable<std::set<int>>);
+static_assert(dp::encodable<std::map<int, int>>);
+static_assert(dp::encodable<std::unordered_map<int, int>>);
+static_assert(dp::encodable<boost::container::map<int, int>>);
+static_assert(dp::encodable<boost::container::flat_map<int, int>>);
 
-static_assert(dp::ng::encodable<std::array<std::byte, 15>>);
-static_assert(dp::ng::encodable<std::array<std::byte, 16>>);
-static_assert(dp::ng::encodable<std::array<int, 15>>);
-static_assert(dp::ng::encodable<std::array<unsigned, 16>>);
+static_assert(dp::encodable<std::array<std::byte, 15>>);
+static_assert(dp::encodable<std::array<std::byte, 16>>);
+static_assert(dp::encodable<std::array<int, 15>>);
+static_assert(dp::encodable<std::array<unsigned, 16>>);
 
 ////////////////////////////////////////////////////////////////////////////////
 // decodable
-static_assert(dp::ng::decodable<std::deque<int>>);
-static_assert(dp::ng::decodable<std::list<int>>);
-static_assert(dp::ng::decodable<std::vector<int>>);
-static_assert(dp::ng::decodable<boost::container::deque<int>>);
-static_assert(dp::ng::decodable<boost::container::list<int>>);
-static_assert(dp::ng::decodable<boost::container::small_vector<int, 33>>);
-static_assert(dp::ng::decodable<boost::container::static_vector<int, 37>>);
-static_assert(dp::ng::decodable<boost::container::vector<int>>);
+static_assert(dp::decodable<std::deque<int>>);
+static_assert(dp::decodable<std::list<int>>);
+static_assert(dp::decodable<std::vector<int>>);
+static_assert(dp::decodable<boost::container::deque<int>>);
+static_assert(dp::decodable<boost::container::list<int>>);
+static_assert(dp::decodable<boost::container::small_vector<int, 33>>);
+static_assert(dp::decodable<boost::container::static_vector<int, 37>>);
+static_assert(dp::decodable<boost::container::vector<int>>);
 
-static_assert(dp::ng::decodable<std::set<int>>);
-static_assert(dp::ng::decodable<std::map<int, int>>);
-static_assert(dp::ng::decodable<std::unordered_map<int, int>>);
-static_assert(dp::ng::decodable<boost::container::map<int, int>>);
-static_assert(dp::ng::decodable<boost::container::flat_map<int, int>>);
+static_assert(dp::decodable<std::set<int>>);
+static_assert(dp::decodable<std::map<int, int>>);
+static_assert(dp::decodable<std::unordered_map<int, int>>);
+static_assert(dp::decodable<boost::container::map<int, int>>);
+static_assert(dp::decodable<boost::container::flat_map<int, int>>);
 
-static_assert(dp::ng::decodable<std::array<std::byte, 15>>);
-static_assert(dp::ng::decodable<std::array<std::byte, 16>>);
-static_assert(dp::ng::decodable<std::array<int, 15>>);
-static_assert(dp::ng::decodable<std::array<unsigned, 16>>);
+static_assert(dp::decodable<std::array<std::byte, 15>>);
+static_assert(dp::decodable<std::array<std::byte, 16>>);
+static_assert(dp::decodable<std::array<int, 15>>);
+static_assert(dp::decodable<std::array<unsigned, 16>>);
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ TEST_CASE("std::span of bytes has a codec")
             .encoded_length = 3,
             .encoded = { 0x42, 0xfe,0xfe},
     };
-    dp::bytes const sampleValue = std::span(sample.value);
+    auto const sampleValue = std::span(sample.value);
 
     SECTION("with encode")
     {

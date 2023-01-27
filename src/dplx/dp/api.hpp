@@ -15,7 +15,6 @@
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/parse_context.hpp>
-#include <dplx/dp/stream.hpp>
 #include <dplx/dp/streams/void_stream.hpp>
 
 namespace dplx::dp
@@ -24,7 +23,7 @@ namespace dplx::dp
 inline constexpr struct encoded_size_of_fn
 {
     template <typename T>
-        requires ng::encodable<cncr::remove_cref_t<T>>
+        requires encodable<cncr::remove_cref_t<T>>
     constexpr auto operator()(T &&value) const noexcept
     {
         using unqualified_type = cncr::remove_cref_t<T>;
@@ -34,7 +33,7 @@ inline constexpr struct encoded_size_of_fn
                 ctx, static_cast<unqualified_type const &>(value));
     }
     template <typename T>
-        requires ng::encodable<cncr::remove_cref_t<T>>
+        requires encodable<cncr::remove_cref_t<T>>
     constexpr auto operator()(emit_context const &ctx, T &&value) const noexcept
     {
         using unqualified_type = cncr::remove_cref_t<T>;
@@ -48,7 +47,7 @@ inline constexpr struct encoded_size_of_fn
 inline constexpr struct encode_fn final
 {
     template <typename T>
-        requires ng::encodable<cncr::remove_cref_t<T>>
+        requires encodable<cncr::remove_cref_t<T>>
     inline auto operator()(output_buffer &outStream, T &&value) const noexcept
             -> result<void>
     {
@@ -57,7 +56,7 @@ inline constexpr struct encode_fn final
                 ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
     }
     template <typename T>
-        requires ng::encodable<cncr::remove_cref_t<T>>
+        requires encodable<cncr::remove_cref_t<T>>
     inline auto operator()(emit_context const &ctx, T &&value) const noexcept
             -> result<void>
     {
@@ -71,7 +70,7 @@ inline constexpr struct encode_fn final
 inline constexpr struct decode_fn final
 {
     template <typename T>
-        requires ng::decodable<T>
+        requires decodable<T>
     inline auto operator()(input_buffer &inStream, T &outValue) const noexcept
             -> result<void>
     {
@@ -79,7 +78,7 @@ inline constexpr struct decode_fn final
         return codec<T>::decode(ctx, outValue);
     }
     template <typename T>
-        requires ng::decodable<T>
+        requires decodable<T>
     inline auto operator()(parse_context &ctx, T &outValue) const noexcept
             -> result<void>
     {
@@ -87,7 +86,7 @@ inline constexpr struct decode_fn final
     }
 
     template <typename T>
-        requires ng::value_decodable<T>
+        requires value_decodable<T>
     inline auto operator()(as_value_t<T>, input_buffer &inStream) const noexcept
             -> result<T>
     {
@@ -95,7 +94,7 @@ inline constexpr struct decode_fn final
         return (*this)(as_value<T>, ctx);
     }
     template <typename T>
-        requires ng::value_decodable<T>
+        requires value_decodable<T>
     inline auto operator()(as_value_t<T>, parse_context &ctx) const noexcept
             -> result<T>
     {
@@ -138,26 +137,6 @@ inline constexpr struct decode_fn final
             return rx;
         }
     }
-
-    // legacy begin
-    template <typename T, input_stream Stream>
-        requires decodable<T, Stream>
-    inline auto operator()(Stream &inStream, T &dest) const -> result<void>
-    {
-        DPLX_TRY((basic_decoder<T, Stream>()(inStream, dest)));
-        return success();
-    }
-
-    template <typename T, input_stream Stream>
-        requires(decodable<T, Stream> &&std::is_default_constructible_v<T>
-                         &&std::is_move_constructible_v<T>)
-    inline auto operator()(as_value_t<T>, Stream &inStream) const -> result<T>
-    {
-        auto value = T();
-        DPLX_TRY((basic_decoder<T, Stream>()(inStream, value)));
-        return dp::success(std::move(value));
-    }
-    // legacy end
 } decode{};
 
 } // namespace dplx::dp

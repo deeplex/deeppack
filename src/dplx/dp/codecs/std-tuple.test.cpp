@@ -22,7 +22,7 @@
 namespace dp_tests
 {
 
-static_assert(dp::ng::encodable<std::tuple<int, long>>);
+static_assert(dp::encodable<std::tuple<int, long>>);
 
 TEST_CASE("std::tuple has a codec")
 {
