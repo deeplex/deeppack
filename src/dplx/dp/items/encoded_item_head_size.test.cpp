@@ -7,10 +7,7 @@
 
 #include "dplx/dp/items/encoded_item_head_size.hpp"
 
-#include <catch2/catch_test_macros.hpp>
-
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
+// Tests are located in item_size_of_core.test.cpp
 }

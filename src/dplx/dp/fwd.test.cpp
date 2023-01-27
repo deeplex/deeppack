@@ -7,9 +7,6 @@
 
 #include "dplx/dp/fwd.hpp"
 
-#include "boost-test.hpp"
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
 }

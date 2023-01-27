@@ -5,8 +5,6 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
 
     PUBLIC
-        dp/disappointment
-
         dp/codecs/core
         dp/codecs/fixed_u8string
         dp/codecs/std-chrono
@@ -23,6 +21,10 @@ dplx_target_sources(deeppack
 
     PUBLIC
         dp/api
+        dp/concepts
+        dp/config
+        dp/disappointment
+        dp/fwd
         dp/indefinite_range
         dp/map_pair
 
@@ -38,6 +40,7 @@ dplx_target_sources(deeppack
         dp/detail/perfect_hash
         dp/detail/type_utils
         dp/detail/utils
+        dp/detail/workaround
 
         dp/items
         dp/items/emit_context
@@ -72,10 +75,6 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
 
     PUBLIC
-        dp/config
-
-        dp/concepts
-        dp/fwd
         dp/layout_descriptor
         dp/memory_buffer
         dp/object_def
@@ -91,8 +90,6 @@ dplx_target_sources(deeppack
 
         dp/detail/bit
         dp/detail/hash
-        dp/detail/mp_for_dots
-        dp/detail/workaround
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail)

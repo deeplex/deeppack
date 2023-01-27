@@ -17,18 +17,6 @@
 
 #include <dplx/cncr/utils.hpp>
 
-#if __has_cpp_attribute(likely) >= 201803
-#define DPLX_ATTR_LIKELY [[likely]]
-#else
-#define DPLX_ATTR_LIKELY
-#endif
-
-#if __has_cpp_attribute(unlikely) >= 201803
-#define DPLX_ATTR_UNLIKELY [[unlikely]]
-#else
-#define DPLX_ATTR_UNLIKELY
-#endif
-
 namespace dplx::dp::detail
 {
 

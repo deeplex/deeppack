@@ -13,5 +13,5 @@
 
 namespace dp_tests
 {
-// Tests TBA
+// TODO: Add tests for endian-aware load/store functions
 }

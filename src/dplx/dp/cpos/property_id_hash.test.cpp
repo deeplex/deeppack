@@ -14,6 +14,6 @@
 namespace dp_tests
 {
 
-// Tests TBA
+// TODO: Add tests for property_id_hash CPO
 
 } // namespace dp_tests

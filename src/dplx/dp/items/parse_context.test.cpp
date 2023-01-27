@@ -9,8 +9,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "test_input_stream.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
 {
+
+TEST_CASE("emit_context can be instantiated given an output_buffer reference")
+{
+    simple_test_input_stream stream({});
+    [[maybe_unused]] dp::parse_context ctx{
+            static_cast<dp::input_buffer &>(stream)};
 }
+
+} // namespace dp_tests

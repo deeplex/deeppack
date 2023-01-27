@@ -7,10 +7,6 @@
 
 #include "dplx/dp/detail/item_size.hpp"
 
-#include <catch2/catch_test_macros.hpp>
-
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
 }
