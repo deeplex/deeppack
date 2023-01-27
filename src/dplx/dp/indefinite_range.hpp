@@ -10,8 +10,6 @@
 #include <ranges>
 #include <type_traits>
 
-#include <dplx/dp/concepts.hpp>
-
 namespace dplx::dp
 {
 
@@ -53,9 +51,6 @@ template <std::ranges::input_range R>
 explicit indefinite_range(R const &)
         -> indefinite_range<std::ranges::iterator_t<R const>,
                             std::ranges::sentinel_t<R const>>;
-
-template <typename T, typename S>
-inline constexpr bool enable_indefinite_encoding<indefinite_range<T, S>> = true;
 
 } // namespace dplx::dp
 

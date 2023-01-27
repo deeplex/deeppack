@@ -13,6 +13,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <dplx/dp/codecs/std-container.hpp>
+
 #include "test_utils.hpp"
 
 namespace dp_tests
