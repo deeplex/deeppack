@@ -15,7 +15,7 @@
 namespace dp_tests
 {
 
-TEST_CASE("emit_context can be instantiated given an output_buffer reference")
+TEST_CASE("parse_context can be instantiated given an input_buffer reference")
 {
     simple_test_input_stream stream({});
     [[maybe_unused]] dp::parse_context ctx{

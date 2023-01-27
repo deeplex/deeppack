@@ -262,7 +262,7 @@ private:
 
             return oc::success();
         }
-        else if (mBufferStart < decommission_threshold)
+        if (mBufferStart < decommission_threshold)
         {
             auto const buffered = buffered_amount();
             if (buffered >= numBytes)
