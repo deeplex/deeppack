@@ -17,7 +17,6 @@
 #include <dplx/dp/codecs/core.hpp>
 #include <dplx/dp/indefinite_range.hpp>
 #include <dplx/dp/items/item_size_of_ranges.hpp>
-#include <dplx/dp/map_pair.hpp>
 
 #include "blob_matcher.hpp"
 #include "item_sample_ct.hpp"

@@ -9,15 +9,14 @@
 
 #include <algorithm>
 #include <array>
+#include <climits>
+#include <cstddef>
 #include <cstdint>
 #include <span>
 
 #include <dplx/predef/compiler.h>
 
-#include <dplx/dp/detail/bit.hpp>
-#include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/detail/workaround.hpp>
-#include <dplx/dp/map_pair.hpp>
 
 namespace dplx::dp::detail
 {

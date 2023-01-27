@@ -26,7 +26,6 @@ dplx_target_sources(deeppack
         dp/disappointment
         dp/fwd
         dp/indefinite_range
-        dp/map_pair
 
         dp/codecs/auto_enum
         dp/codecs/auto_object
