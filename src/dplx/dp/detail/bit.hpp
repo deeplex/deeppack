@@ -8,16 +8,16 @@
 #pragma once
 
 #include <bit>
+#include <concepts>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <type_traits>
 
-#include <boost/endian/arithmetic.hpp>
+#include <boost/endian/conversion.hpp>
 
-#include <dplx/cncr/math_supplement.hpp>
+#include <dplx/cncr/utils.hpp>
 #include <dplx/predef/compiler.h>
-
-#include <dplx/dp/detail/type_utils.hpp>
-#include <dplx/dp/detail/utils.hpp>
 
 #if defined DPLX_COMP_MSVC_AVAILABLE
 #include <intrin.h>
@@ -27,12 +27,145 @@ namespace dplx::dp::detail
 {
 
 template <typename T>
-constexpr auto find_last_set_bit(T value) noexcept -> int
-{
-    static_assert(std::is_integral_v<T>);
-    static_assert(std::is_unsigned_v<T>);
-    static_assert(sizeof(T) <= sizeof(unsigned long long));
+inline constexpr int digits_v = std::numeric_limits<T>::digits;
 
+template <std::size_t N>
+struct byte_bag
+{
+    std::byte bytes[N];
+};
+
+#if __cpp_lib_byteswap < 202110L
+inline
+#endif
+        namespace cpp20
+{
+
+template <std::integral T>
+DPLX_ATTR_FORCE_INLINE void store(std::byte *dest, T value)
+{
+    if constexpr (std::endian::native == std::endian::little)
+    {
+        value = boost::endian::endian_reverse<T>(value);
+    }
+
+    // std::memcpy(dest, &value, sizeof(T));
+    alignas(T) auto raw = std::bit_cast<byte_bag<sizeof(T)>>(value);
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (auto src = static_cast<std::byte *>(raw.bytes),
+              srcEnd = static_cast<std::byte *>(raw.bytes) + sizeof(T);
+         src != srcEnd; ++src, ++dest)
+    {
+        *dest = *src;
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+}
+
+template <std::integral T>
+DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
+{
+    // T value;
+    // std::memcpy(&value, src, sizeof(T));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    alignas(T) byte_bag<sizeof(T)> raw;
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (auto dest = static_cast<std::byte *>(raw.bytes),
+              destEnd = static_cast<std::byte *>(raw.bytes) + sizeof(T);
+         dest != destEnd; ++src, ++dest)
+    {
+        *dest = *src;
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    if constexpr (std::endian::native == std::endian::little)
+    {
+        return boost::endian::endian_reverse<T>(std::bit_cast<T>(raw));
+    }
+    else
+    {
+        return std::bit_cast<T>(raw);
+    }
+}
+
+} // namespace cpp20
+
+#if __cpp_lib_byteswap >= 202110L
+
+inline namespace cpp23
+{
+
+template <typename T>
+DPLX_ATTR_FORCE_INLINE void store(std::byte *const dest, T value)
+{
+    if constexpr (std::endian::native == std::endian::little)
+    {
+        value = std::byteswap<T>(value);
+    }
+
+    // std::memcpy(dest, &value, sizeof(T));
+    alignas(T) auto raw = std::bit_cast<byte_bag<sizeof(T)>>(value);
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (auto src = static_cast<std::byte *>(raw.bytes),
+              srcEnd = static_cast<std::byte *>(raw.bytes) + sizeof(T);
+         src != srcEnd; ++src, ++dest)
+    {
+        *dest = *src;
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+}
+
+template <typename T>
+DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
+{
+    // T value;
+    // std::memcpy(&value, src, sizeof(T));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    alignas(T) byte_bag<sizeof(T)> raw;
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (auto dest = static_cast<std::byte *>(raw.bytes),
+              destEnd = static_cast<std::byte *>(raw.bytes) + sizeof(T);
+         dest != destEnd; ++src, ++dest)
+    {
+        *dest = *src;
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    if constexpr (std::endian::native == std::endian::little)
+    {
+        return std::byteswap<T>(std::bit_cast<T>(raw));
+    }
+    else
+    {
+        return std::bit_cast<T>(raw);
+    }
+}
+
+} // namespace cpp23
+
+#endif
+
+template <std::floating_point T>
+DPLX_ATTR_FORCE_INLINE void store(std::byte *dest, T value)
+{
+    static_assert(sizeof(T) == sizeof(std::uint32_t)
+                  || sizeof(T) == sizeof(std::uint64_t));
+    if constexpr (sizeof(T) == sizeof(std::uint32_t))
+    {
+        detail::store<std::uint32_t>(dest, std::bit_cast<std::uint32_t>(value));
+    }
+    else
+    {
+        detail::store<std::uint64_t>(dest, std::bit_cast<std::uint64_t>(value));
+    }
+}
+
+template <typename T>
+DPLX_ATTR_FORCE_INLINE constexpr auto find_last_set_bit(T value) noexcept
+        -> int requires requires
+{
+    std::countl_zero(value);
+}
+{
     if (std::is_constant_evaluated())
     {
         return (digits_v<T> - 1) - std::countl_zero(value);
@@ -50,8 +183,7 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
         return (digits_v<unsigned long> - 1)
              ^ __builtin_clzl(static_cast<unsigned long>(value));
     }
-    else /*if constexpr (sizeof(T) <= sizeof(unsigned long long))
-            see static_assert above */
+    else if constexpr (sizeof(T) <= sizeof(unsigned long long))
     {
         return (digits_v<unsigned long long> - 1)
              ^ __builtin_clzll(static_cast<unsigned long long>(value));
@@ -59,14 +191,16 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
 
 #elif defined(DPLX_COMP_MSVC_AVAILABLE)
 
-    unsigned long result;
     if constexpr (sizeof(T) <= sizeof(unsigned long))
     {
+        unsigned long result;
         _BitScanReverse(&result, static_cast<unsigned long>(value));
         return static_cast<int>(result);
     }
     else if constexpr (sizeof(T) <= sizeof(unsigned long long))
     {
+        unsigned long result;
+
 #if defined(_M_ARM64) || defined(_M_AMD64)
 
         _BitScanReverse64(&result, static_cast<unsigned long long>(value));
@@ -81,171 +215,31 @@ constexpr auto find_last_set_bit(T value) noexcept -> int
         {
             return static_cast<int>(result + digits_v<unsigned long>);
         }
-        else
-        {
-            _BitScanReverse(&result, static_cast<unsigned long>(value));
-            return static_cast<int>(result);
-        }
+        _BitScanReverse(&result, static_cast<unsigned long>(value));
+        return static_cast<int>(result);
 #endif
     }
 
-#else
-
-    return (digits_v<T> - 1) ^ std::countl_zero(value);
-
 #endif
+
+    else
+    {
+        return (digits_v<T> - 1) ^ std::countl_zero(value);
+    }
 }
 
-template <cncr::unsigned_integer T>
-constexpr auto rotl(T const v, int n) noexcept -> T
+template <typename T>
+DPLX_ATTR_FORCE_INLINE constexpr auto rotl(T const v, int n) noexcept
+        -> T requires requires
+{
+    std::rotl(v, n);
+}
 {
     return (v << n) | (v >> (digits_v<T> - n));
 }
 
-template <cncr::integer T, std::endian order>
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
-constexpr auto load(std::byte const *const src) -> T
-{
-    static_assert(order == std::endian::big || order == std::endian::little);
-
-    if (std::is_constant_evaluated())
-    {
-        // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        static_assert(sizeof(T) <= 8);
-        using uT = std::make_unsigned_t<T>;
-        if constexpr (order == std::endian::little)
-        {
-            uT acc = static_cast<uT>(src[0]);
-            if constexpr (sizeof(acc) >= 2)
-            {
-                acc |= static_cast<uT>(src[1]) << 8;
-            }
-            if constexpr (sizeof(acc) >= 4)
-            {
-                acc |= static_cast<uT>(src[2]) << 16
-                     | static_cast<uT>(src[3]) << 24;
-            }
-            if constexpr (sizeof(acc) == 8)
-            {
-                acc |= static_cast<uT>(src[4]) << 32
-                     | static_cast<uT>(src[5]) << 40
-                     | static_cast<uT>(src[6]) << 48
-                     | static_cast<uT>(src[7]) << 56;
-            }
-            return static_cast<T>(acc);
-        }
-        else
-        {
-            uT acc = static_cast<uT>(src[0]) << 56;
-            if constexpr (sizeof(acc) >= 2)
-            {
-                acc |= static_cast<uT>(src[1]) << 48;
-            }
-            if constexpr (sizeof(acc) >= 4)
-            {
-                acc |= static_cast<uT>(src[2]) << 40
-                     | static_cast<uT>(src[3]) << 32;
-            }
-            if constexpr (sizeof(acc) == 8)
-            {
-                acc |= static_cast<uT>(src[4]) << 24
-                     | static_cast<uT>(src[5]) << 16
-                     | static_cast<uT>(src[6]) << 8 | static_cast<uT>(src[7]);
-            }
-            return static_cast<T>(acc >> (64 - digits_v<uT>));
-        }
-        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
-    }
-    else
-    {
-        constexpr auto boostOrder = order == std::endian::little
-                                          ? boost::endian::order::little
-                                          : boost::endian::order::big;
-        return boost::endian::endian_load<T, sizeof(T), boostOrder>(
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-                reinterpret_cast<unsigned char const *>(src));
-        // T assembled;
-        // std::memcpy(&assembled, src, sizeof(assembled));
-        // return assembled;
-    }
-}
-
-template <cncr::integer T, std::endian order>
-constexpr auto load_partial(std::byte const *data, int num) -> T
-{
-    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-    static_assert(sizeof(T) <= 8);
-    static_assert(order != std::endian::big,
-                  "big endian partial loads haven't been implemented yet");
-    static_assert(order == std::endian::little, "unknown endianess");
-
-    using uT = std::make_unsigned_t<T>;
-    if constexpr (order == std::endian::little)
-    {
-        uT assembled = 0;
-        switch (num)
-        {
-        case 7:
-            if constexpr (sizeof(assembled) == 8)
-            {
-                assembled |= static_cast<uT>(data[6]) << 48;
-            }
-            [[fallthrough]];
-        case 6:
-            if constexpr (sizeof(assembled) == 8)
-            {
-                assembled |= static_cast<uT>(data[5]) << 40;
-            }
-            [[fallthrough]];
-        case 5:
-            if constexpr (sizeof(assembled) == 8)
-            {
-                assembled |= static_cast<uT>(data[4]) << 32;
-            }
-            [[fallthrough]];
-
-        case 4:
-            if constexpr (sizeof(assembled) >= 4)
-            {
-                assembled |= static_cast<uT>(data[3]) << 24;
-            }
-            [[fallthrough]];
-        case 3:
-            if constexpr (sizeof(assembled) >= 4)
-            {
-                assembled |= static_cast<uT>(data[2]) << 16;
-            }
-            [[fallthrough]];
-
-        case 2:
-            if constexpr (sizeof(assembled) >= 2)
-            {
-                assembled |= static_cast<uT>(data[1]) << 8;
-            }
-            [[fallthrough]];
-
-        case 1:
-            assembled |= static_cast<uT>(data[0]);
-            [[fallthrough]];
-
-        case 0:
-            break;
-        }
-        return assembled;
-    }
-    else
-    {
-    }
-
-    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
-}
-
-constexpr auto byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
+DPLX_ATTR_FORCE_INLINE constexpr auto
+byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
 {
     if (std::is_constant_evaluated())
     {

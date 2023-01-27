@@ -38,10 +38,11 @@ dplx_target_sources(deeppack
 
         dp/cpos/property_id_hash
 
+        dp/detail/bit
+        dp/detail/hash
         dp/detail/item_size
         dp/detail/perfect_hash
         dp/detail/type_utils
-        dp/detail/utils
         dp/detail/workaround
 
         dp/items
@@ -86,9 +87,6 @@ dplx_target_sources(deeppack
         dp/legacy/chunked_output_stream
         dp/legacy/memory_input_stream
         dp/legacy/stream
-
-        dp/detail/bit
-        dp/detail/hash
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail)

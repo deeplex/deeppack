@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cstdint>
 
-#include <dplx/dp/detail/utils.hpp>
+#include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/items/encoded_item_head_size.hpp>
 #include <dplx/dp/items/parse_context.hpp>

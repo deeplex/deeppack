@@ -14,7 +14,6 @@
 #include <dplx/cncr/math_supplement.hpp>
 
 #include <dplx/dp/detail/bit.hpp>
-#include <dplx/dp/detail/utils.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/item_size_of_core.hpp>

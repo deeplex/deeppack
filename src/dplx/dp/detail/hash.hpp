@@ -10,6 +10,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <dplx/cncr/math_supplement.hpp>
+
 #include <dplx/dp/detail/bit.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 
