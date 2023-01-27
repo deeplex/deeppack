@@ -14,8 +14,8 @@
 #include <dplx/cncr/tag_invoke.hpp>
 
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/legacy/stream.hpp>
 #include <dplx/dp/memory_buffer.hpp>
-#include <dplx/dp/stream.hpp>
 
 namespace dplx::dp
 {

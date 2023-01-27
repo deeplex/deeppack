@@ -79,15 +79,15 @@ dplx_target_sources(deeppack
         dp/layout_descriptor
         dp/memory_buffer
         dp/object_def
-        dp/stream
         dp/tuple_def
 
         dp/customization
         dp/customization.std
 
-        dp/streams/chunked_input_stream
-        dp/streams/chunked_output_stream
-        dp/streams/memory_input_stream
+        dp/legacy/chunked_input_stream
+        dp/legacy/chunked_output_stream
+        dp/legacy/memory_input_stream
+        dp/legacy/stream
 
         dp/detail/bit
         dp/detail/hash

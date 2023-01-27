@@ -14,7 +14,7 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/predef/compiler.h>
 
-#include <dplx/dp/stream.hpp>
+#include <dplx/dp/legacy/stream.hpp>
 
 namespace dplx::dp
 {
