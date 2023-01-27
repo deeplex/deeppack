@@ -57,6 +57,8 @@ dplx_target_sources(deeppack
         dp/streams/memory_output_stream2
         dp/streams/output_buffer
         dp/streams/void_stream
+
+        dp/legacy/memory_buffer
 )
 
 dplx_target_sources(deeppack
@@ -75,7 +77,6 @@ dplx_target_sources(deeppack
 
     PUBLIC
         dp/layout_descriptor
-        dp/memory_buffer
         dp/object_def
         dp/tuple_def
 
