@@ -5,12 +5,14 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/skip_item.hpp"
+#pragma once
 
-#include "boost-test.hpp"
-#include "test_utils.hpp"
+#include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/fwd.hpp>
 
-namespace dp_tests
+namespace dplx::dp
 {
-// Tests TBA
-}
+
+auto skip_item(parse_context &ctx) noexcept -> result<void>;
+
+} // namespace dplx::dp

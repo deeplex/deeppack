@@ -9,8 +9,6 @@
 
 #include <dplx/cncr/misc.hpp>
 
-#include <dplx/dp/skip_item.hpp>
-
 #include "boost-test.hpp"
 #include "test_input_stream.hpp"
 #include "test_utils.hpp"
@@ -152,21 +150,6 @@ BOOST_DATA_TEST_CASE(parse_safe, boost::unit_test::data::make(parse_samples))
     BOOST_TEST(parsed.flags == expected.flags);
     BOOST_TEST(parsed.encoded_length == expected.encoded_length);
     BOOST_TEST(parsed.value == expected.value);
-}
-
-BOOST_DATA_TEST_CASE(skip_simple, boost::unit_test::data::make(parse_samples))
-{
-    if (sample.stream[0] == type_code::special_break)
-    {
-        return;
-    }
-    test_input_stream stream(std::span<std::byte const>(sample.stream)
-                                     .first(sample.expected.encoded_length));
-    auto parseRx = dp::skip_item(stream);
-    DPLX_REQUIRE_RESULT(parseRx);
-
-    auto remainingRx = dp::available_input_size(stream);
-    BOOST_TEST(remainingRx.value() == 0U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

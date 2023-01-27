@@ -12,6 +12,8 @@ dplx_target_sources(deeppack
         dp/codecs/std-chrono
         dp/codecs/std-filesystem
         dp/codecs/std-string
+
+        dp/items/skip_item
 )
 
 dplx_target_sources(deeppack
@@ -91,7 +93,6 @@ dplx_target_sources(deeppack
         dp/decoder/utils
         dp/detail/parse_item
         dp/item_parser
-        dp/skip_item
 
         dp/customization
         dp/customization.std
