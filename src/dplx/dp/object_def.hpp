@@ -7,12 +7,10 @@
 
 #pragma once
 
-#include <algorithm>
 #include <array>
 #include <compare>
 #include <concepts>
 #include <cstdint>
-#include <string_view>
 #include <type_traits>
 
 #include <dplx/cncr/math_supplement.hpp>
@@ -28,10 +26,8 @@
 #endif
 
 #include <dplx/dp/codecs/fixed_u8string.hpp>
-#include <dplx/dp/customization.hpp>
 #include <dplx/dp/detail/type_utils.hpp>
 #include <dplx/dp/fwd.hpp>
-#include <dplx/dp/items/type_code.hpp>
 
 namespace dplx::dp
 {

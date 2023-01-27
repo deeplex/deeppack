@@ -16,7 +16,6 @@
 #include <dplx/cncr/math_supplement.hpp>
 #include <dplx/predef/compiler/clang.h>
 
-#include <dplx/dp/customization.hpp> // TODO: remove
 #include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
@@ -166,50 +165,6 @@ struct fixed_u8string
     [[nodiscard]] static constexpr auto max_size() noexcept -> std::size_t
     {
         return N;
-    }
-
-    // TODO: remove
-    friend inline auto tag_invoke(container_reserve_fn,
-                                  [[maybe_unused]] fixed_u8string &self,
-                                  std::size_t const capacity) noexcept
-            -> result<void>
-    {
-        if (capacity > N)
-        {
-            return errc::not_enough_memory;
-        }
-        return oc::success();
-    }
-    // TODO: remove
-    friend inline auto tag_invoke(container_resize_fn,
-                                  fixed_u8string &self,
-                                  std::size_t const newSize) noexcept
-            -> result<void>
-    {
-        if (newSize > N)
-        {
-            return errc::not_enough_memory;
-        }
-        for (std::size_t i = self.mNumCodeUnits; i < newSize; ++i)
-        {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-            self.mCodeUnits[i] = char8_t{};
-        }
-        self.mNumCodeUnits = static_cast<unsigned>(newSize);
-        return oc::success();
-    }
-    // TODO: remove
-    friend inline auto tag_invoke(container_resize_for_overwrite_fn,
-                                  fixed_u8string &self,
-                                  std::size_t const newSize) noexcept
-            -> result<void>
-    {
-        if (newSize > N)
-        {
-            return errc::not_enough_memory;
-        }
-        self.mNumCodeUnits = static_cast<unsigned>(newSize);
-        return oc::success();
     }
 };
 

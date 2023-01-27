@@ -10,8 +10,8 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
-#include <dplx/dp/object_def.hpp>
-#include <dplx/dp/tuple_def.hpp>
+#include <dplx/dp/detail/type_utils.hpp>
+#include <dplx/dp/fwd.hpp>
 
 namespace dplx::dp
 {

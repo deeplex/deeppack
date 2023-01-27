@@ -26,6 +26,9 @@ dplx_target_sources(deeppack
         dp/disappointment
         dp/fwd
         dp/indefinite_range
+        dp/layout_descriptor
+        dp/object_def
+        dp/tuple_def
 
         dp/codecs/auto_enum
         dp/codecs/auto_object
@@ -76,10 +79,6 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
 
     PUBLIC
-        dp/layout_descriptor
-        dp/object_def
-        dp/tuple_def
-
         dp/customization
         dp/customization.std
 
