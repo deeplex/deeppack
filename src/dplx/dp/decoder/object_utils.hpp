@@ -20,6 +20,7 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
+#include <dplx/dp/codecs/auto_object.hpp>
 #include <dplx/dp/cpos/property_id_hash.hpp>
 #include <dplx/dp/decoder/api.hpp>
 #include <dplx/dp/decoder/std_string.hpp>
@@ -52,118 +53,6 @@ public:
 
 namespace dplx::dp::detail
 {
-
-template <std::size_t NumBits>
-constexpr auto compress_bitset(std::initializer_list<bool> vs) noexcept
-{
-    constexpr auto digits = static_cast<std::size_t>(digits_v<std::size_t>);
-
-    constexpr auto numBuckets = cncr::div_ceil(NumBits, digits);
-    std::array<std::size_t, numBuckets> buckets{};
-
-    auto const *it = vs.begin();
-    auto const *const end = vs.end();
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (std::size_t shift = 0, offset = 0; it != end; ++it, ++shift)
-    {
-        if (shift == digits)
-        {
-            shift = 0;
-            offset += 1;
-        }
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-        buckets[offset] |= static_cast<std::size_t>(*it) << shift;
-    }
-    return buckets;
-}
-
-template <template <auto...> typename ObjectDefLike, auto... Properties>
-constexpr auto
-compress_optional_props(ObjectDefLike<Properties...> const &) noexcept
-{
-    return detail::compress_bitset<sizeof...(Properties)>(
-            {Properties.required...});
-}
-
-template <auto const &descriptor>
-inline constexpr auto required_prop_mask_for
-        = detail::compress_optional_props(descriptor);
-
-inline constexpr std::size_t unknown_property_id = ~static_cast<std::size_t>(0);
-
-template <typename IdType, std::size_t NumIds, bool use_perfect_hash>
-struct property_id_lookup_fn;
-
-template <typename IdType, std::size_t NumIds>
-struct property_id_lookup_fn<IdType, NumIds, true>
-{
-private:
-    using id_type = IdType;
-    using array_type = std::array<id_type, NumIds>;
-
-    perfect_hasher<id_type, NumIds, property_id_hash_fn> hash;
-    array_type const &ids;
-
-public:
-    constexpr property_id_lookup_fn(array_type const &idsInit)
-        : hash(ids)
-        , ids(idsInit)
-    {
-    }
-
-    template <typename TLike>
-    constexpr auto operator()(TLike &&id) const noexcept -> std::size_t
-    {
-        std::size_t const idx = hash(id);
-        if (ids[idx] != id)
-        {
-            return unknown_property_id;
-        }
-        return idx;
-    }
-};
-
-template <typename IdType, std::size_t NumIds>
-struct property_id_lookup_fn<IdType, NumIds, false>
-{
-private:
-    using id_type = IdType;
-    using array_type = std::array<id_type, NumIds>;
-
-    array_type const &ids;
-
-public:
-    constexpr property_id_lookup_fn(array_type const &idsInit)
-        : ids(idsInit)
-    {
-    }
-
-    template <typename TLike>
-    constexpr auto operator()(TLike &&id) const noexcept -> std::size_t
-    {
-        constexpr std::size_t linear_search_efficiency_threshold = 64U;
-
-        auto const *const begin = ids.data();
-        auto const *const end = ids.data() + ids.size();
-        id_type const *it; // NOLINT(cppcoreguidelines-init-variables)
-        if constexpr (NumIds <= linear_search_efficiency_threshold)
-        {
-            if (it = std::find(begin, end, id); it == end)
-            {
-                return unknown_property_id;
-            }
-        }
-        else
-        {
-            if (it = std::lower_bound(begin, end, id); it == end || *it != id)
-            {
-                return unknown_property_id;
-            }
-        }
-        return static_cast<std::size_t>(it - begin);
-    }
-};
 
 template <auto const &Descriptor, typename T, input_stream Stream>
 class decode_object_property_fn
@@ -371,12 +260,6 @@ public:
 
 namespace dplx::dp
 {
-
-struct object_head_info
-{
-    std::int32_t num_properties;
-    std::uint32_t version;
-};
 
 template <input_stream Stream, bool isVersioned = true>
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)

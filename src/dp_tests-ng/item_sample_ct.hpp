@@ -24,12 +24,12 @@
 namespace dp_tests
 {
 
-template <typename T>
+template <typename T, std::size_t MaxSize = dp::detail::var_uint_max_size>
 struct item_sample_ct
 {
     T value;
     unsigned encoded_length;
-    std::array<std::uint8_t, dplx::dp::detail::var_uint_max_size> encoded;
+    std::array<std::uint8_t, MaxSize> encoded;
 
     template <typename U>
     [[nodiscard]] constexpr auto as() const noexcept -> item_sample_ct<U>
