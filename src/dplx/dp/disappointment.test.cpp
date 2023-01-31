@@ -7,10 +7,6 @@
 
 #include "dplx/dp/disappointment.hpp"
 
-#include "boost-test.hpp"
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
-// Tests TBA
 }

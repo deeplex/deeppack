@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020
+// Copyright Henrik Steffen Gaßmann 2023
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -7,131 +7,104 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstddef>
-#include <cstdint>
+#include <cstring>
 #include <span>
-#include <vector>
+#include <utility>
 
 #include <dplx/dp/disappointment.hpp>
-#include <dplx/dp/stream.hpp>
+#include <dplx/dp/items/parse_context.hpp>
+#include <dplx/dp/streams/input_buffer.hpp>
 
-#include "boost-test.hpp"
 #include "test_utils.hpp"
 
 namespace dp_tests
 {
 
-class test_input_stream // #TODO use a validating readproxy
+// the class is final and none of its base classes have public destructors
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+class simple_test_input_stream final : public dp::input_buffer
 {
-    std::span<std::byte const> mBuffer;
-    std::vector<std::byte> mReadBuffer;
-    std::size_t mStreamPosition;
-    int mReadCounter;
-    int mCommitCounter;
+    std::span<std::byte const> mReadBuffer;
+    bool mInitiallyEmpty;
 
 public:
-    explicit test_input_stream(std::span<std::byte const> bs)
-        : mBuffer(bs)
-        , mReadBuffer()
-        , mStreamPosition(0)
-        , mReadCounter(0)
-        , mCommitCounter(0)
+    ~simple_test_input_stream() = default;
+
+    simple_test_input_stream(std::span<std::byte const> const readBuffer,
+                             bool const initiallyEmpty = false)
+        : input_buffer(nullptr, 0U, readBuffer.size())
+        , mReadBuffer(readBuffer)
+        , mInitiallyEmpty(initiallyEmpty)
     {
+        if (!initiallyEmpty)
+        {
+            reset(mReadBuffer.data(), mReadBuffer.size(), mReadBuffer.size());
+        }
     }
 
-    friend inline auto tag_invoke(cncr::tag_t<dp::available_input_size>,
-                                  test_input_stream &self) noexcept
-            -> dp::result<std::size_t>
+    [[nodiscard]] auto discarded() const noexcept -> std::size_t
     {
-        return self.mBuffer.size() - self.mStreamPosition;
+        return mInitiallyEmpty ? 0U : mReadBuffer.size() - size();
     }
-    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
-                                  test_input_stream &self,
-                                  std::size_t const amount)
-            -> dp::result<std::span<std::byte const>>
+
+private:
+    auto do_require_input(size_type requiredSize) noexcept
+            -> dp::result<void> override
     {
-        BOOST_TEST(self.mReadCounter == self.mCommitCounter);
-        auto const start = self.mStreamPosition;
-        if (start + amount > self.mBuffer.size())
+        if (!std::exchange(mInitiallyEmpty, false)
+            || requiredSize > mReadBuffer.size())
+        {
+            return dp::errc::end_of_stream;
+        }
+        reset(mReadBuffer.data(), mReadBuffer.size(), mReadBuffer.size());
+        return dp::oc::success();
+    }
+    auto do_discard_input(size_type amount) noexcept
+            -> dp::result<void> override
+    {
+        if (!std::exchange(mInitiallyEmpty, false)
+            || amount > mReadBuffer.size())
+        {
+            return dp::errc::end_of_stream;
+        }
+        auto const remaining = mReadBuffer.subspan(amount);
+        reset(remaining.data(), remaining.size(), remaining.size());
+        return dp::oc::success();
+    }
+    auto do_bulk_read(std::byte *dest, std::size_t size) noexcept
+            -> dp::result<void> override
+    {
+        if (!std::exchange(mInitiallyEmpty, false) || size > mReadBuffer.size())
         {
             return dp::errc::end_of_stream;
         }
 
-        self.mReadCounter += 1;
-        self.mStreamPosition += amount;
+        std::memcpy(dest, mReadBuffer.data(), size);
 
-        self.mReadBuffer.resize(amount);
-        std::copy_n(self.mBuffer.data() + start, amount,
-                    self.mReadBuffer.data());
-
-        return std::span(self.mReadBuffer);
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::consume>,
-                                  test_input_stream &self,
-                                  std::span<std::byte const> proxy,
-                                  std::size_t const actualAmount) noexcept
-            -> dp::result<void>
-    {
-        BOOST_TEST(proxy.size() >= actualAmount);
-        BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
-        self.mCommitCounter += 1;
-        self.mStreamPosition -= (proxy.size() - actualAmount);
-        std::vector<std::byte> tmp;
-        self.mReadBuffer.swap(tmp); // dispose the memory
-        return dp::success();
-    }
-    friend inline auto
-    tag_invoke(cncr::tag_t<dp::consume>,
-               test_input_stream &self,
-               [[maybe_unused]] std::span<std::byte const> const proxy) noexcept
-            -> dp::result<void>
-    {
-        BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
-        self.mCommitCounter += 1;
-        std::vector<std::byte> tmp;
-        self.mReadBuffer.swap(tmp); // dispose the memory
-        return dp::success();
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
-                                  test_input_stream &self,
-                                  std::byte *buffer,
-                                  std::size_t const amount) noexcept
-            -> dp::result<void>
-    {
-        BOOST_TEST(self.mReadCounter == self.mCommitCounter);
-        if (self.mStreamPosition + amount > self.mBuffer.size())
-        {
-            return dp::errc::end_of_stream;
-        }
-
-        std::memcpy(buffer, self.mBuffer.data() + self.mStreamPosition, amount);
-        self.mStreamPosition += amount;
-
-        return dp::success();
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::skip_bytes>,
-                                  test_input_stream &self,
-                                  std::uint64_t const numBytes) noexcept
-            -> dp::result<void>
-    {
-        BOOST_TEST(self.mReadCounter == (self.mCommitCounter + 1));
-        if (self.mStreamPosition + numBytes > self.mBuffer.size())
-        {
-            return dp::errc::end_of_stream;
-        }
-        self.mStreamPosition += numBytes;
+        auto const remaining = mReadBuffer.subspan(size);
+        reset(remaining.data(), remaining.size(), remaining.size());
         return dp::oc::success();
     }
 };
-static_assert(dp::lazy_input_stream<test_input_stream>);
 
-template <typename... Ts>
-auto make_test_input_stream(Ts... ts) noexcept -> test_input_stream
+class simple_test_parse_context final : private dp::parse_context
 {
-    static_assert((... && (std::is_integral_v<Ts> || std::is_enum_v<Ts>)));
-    return test_input_stream(
-            std::vector<std::byte>{static_cast<std::byte>(ts)...});
-}
+public:
+    simple_test_input_stream stream;
+
+    explicit simple_test_parse_context(
+            std::span<std::byte const> const readBuffer,
+            bool const initiallyEmpty = false)
+        : parse_context{stream}
+        , stream(readBuffer, initiallyEmpty)
+    {
+    }
+
+    auto as_parse_context() noexcept -> dp::parse_context &
+    {
+        return *this;
+    }
+};
 
 } // namespace dp_tests

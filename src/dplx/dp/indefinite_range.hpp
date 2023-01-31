@@ -10,19 +10,18 @@
 #include <ranges>
 #include <type_traits>
 
-#include <dplx/dp/concepts.hpp>
-
 namespace dplx::dp
 {
 
-template <std::input_iterator T, typename S = T>
-    requires std::sentinel_for<S, T>
+template <std::input_iterator T, std::sentinel_for<T> S = T>
 class indefinite_range : public std::ranges::view_base
 {
     T mIt;
     S mEnd;
 
 public:
+    indefinite_range() noexcept = default;
+
     template <std::ranges::input_range R>
         requires std::assignable_from<T &,
                                       std::ranges::iterator_t<R const>> && std::
@@ -33,11 +32,10 @@ public:
     {
     }
     constexpr explicit indefinite_range(T it, S endIt)
-        : mIt(std::move(it))
-        , mEnd(std::move(endIt))
+        : mIt(static_cast<T &&>(it))
+        , mEnd(static_cast<S &&>(endIt))
     {
     }
-    indefinite_range() noexcept = default;
 
     [[nodiscard]] constexpr auto begin() const -> T
     {
@@ -54,15 +52,8 @@ explicit indefinite_range(R const &)
         -> indefinite_range<std::ranges::iterator_t<R const>,
                             std::ranges::sentinel_t<R const>>;
 
-template <typename T, typename S>
-static inline constexpr bool
-        enable_indefinite_encoding<indefinite_range<T, S>> = true;
-
 } // namespace dplx::dp
 
-namespace std::ranges
-{
 template <typename T, typename S>
-static inline constexpr bool
-        enable_borrowed_range<::dplx::dp::indefinite_range<T, S>> = true;
-}
+inline constexpr bool std::ranges::enable_borrowed_range<
+        ::dplx::dp::indefinite_range<T, S>> = true;

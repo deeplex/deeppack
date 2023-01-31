@@ -131,6 +131,16 @@
             }
         },
         {
+            "name": "x64-linux-ci-lint",
+            "inherits": [
+                "x64-linux-clang"
+            ],
+            "cacheVariables": {
+                "DPLX_DP_TESTS_PCH": false,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
+            }
+        },
+        {
             "name": "x64-linux-gcc",
             "inherits": [
                 "x64-linux"

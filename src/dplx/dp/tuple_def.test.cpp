@@ -7,10 +7,7 @@
 
 #include "dplx/dp/tuple_def.hpp"
 
-#include "boost-test.hpp"
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
-// Tests TBA
+// this is implicitly tested by auto_tuple
 }

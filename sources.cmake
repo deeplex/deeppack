@@ -3,10 +3,17 @@ dplx_target_sources(deeppack
     TEST_TARGET deeppack-tests
     MODE SMART_SOURCE MERGED_LAYOUT
     BASE_DIR dplx
-    
+
     PUBLIC
         dp
-        dp/disappointment
+
+        dp/codecs/core
+        dp/codecs/fixed_u8string
+        dp/codecs/std-chrono
+        dp/codecs/std-filesystem
+        dp/codecs/std-string
+
+        dp/items/skip_item
 )
 
 dplx_target_sources(deeppack
@@ -15,58 +22,56 @@ dplx_target_sources(deeppack
     BASE_DIR dplx
 
     PUBLIC
-        dp/config
-
+        dp/api
         dp/concepts
+        dp/config
+        dp/disappointment
         dp/fwd
-        dp/layout_descriptor
-        dp/memory_buffer
-        dp/object_def
-        dp/stream
-        dp/tuple_def
-        dp/type_code
-
-        dp/detail/item_size
-        dp/encoder/api
-        dp/encoder/arg_list
-        dp/encoder/chrono
-        dp/encoder/core
-        dp/encoder/narrow_strings
-        dp/encoder/object_utils
-        dp/encoder/std_path
-        dp/encoder/tuple_utils
-        dp/item_emitter
-
-        dp/decoder/api
-        dp/decoder/chrono
-        dp/decoder/core
-        dp/decoder/object_utils
-        dp/decoder/std_container
-        dp/decoder/std_path
-        dp/decoder/std_string
-        dp/decoder/tuple_utils
-        dp/decoder/utils
-        dp/detail/parse_item
-        dp/item_parser
-        dp/skip_item
-
-        dp/customization
-        dp/customization.std
         dp/indefinite_range
-        dp/map_pair
+        dp/layout_descriptor
+        dp/object_def
+        dp/tuple_def
 
-        dp/streams/chunked_input_stream
-        dp/streams/chunked_output_stream
-        dp/streams/memory_input_stream
-        dp/streams/memory_output_stream
+        dp/codecs/auto_enum
+        dp/codecs/auto_object
+        dp/codecs/auto_tuple
+        dp/codecs/std-container
+        dp/codecs/std-tuple
+
+        dp/cpos/container
+        dp/cpos/container.std
+        dp/cpos/property_id_hash
+        dp/cpos/stream
 
         dp/detail/bit
         dp/detail/hash
-        dp/detail/mp_for_dots
+        dp/detail/item_size
         dp/detail/perfect_hash
         dp/detail/type_utils
-        dp/detail/utils
         dp/detail/workaround
+
+        dp/items
+        dp/items/emit_context
+        dp/items/emit_core
+        dp/items/emit_ranges
+        dp/items/encoded_item_head_size
+        dp/items/item_size_of_core
+        dp/items/item_size_of_ranges
+        dp/items/parse_context
+        dp/items/parse_core
+        dp/items/parse_ranges
+        dp/items/type_code
+
+        dp/streams/input_buffer
+        dp/streams/memory_output_stream2
+        dp/streams/output_buffer
+        dp/streams/void_stream
+
+        dp/legacy/chunked_input_stream
+        dp/legacy/chunked_output_stream
+        dp/legacy/memory_buffer
+        dp/legacy/memory_input_stream
+        dp/legacy/memory_output_stream
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail)
@@ -79,22 +84,25 @@ if (BUILD_TESTING)
         BASE_DIR dp_tests
 
         PRIVATE
+            blob_matcher.hpp
+            core_samples.hpp
+            item_sample_ct.hpp
+            item_sample_rt.hpp
+            range_generator.hpp
+            simple_encodable.hpp
+            test_input_stream.hpp
+            test_output_stream.hpp
             test_utils.hpp
+            yaml_sample_generator.hpp
     )
 
-    target_sources(deeppack-tests PRIVATE
-        tests/encoder.blob.test.cpp
-        tests/encoder.map.test.cpp
-        tests/encoder.range.test.cpp
-        tests/encoder.string.test.cpp
-        tests/encoder.tuple.test.cpp
+    dplx_target_data(deeppack-tests
+        SOURCE_DIR test-samples
 
-        tests/enum_codec.test.cpp
-
-        tests/item_emitter.integer.test.cpp
-        tests/item_parser.array.test.cpp
-        tests/item_parser.binary.test.cpp
-        tests/item_parser.expect.test.cpp
-        tests/item_parser.integer.test.cpp
+        FILES
+            arrays.yaml
+            blobs.yaml
+            maps.yaml
+            text.yaml
     )
 endif ()

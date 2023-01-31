@@ -7,10 +7,7 @@
 
 #include "dplx/dp/detail/bit.hpp"
 
-#include "boost-test.hpp"
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
-// Tests TBA
+// TODO: Add tests to bit twiddling utilities
 }

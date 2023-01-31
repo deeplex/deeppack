@@ -7,10 +7,7 @@
 
 #include "dplx/dp/object_def.hpp"
 
-#include "boost-test.hpp"
-#include "test_utils.hpp"
-
 namespace dp_tests
 {
-// Tests TBA
+// this is implicitly tested by auto_object and auto_tuple
 }

@@ -10,8 +10,8 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/cncr/type_utils.hpp>
 
-#include <dplx/dp/object_def.hpp>
-#include <dplx/dp/tuple_def.hpp>
+#include <dplx/dp/detail/type_utils.hpp>
+#include <dplx/dp/fwd.hpp>
 
 namespace dplx::dp
 {
@@ -65,8 +65,6 @@ concept packable_tuple = packable<T> && is_tuple_def_v<
         cncr::remove_cref_t<cncr::tag_invoke_result_t<layout_descriptor_for_fn,
                                                       std::type_identity<T>>>>;
 
-inline constexpr std::uint32_t null_def_version = 0xFFFF'FFFFU;
-
 template <typename T>
     requires packable<T>
 inline constexpr auto layout_descriptor_for_v
@@ -83,5 +81,9 @@ constexpr auto versioned_decoder_enabled(T const &descriptor) noexcept -> bool
     return descriptor.allow_versioned_auto_decoder
         || descriptor.version == null_def_version;
 }
+
+template <auto const &descriptor>
+using descriptor_class_type =
+        typename cncr::remove_cref_t<decltype(descriptor)>::class_type;
 
 } // namespace dplx::dp::detail

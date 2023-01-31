@@ -60,19 +60,19 @@ find_package(fmt CONFIG REQUIRED)
 find_package(status-code CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
 
-if (BUILD_TESTING)
-    set(DP_REQUIRE_UNIT_TEST_FRAMEWORK unit_test_framework)
-endif()
-find_package(Boost 1.71 REQUIRED COMPONENTS
-    ${DP_REQUIRE_UNIT_TEST_FRAMEWORK}
-)
+find_package(Boost 1.71 REQUIRED)
 
+find_package(yaml-cpp CONFIG)
+set_package_properties(yaml-cpp PROPERTIES
+    TYPE OPTIONAL
+    PURPOSE "Allows to build the test suite"
+)
 find_package(Catch2 CONFIG)
-cmake_dependent_option(BUILD_TESTING "Build the documentation using sphinx" ON Catch2_FOUND OFF)
 set_package_properties(Catch2 PROPERTIES
     TYPE OPTIONAL
     PURPOSE "Allows to build the test suite"
 )
+cmake_dependent_option(BUILD_TESTING "Build the test suite" ON Catch2_FOUND;yaml-cpp_FOUND OFF)
 
 find_package(Sphinx)
 cmake_dependent_option(BUILD_DOCS "Build the documentation using sphinx" ON Sphinx_FOUND OFF)
@@ -131,37 +131,21 @@ target_include_directories(deeppack PUBLIC
 # library test project
 if (BUILD_TESTING)
     add_executable(deeppack-tests)
-    source_group(TREE dp_tests PREFIX test_utils)
 
     target_link_libraries(deeppack-tests PRIVATE
         Deeplex::deeppack
-        
-        Boost::unit_test_framework
-        fmt::fmt
-        #Catch2::Catch2 Catch2::Catch2WithMain
-    )
 
+        Catch2::Catch2 Catch2::Catch2WithMain
+        yaml-cpp
+    )
+    
     target_include_directories(deeppack-tests PRIVATE
         src/dp_tests
     )
-
-    if (DPLX_DP_TESTS_PCH)
-        target_precompile_headers(deeppack-tests PRIVATE
-            <algorithm>
-            <array>
-            <bit>
-            <cmath>
-            <concepts>
-            <cstddef>
-            <cstdint>
-            <limits>
-            <ranges>
-            <span>
-            <type_traits>
-        )
-    endif()
-
-    add_test(NAME deeppack-tests COMMAND deeppack-tests)
+    
+    add_test(NAME deeppack-tests COMMAND deeppack-tests
+             WORKING_DIRECTORY $<TARGET_FILE_DIR:deeppack-tests>
+    )
 endif()
 
 ########################################################################
