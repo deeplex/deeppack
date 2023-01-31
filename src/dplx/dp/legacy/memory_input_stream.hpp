@@ -13,75 +13,68 @@
 
 #include <dplx/cncr/tag_invoke.hpp>
 
+#include <dplx/dp/cpos/stream.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/legacy/memory_buffer.hpp>
-#include <dplx/dp/legacy/stream.hpp>
+#include <dplx/dp/streams/input_buffer.hpp>
 
 namespace dplx::dp
 {
 
-template <typename T>
-    requires std::is_same_v<std::byte, std::remove_const_t<T>>
-inline auto tag_invoke(cncr::tag_t<dp::available_input_size>,
-                       basic_memory_buffer<T> &self) noexcept
-        -> dplx::dp::result<std::size_t>
+namespace detail
 {
-    return self.remaining_size();
-}
+
 template <typename T>
-    requires std::is_same_v<std::byte, std::remove_const_t<T>>
-inline auto tag_invoke(cncr::tag_t<dp::read>,
-                       basic_memory_buffer<T> &self,
-                       std::size_t const amount) noexcept
-        -> dplx::dp::result<std::span<std::byte const>>
+class legacy_memory_input_stream final : public input_buffer
 {
-    if (amount > self.remaining_size())
+    basic_memory_buffer<T> &mImpl;
+
+public:
+    ~legacy_memory_input_stream() noexcept = default;
+    explicit legacy_memory_input_stream(basic_memory_buffer<T> &impl) noexcept
+        : input_buffer(impl.remaining_begin(),
+                       impl.remaining_size(),
+                       impl.remaining_size())
+        , mImpl(impl)
     {
-        return errc::end_of_stream;
-    }
-    return std::span<std::byte const>(self.consume(static_cast<int>(amount)),
-                                      amount);
-}
-template <typename T>
-    requires std::is_same_v<std::byte, std::remove_const_t<T>>
-inline auto tag_invoke(cncr::tag_t<dp::consume>,
-                       basic_memory_buffer<T> &self,
-                       std::span<std::byte const> proxy,
-                       std::size_t const actualAmount) noexcept
-        -> dplx::dp::result<void>
-{
-    self.move_consumer(-static_cast<int>(proxy.size() - actualAmount));
-    return success();
-}
-template <typename T>
-    requires std::is_same_v<std::byte, std::remove_const_t<T>>
-inline auto tag_invoke(cncr::tag_t<dp::read>,
-                       basic_memory_buffer<T> &self,
-                       std::byte *buffer,
-                       std::size_t const amount) noexcept
-        -> dplx::dp::result<void>
-{
-    if (amount > self.remaining_size())
-    {
-        return errc::end_of_stream;
     }
 
-    std::memcpy(buffer, self.consume(static_cast<int>(amount)), amount);
-    return success();
-}
-template <typename T>
-    requires std::is_same_v<std::byte, std::remove_const_t<T>>
-inline auto tag_invoke(cncr::tag_t<dp::skip_bytes>,
-                       basic_memory_buffer<T> &self,
-                       std::uint64_t const numBytes) noexcept
-        -> dplx::dp::result<void>
-{
-    if (numBytes > self.remaining_size())
+private:
+    auto do_require_input([[maybe_unused]] size_type requiredSize) noexcept
+            -> result<void> override
     {
         return errc::end_of_stream;
     }
-    self.move_consumer(static_cast<int>(numBytes));
-    return oc::success();
+    auto do_discard_input([[maybe_unused]] size_type amount) noexcept
+            -> result<void> override
+    {
+        return errc::end_of_stream;
+    }
+    auto do_bulk_read([[maybe_unused]] std::byte *dest,
+                      [[maybe_unused]] std::size_t size) noexcept
+            -> result<void> override
+    {
+        return errc::end_of_stream;
+    }
+    auto do_sync_input() noexcept -> result<void> override
+    {
+        auto const writtenSize = data() - mImpl.remaining_begin();
+        mImpl.move_consumer(
+                static_cast<typename basic_memory_buffer<T>::difference_type>(
+                        writtenSize));
+        return oc::success();
+    }
+};
+
+} // namespace detail
+
+template <typename T>
+    requires std::is_same_v<std::byte, std::remove_const_t<T>>
+inline auto tag_invoke(get_input_buffer_fn,
+                       basic_memory_buffer<T> &view) noexcept
+        -> detail::legacy_memory_input_stream<T>
+{
+    return detail::legacy_memory_input_stream<T>(view);
 }
 
 } // namespace dplx::dp

@@ -15,37 +15,54 @@
 #include <dplx/cncr/tag_invoke.hpp>
 
 #include <dplx/dp/legacy/memory_buffer.hpp>
-#include <dplx/dp/legacy/stream.hpp>
+#include <dplx/dp/streams/input_buffer.hpp>
 
-namespace dplx::dp
+namespace dplx::dp::legacy
 {
+
 template <typename Impl>
-class chunked_input_stream_base
+class chunked_input_stream_base : public input_buffer
 {
     memory_view mReadArea;
-    std::uint64_t mRemaining;
 
     static constexpr unsigned int small_buffer_size
-            = 2 * (minimum_guaranteed_read_size - 1);
-    static constexpr int decommission_threshold = small_buffer_size / 2;
+            = 2 * (minimum_input_buffer_size - 1);
 
     std::int8_t mBufferStart;
     std::byte mSmallBuffer[small_buffer_size];
 
 protected:
+    ~chunked_input_stream_base() noexcept = default;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     explicit chunked_input_stream_base(
             std::span<std::byte const> const initialReadArea,
             std::uint64_t streamSize)
-        : mReadArea(initialReadArea)
-        , mRemaining(streamSize)
+        : input_buffer(
+                initialReadArea.data(), initialReadArea.size(), streamSize)
+        , mReadArea(initialReadArea)
         , mBufferStart(-1)
     {
     }
 
     [[nodiscard]] inline auto current_read_area() const noexcept -> memory_view
     {
-        return mReadArea;
+        memory_view readArea{mReadArea};
+        if (mBufferStart < 0)
+        {
+            readArea.move_consumer_to(static_cast<memory_view::difference_type>(
+                    readArea.buffer_size() - size()));
+        }
+        else if (
+                auto const consumedSize = static_cast<int>(
+                        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+                        const_cast<input_buffer *>(this)->data()
+                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        - static_cast<std::byte const *>(mSmallBuffer));
+                consumedSize > mBufferStart)
+        {
+            readArea.move_consumer(consumedSize - mBufferStart);
+        }
+        return readArea;
     }
 
 private:
@@ -54,285 +71,183 @@ private:
         return static_cast<Impl *>(this);
     }
 
-    [[nodiscard]] inline auto buffered_amount() const noexcept -> unsigned int
-    {
-        return small_buffer_size - static_cast<unsigned int>(mBufferStart);
-    }
-    inline auto consume_buffer(std::size_t const amount) noexcept -> bytes
-    {
-        // precondition:
-        // 0 <= mBufferStart < decommission_threshold
-        //     => buffered_amount() > minimum_guaranteed_read_size
-
-        auto const remainingBuffered = buffered_amount();
-        auto const granted
-                = amount <= remainingBuffered ? amount : remainingBuffered;
-
-        bytes const readProxy(
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                static_cast<std::byte *>(mSmallBuffer) + mBufferStart, granted);
-
-        mBufferStart += static_cast<std::int8_t>(granted);
-        mRemaining -= granted;
-
-        return readProxy;
-    }
-    inline void decommission_buffer() noexcept
-    {
-        // precondition:
-        // decommission_threshold <= mBufferStart <= small_buffer_size
-        auto const consumed = mBufferStart - decommission_threshold;
-        mReadArea.move_consumer(consumed);
-
-        mBufferStart = -1;
-    }
-
     inline auto acquire_next_chunk() noexcept -> result<void>
     {
-        DPLX_TRY(mReadArea, impl()->acquire_next_chunk_impl(mRemaining));
-        if (mReadArea.remaining_size() > mRemaining)
+        DPLX_TRY(mReadArea, impl()->acquire_next_chunk_impl(input_size()));
+        if (mReadArea.remaining_size() > input_size())
         {
-            mReadArea = memory_view{mReadArea.remaining().first(mRemaining)};
+            mReadArea = memory_view{mReadArea.remaining().first(input_size())};
         }
         return success();
     }
 
-    inline auto read(std::size_t const amount) noexcept -> result<bytes>
+    inline void save_remaining_to_small_buffer() noexcept
     {
-        if (mBufferStart < 0 && amount <= mReadArea.remaining_size())
-        {
-            mRemaining -= amount;
-            return std::span<std::byte const>(
-                    mReadArea.consume(static_cast<int>(amount)), amount);
-        }
+        auto const remainingSize = size();
+        assert(remainingSize <= small_buffer_size);
 
-        if (amount > mRemaining)
-        {
-            return dp::errc::end_of_stream;
-        }
-
-        if (mBufferStart < 0)
-        {
-            auto const remainingChunk = mReadArea.remaining_size();
-
-            if (remainingChunk >= minimum_guaranteed_read_size)
-            {
-                mRemaining -= amount;
-                return std::span<std::byte const>(
-                        mReadArea.consume(
-                                static_cast<memory_view::difference_type>(
-                                        remainingChunk)),
-                        remainingChunk);
-            }
-
-            auto const bufferStart
-                    = static_cast<int>(decommission_threshold - remainingChunk);
-
-            if (remainingChunk > 0)
-            {
-                std::memcpy(
-                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                        static_cast<std::byte *>(mSmallBuffer) + bufferStart,
-                        mReadArea.remaining_begin(), remainingChunk);
-            }
-
-            DPLX_TRY(this->acquire_next_chunk());
-
-            if (remainingChunk > 0)
-            {
-                auto const nextPart = std::min(minimum_guaranteed_read_size - 1,
-                                               mReadArea.remaining_size());
-
-                // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                std::memcpy(static_cast<std::byte *>(mSmallBuffer)
-                                    + decommission_threshold,
-                            mReadArea.remaining_begin(), nextPart);
-                // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-
-                mBufferStart = static_cast<int8_t>(bufferStart);
-            }
-
-            return read(amount);
-        }
-        if (mBufferStart < decommission_threshold)
-        {
-            return consume_buffer(amount);
-        }
-        // else
-        // {
-        // we ignore the buffer as soon as our read cursor leaves the
-        // previous chunk
-
-        decommission_buffer();
-        return read(amount);
-        // }
+        std::memcpy(static_cast<std::byte *>(mSmallBuffer), data(),
+                    remainingSize);
+        mBufferStart += static_cast<std::int8_t>(remainingSize);
+        reset(static_cast<std::byte *>(mSmallBuffer), remainingSize,
+              input_size());
     }
-    auto consume(std::size_t const requestedAmount,
-                 std::size_t const actualAmount) noexcept -> result<void>
+    inline void append_current_to_small_buffer() noexcept
     {
-        auto const unused = static_cast<int>(requestedAmount - actualAmount);
+        auto const smallChunkSize = std::min<std::size_t>(
+                mReadArea.remaining_size(), small_buffer_size - size());
 
-        mRemaining += static_cast<unsigned>(unused);
-        if (mBufferStart < 0)
-        {
-            mReadArea.move_consumer(-unused);
-            return success();
-        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::memcpy(static_cast<std::byte *>(mSmallBuffer) + mBufferStart,
+                    mReadArea.remaining_begin(), smallChunkSize);
 
-        mBufferStart -= static_cast<std::int8_t>(unused);
-        return success();
+        reset(static_cast<std::byte *>(mSmallBuffer), size() + smallChunkSize,
+              input_size());
+    }
+    inline void move_small_buffer_content_to_front() noexcept
+    {
+        auto const consumedSize = static_cast<int>(
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                data() - static_cast<std::byte *>(mSmallBuffer));
+
+        mBufferStart -= static_cast<std::int8_t>(consumedSize);
+        std::memmove(static_cast<std::byte *>(mSmallBuffer), data(),
+                     static_cast<std::size_t>(mBufferStart));
+
+        reset(static_cast<std::byte *>(mSmallBuffer),
+              static_cast<std::size_t>(mBufferStart), input_size());
     }
 
-    auto read(std::byte *data, std::size_t const amount) noexcept
-            -> result<void>
+    auto do_require_input(size_type const requiredSize) noexcept
+            -> result<void> override
     {
-        // precondition amount <= mRemaining
-
-        if (mBufferStart < 0)
+        if (size() == 0U)
         {
-            for (std::span<std::byte> remaining(data, amount);
-                 !remaining.empty();)
+            mBufferStart = -1;
+            DPLX_TRY(acquire_next_chunk());
+            reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
+                  input_size());
+
+            if (requiredSize > size())
             {
-                auto const chunk = std::min(
-                        remaining.size(),
-                        static_cast<std::size_t>(mReadArea.remaining_size()));
-
-                std::memcpy(remaining.data(),
-                            mReadArea.consume(static_cast<int>(chunk)), chunk);
-
-                remaining = remaining.subspan(chunk);
-                mRemaining -= chunk;
-
-                if (mRemaining != 0 && mReadArea.remaining_size() == 0)
-                {
-                    DPLX_TRY(this->acquire_next_chunk());
-                }
+                return require_input(requiredSize);
             }
-
-            return success();
-        }
-        if (mBufferStart < decommission_threshold)
-        {
-            auto buffered = consume_buffer(amount);
-
-            std::memcpy(data, buffered.data(), buffered.size());
-
-            if (buffered.size() == amount)
-            {
-                return success();
-            }
-            // else
-            // {
-            // need more data than buffered
-
-            decommission_buffer();
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            return read(data + buffered.size(), amount - buffered.size());
-            // }
-        }
-        // else
-        // {
-        decommission_buffer();
-        return read(data, amount);
-        // }
-    }
-
-    auto discard(std::uint64_t numBytes) noexcept -> result<void>
-    {
-        // precondition 0 < numBytes <= mRemaining
-
-        if (mBufferStart < 0)
-        {
-            do
-            {
-                auto const chunk = std::min(
-                        numBytes,
-                        static_cast<std::uint64_t>(mReadArea.remaining_size()));
-
-                numBytes -= chunk;
-                mReadArea.move_consumer(static_cast<int>(chunk));
-                mRemaining -= chunk;
-
-                if (mRemaining != 0 && mReadArea.remaining_size() == 0)
-                {
-                    DPLX_TRY(this->acquire_next_chunk());
-                }
-
-            } while (numBytes != 0);
-
             return oc::success();
         }
-        if (mBufferStart < decommission_threshold)
+
+        if (mBufferStart < 0)
         {
-            auto const buffered = buffered_amount();
-            if (buffered >= numBytes)
+            if (requiredSize > small_buffer_size)
             {
-                mRemaining -= numBytes;
-                mBufferStart += static_cast<int8_t>(numBytes);
+                return errc::buffer_size_exceeded;
+            }
+            mBufferStart = 0;
+            save_remaining_to_small_buffer();
+            DPLX_TRY(acquire_next_chunk());
+            append_current_to_small_buffer();
+
+            if (requiredSize <= size())
+            {
                 return oc::success();
             }
-
-            auto const popped = static_cast<unsigned>(decommission_threshold
-                                                      - mBufferStart);
-            mRemaining -= popped;
-            mBufferStart = -1;
-
-            return discard(numBytes - popped);
+            if (size() == small_buffer_size)
+            {
+                return errc::buffer_size_exceeded;
+            }
+            return require_input(requiredSize);
         }
 
-        decommission_buffer();
-        return discard(numBytes);
-    }
-
-public:
-    friend inline auto tag_invoke(cncr::tag_t<dp::available_input_size>,
-                                  chunked_input_stream_base &self) noexcept
-            -> result<std::uint64_t>
-    {
-        return self.mRemaining;
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
-                                  chunked_input_stream_base &self,
-                                  std::size_t const amount) noexcept
-            -> result<std::span<std::byte const>>
-    {
-        return self.read(amount);
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::consume>,
-                                  chunked_input_stream_base &self,
-                                  std::span<std::byte const> proxy,
-                                  std::size_t const actualAmount) noexcept
-            -> result<void>
-    {
-        return self.consume(proxy.size(), actualAmount);
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::read>,
-                                  chunked_input_stream_base &self,
-                                  std::byte *buffer,
-                                  std::size_t const amount) noexcept
-            -> result<void>
-    {
-        if (amount > self.mRemaining)
+        auto const consumedSize = static_cast<int>(
+                data() - static_cast<std::byte *>(mSmallBuffer));
+        if (consumedSize >= mBufferStart)
         {
-            return dp::errc::end_of_stream;
+            mReadArea.move_consumer(consumedSize - mBufferStart);
+            mBufferStart = -1;
+            reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
+                  input_size());
+
+            if (requiredSize > mReadArea.remaining_size())
+            {
+                return require_input(requiredSize);
+            }
+            return oc::success();
         }
 
-        return self.read(buffer, amount);
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::skip_bytes>,
-                                  chunked_input_stream_base &self,
-                                  std::uint64_t const numBytes) noexcept
-            -> result<void>
-    {
-        if (numBytes == 0)
+        if (requiredSize > small_buffer_size)
+        {
+            return errc::buffer_size_exceeded;
+        }
+
+        move_small_buffer_content_to_front();
+        append_current_to_small_buffer();
+
+        if (requiredSize <= size())
         {
             return oc::success();
         }
-        if (numBytes > self.mRemaining)
+
+        // mReadArea has been completely drained and copied to mSmallBuffer
+        mBufferStart = static_cast<std::int8_t>(size());
+        mReadArea.reset();
+        DPLX_TRY(acquire_next_chunk());
+        return require_input(requiredSize);
+    }
+
+    auto do_discard_input(size_type discardAmount) noexcept
+            -> result<void> override
+    {
+        mBufferStart = -1;
+        do
         {
-            return dp::errc::end_of_stream;
+            DPLX_TRY(acquire_next_chunk());
+
+            auto const discardChunkSize = std::min<size_type>(
+                    discardAmount, mReadArea.remaining_size());
+
+            reset(nullptr, 0U, input_size() - discardChunkSize);
+            mReadArea.move_consumer(static_cast<memory_buffer::difference_type>(
+                    discardChunkSize));
+            discardAmount -= discardChunkSize;
+        } while (discardAmount != 0U);
+
+        if (mReadArea.remaining_size() == 0U)
+        {
+            DPLX_TRY(acquire_next_chunk());
         }
-        return self.discard(numBytes);
+        reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
+              input_size());
+        return oc::success();
+    }
+
+    auto do_bulk_read(std::byte *dest, std::size_t readAmount) noexcept
+            -> result<void> override
+    {
+        mBufferStart = -1;
+
+        do
+        {
+            DPLX_TRY(acquire_next_chunk());
+
+            auto const readChunkSize = std::min<std::size_t>(
+                    readAmount, mReadArea.remaining_size());
+            std::memcpy(dest, mReadArea.remaining_begin(), readChunkSize);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            dest += readChunkSize;
+
+            reset(nullptr, 0U, input_size() - readChunkSize);
+            mReadArea.move_consumer(
+                    static_cast<memory_buffer::difference_type>(readChunkSize));
+            readAmount -= readChunkSize;
+        } while (readAmount != 0);
+
+        if (mReadArea.remaining_size() == 0U)
+        {
+            DPLX_TRY(acquire_next_chunk());
+        }
+        reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
+              input_size());
+        return oc::success();
     }
 };
-} // namespace dplx::dp
+
+} // namespace dplx::dp::legacy

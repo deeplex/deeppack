@@ -14,68 +14,32 @@
 #include <dplx/cncr/tag_invoke.hpp>
 #include <dplx/predef/compiler.h>
 
-#include <dplx/dp/legacy/stream.hpp>
+#include <dplx/dp/streams/output_buffer.hpp>
 
-namespace dplx::dp
+namespace dplx::dp::legacy
 {
-
-class sbo_write_proxy final
-{
-    std::byte *mMemory;
-    std::size_t mSize;
-    std::byte mBuffer[minimum_guaranteed_write_size];
-
-public:
-    // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
-    constexpr sbo_write_proxy() noexcept = default;
-    inline explicit sbo_write_proxy(std::size_t size) noexcept
-        : mMemory(nullptr)
-        , mSize(size)
-    {
-    }
-    inline explicit sbo_write_proxy(std::span<std::byte> memory) noexcept
-        : mMemory(memory.data())
-        , mSize(memory.size())
-    {
-    }
-    // NOLINTEND(cppcoreguidelines-pro-type-member-init)
-
-    [[nodiscard]] inline auto uses_small_buffer() const noexcept -> bool
-    {
-        return mMemory == nullptr;
-    }
-
-    [[nodiscard]] inline auto data() noexcept -> std::byte *
-    {
-        return mMemory != nullptr ? mMemory : static_cast<std::byte *>(mBuffer);
-    }
-    [[nodiscard]] inline auto size() const noexcept -> std::size_t
-    {
-        return mSize;
-    }
-
-    [[nodiscard]] inline auto begin() noexcept -> std::byte *
-    {
-        return data();
-    }
-    [[nodiscard]] inline auto end() noexcept -> std::byte *
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return data() + mSize;
-    }
-};
 
 template <typename Impl>
-class chunked_output_stream_base
+class chunked_output_stream_base : public output_buffer
 {
-    std::span<std::byte> mWriteArea;
-    std::uint64_t mRemaining;
+    std::span<std::byte> mCurrentChunk;
+    size_type mRemaining;
+
+    static constexpr unsigned int small_buffer_size
+            = 2 * (minimum_output_buffer_size - 1);
+
+    std::int8_t mDecomissionThreshold;
+    std::byte mSmallBuffer[small_buffer_size];
 
 protected:
+    ~chunked_output_stream_base() noexcept = default;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     chunked_output_stream_base(std::span<std::byte> initialWriteArea,
-                               std::uint64_t remaining) noexcept
-        : mWriteArea(initialWriteArea)
+                               size_type remaining) noexcept
+        : output_buffer(initialWriteArea.data(), initialWriteArea.size())
+        , mCurrentChunk(initialWriteArea)
         , mRemaining(remaining)
+        , mDecomissionThreshold(-1)
     {
     }
 
@@ -94,142 +58,124 @@ private:
         using byte_span = std::span<std::byte>;
         DPLX_TRY(byte_span const nextChunk, impl()->acquire_next_chunk_impl());
 
-        mWriteArea
+        mCurrentChunk
                 = nextChunk.size() > mRemaining
                         ? nextChunk.first(static_cast<std::size_t>(mRemaining))
                         : nextChunk;
 
-        mRemaining -= mWriteArea.size();
+        mRemaining -= mCurrentChunk.size();
 
-        return success();
+        return oc::success();
     }
 #if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
 #pragma GCC diagnostic pop
 #endif
 
-    auto write(std::size_t const size) noexcept -> result<sbo_write_proxy>
+    auto do_grow(size_type requestedSize) noexcept -> result<void> override
     {
-        if (mWriteArea.size() >= size)
+        if (mDecomissionThreshold < 0)
         {
-            auto const buffer = mWriteArea.first(size);
-            mWriteArea = mWriteArea.subspan(size);
-            return sbo_write_proxy(buffer);
-        }
-        if (mWriteArea.size() + mRemaining < size)
-        {
-            return dplx::dp::errc::end_of_stream;
-        }
-        if (mWriteArea.empty())
-        {
-            DPLX_TRY(this->acquire_next_chunk());
-            return write(size);
-        }
-
-        // sector wrap around
-        if (size > dp::minimum_guaranteed_write_size)
-        {
-            return this->write(dp::minimum_guaranteed_write_size);
-        }
-
-        return sbo_write_proxy(size);
-    }
-
-    auto commit(sbo_write_proxy &proxy, std::size_t const size) noexcept
-            -> result<void>
-    {
-        if (!proxy.uses_small_buffer())
-        {
-            auto const diff = proxy.size() - size;
-            mWriteArea = std::span<std::byte>(mWriteArea.data() - diff,
-                                              mWriteArea.size() + diff);
-
-            return success();
-        }
-
-        // write() will only return a reference to the secondary
-        // buffer if the write doesn't fit into mWriteArea
-
-        std::span<std::byte> const buffer = proxy;
-
-        auto const firstChunkSize = std::min(buffer.size(), mWriteArea.size());
-        std::memcpy(mWriteArea.data(), buffer.data(), firstChunkSize);
-
-        // however, commit might shrink it back into a fitting chunk
-        if (buffer.size() < mWriteArea.size())
-        {
-            mWriteArea = mWriteArea.subspan(firstChunkSize);
-            return success();
-        }
-
-        auto const secondChunk = buffer.subspan(firstChunkSize);
-        DPLX_TRY(this->acquire_next_chunk());
-
-        // secondChunk.size() < minimum_guaranteed_write_size < chunk size
-        std::memcpy(mWriteArea.data(), secondChunk.data(), secondChunk.size());
-
-        return success();
-    }
-
-    auto write(std::byte const *data, std::size_t const size) noexcept
-            -> result<void>
-    {
-        if (mWriteArea.size() + mRemaining < size)
-        {
-            return dp::errc::end_of_stream;
-        }
-
-        for (std::span<std::byte const> remaining(data, size);
-             !remaining.empty();)
-        {
-            auto const chunk = std::min(remaining.size(), mWriteArea.size());
-
-            std::memcpy(mWriteArea.data(), remaining.data(), chunk);
-
-            remaining = remaining.subspan(chunk);
-            mWriteArea = mWriteArea.subspan(chunk);
-
-            if (mWriteArea.empty())
+            if (size() == 0U)
             {
-                DPLX_TRY(this->acquire_next_chunk());
+                DPLX_TRY(acquire_next_chunk());
+                reset(mCurrentChunk.data(), mCurrentChunk.size());
+                return oc::success();
             }
+            if (requestedSize > small_buffer_size)
+            {
+                return errc::buffer_size_exceeded;
+            }
+            mDecomissionThreshold = static_cast<std::int8_t>(size());
+            reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
+            return oc::success();
         }
 
-        return success();
-    }
+        auto const chunkPart = mCurrentChunk.last(
+                static_cast<std::size_t>(mDecomissionThreshold));
+        auto const consumedSize = static_cast<std::size_t>(
+                data() - static_cast<std::byte *>(mSmallBuffer));
+        if (consumedSize < static_cast<std::size_t>(mDecomissionThreshold))
+        {
+            if (requestedSize > small_buffer_size)
+            {
+                return errc::buffer_size_exceeded;
+            }
+            std::memcpy(chunkPart.data(),
+                        static_cast<std::byte *>(mSmallBuffer), consumedSize);
 
-public:
-    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
-                                  chunked_output_stream_base &self,
-                                  std::size_t const size) noexcept
-            -> result<sbo_write_proxy>
-    {
-        return self.write(size);
-    }
+            reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
+            mDecomissionThreshold -= static_cast<std::int8_t>(consumedSize);
+            return oc::success();
+        }
 
-    friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
-                                  chunked_output_stream_base &stream,
-                                  sbo_write_proxy &proxy) noexcept
-            -> result<void>
-    {
-        return stream.commit(proxy, proxy.size());
-    }
-    friend inline auto tag_invoke(cncr::tag_t<dp::commit>,
-                                  chunked_output_stream_base &stream,
-                                  sbo_write_proxy &proxy,
-                                  std::size_t const actualSize) noexcept
-            -> result<void>
-    {
-        return stream.commit(proxy, actualSize);
-    }
+        std::memcpy(chunkPart.data(), static_cast<std::byte *>(mSmallBuffer),
+                    chunkPart.size());
 
-    friend inline auto tag_invoke(cncr::tag_t<dp::write>,
-                                  chunked_output_stream_base &self,
-                                  std::byte const *data,
-                                  std::size_t const size) noexcept
-            -> result<void>
+        DPLX_TRY(acquire_next_chunk());
+
+        auto const overlap = consumedSize
+                           - static_cast<std::size_t>(mDecomissionThreshold);
+        std::memcpy(
+                mCurrentChunk.data(),
+                static_cast<std::byte *>(mSmallBuffer)
+                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        + mDecomissionThreshold,
+                overlap);
+
+        mCurrentChunk = mCurrentChunk.subspan(overlap);
+        mDecomissionThreshold = -1;
+        return ensure_size(requestedSize);
+    }
+    auto do_bulk_write(std::byte const *src, std::size_t writeAmount) noexcept
+            -> result<void> override
     {
-        return self.write(data, size);
+        if (mDecomissionThreshold >= 0)
+        {
+            auto const chunkPart = mCurrentChunk.last(
+                    static_cast<std::size_t>(mDecomissionThreshold));
+            std::memcpy(chunkPart.data(),
+                        static_cast<std::byte *>(mSmallBuffer),
+                        chunkPart.size());
+
+            DPLX_TRY(acquire_next_chunk());
+
+            auto const overlap = small_buffer_size
+                               - static_cast<unsigned>(mDecomissionThreshold);
+            std::memcpy(
+                    mCurrentChunk.data(),
+                    static_cast<std::byte *>(mSmallBuffer)
+                            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            + chunkPart.size(),
+                    overlap);
+            mCurrentChunk = mCurrentChunk.subspan(overlap);
+            mDecomissionThreshold = -1;
+        }
+        else
+        {
+            DPLX_TRY(acquire_next_chunk());
+        }
+
+        do
+        {
+            auto const chunkSize
+                    = std::min<std::size_t>(writeAmount, mCurrentChunk.size());
+            std::memcpy(mCurrentChunk.data(), src, chunkSize);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            src += chunkSize;
+            writeAmount -= chunkSize;
+
+            if (chunkSize == mCurrentChunk.size())
+            {
+                DPLX_TRY(acquire_next_chunk());
+            }
+            else
+            {
+                mCurrentChunk = mCurrentChunk.subspan(chunkSize);
+            }
+        } while (writeAmount != 0);
+        reset(mCurrentChunk.data(), mCurrentChunk.size());
+        return oc::success();
     }
 };
 
-} // namespace dplx::dp
+} // namespace dplx::dp::legacy

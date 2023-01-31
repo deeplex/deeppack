@@ -71,6 +71,7 @@ dplx_target_sources(deeppack
         dp/legacy/chunked_output_stream
         dp/legacy/memory_buffer
         dp/legacy/memory_input_stream
+        dp/legacy/memory_output_stream
         dp/legacy/stream
 )
 

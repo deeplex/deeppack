@@ -5,9 +5,10 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/legacy/memory_input_stream.hpp"
+#include "dplx/dp/legacy/memory_output_stream.hpp"
 
 #include <cstddef>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -20,21 +21,20 @@
 namespace dp_tests
 {
 
-static_assert(dp::input_stream<dp::memory_view &>);
+static_assert(dp::output_stream<dp::memory_buffer &>);
 
-TEST_CASE("legacy memory_view can be read from")
+TEST_CASE("legacy memory_buffer can be written to")
 {
     auto const sample = item_sample_ct<int>{
             0x7e, 2, {0x18, 0x7e}
     };
 
-    dp::memory_view subject{sample.encoded_bytes()};
+    std::vector<std::byte> memory(sample.encoded_length);
+    dp::memory_buffer subject{std::span<std::byte>(memory)};
 
-    int value = -1;
-    REQUIRE(dp::decode(subject, value));
+    REQUIRE(dp::encode(subject, sample.value));
 
-    CHECK(value == sample.value);
-    CHECK(subject.consumed_size() == sample.encoded_length);
+    CHECK(std::ranges::equal(subject.consumed(), sample.encoded_bytes()));
 }
 
 } // namespace dp_tests
