@@ -18,9 +18,16 @@
 namespace dplx::dp
 {
 
-inline constexpr unsigned minimum_guaranteed_read_size = 40;
+/**
+ * The minimum_input_buffer_size is in turn the the maximum value for which
+ * `input_buffer::require_input()` must not fail with
+ * `errc::buffer_size_exceeded`
+ */
+inline constexpr unsigned minimum_input_buffer_size = 40U;
+inline constexpr unsigned minimum_guaranteed_read_size
+        = minimum_input_buffer_size;
 
-}
+} // namespace dplx::dp
 
 namespace dplx::dp
 {

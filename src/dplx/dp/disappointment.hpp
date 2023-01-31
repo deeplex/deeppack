@@ -47,6 +47,7 @@ enum class errc
     oversized_additional_information_coding,
     indefinite_item,
     string_exceeds_size_limit,
+    buffer_size_exceeded,
 
     LIMIT,
 };
@@ -103,6 +104,8 @@ struct status_enum_definition<::dplx::dp::errc>
             "An indefinite binary/string/array/map CBOR item has been encountered during canonical or strict parsing" },
         { code::string_exceeds_size_limit, generic_errc::bad_message,
             "A binary/string CBOR item exceeded a size limit imposed by the user." },
+        { code::buffer_size_exceeded, generic_errc::no_buffer_space,
+            "The require_input(amount)/ensure_size(amount) call failed due to `amount` exceeding the streams internal buffer size." },
   // clang-format on
     };
 

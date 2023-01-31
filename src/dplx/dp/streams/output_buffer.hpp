@@ -17,9 +17,16 @@
 namespace dplx::dp
 {
 
-inline constexpr unsigned minimum_guaranteed_write_size = 40U;
+/**
+ * The minimum_output_buffer_size is in turn the the maximum value for which
+ * `output_buffer::ensure_size()` must not fail with
+ * `errc::buffer_size_exceeded`
+ */
+inline constexpr unsigned minimum_output_buffer_size = 40U;
+inline constexpr unsigned minimum_guaranteed_write_size
+        = minimum_output_buffer_size;
 
-}
+} // namespace dplx::dp
 
 namespace dplx::dp
 {
