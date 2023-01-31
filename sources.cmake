@@ -72,7 +72,6 @@ dplx_target_sources(deeppack
         dp/legacy/memory_buffer
         dp/legacy/memory_input_stream
         dp/legacy/memory_output_stream
-        dp/legacy/stream
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail)
