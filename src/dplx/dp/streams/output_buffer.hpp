@@ -129,6 +129,11 @@ public:
         return do_bulk_write(bytes, bytesSize);
     }
 
+    auto sync_output() noexcept -> result<void>
+    {
+        return do_sync_output();
+    }
+
 protected:
     constexpr void reset() noexcept
     {
@@ -145,6 +150,10 @@ private:
     virtual auto do_grow(size_type requestedSize) noexcept -> result<void> = 0;
     virtual auto do_bulk_write(std::byte const *src, std::size_t size) noexcept
             -> result<void> = 0;
+    virtual auto do_sync_output() noexcept -> result<void>
+    {
+        return oc::success();
+    }
 };
 
 } // namespace dplx::dp

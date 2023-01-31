@@ -10,11 +10,31 @@
 #include <dplx/cncr/type_utils.hpp>
 
 #include <dplx/dp/concepts.hpp>
+#include <dplx/dp/cpos/stream.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>
 #include <dplx/dp/items/emit_context.hpp>
 #include <dplx/dp/items/parse_context.hpp>
+#include <dplx/dp/streams/input_buffer.hpp>
+#include <dplx/dp/streams/output_buffer.hpp>
 #include <dplx/dp/streams/void_stream.hpp>
+
+namespace dplx::dp
+{
+
+template <typename T>
+concept output_stream = requires(T stream)
+{
+    get_output_buffer(static_cast<T &&>(stream));
+};
+
+template <typename T>
+concept input_stream = requires(T stream)
+{
+    get_input_buffer(static_cast<T &&>(stream));
+};
+
+} // namespace dplx::dp
 
 namespace dplx::dp
 {
@@ -45,6 +65,18 @@ inline constexpr struct encoded_size_of_fn
 // niebloids
 inline constexpr struct encode_fn final
 {
+    template <typename T, typename OutStream>
+        requires encodable<cncr::remove_cref_t<T>> && output_stream<
+                OutStream &&>
+    inline auto operator()(OutStream &&outStream, T &&value) const noexcept
+            -> result<void>
+    {
+        auto &&buffer = get_output_buffer(static_cast<OutStream &&>(outStream));
+        emit_context const ctx{static_cast<output_buffer &>(buffer)};
+        DPLX_TRY(codec<cncr::remove_cref_t<T>>::encode(
+                ctx, static_cast<cncr::remove_cref_t<T> const &>(value)));
+        return static_cast<output_buffer &>(buffer).sync_output();
+    }
     template <typename T>
         requires encodable<cncr::remove_cref_t<T>>
     inline auto operator()(output_buffer &outStream, T &&value) const noexcept
@@ -68,6 +100,16 @@ inline constexpr struct encode_fn final
 // niebloids
 inline constexpr struct decode_fn final
 {
+    template <typename T, typename InStream>
+        requires decodable<T> && input_stream<InStream>
+    inline auto operator()(InStream &&inStream, T &outValue) const noexcept
+            -> result<void>
+    {
+        auto &&buffer = get_input_buffer(static_cast<InStream &&>(inStream));
+        parse_context ctx{static_cast<input_buffer &>(buffer)};
+        DPLX_TRY(codec<T>::decode(ctx, outValue));
+        return static_cast<input_buffer &>(buffer).sync_input();
+    }
     template <typename T>
         requires decodable<T>
     inline auto operator()(input_buffer &inStream, T &outValue) const noexcept
@@ -84,6 +126,25 @@ inline constexpr struct decode_fn final
         return codec<T>::decode(ctx, outValue);
     }
 
+    template <typename T, typename InStream>
+        requires value_decodable<T> && std::default_initializable<
+                T> && std::movable<T> && input_stream<InStream>
+    inline auto operator()(as_value_t<T>, InStream &&inStream) const noexcept
+            -> result<T>
+    {
+        auto &&buffer = get_input_buffer(static_cast<InStream &&>(inStream));
+        parse_context ctx{static_cast<input_buffer &>(buffer)};
+        if (result<T> decodeRx = (*this)(as_value<T>, ctx);
+            decodeRx.has_failure())
+        {
+            return static_cast<decltype(decodeRx) &&>(decodeRx).as_failure();
+        }
+        else
+        {
+            DPLX_TRY(static_cast<input_buffer &>(buffer).sync_input());
+            return decodeRx;
+        }
+    }
     template <typename T>
         requires value_decodable<T>
     inline auto operator()(as_value_t<T>, input_buffer &inStream) const noexcept

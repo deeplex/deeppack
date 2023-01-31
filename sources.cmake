@@ -38,10 +38,10 @@ dplx_target_sources(deeppack
         dp/codecs/std-container
         dp/codecs/std-tuple
 
-       
         dp/cpos/container
         dp/cpos/container.std
         dp/cpos/property_id_hash
+        dp/cpos/stream
 
         dp/detail/bit
         dp/detail/hash

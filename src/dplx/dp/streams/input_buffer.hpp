@@ -176,6 +176,11 @@ public:
         return do_bulk_read(dest, amount);
     }
 
+    auto sync_input() noexcept -> result<void>
+    {
+        return do_sync_input();
+    }
+
 protected:
     void reset() noexcept
     {
@@ -207,6 +212,10 @@ private:
             -> result<void> = 0;
     virtual auto do_bulk_read(std::byte *dest, std::size_t size) noexcept
             -> result<void> = 0;
+    virtual auto do_sync_input() noexcept -> result<void>
+    {
+        return oc::success();
+    }
 };
 
 } // namespace dplx::dp
