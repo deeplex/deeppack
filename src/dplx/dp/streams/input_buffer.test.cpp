@@ -94,24 +94,22 @@ TEST_CASE("input_buffer can be default constructed")
               == std::ranges::ssize(storage));
     }
 
-    SECTION("calling require_input calls do_require_input in turn")
+    SECTION("calling require_input checks input_size()")
     {
         CHECK(subject.require_input_calls == 0);
 
         CHECK(subject.require_input(1U).error() == dp::errc::end_of_stream);
 
-        CHECK(subject.require_input_calls == 1);
-        CHECK(subject.last_require_input_param == 1U);
+        CHECK(subject.require_input_calls == 0);
     }
 
-    SECTION("calling discard_input calls do_discard_input in turn")
+    SECTION("calling discard_input checks input_size()")
     {
         CHECK(subject.discard_input_calls == 0);
 
         CHECK(subject.discard_input(1U).error() == dp::errc::end_of_stream);
 
-        CHECK(subject.discard_input_calls == 1);
-        CHECK(subject.last_discard_input_param == 1U);
+        CHECK(subject.discard_input_calls == 0);
     }
 
     SECTION("calling bulk_read calls do_bulk_read in turn")
@@ -122,9 +120,7 @@ TEST_CASE("input_buffer can be default constructed")
         CHECK(subject.bulk_read(writeArea.data(), writeArea.size()).error()
               == dp::errc::end_of_stream);
 
-        CHECK(subject.bulk_read_calls == 1);
-        CHECK(subject.last_bulk_read_param0 == writeArea.data());
-        CHECK(subject.last_bulk_read_param1 == writeArea.size());
+        CHECK(subject.bulk_read_calls == 0);
     }
 
     SECTION("calling bulk_read with size=0 does nothing")
@@ -186,6 +182,8 @@ TEST_CASE("input_buffer can be constructed with an initial buffer")
     }
     SECTION("discard_input discards the buffer and calls do_discard_input")
     {
+        subject.reset(subject.data(), subject.size(), subject.input_size() + 1);
+
         CHECK(subject.discard_input_calls == 0);
 
         CHECK(subject.discard_input(initialStorage.size() + 1U).error()
@@ -198,6 +196,7 @@ TEST_CASE("input_buffer can be constructed with an initial buffer")
 
     SECTION("calling bulk_write calls do_bulk_write in turn")
     {
+        subject.reset(subject.data(), subject.size(), subject.input_size() * 2);
         std::array<std::byte, testMemorySize * 2> memory{};
 
         CHECK(subject.bulk_read(memory.data(), memory.size()).error()

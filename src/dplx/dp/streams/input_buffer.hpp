@@ -110,7 +110,11 @@ public:
     auto require_input(size_type const requiredSize) noexcept -> result<void>
     {
         result<void> rx = oc::success();
-        if (mInputBufferSize < requiredSize)
+        if (requiredSize > mInputSize)
+        {
+            rx = errc::end_of_stream;
+        }
+        else if (mInputBufferSize < requiredSize)
         {
             rx = do_require_input(requiredSize);
         }
@@ -132,7 +136,12 @@ public:
             discard_buffered(amount);
             return oc::success();
         }
+        if (amount > mInputSize)
+        {
+            return errc::end_of_stream;
+        }
 
+        mInputSize -= mInputBufferSize;
         auto const remaining = amount - mInputBufferSize;
         reset();
         return do_discard_input(remaining);
@@ -143,6 +152,10 @@ public:
         if (amount == 0U) [[unlikely]]
         {
             return oc::success();
+        }
+        if (amount > mInputSize)
+        {
+            return errc::end_of_stream;
         }
         if (mInputBufferSize > 0U) [[likely]]
         {
