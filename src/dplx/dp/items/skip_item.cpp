@@ -32,7 +32,7 @@ static auto skip_binary_or_text(parse_context &ctx, item_head const &item)
     for (;;)
     {
         item_head chunkInfo; // NOLINT(cppcoreguidelines-pro-type-member-init)
-        if (auto const parseHeadRx = dp::parse_item_head(ctx);
+        if (auto &&parseHeadRx = dp::parse_item_head(ctx);
             parseHeadRx.has_value()) [[likely]]
         {
             chunkInfo = parseHeadRx.assume_value();

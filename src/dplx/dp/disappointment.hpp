@@ -117,13 +117,8 @@ struct status_enum_definition<::dplx::dp::errc>
 namespace dplx::dp
 {
 
-template <typename R,
-          typename EC = system_error::errored_status_code<
-                  cncr::data_defined_status_domain_type<errc>>>
-using result = oc::basic_result<
-        R,
-        EC,
-        oc::experimental::policy::default_status_result_policy<R, EC>>;
+template <typename R>
+using result = oc::experimental::status_result<R>;
 
 }
 
@@ -178,7 +173,7 @@ inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
     {
         return false;
     }
-    out = oc::try_operation_return_as(in);
+    out = oc::try_operation_return_as(static_cast<result<void> &&>(in));
     return true;
 }
 template <tryable T>
