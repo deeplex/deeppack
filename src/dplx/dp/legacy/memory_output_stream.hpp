@@ -20,6 +20,7 @@ namespace dplx::dp
 namespace detail
 {
 
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
 class legacy_memory_output_stream final : public output_buffer
 {
     memory_buffer &mImpl;

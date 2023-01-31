@@ -452,7 +452,13 @@ inline auto decode_object_head(parse_context &ctx,
                                std::bool_constant<isVersioned> = {})
         -> result<object_head_info>
 {
-    DPLX_TRY(item_head mapInfo, dp::parse_item_head(ctx));
+    auto &&parseHeadRx = dp::parse_item_head(ctx);
+    if (parseHeadRx.has_error()) [[unlikely]]
+    {
+        return static_cast<decltype(parseHeadRx) &&>(parseHeadRx)
+                .assume_error();
+    }
+    item_head const &mapInfo = parseHeadRx.assume_value();
     if (mapInfo.type != type_code::map || mapInfo.indefinite())
     {
         return errc::item_type_mismatch;

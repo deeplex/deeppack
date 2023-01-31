@@ -19,7 +19,7 @@ namespace dplx::dp
 inline constexpr struct get_output_buffer_fn
 {
     template <typename OutStream>
-    // clang-format off
+        // clang-format off
         requires cncr::nothrow_tag_invocable<get_output_buffer_fn, OutStream &&>
             && std::is_base_of_v<output_buffer,
                     std::remove_cvref_t<cncr::tag_invoke_result_t<get_output_buffer_fn, OutStream &&>>>

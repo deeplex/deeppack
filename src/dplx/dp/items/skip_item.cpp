@@ -40,7 +40,7 @@ static auto skip_binary_or_text(parse_context &ctx, item_head const &item)
         else
         {
             return static_cast<decltype(parseHeadRx) &&>(parseHeadRx)
-                    .as_failure();
+                    .assume_error();
         }
 
         if (chunkInfo.is_special_break())
@@ -66,7 +66,15 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
     constexpr std::size_t numStackItems = 64;
 
     boost::container::small_vector<item_head, numStackItems> stack;
-    DPLX_TRY(stack.emplace_back(), dp::parse_item_head(ctx));
+    if (auto &&parseHeadRx = dp::parse_item_head(ctx); parseHeadRx.has_error())
+    {
+        return static_cast<decltype(parseHeadRx) &&>(parseHeadRx)
+                .assume_error();
+    }
+    else // NOLINT(readability-else-after-return)
+    {
+        stack.emplace_back() = parseHeadRx.assume_value();
+    }
 
     do
     {
@@ -89,7 +97,14 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
         case static_cast<unsigned>(type_code::text) >> majorTypeBitOffset:
         {
             // neither finite nor indefinite binary/text items can be nested
-            DPLX_TRY(detail::skip_binary_or_text(ctx, item));
+            if (auto &&skipBinaryOrTextRx
+                = detail::skip_binary_or_text(ctx, item);
+                skipBinaryOrTextRx.has_error())
+            {
+                return static_cast<decltype(skipBinaryOrTextRx) &&>(
+                               skipBinaryOrTextRx)
+                        .assume_error();
+            }
             stack.pop_back();
             break;
         }

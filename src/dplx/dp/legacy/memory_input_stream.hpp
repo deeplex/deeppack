@@ -25,6 +25,7 @@ namespace detail
 {
 
 template <typename T>
+// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
 class legacy_memory_input_stream final : public input_buffer
 {
     basic_memory_buffer<T> &mImpl;

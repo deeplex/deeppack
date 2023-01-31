@@ -134,16 +134,13 @@ inline constexpr struct decode_fn final
     {
         auto &&buffer = get_input_buffer(static_cast<InStream &&>(inStream));
         parse_context ctx{static_cast<input_buffer &>(buffer)};
-        if (result<T> decodeRx = (*this)(as_value<T>, ctx);
-            decodeRx.has_failure())
+        result<T> decodeRx = (*this)(as_value<T>, ctx);
+        if (decodeRx.has_failure())
         {
             return static_cast<decltype(decodeRx) &&>(decodeRx).as_failure();
         }
-        else
-        {
-            DPLX_TRY(static_cast<input_buffer &>(buffer).sync_input());
-            return decodeRx;
-        }
+        DPLX_TRY(static_cast<input_buffer &>(buffer).sync_input());
+        return decodeRx;
     }
     template <typename T>
         requires value_decodable<T>

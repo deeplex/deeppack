@@ -158,7 +158,13 @@ inline auto decode_tuple_head(parse_context &ctx,
                               std::bool_constant<isVersioned> = {}) noexcept
         -> result<tuple_head_info>
 {
-    DPLX_TRY(item_head const &arrayInfo, dp::parse_item_head(ctx));
+    auto &&parseHeadRx = dp::parse_item_head(ctx);
+    if (parseHeadRx.has_error()) [[unlikely]]
+    {
+        return static_cast<decltype(parseHeadRx) &&>(parseHeadRx)
+                .assume_error();
+    }
+    item_head const &arrayInfo = parseHeadRx.assume_value();
     if (arrayInfo.type != type_code::array || arrayInfo.indefinite())
     {
         return errc::item_type_mismatch;
