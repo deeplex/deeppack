@@ -27,8 +27,8 @@ static_assert(dp::encodable<std::tuple<int, long>>);
 TEST_CASE("std::tuple has a codec")
 {
     constexpr item_sample_ct<std::tuple<int, long long>> sample{
-            {   3, 22},
-            3, { 0x82,  3,  22}
+            {3, 22},
+            3, {0x82, 3, 22}
     };
 
     SECTION("with encode")
@@ -57,8 +57,8 @@ TEST_CASE("std::tuple has a codec")
 TEST_CASE("encodes three tuples")
 {
     constexpr item_sample_ct<std::tuple<int, long long, long>> sample{
-            {   3, 22,  5},
-            4, { 0x83,  3, 22,   5}
+            {3, 22, 5},
+            4, {0x83, 3, 22, 5}
     };
 
     SECTION("to a stream")

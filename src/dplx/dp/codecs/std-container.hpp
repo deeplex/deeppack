@@ -30,8 +30,8 @@ namespace dplx::dp
 
 template <typename Range>
 inline constexpr bool enable_indefinite_encoding
-        = std::ranges::input_range<
-                  Range> && !std::ranges::sized_range<Range> && !std::ranges::forward_range<Range>;
+        = std::ranges::input_range<Range> && !std::ranges::sized_range<Range>
+       && !std::ranges::forward_range<Range>;
 
 template <typename T>
 inline constexpr bool disable_range
@@ -42,7 +42,7 @@ inline constexpr bool disable_range
         = std::is_same_v<T, std::ranges::range_value_t<T>>;
 
 template <typename T>
-concept range = std::ranges::range<T> && !disable_range<T>;
+concept range = std::ranges::range<T> && (!disable_range<T>);
 
 // clang-format off
 template <typename C>
@@ -142,8 +142,8 @@ namespace dplx::dp
 {
 
 template <range R>
-    requires(std::ranges::contiguous_range<R>
-                     &&std::same_as<std::byte, std::ranges::range_value_t<R>>)
+    requires std::ranges::contiguous_range<R>
+          && std::same_as<std::byte, std::ranges::range_value_t<R>>
 class codec<R>
 {
 public:
@@ -159,8 +159,8 @@ public:
                                std::ranges::size(value));
     }
     static auto decode(parse_context &ctx, R &value) noexcept -> result<void>
-        requires(container_traits<R>::resize
-                         &&std::ranges::output_range<R, std::byte>)
+        requires container_traits<R>::resize
+              && std::ranges::output_range<R, std::byte>
     {
         result<std::size_t> parseRx = dp::parse_binary(ctx, value);
         if (parseRx.has_failure()) [[unlikely]]
@@ -199,8 +199,8 @@ class codec<R>
 public:
     static auto size_of(emit_context const &ctx, R const &vs) noexcept
             -> std::uint64_t
-            requires(std::ranges::input_range<R>
-                             &&encodable<std::ranges::range_value_t<R>>)
+        requires std::ranges::input_range<R>
+              && encodable<std::ranges::range_value_t<R>>
     {
         if constexpr (enable_indefinite_encoding<R>)
         {
@@ -214,8 +214,8 @@ public:
     }
     static auto encode(emit_context const &ctx, R const &vs) noexcept
             -> result<void>
-        requires(std::ranges::input_range<R>
-                         &&encodable<std::ranges::range_value_t<R>>)
+        requires std::ranges::input_range<R>
+              && encodable<std::ranges::range_value_t<R>>
     {
         if constexpr (enable_indefinite_encoding<R>)
         {
@@ -229,27 +229,27 @@ public:
     static auto decode(parse_context &ctx, R &c) noexcept -> result<void>
         requires
 #if DPLX_DP_WORKAROUND_CLANG_44178
-                detail::decodable_sequence_container<R>
+            detail::decodable_sequence_container<R>
 #else
-                sequence_container<R> && decodable<typename R::value_type>
+            sequence_container<R> && decodable<typename R::value_type>
 #endif
-        {
-            c.clear();
-            DPLX_TRY(dp::parse_array(ctx, c, decode_element));
-            return dp::success();
-        }
+    {
+        c.clear();
+        DPLX_TRY(dp::parse_array(ctx, c, decode_element));
+        return dp::success();
+    }
     static auto decode(parse_context &ctx, R &c) noexcept -> result<void>
         requires
 #if DPLX_DP_WORKAROUND_CLANG_44178
-                detail::decodable_associative_container<R>
+            detail::decodable_associative_container<R>
 #else
-                associative_container<R> && decodable<typename R::key_type>
+            associative_container<R> && decodable<typename R::key_type>
 #endif
-        {
-            c.clear();
-            DPLX_TRY(dp::parse_array(ctx, c, decode_key));
-            return dp::success();
-        }
+    {
+        c.clear();
+        DPLX_TRY(dp::parse_array(ctx, c, decode_key));
+        return dp::success();
+    }
 
 private:
     static auto decode_element(parse_context &ctx,
@@ -257,50 +257,50 @@ private:
                                std::size_t const) noexcept -> result<void>
         requires
 #if DPLX_DP_WORKAROUND_CLANG_44178
-                detail::decodable_sequence_container<R>
+            detail::decodable_sequence_container<R>
 #else
-                sequence_container<R> && decodable<typename R::value_type>
+            sequence_container<R> && decodable<typename R::value_type>
 #endif
+    {
+        try
         {
-            try
-            {
-                typename R::reference v = vs.emplace_back();
-                return dp::decode(ctx, v);
-            }
-            catch (std::bad_alloc const &)
-            {
-                return errc::not_enough_memory;
-            }
+            typename R::reference v = vs.emplace_back();
+            return dp::decode(ctx, v);
         }
+        catch (std::bad_alloc const &)
+        {
+            return errc::not_enough_memory;
+        }
+    }
     static auto decode_key(parse_context &ctx,
                            R &vs,
                            std::size_t const) noexcept -> result<void>
         requires
 #if DPLX_DP_WORKAROUND_CLANG_44178
-                detail::decodable_associative_container<R>
+            detail::decodable_associative_container<R>
 #else
-                associative_container<R> && decodable<typename R::key_type>
+            associative_container<R> && decodable<typename R::key_type>
 #endif
+    {
+        try
         {
-            try
-            {
-                DPLX_TRY(auto &&key,
-                         dp::decode(as_value<typename R::key_type>, ctx));
+            DPLX_TRY(auto &&key,
+                     dp::decode(as_value<typename R::key_type>, ctx));
 
-                std::pair<typename R::iterator, bool> it
-                        = vs.emplace(static_cast<typename R::key_type &&>(key));
-                if (!it.second)
-                {
-                    vs.clear();
-                    return errc::duplicate_key;
-                }
-                return dp::success();
-            }
-            catch (std::bad_alloc const &)
+            std::pair<typename R::iterator, bool> it
+                    = vs.emplace(static_cast<typename R::key_type &&>(key));
+            if (!it.second)
             {
-                return errc::not_enough_memory;
+                vs.clear();
+                return errc::duplicate_key;
             }
+            return dp::success();
         }
+        catch (std::bad_alloc const &)
+        {
+            return errc::not_enough_memory;
+        }
+    }
 };
 
 template <mapping_associative_container C>
@@ -308,8 +308,9 @@ class codec<C>
 {
 public:
     static auto size_of(emit_context const &ctx, C const &vs) noexcept
-            -> std::uint64_t requires encodable<
-                    typename C::key_type> && encodable<typename C::mapped_type>
+            -> std::uint64_t
+        requires encodable<typename C::key_type>
+              && encodable<typename C::mapped_type>
     {
         if constexpr (enable_indefinite_encoding<C>)
         {
@@ -322,32 +323,33 @@ public:
     }
     static auto encode(emit_context const &ctx, C const &vs) noexcept
             -> result<void>
-        requires encodable<typename C::key_type> && encodable<
-                typename C::mapped_type>
+        requires encodable<typename C::key_type>
+              && encodable<typename C::mapped_type>
+    {
+        if constexpr (enable_indefinite_encoding<C>)
         {
-            if constexpr (enable_indefinite_encoding<C>)
-            {
-                return dp::emit_map_indefinite(ctx, vs, encode_pair);
-            }
-            else
-            {
-                return dp::emit_map(ctx, vs, encode_pair);
-            }
+            return dp::emit_map_indefinite(ctx, vs, encode_pair);
         }
+        else
+        {
+            return dp::emit_map(ctx, vs, encode_pair);
+        }
+    }
     static auto decode(parse_context &ctx, C &vs) noexcept -> result<void>
-        requires decodable<typename C::key_type> && decodable<
-                typename C::mapped_type>
-        {
-            vs.clear();
-            DPLX_TRY(dp::parse_map(ctx, vs, decode_pair));
-            return oc::success();
-        }
+        requires decodable<typename C::key_type>
+              && decodable<typename C::mapped_type>
+    {
+        vs.clear();
+        DPLX_TRY(dp::parse_map(ctx, vs, decode_pair));
+        return oc::success();
+    }
 
 private:
     static auto size_of_pair(emit_context const &ctx,
                              typename C::value_type const &pair) noexcept
-            -> std::uint64_t requires encodable<
-                    typename C::key_type> && encodable<typename C::mapped_type>
+            -> std::uint64_t
+        requires encodable<typename C::key_type>
+              && encodable<typename C::mapped_type>
     {
         auto const &[key, mapped] = pair;
         return dp::encoded_size_of(ctx, key) + dp::encoded_size_of(ctx, mapped);
@@ -355,43 +357,42 @@ private:
     static auto encode_pair(emit_context const &ctx,
                             typename C::value_type const &pair) noexcept
             -> result<void>
-        requires encodable<typename C::key_type> && encodable<
-                typename C::mapped_type>
-        {
-            auto const &[key, mapped] = pair;
-            DPLX_TRY(dp::encode(ctx, key));
-            DPLX_TRY(dp::encode(ctx, mapped));
-            return dp::success();
-        }
+        requires encodable<typename C::key_type>
+              && encodable<typename C::mapped_type>
+    {
+        auto const &[key, mapped] = pair;
+        DPLX_TRY(dp::encode(ctx, key));
+        DPLX_TRY(dp::encode(ctx, mapped));
+        return dp::success();
+    }
     static auto decode_pair(parse_context &ctx,
                             C &vs,
                             std::size_t const) noexcept -> result<void>
-        requires decodable<typename C::key_type> && decodable<
-                typename C::mapped_type>
+        requires decodable<typename C::key_type>
+              && decodable<typename C::mapped_type>
+    {
+        try
         {
-            try
-            {
-                DPLX_TRY(auto &&key,
-                         dp::decode(as_value<typename C::key_type>, ctx));
-                DPLX_TRY(auto &&mapped,
-                         dp::decode(as_value<typename C::mapped_type>, ctx));
+            DPLX_TRY(auto &&key,
+                     dp::decode(as_value<typename C::key_type>, ctx));
+            DPLX_TRY(auto &&mapped,
+                     dp::decode(as_value<typename C::mapped_type>, ctx));
 
-                std::pair<typename C::iterator, bool> emplaceResult
-                        = vs.emplace(static_cast<typename C::key_type &&>(key),
-                                     static_cast<typename C::mapped_type &&>(
-                                             mapped));
-                if (!emplaceResult.second)
-                {
-                    vs.clear();
-                    return errc::duplicate_key;
-                }
-                return dp::success();
-            }
-            catch (std::bad_alloc const &)
+            std::pair<typename C::iterator, bool> emplaceResult = vs.emplace(
+                    static_cast<typename C::key_type &&>(key),
+                    static_cast<typename C::mapped_type &&>(mapped));
+            if (!emplaceResult.second)
             {
-                return errc::not_enough_memory;
+                vs.clear();
+                return errc::duplicate_key;
             }
+            return dp::success();
         }
+        catch (std::bad_alloc const &)
+        {
+            return errc::not_enough_memory;
+        }
+    }
 };
 
 } // namespace dplx::dp
@@ -442,19 +443,20 @@ class fixed_size_container_codec
 {
 public:
     static auto size_of(emit_context const &ctx, std::span<T const> vs) noexcept
-            -> std::uint64_t requires(encodable<T>)
+            -> std::uint64_t
+        requires encodable<T>
     {
         return dp::item_size_of_array(ctx, vs, dp::encoded_size_of);
     }
     static auto encode(emit_context const &ctx, std::span<T const> vs) noexcept
             -> result<void>
-        requires(encodable<T>)
+        requires encodable<T>
     {
         return dp::emit_array(ctx, vs, dp::encode);
     }
     static auto decode(parse_context &ctx, std::span<T> value) noexcept
             -> result<void>
-        requires(decodable<T>)
+        requires decodable<T>
     {
         result<std::size_t> parseRx
                 = dp::parse_array(ctx, value, value.size(), decode_element);
@@ -473,7 +475,7 @@ private:
     static auto decode_element(parse_context &ctx,
                                std::span<T> const value,
                                std::size_t const i) noexcept -> result<void>
-        requires(decodable<T>)
+        requires decodable<T>
     {
         return dp::decode(ctx, value[i]);
     }

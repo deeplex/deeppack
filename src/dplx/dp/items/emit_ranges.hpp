@@ -93,20 +93,19 @@ inline auto emit_indefinite_array_like(emit_context const &ctx,
 } // namespace detail
 
 template <std::ranges::input_range R, typename EncodeElementFn>
-    // clang-format off
-    requires((std::ranges::forward_range<R> || std::ranges::sized_range<R>)
-            && detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>)
-// clang-format on
-inline auto emit_array(emit_context const &ctx,
-                       R const &vs,
-                       EncodeElementFn &&encodeElement) noexcept -> result<void>
+    requires(std::ranges::forward_range<R> || std::ranges::sized_range<R>)
+         && detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>
+            inline auto emit_array(emit_context const &ctx,
+                                   R const &vs,
+                                   EncodeElementFn &&encodeElement) noexcept
+            -> result<void>
 {
     return detail::emit_array_like(
             ctx, vs, type_code::array,
             static_cast<EncodeElementFn &&>(encodeElement));
 }
 template <std::ranges::input_range R, typename EncodeElementFn>
-    requires(detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>)
+    requires detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>
 inline auto emit_array_indefinite(emit_context const &ctx,
                                   R const &vs,
                                   EncodeElementFn &&encodeElement) noexcept
@@ -118,20 +117,19 @@ inline auto emit_array_indefinite(emit_context const &ctx,
 }
 
 template <std::ranges::input_range R, typename EncodeElementFn>
-    // clang-format off
-    requires((std::ranges::forward_range<R> || std::ranges::sized_range<R>)
-            &&detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>)
-// clang-format on
-inline auto emit_map(emit_context const &ctx,
-                     R const &vs,
-                     EncodeElementFn &&encodeElement) noexcept -> result<void>
+    requires(std::ranges::forward_range<R> || std::ranges::sized_range<R>)
+         && detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>
+            inline auto emit_map(emit_context const &ctx,
+                                 R const &vs,
+                                 EncodeElementFn &&encodeElement) noexcept
+            -> result<void>
 {
     return detail::emit_array_like(
             ctx, vs, type_code::map,
             static_cast<EncodeElementFn &&>(encodeElement));
 }
 template <std::ranges::input_range R, typename EncodeElementFn>
-    requires(detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>)
+    requires detail::subitem_emitlet<std::remove_cvref_t<EncodeElementFn>, R>
 inline auto emit_map_indefinite(emit_context const &ctx,
                                 R const &vs,
                                 EncodeElementFn &&encodeElement) noexcept

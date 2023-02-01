@@ -62,7 +62,8 @@ struct fixed_u8string
             = default;
     friend inline constexpr auto operator<=>(fixed_u8string const &,
                                              fixed_u8string const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 
     // NOLINTEND(cppcoreguidelines-pro-bounds-constant-array-index)
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

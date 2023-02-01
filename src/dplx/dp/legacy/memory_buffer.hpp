@@ -52,7 +52,7 @@ public:
     }
 
     template <typename U, std::size_t Extent>
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         requires(std::convertible_to<U (*)[], T (*)[]>)
     explicit constexpr basic_memory_buffer(std::span<U, Extent> const &memory)
         : basic_memory_buffer(
@@ -60,7 +60,7 @@ public:
     {
     }
     template <typename U>
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
         requires(std::convertible_to<U (*)[], T (*)[]>)
     explicit constexpr basic_memory_buffer(basic_memory_buffer<U> const &other)
         : mWindowBegin(other.remaining_begin())

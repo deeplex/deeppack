@@ -22,8 +22,8 @@ namespace dplx::dp
 {
 
 template <auto M, auto... Ms>
-    requires(std::is_member_object_pointer_v<decltype(M)> &&...
-                     &&std::is_member_object_pointer_v<decltype(Ms)>)
+    requires(std::is_member_object_pointer_v<decltype(M)> && ...
+             && std::is_member_object_pointer_v<decltype(Ms)>)
 struct tuple_member_def
 {
 private:
@@ -58,7 +58,8 @@ public:
             = default;
     friend inline constexpr auto operator<=>(tuple_member_def const &,
                                              tuple_member_def const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 };
 
 template <typename AccessorType>
@@ -92,7 +93,8 @@ struct tuple_member_fun
             = default;
     friend inline constexpr auto operator<=>(tuple_member_fun const &,
                                              tuple_member_fun const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 };
 
 template <auto... Properties>
@@ -137,7 +139,8 @@ struct tuple_def
             = default;
     friend inline constexpr auto operator<=>(tuple_def const &,
                                              tuple_def const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 };
 
 } // namespace dplx::dp

@@ -241,7 +241,7 @@ TEST_CASE("object codec helpers with layout descriptor")
     item_sample_ct<test_object> const sample{
             {0xdeadbeafU, 0x07U, 0xfefeU},
             9,
-            { 0xa2, 0x01, 0x1a, 0xde, 0xad, 0xbe, 0xaf, 0x17, 0x07}
+            {0xa2, 0x01, 0x1a, 0xde, 0xad, 0xbe, 0xaf, 0x17, 0x07}
     };
 
     SECTION("can encode")
@@ -360,7 +360,7 @@ TEST_CASE("object codec helpers with auto numeric layout descriptor")
     item_sample_ct<custom_with_layout_descriptor, 16> const sample{
             {0x13, 0x07, 0x04, 0x14, {0, 0, 0xcfU}},
             14,
-            { 0xa5, 1, 0x13, 2, 7, 5, 0x18, 0xcfU, 0x18, 26, 4, 0x18, 36, 0x14}
+            {0xa5, 1, 0x13, 2, 7, 5, 0x18, 0xcfU, 0x18, 26, 4, 0x18, 36, 0x14}
     };
 
     SECTION("can encode")
@@ -458,7 +458,7 @@ TEST_CASE("object codec helpers with auto named layout descriptor")
     item_sample_ct<custom_with_named_layout_descriptor, 32> const sample{
             {0x13, 0x07, 0x04, 0x14},
             17,
-            { 0xa4, 0x61, 'b', 7, 0x61, 'c', 0x04, 0x61, 'd', 0x14, 0x65, 'n',
+            {0xa4, 0x61, 'b', 7, 0x61, 'c', 0x04, 0x61, 'd', 0x14, 0x65, 'n',
              'o', 'n', 'c', 'e', 0x13}
     };
 

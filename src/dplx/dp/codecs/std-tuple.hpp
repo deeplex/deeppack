@@ -22,7 +22,7 @@ namespace dplx::dp
 inline constexpr struct encode_varargs_fn final
 {
     template <typename... Ts>
-        requires(... &&encodable<cncr::remove_cref_t<Ts>>)
+        requires(... && encodable<cncr::remove_cref_t<Ts>>)
     inline auto operator()(emit_context const &ctx,
                            Ts &&...values) const noexcept -> result<void>
     {
@@ -40,7 +40,7 @@ inline constexpr struct encode_varargs_fn final
         }
 
         template <typename... Ts>
-            requires(... &&encodable<cncr::remove_cref_t<Ts>>)
+            requires(... && encodable<cncr::remove_cref_t<Ts>>)
         inline auto operator()(Ts &&...vs) const noexcept -> result<void>
         {
             auto const &ctx = *mCtx;
@@ -74,7 +74,7 @@ inline constexpr struct encode_varargs_fn final
 constexpr struct encoded_size_of_varargs_fn
 {
     template <typename... Ts>
-        requires(... &&encodable<cncr::remove_cref_t<Ts>>)
+        requires(... && encodable<cncr::remove_cref_t<Ts>>)
     inline auto operator()(emit_context const &ctx,
                            Ts &&...values) const noexcept -> result<void>
     {
@@ -92,7 +92,7 @@ constexpr struct encoded_size_of_varargs_fn
         }
 
         template <typename... Ts>
-            requires(... &&encodable<cncr::remove_cref_t<Ts>>)
+            requires(... && encodable<cncr::remove_cref_t<Ts>>)
         inline auto operator()(Ts &&...vs) const noexcept -> std::uint64_t
         {
             auto const &ctx = *mCtx;
@@ -113,7 +113,7 @@ constexpr struct encoded_size_of_varargs_fn
 constexpr struct decode_varargs_fn
 {
     template <typename... Ts>
-        requires(... &&decodable<cncr::remove_cref_t<Ts>>)
+        requires(... && decodable<cncr::remove_cref_t<Ts>>)
     inline auto operator()(parse_context &ctx, Ts &&...values) const noexcept
             -> result<void>
     {
@@ -131,7 +131,7 @@ constexpr struct decode_varargs_fn
         }
 
         template <typename... Ts>
-            requires(... &&decodable<cncr::remove_cref_t<Ts>>)
+            requires(... && decodable<cncr::remove_cref_t<Ts>>)
         inline auto operator()(Ts &&...vs) const noexcept -> result<void>
         {
             auto &ctx = *mCtx;
@@ -168,25 +168,26 @@ namespace dplx::dp
 {
 
 template <typename... Ts>
-    requires(codable<std::remove_cvref_t<Ts>> &&...)
+    requires(codable<std::remove_cvref_t<Ts>> && ...)
 class codec<std::tuple<Ts...>>
 {
 public:
     static auto size_of(emit_context const &ctx,
                         std::tuple<Ts...> const &tuple) noexcept
-            -> std::uint64_t requires(encodable<std::remove_cvref_t<Ts>> &&...)
+            -> std::uint64_t
+        requires(encodable<std::remove_cvref_t<Ts>> && ...)
     {
         return std::apply(encoded_size_of_varargs_fn::bound_type(ctx), tuple);
     }
     static auto encode(emit_context const &ctx,
                        std::tuple<Ts...> const &tuple) noexcept -> result<void>
-        requires(encodable<std::remove_cvref_t<Ts>> &&...)
+        requires(encodable<std::remove_cvref_t<Ts>> && ...)
     {
         return std::apply(encode_varargs_fn::bound_type(ctx), tuple);
     }
     static auto decode(parse_context &ctx, std::tuple<Ts...> &tuple) noexcept
             -> result<void>
-        requires(decodable<std::remove_cvref_t<Ts>> &&...)
+        requires(decodable<std::remove_cvref_t<Ts>> && ...)
     {
         return std::apply(decode_varargs_fn::bound_type(ctx), tuple);
     }
