@@ -13,13 +13,12 @@
 #include <span>
 #include <string_view>
 
-#include <boost/algorithm/hex.hpp>
-
 #include <catch2/generators/catch_generator_exception.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
+#include "hex_decode.hpp"
 #include "item_sample_rt.hpp"
 #include "range_generator.hpp" // gens
 
@@ -49,21 +48,12 @@ struct YAML::convert<dp_tests::item_sample_rt<T>>
 
         // decode the hex encodde output binary
         std::string const &hexEncoded = encodedNode.Scalar();
-        if (hexEncoded.size() % 2U != 0U)
-        {
-
-            return false;
-        }
-        std::vector<std::byte> bytes(hexEncoded.size() / 2U);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-        auto *const out = reinterpret_cast<std::uint8_t *>(bytes.data());
-        auto *const outEnd = boost::algorithm::unhex(hexEncoded, out);
-        if (std::distance(out, outEnd) != std::ssize(bytes))
+        if (hexEncoded.size() % 2U != 0U
+            || !std::ranges::all_of(hexEncoded, dp_tests::is_hex_digit))
         {
             return false;
         }
-
-        sample.encoded = std::move(bytes);
+        sample.encoded = dp_tests::hex_decode(hexEncoded);
         return true;
     }
 };
