@@ -17,10 +17,7 @@ namespace dplx::dp
 {
 
 template <typename T>
-concept exposed_static_layout_descriptor = requires
-{
-    T::layout_descriptor;
-};
+concept exposed_static_layout_descriptor = requires { T::layout_descriptor; };
 
 inline constexpr struct layout_descriptor_for_fn
 {
@@ -35,9 +32,11 @@ inline constexpr struct layout_descriptor_for_fn
     }
 
     template <typename T>
-        requires(
-                exposed_static_layout_descriptor<
-                        T> && (is_object_def_v<cncr::remove_cref_t<decltype(T::layout_descriptor)>> || is_tuple_def_v<cncr::remove_cref_t<decltype(T::layout_descriptor)>>))
+        requires(exposed_static_layout_descriptor<T>
+                 && (is_object_def_v<cncr::remove_cref_t<
+                             decltype(T::layout_descriptor)>>
+                     || is_tuple_def_v<cncr::remove_cref_t<
+                             decltype(T::layout_descriptor)>>))
     friend constexpr auto tag_invoke(layout_descriptor_for_fn,
                                      std::type_identity<T>) noexcept
             -> decltype(auto)
@@ -49,21 +48,24 @@ inline constexpr struct layout_descriptor_for_fn
 
 template <typename T>
 concept packable
-        = !detail::is_type_identity<T>::value // tis a workaround for infinite
-                                              // compiler recursion during
-                                              // encoded_size_of_fn constraint
-                                              // checks (for gcc 11.1)
+        // tis a workaround for infinite compiler recursion during
+        // encoded_size_of_fn constraint checks (for gcc 11.1)
+        = (!detail::is_type_identity<T>::value)
        && cncr::tag_invocable<layout_descriptor_for_fn, std::type_identity<T>>;
 
 template <typename T>
-concept packable_object = packable<T> && is_object_def_v<
-        cncr::remove_cref_t<cncr::tag_invoke_result_t<layout_descriptor_for_fn,
-                                                      std::type_identity<T>>>>;
+concept packable_object
+        = packable<T>
+       && is_object_def_v<cncr::remove_cref_t<
+               cncr::tag_invoke_result_t<layout_descriptor_for_fn,
+                                         std::type_identity<T>>>>;
 
 template <typename T>
-concept packable_tuple = packable<T> && is_tuple_def_v<
-        cncr::remove_cref_t<cncr::tag_invoke_result_t<layout_descriptor_for_fn,
-                                                      std::type_identity<T>>>>;
+concept packable_tuple
+        = packable<T>
+       && is_tuple_def_v<cncr::remove_cref_t<
+               cncr::tag_invoke_result_t<layout_descriptor_for_fn,
+                                         std::type_identity<T>>>>;
 
 template <typename T>
     requires packable<T>

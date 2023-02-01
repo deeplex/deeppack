@@ -109,7 +109,7 @@ TEST_CASE("std::vector of bytes has a codec")
             .value = cncr::make_byte_array<2U>({0xfe, 0xfe}
               ),
             .encoded_length = 3,
-            .encoded = { 0x42, 0xfe,0xfe},
+            .encoded = {0x42, 0xfe, 0xfe},
     };
     std::vector<std::byte> sampleValue(sample.value.begin(),
                                        sample.value.end());
@@ -172,7 +172,7 @@ TEST_CASE("std::set has a codec")
     item_sample_ct<std::set<int>> const sample{
             .value = {0x01, 0x02, 0x03, 0x0a},
             .encoded_length = 5,
-            .encoded = { 0x84, 0x01, 0x02, 0x03,0x0a},
+            .encoded = {0x84, 0x01, 0x02, 0x03, 0x0a},
     };
 
     SECTION("with encode")
@@ -236,7 +236,7 @@ TEST_CASE("std::span of bytes has a codec")
             .value = cncr::make_byte_array<2U>({0xfe, 0xfe}
               ),
             .encoded_length = 3,
-            .encoded = { 0x42, 0xfe,0xfe},
+            .encoded = {0x42, 0xfe, 0xfe},
     };
     auto const sampleValue = std::span(sample.value);
 
@@ -270,7 +270,7 @@ TEST_CASE("std::array of bytes has a codec")
             .value = cncr::make_byte_array<2U>({0xfe, 0xfe}
               ),
             .encoded_length = 3,
-            .encoded = { 0x42, 0xfe,0xfe},
+            .encoded = {0x42, 0xfe, 0xfe},
     };
 
     SECTION("with encode")
@@ -309,9 +309,9 @@ TEST_CASE("std::array of bytes has a codec")
 TEST_CASE("a fixed size std-array has a codec")
 {
     item_sample_ct<std::array<unsigned char, 2U>> const sample{
-            .value = {0xfe, 0xfe },
+            .value = {0xfe, 0xfe},
             .encoded_length = 5,
-            .encoded = { 0x82, 0x18, 0xfe, 0x18, 0xfe},
+            .encoded = {0x82, 0x18, 0xfe, 0x18, 0xfe},
     };
 
     SECTION("with encode")
@@ -340,9 +340,9 @@ TEST_CASE("a fixed size std-array has a codec")
 TEST_CASE("an indefinite range gets encoded")
 {
     item_sample_ct<std::array<unsigned char const, 2U>> const sample{
-            .value = {0xfe, 0xfe },
+            .value = {0xfe, 0xfe},
             .encoded_length = 6,
-            .encoded = { 0x9f, 0x18, 0xfe, 0x18, 0xfe, 0xff},
+            .encoded = {0x9f, 0x18, 0xfe, 0x18, 0xfe, 0xff},
     };
 
     std::vector<std::byte> buffer(sample.encoded_length);

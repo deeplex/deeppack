@@ -160,11 +160,8 @@ DPLX_ATTR_FORCE_INLINE void store(std::byte *dest, T value)
 }
 
 template <typename T>
-DPLX_ATTR_FORCE_INLINE constexpr auto find_last_set_bit(T value) noexcept
-        -> int requires requires
-{
-    std::countl_zero(value);
-}
+DPLX_ATTR_FORCE_INLINE constexpr auto find_last_set_bit(T value) noexcept -> int
+    requires requires { std::countl_zero(value); }
 {
     if (std::is_constant_evaluated())
     {
@@ -229,11 +226,8 @@ DPLX_ATTR_FORCE_INLINE constexpr auto find_last_set_bit(T value) noexcept
 }
 
 template <typename T>
-DPLX_ATTR_FORCE_INLINE constexpr auto rotl(T const v, int n) noexcept
-        -> T requires requires
-{
-    std::rotl(v, n);
-}
+DPLX_ATTR_FORCE_INLINE constexpr auto rotl(T const v, int n) noexcept -> T
+    requires requires { std::rotl(v, n); }
 {
     return (v << n) | (v >> (digits_v<T> - n));
 }

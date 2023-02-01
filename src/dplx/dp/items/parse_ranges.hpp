@@ -24,8 +24,8 @@ namespace detail
 {
 
 template <typename Container>
-concept blob_output_container = container_traits<
-        Container>::resize && std::ranges::contiguous_range<Container>;
+concept blob_output_container = container_traits<Container>::resize
+                             && std::ranges::contiguous_range<Container>;
 
 template <typename Container>
 inline auto parse_blob_indefinite(parse_context &ctx,

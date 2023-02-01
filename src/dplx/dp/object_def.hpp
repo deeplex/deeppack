@@ -33,8 +33,8 @@ namespace dplx::dp
 {
 
 template <typename IdRuntimeType, auto Id, auto M, auto... Ms>
-    requires(std::is_member_object_pointer_v<decltype(M)> &&...
-                     &&std::is_member_object_pointer_v<decltype(Ms)>)
+    requires(std::is_member_object_pointer_v<decltype(M)> && ...
+             && std::is_member_object_pointer_v<decltype(Ms)>)
 struct basic_property_def
 {
 private:
@@ -71,7 +71,8 @@ public:
             = default;
     friend inline constexpr auto
     operator<=>(basic_property_def const &, basic_property_def const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 };
 
 template <std::uint32_t Id, auto M, auto... Ms>
@@ -123,7 +124,8 @@ public:
             = default;
     friend inline constexpr auto
     operator<=>(basic_property_fun const &, basic_property_fun const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 };
 
 template <std::uint32_t Id, typename AccessorType>
@@ -193,7 +195,8 @@ struct object_def
             = default;
     friend inline constexpr auto operator<=>(object_def const &,
                                              object_def const &) noexcept
-            -> std::strong_ordering = default;
+            -> std::strong_ordering
+            = default;
 };
 
 } // namespace dplx::dp

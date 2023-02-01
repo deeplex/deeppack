@@ -39,7 +39,7 @@ inline constexpr struct container_reserve_fn
                                   StdContainer &container,
                                   std::size_t const reservationSize) noexcept
             -> result<void>
-        // clang-format off
+            // clang-format off
         requires requires
         {
             typename StdContainer;
@@ -87,9 +87,9 @@ inline constexpr struct container_resize_fn
                                   StdContainer &container,
                                   std::size_t const newSize) noexcept
             -> result<void>
-        // clang-format off
+            // clang-format off
         requires requires
-        {                 
+        {
             typename StdContainer;
             typename StdContainer::value_type;
             requires std::is_nothrow_move_constructible_v<
@@ -132,11 +132,12 @@ inline constexpr struct container_resize_for_overwrite_fn
     }
 
     template <typename Container>
-        requires(
-                !cncr::nothrow_tag_invocable<
-                        container_resize_for_overwrite_fn,
-                        Container &,
-                        std::size_t const> && cncr::tag_invocable<container_resize_fn, Container &, std::size_t const>)
+        requires(!cncr::nothrow_tag_invocable<container_resize_for_overwrite_fn,
+                                              Container &,
+                                              std::size_t const>
+                 && cncr::tag_invocable<container_resize_fn,
+                                        Container &,
+                                        std::size_t const>)
     auto operator()(Container &container,
                     std::size_t const newSize) const noexcept
             -> cncr::tag_invoke_result_t<container_resize_fn,

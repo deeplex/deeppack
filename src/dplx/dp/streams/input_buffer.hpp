@@ -214,11 +214,13 @@ protected:
 
 private:
     virtual auto do_require_input(size_type requiredSize) noexcept
-            -> result<void> = 0;
-    virtual auto do_discard_input(size_type amount) noexcept
-            -> result<void> = 0;
+            -> result<void>
+            = 0;
+    virtual auto do_discard_input(size_type amount) noexcept -> result<void>
+            = 0;
     virtual auto do_bulk_read(std::byte *dest, std::size_t size) noexcept
-            -> result<void> = 0;
+            -> result<void>
+            = 0;
     virtual auto do_sync_input() noexcept -> result<void>
     {
         return oc::success();

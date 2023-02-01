@@ -44,17 +44,17 @@ struct item_sample_ct
     }
 
     friend inline auto operator<<(std::ostream &os,
-                                  item_sample_ct const &sample)
-            -> std::ostream &requires(!detail::is_fmt_formattable<T const &>)
-    {
-        fmt::print(os, "{{item_value: <please specialize me>, {}, 0x{:02x}}}",
-                   sample.encoded_length,
-                   fmt::join(sample.encoded_bytes(), "'"));
-        return os;
-    }
-    friend inline auto operator<<(std::ostream &os,
-                                  item_sample_ct const &sample)
-            -> std::ostream &
+                                  item_sample_ct const &sample) -> std::ostream
+            &requires(!detail::is_fmt_formattable<T const &>) {
+                 fmt::print(
+                         os,
+                         "{{item_value: <please specialize me>, {}, 0x{:02x}}}",
+                         sample.encoded_length,
+                         fmt::join(sample.encoded_bytes(), "'"));
+                 return os;
+             } friend inline auto
+            operator<<(std::ostream &os, item_sample_ct const &sample)
+                    -> std::ostream &
     {
         fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,
                    sample.encoded_length,
@@ -63,7 +63,8 @@ struct item_sample_ct
     }
     friend inline auto operator<<(std::ostream &os,
                                   item_sample_ct const &sample)
-            -> std::ostream &requires(std::integral<T>)
+            -> std::ostream &
+        requires std::integral<T>
     {
         fmt::print(os, "{{item_value: {:#x}, {}, 0x{:02x}}}", sample.value,
                    sample.encoded_length,
@@ -72,7 +73,8 @@ struct item_sample_ct
     }
     friend inline auto operator<<(std::ostream &os,
                                   item_sample_ct const &sample)
-            -> std::ostream &requires(std::floating_point<T>)
+            -> std::ostream &
+        requires std::floating_point<T>
     {
         fmt::print(os, "{{item_value: {}, {}, 0x{:02x}}}", sample.value,
                    sample.encoded_length,
