@@ -85,6 +85,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: "Install clang-tools-15"
+        run: |
+          sudo cp ${{ github.workspace }}/tools/llvm-snapshot.gpg.key.asc /etc/apt/trusted.gpg.d/llvm-snapshot.asc
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main"
+          sudo apt-get -qq update
+          sudo apt-get -qq -y install clang-15 clang-tidy-15 clang-format-15
+
       - uses: lukka/get-cmake@latest
         with:
           cmakeVersion: 3.22.6
@@ -92,15 +99,10 @@ jobs:
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@v10
         with:
-          vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
+          vcpkgDirectory: ${{ github.workspace }}/../vcpkg
           vcpkgGitCommitId: 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
-          prependedCacheKey: compiler=clang
+          prependedCacheKey: compiler=clang-15
           #appendedCacheKey: r00
-
-      - name: Disable vcpkg cache to prevent racing with the Test jobs
-        run: |
-          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
-        shell: bash
 
       - name: Configure x64-linux-clang preset
         uses: lukka/run-cmake@v10
@@ -113,7 +115,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-            version: 14
+            version: 15.0.7
             style: file # use .clang-format settings
             tidy-checks: '' # use .clang-tidy settings
             extensions: cpp,hpp
