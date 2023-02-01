@@ -128,8 +128,8 @@ inline auto parse_item_head_speculative(parse_context &ctx) noexcept
              // every type with one of these bits set has a meaningful value,
              // except for tag
              // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-             && !((static_cast<unsigned char>(info.type) & 0b110'00000U) == 0U
-                  || info.type == type_code::tag))
+             && (static_cast<unsigned char>(info.type) & 0b110'00000U) != 0U
+             && info.type != type_code::tag)
     {
         info.make_indefinite();
     }
@@ -212,8 +212,8 @@ inline auto parse_item_head_safe(parse_context &ctx) noexcept
              // every type with one of these bits set has a meaningful value,
              // except for tag
              // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-             && !((static_cast<unsigned char>(info.type) & 0b110'00000U) == 0U
-                  || info.type == type_code::tag))
+             && (static_cast<unsigned char>(info.type) & 0b110'00000U) != 0U
+             && info.type != type_code::tag)
 
     {
         info.make_indefinite();
