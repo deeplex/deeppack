@@ -86,6 +86,7 @@ if (BUILD_TESTING)
         PRIVATE
             blob_matcher.hpp
             core_samples.hpp
+            hex_decode.hpp
             item_sample_ct.hpp
             item_sample_rt.hpp
             range_generator.hpp
