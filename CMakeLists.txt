@@ -27,7 +27,7 @@ endif()
 
 ########################################################################
 project(deeppack
-    VERSION 0.1.0.1
+    VERSION 0.1.0.2
     LANGUAGES CXX
 )
 
@@ -144,11 +144,11 @@ if (BUILD_TESTING)
         Catch2::Catch2 Catch2::Catch2WithMain
         yaml-cpp
     )
-    
+
     target_include_directories(deeppack-tests PRIVATE
         src/dp_tests
     )
-    
+
     add_test(NAME deeppack-tests COMMAND deeppack-tests
              WORKING_DIRECTORY $<TARGET_FILE_DIR:deeppack-tests>
     )

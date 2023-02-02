@@ -22,7 +22,7 @@ copyright = '2020-2022, Henrik Steffen Gaßmann'
 author = 'Henrik Steffen Gaßmann'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0-alpha.2'
+release = '0.1.0-alpha.3'
 
 
 # -- General configuration ---------------------------------------------------
