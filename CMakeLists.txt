@@ -10,8 +10,12 @@
 #     http://creativecommons.org/publicdomain/zero/1.0/
 #
 ########################################################################
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.20...3.25.2)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/tools/cmake/")
+
+if (POLICY CMP0127)
+    cmake_policy(SET CMP0127 NEW)
+endif()
 
 ########################################################################
 # configure vcpkg from environment vars if possible
@@ -36,7 +40,9 @@ include(GNUInstallDirs)
 include(SourceHelpers)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-enable_testing()
+if (BUILD_TESTING)
+    enable_testing()
+endif()
 
 
 ########################################################################
@@ -72,7 +78,7 @@ set_package_properties(Catch2 PROPERTIES
     TYPE OPTIONAL
     PURPOSE "Allows to build the test suite"
 )
-cmake_dependent_option(BUILD_TESTING "Build the test suite" ON Catch2_FOUND;yaml-cpp_FOUND OFF)
+cmake_dependent_option(BUILD_TESTING "Build the test suite" ON "Catch2_FOUND;yaml-cpp_FOUND" OFF)
 
 find_package(Sphinx)
 cmake_dependent_option(BUILD_DOCS "Build the documentation using sphinx" ON Sphinx_FOUND OFF)
