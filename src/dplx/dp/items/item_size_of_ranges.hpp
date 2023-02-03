@@ -25,7 +25,7 @@ namespace detail
 template <typename Fn, typename R>
 concept subitem_size_of
     = requires(Fn &&sizeOfFn,
-               emit_context const ctx,
+               emit_context ctx,
                std::ranges::range_reference_t<R const> v)
     {
         { static_cast<Fn &&>(sizeOfFn)(ctx, v) }
@@ -34,7 +34,7 @@ concept subitem_size_of
 // clang-format on
 
 template <typename R, typename SizeOfElementFn>
-inline auto item_size_of_array_like(emit_context const &ctx,
+inline auto item_size_of_array_like(emit_context &ctx,
                                     R const &vs,
                                     SizeOfElementFn &&sizeOfElement) noexcept
         -> std::uint64_t
@@ -72,7 +72,7 @@ inline auto item_size_of_array_like(emit_context const &ctx,
 }
 template <typename R, typename SizeOfElementFn>
 inline auto
-item_size_of_indefinite_array_like(emit_context const &ctx,
+item_size_of_indefinite_array_like(emit_context &ctx,
                                    R const &vs,
                                    SizeOfElementFn &&sizeOfElement) noexcept
         -> std::uint64_t
@@ -93,7 +93,7 @@ template <std::ranges::input_range R, typename SizeOfElementFn>
     requires(std::ranges::forward_range<R> || std::ranges::sized_range<R>)
          && detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
             inline auto item_size_of_array(
-                    emit_context const &ctx,
+                    emit_context &ctx,
                     R const &vs,
                     SizeOfElementFn &&sizeOfElement) noexcept -> std::uint64_t
 {
@@ -103,7 +103,7 @@ template <std::ranges::input_range R, typename SizeOfElementFn>
 template <std::ranges::input_range R, typename SizeOfElementFn>
     requires detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
 inline auto
-item_size_of_array_indefinite(emit_context const &ctx,
+item_size_of_array_indefinite(emit_context &ctx,
                               R const &vs,
                               SizeOfElementFn &&sizeOfElement) noexcept
         -> std::uint64_t
@@ -117,7 +117,7 @@ template <std::ranges::input_range R, typename SizeOfElementFn>
          && detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
             // clang-format on
             inline auto item_size_of_map(
-                    emit_context const &ctx,
+                    emit_context &ctx,
                     R const &vs,
                     SizeOfElementFn &&sizeOfElement) noexcept -> std::uint64_t
 {
@@ -127,7 +127,7 @@ template <std::ranges::input_range R, typename SizeOfElementFn>
 template <std::ranges::input_range R, typename SizeOfElementFn>
     requires detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
 inline auto
-item_size_of_map_indefinite(emit_context const &ctx,
+item_size_of_map_indefinite(emit_context &ctx,
                             R const &vs,
                             SizeOfElementFn &&sizeOfElement) noexcept
         -> std::uint64_t

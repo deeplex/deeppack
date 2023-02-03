@@ -29,7 +29,7 @@ namespace dplx::dp::detail
 template <typename T>
 struct mp_encode_tuple_member_fn
 {
-    emit_context const &ctx;
+    emit_context &ctx;
     T const &value;
 
     template <typename PropDefType>
@@ -44,7 +44,7 @@ struct mp_encode_tuple_member_fn
 template <typename T>
 struct mp_size_of_tuple_element_fn
 {
-    emit_context const &ctx;
+    emit_context &ctx;
     T const &value;
 
     template <typename PropDefType>
@@ -64,7 +64,7 @@ namespace dplx::dp
 
 template <auto const &descriptor>
 inline auto
-encode_tuple(emit_context const &ctx,
+encode_tuple(emit_context &ctx,
              detail::descriptor_class_type<descriptor> const &value) noexcept
         -> result<void>
 {
@@ -85,7 +85,7 @@ encode_tuple(emit_context const &ctx,
 }
 
 template <packable_tuple T>
-inline auto encode_tuple(emit_context const &ctx, T const &value) noexcept
+inline auto encode_tuple(emit_context &ctx, T const &value) noexcept
         -> result<void>
 {
     return dp::encode_tuple<layout_descriptor_for_v<T>>(ctx, value);
@@ -93,7 +93,7 @@ inline auto encode_tuple(emit_context const &ctx, T const &value) noexcept
 
 template <auto const &descriptor>
 inline auto
-size_of_tuple(emit_context const &ctx,
+size_of_tuple(emit_context &ctx,
               detail::descriptor_class_type<descriptor> const &value) noexcept
         -> std::uint64_t
 {
@@ -118,7 +118,7 @@ size_of_tuple(emit_context const &ctx,
 }
 
 template <packable_tuple T>
-inline auto size_of_tuple(emit_context const &ctx, T const &value) noexcept
+inline auto size_of_tuple(emit_context &ctx, T const &value) noexcept
         -> std::uint64_t
 {
     return dp::size_of_tuple<layout_descriptor_for_v<T>>(ctx, value);

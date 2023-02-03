@@ -23,18 +23,18 @@ inline constexpr struct encode_varargs_fn final
 {
     template <typename... Ts>
         requires(... && encodable<cncr::remove_cref_t<Ts>>)
-    inline auto operator()(emit_context const &ctx,
-                           Ts &&...values) const noexcept -> result<void>
+    inline auto operator()(emit_context &ctx, Ts &&...values) const noexcept
+            -> result<void>
     {
         return bound_type(ctx)(static_cast<Ts &&>(values)...);
     }
 
     class bound_type final
     {
-        emit_context const *mCtx;
+        emit_context *mCtx;
 
     public:
-        constexpr explicit bound_type(emit_context const &ctx)
+        constexpr explicit bound_type(emit_context &ctx)
             : mCtx(&ctx)
         {
         }
@@ -43,7 +43,7 @@ inline constexpr struct encode_varargs_fn final
             requires(... && encodable<cncr::remove_cref_t<Ts>>)
         inline auto operator()(Ts &&...vs) const noexcept -> result<void>
         {
-            auto const &ctx = *mCtx;
+            auto &ctx = *mCtx;
             result<void> rx = dp::emit_array(ctx, sizeof...(Ts));
 
             if (!rx.has_failure()) [[likely]]
@@ -65,7 +65,7 @@ inline constexpr struct encode_varargs_fn final
         }
     };
 
-    static constexpr auto bind(emit_context const &ctx) -> bound_type
+    static constexpr auto bind(emit_context &ctx) -> bound_type
     {
         return bound_type{ctx};
     }
@@ -75,18 +75,18 @@ constexpr struct encoded_size_of_varargs_fn
 {
     template <typename... Ts>
         requires(... && encodable<cncr::remove_cref_t<Ts>>)
-    inline auto operator()(emit_context const &ctx,
-                           Ts &&...values) const noexcept -> result<void>
+    inline auto operator()(emit_context &ctx, Ts &&...values) const noexcept
+            -> result<void>
     {
         return bound_type(ctx)(static_cast<Ts &&>(values)...);
     }
 
     class bound_type
     {
-        emit_context const *mCtx;
+        emit_context *mCtx;
 
     public:
-        constexpr explicit bound_type(emit_context const &ctx)
+        constexpr explicit bound_type(emit_context &ctx)
             : mCtx(&ctx)
         {
         }
@@ -95,7 +95,7 @@ constexpr struct encoded_size_of_varargs_fn
             requires(... && encodable<cncr::remove_cref_t<Ts>>)
         inline auto operator()(Ts &&...vs) const noexcept -> std::uint64_t
         {
-            auto const &ctx = *mCtx;
+            auto &ctx = *mCtx;
             auto const headSize = dp::encoded_item_head_size(type_code::array,
                                                              sizeof...(Ts));
 
@@ -104,7 +104,7 @@ constexpr struct encoded_size_of_varargs_fn
         }
     };
 
-    static constexpr auto bind(emit_context const &ctx) -> bound_type
+    static constexpr auto bind(emit_context &ctx) -> bound_type
     {
         return bound_type{ctx};
     }
@@ -172,14 +172,14 @@ template <typename... Ts>
 class codec<std::tuple<Ts...>>
 {
 public:
-    static auto size_of(emit_context const &ctx,
+    static auto size_of(emit_context &ctx,
                         std::tuple<Ts...> const &tuple) noexcept
             -> std::uint64_t
         requires(encodable<std::remove_cvref_t<Ts>> && ...)
     {
         return std::apply(encoded_size_of_varargs_fn::bound_type(ctx), tuple);
     }
-    static auto encode(emit_context const &ctx,
+    static auto encode(emit_context &ctx,
                        std::tuple<Ts...> const &tuple) noexcept -> result<void>
         requires(encodable<std::remove_cvref_t<Ts>> && ...)
     {

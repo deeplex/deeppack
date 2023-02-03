@@ -147,12 +147,12 @@ template <range R>
 class codec<R>
 {
 public:
-    static auto size_of(emit_context const &ctx, R const &value) noexcept
+    static auto size_of(emit_context &ctx, R const &value) noexcept
             -> std::uint64_t
     {
         return dp::item_size_of_binary(ctx, std::ranges::size(value));
     }
-    static auto encode(emit_context const &ctx, R const &value) noexcept
+    static auto encode(emit_context &ctx, R const &value) noexcept
             -> result<void>
     {
         return dp::emit_binary(ctx, std::ranges::data(value),
@@ -197,7 +197,7 @@ template <range R>
 class codec<R>
 {
 public:
-    static auto size_of(emit_context const &ctx, R const &vs) noexcept
+    static auto size_of(emit_context &ctx, R const &vs) noexcept
             -> std::uint64_t
         requires std::ranges::input_range<R>
               && encodable<std::ranges::range_value_t<R>>
@@ -212,8 +212,7 @@ public:
             return dp::item_size_of_array(ctx, vs, dp::encoded_size_of);
         }
     }
-    static auto encode(emit_context const &ctx, R const &vs) noexcept
-            -> result<void>
+    static auto encode(emit_context &ctx, R const &vs) noexcept -> result<void>
         requires std::ranges::input_range<R>
               && encodable<std::ranges::range_value_t<R>>
     {
@@ -307,7 +306,7 @@ template <mapping_associative_container C>
 class codec<C>
 {
 public:
-    static auto size_of(emit_context const &ctx, C const &vs) noexcept
+    static auto size_of(emit_context &ctx, C const &vs) noexcept
             -> std::uint64_t
         requires encodable<typename C::key_type>
               && encodable<typename C::mapped_type>
@@ -321,8 +320,7 @@ public:
             return dp::item_size_of_map(ctx, vs, size_of_pair);
         }
     }
-    static auto encode(emit_context const &ctx, C const &vs) noexcept
-            -> result<void>
+    static auto encode(emit_context &ctx, C const &vs) noexcept -> result<void>
         requires encodable<typename C::key_type>
               && encodable<typename C::mapped_type>
     {
@@ -345,7 +343,7 @@ public:
     }
 
 private:
-    static auto size_of_pair(emit_context const &ctx,
+    static auto size_of_pair(emit_context &ctx,
                              typename C::value_type const &pair) noexcept
             -> std::uint64_t
         requires encodable<typename C::key_type>
@@ -354,7 +352,7 @@ private:
         auto const &[key, mapped] = pair;
         return dp::encoded_size_of(ctx, key) + dp::encoded_size_of(ctx, mapped);
     }
-    static auto encode_pair(emit_context const &ctx,
+    static auto encode_pair(emit_context &ctx,
                             typename C::value_type const &pair) noexcept
             -> result<void>
         requires encodable<typename C::key_type>
@@ -407,13 +405,13 @@ template <typename T>
 class fixed_size_binary_item_container_codec
 {
 public:
-    static auto size_of(emit_context const &ctx,
+    static auto size_of(emit_context &ctx,
                         std::span<std::byte const> value) noexcept
             -> std::uint64_t
     {
         return dp::item_size_of_binary(ctx, value.size());
     }
-    static auto encode(emit_context const &ctx,
+    static auto encode(emit_context &ctx,
                        std::span<std::byte const> value) noexcept
             -> result<void>
     {
@@ -442,13 +440,13 @@ template <typename T>
 class fixed_size_container_codec
 {
 public:
-    static auto size_of(emit_context const &ctx, std::span<T const> vs) noexcept
+    static auto size_of(emit_context &ctx, std::span<T const> vs) noexcept
             -> std::uint64_t
         requires encodable<T>
     {
         return dp::item_size_of_array(ctx, vs, dp::encoded_size_of);
     }
-    static auto encode(emit_context const &ctx, std::span<T const> vs) noexcept
+    static auto encode(emit_context &ctx, std::span<T const> vs) noexcept
             -> result<void>
         requires encodable<T>
     {
@@ -489,12 +487,12 @@ class fixed_size_associative_container_codec
     using mapped_type = std::tuple_element_t<1U, T>;
 
 public:
-    static auto size_of(emit_context const &ctx, std::span<T const> vs) noexcept
+    static auto size_of(emit_context &ctx, std::span<T const> vs) noexcept
             -> std::uint64_t requires(encodable_pair<T>)
     {
         return dp::item_size_of_map(ctx, vs, item_size_of_pair);
     }
-    static auto encode(emit_context const &ctx, std::span<T const> vs) noexcept
+    static auto encode(emit_context &ctx, std::span<T const> vs) noexcept
             -> result<void>
         requires(encodable_pair<T>)
     {
@@ -518,13 +516,13 @@ public:
     }
 
 private:
-    static auto item_size_of_pair(emit_context const &ctx,
+    static auto item_size_of_pair(emit_context &ctx,
                                   T const &value) noexcept -> result<void>
     {
         auto const &[key, mapped] = value;
         return encoded_size_of(ctx, key) + encoded_size_of(ctx, mapped);
     }
-    static auto encode_pair(emit_context const &ctx, T const &value) noexcept
+    static auto encode_pair(emit_context &ctx, T const &value) noexcept
             -> result<void>
     {
         auto const &[key, mapped] = value;

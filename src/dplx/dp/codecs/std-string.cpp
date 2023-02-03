@@ -15,26 +15,26 @@
 namespace dplx::dp
 {
 
-auto codec<std::u8string_view>::size_of(emit_context const &ctx,
+auto codec<std::u8string_view>::size_of(emit_context &ctx,
                                         std::u8string_view value) noexcept
         -> std::uint64_t
 {
     return dp::item_size_of_u8string(ctx, value.size());
 }
-auto codec<std::u8string_view>::encode(emit_context const &ctx,
+auto codec<std::u8string_view>::encode(emit_context &ctx,
                                        std::u8string_view value) noexcept
         -> result<void>
 {
     return dp::emit_u8string(ctx, value.data(), value.size());
 }
 
-auto codec<std::u8string>::size_of(emit_context const &ctx,
+auto codec<std::u8string>::size_of(emit_context &ctx,
                                    std::u8string const &value) noexcept
         -> std::uint64_t
 {
     return dp::item_size_of_u8string(ctx, value.size());
 }
-auto codec<std::u8string>::encode(emit_context const &ctx,
+auto codec<std::u8string>::encode(emit_context &ctx,
                                   std::u8string const &value) noexcept
         -> result<void>
 {
@@ -48,26 +48,26 @@ auto codec<std::u8string>::decode(parse_context &ctx,
     return oc::success();
 }
 
-auto codec<std::string_view>::size_of(emit_context const &ctx,
+auto codec<std::string_view>::size_of(emit_context &ctx,
                                       std::string_view value) noexcept
         -> std::uint64_t
 {
     return dp::item_size_of_u8string(ctx, value.size());
 }
-auto codec<std::string_view>::encode(emit_context const &ctx,
+auto codec<std::string_view>::encode(emit_context &ctx,
                                      std::string_view value) noexcept
         -> result<void>
 {
     return dp::emit_u8string(ctx, value.data(), value.size());
 }
 
-auto codec<std::string>::size_of(emit_context const &ctx,
+auto codec<std::string>::size_of(emit_context &ctx,
                                  std::string const &value) noexcept
         -> std::uint64_t
 {
     return dp::item_size_of_u8string(ctx, value.size());
 }
-auto codec<std::string>::encode(emit_context const &ctx,
+auto codec<std::string>::encode(emit_context &ctx,
                                 std::string const &value) noexcept
         -> result<void>
 {

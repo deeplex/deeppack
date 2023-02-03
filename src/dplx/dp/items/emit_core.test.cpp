@@ -37,7 +37,7 @@ TEST_CASE("boolean emits correctly")
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
     REQUIRE(emit_boolean(ctx, sample.value));
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
@@ -64,7 +64,7 @@ TEMPLATE_TEST_CASE("positive integers emit correctly",
         std::vector<std::byte> encodingBuffer(sample.encoded_length);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::emit_context const ctx{outputStream};
+        dp::emit_context ctx{outputStream};
         REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
@@ -76,7 +76,7 @@ TEMPLATE_TEST_CASE("positive integers emit correctly",
         std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::emit_context const ctx{outputStream};
+        dp::emit_context ctx{outputStream};
         REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
@@ -100,7 +100,7 @@ TEMPLATE_TEST_CASE("negative integers emit correctly",
         std::vector<std::byte> encodingBuffer(sample.encoded_length);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::emit_context const ctx{outputStream};
+        dp::emit_context ctx{outputStream};
         REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
@@ -112,7 +112,7 @@ TEMPLATE_TEST_CASE("negative integers emit correctly",
         std::vector<std::byte> encodingBuffer(dp::detail::var_uint_max_size);
         dp::memory_output_stream outputStream(encodingBuffer);
 
-        dp::emit_context const ctx{outputStream};
+        dp::emit_context ctx{outputStream};
         REQUIRE(dp::emit_integer(ctx, sample.value));
 
         CHECK(std::ranges::equal(outputStream.written(),
@@ -127,7 +127,7 @@ TEST_CASE("finite prefixes are emitted correctly")
 
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
 
     SECTION("for binary")
     {
@@ -169,7 +169,7 @@ TEST_CASE("emit_binary writes a short blob")
 
     std::vector<std::byte> buffer(sample.encoded_length);
     dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
 
     REQUIRE(emit_binary(
             ctx,
@@ -190,7 +190,7 @@ TEST_CASE("emit_u8string writes a short string")
 
     std::vector<std::byte> buffer(sample.encoded_length);
     dp::memory_output_stream outputStream(buffer);
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
 
     SECTION("for char8_t const *")
     {
@@ -215,7 +215,7 @@ TEST_CASE("indefinite prefixes are emitted correctly")
 {
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
 
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     std::byte expected{0x1f};
@@ -252,7 +252,7 @@ TEST_CASE("float single emits correctly")
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
     REQUIRE(emit_float_single(ctx, sample.value));
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
@@ -266,7 +266,7 @@ TEST_CASE("float double emits correctly")
     std::vector<std::byte> encodingBuffer(sample.encoded_length);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
     REQUIRE(emit_float_double(ctx, sample.value));
 
     CHECK(std::ranges::equal(outputStream.written(), sample.encoded_bytes()));
@@ -277,7 +277,7 @@ TEST_CASE("null emits correctly")
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
     REQUIRE(emit_null(ctx));
 
     REQUIRE(outputStream.written().size() == 1U);
@@ -290,7 +290,7 @@ TEST_CASE("undefined emits correctly")
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
     REQUIRE(emit_undefined(ctx));
 
     REQUIRE(outputStream.written().size() == 1U);
@@ -303,7 +303,7 @@ TEST_CASE("break emits correctly")
     std::vector<std::byte> encodingBuffer(1U);
     dp::memory_output_stream outputStream(encodingBuffer);
 
-    dp::emit_context const ctx{outputStream};
+    dp::emit_context ctx{outputStream};
     REQUIRE(emit_break(ctx));
 
     REQUIRE(outputStream.written().size() == 1U);

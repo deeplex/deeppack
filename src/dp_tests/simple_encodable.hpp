@@ -31,12 +31,12 @@ template <>
 class dplx::dp::codec<dp_tests::simple_encodable>
 {
 public:
-    static auto size_of(emit_context const &,
-                        dp_tests::simple_encodable) noexcept -> std::uint64_t
+    static auto size_of(emit_context &, dp_tests::simple_encodable) noexcept
+            -> std::uint64_t
     {
         return 1U;
     }
-    static auto encode(emit_context const &ctx,
+    static auto encode(emit_context &ctx,
                        dp_tests::simple_encodable obj) noexcept -> result<void>
     {
         DPLX_TRY(ctx.out.ensure_size(1U));

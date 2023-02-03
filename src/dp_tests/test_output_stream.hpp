@@ -96,7 +96,7 @@ public:
     {
     }
 
-    auto as_emit_context() noexcept -> dp::emit_context const &
+    auto as_emit_context() noexcept -> dp::emit_context &
     {
         return *this;
     }
@@ -263,7 +263,7 @@ public:
     {
     }
 
-    auto as_emit_context() noexcept -> dp::emit_context const &
+    auto as_emit_context() noexcept -> dp::emit_context &
     {
         return *this;
     }

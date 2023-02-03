@@ -139,7 +139,7 @@ namespace dplx::dp
 {
 
 template <detail::encodable_int T>
-inline auto emit_integer(emit_context const &ctx, T const value) noexcept
+inline auto emit_integer(emit_context &ctx, T const value) noexcept
         -> result<void>
 {
     using code_type = detail::encoder_uint_t<T>;
@@ -165,7 +165,7 @@ inline auto emit_integer(emit_context const &ctx, T const value) noexcept
 }
 
 template <detail::encodable_int T>
-inline auto emit_binary(emit_context const &ctx, T const byteSize) noexcept
+inline auto emit_binary(emit_context &ctx, T const byteSize) noexcept
         -> result<void>
 {
     using code_type = detail::encoder_uint_t<T>;
@@ -173,7 +173,7 @@ inline auto emit_binary(emit_context const &ctx, T const byteSize) noexcept
     return detail::store_var_uint<code_type>(
             ctx.out, static_cast<code_type>(byteSize), type_code::binary);
 }
-inline auto emit_binary(emit_context const &ctx,
+inline auto emit_binary(emit_context &ctx,
                         std::byte const *data,
                         std::size_t size) noexcept -> result<void>
 {
@@ -181,23 +181,22 @@ inline auto emit_binary(emit_context const &ctx,
                                                  type_code::binary));
     return ctx.out.bulk_write(data, size);
 }
-inline auto emit_binary_indefinite(emit_context const &ctx) noexcept
-        -> result<void>
+inline auto emit_binary_indefinite(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, detail::indefinite_add_info,
                                       type_code::binary);
 }
 
 template <detail::encodable_int T>
-inline auto emit_u8string(emit_context const &ctx,
-                          T const numCodeUnits) noexcept -> result<void>
+inline auto emit_u8string(emit_context &ctx, T const numCodeUnits) noexcept
+        -> result<void>
 {
     using code_type = detail::encoder_uint_t<T>;
     assert(numCodeUnits >= 0);
     return detail::store_var_uint<code_type>(
             ctx.out, static_cast<code_type>(numCodeUnits), type_code::text);
 }
-inline auto emit_u8string(emit_context const &ctx,
+inline auto emit_u8string(emit_context &ctx,
                           char8_t const *data,
                           std::size_t size) noexcept -> result<void>
 {
@@ -206,7 +205,7 @@ inline auto emit_u8string(emit_context const &ctx,
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return ctx.out.bulk_write(reinterpret_cast<std::byte const *>(data), size);
 }
-inline auto emit_u8string(emit_context const &ctx,
+inline auto emit_u8string(emit_context &ctx,
                           char const *data,
                           std::size_t size) noexcept -> result<void>
 {
@@ -215,15 +214,14 @@ inline auto emit_u8string(emit_context const &ctx,
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return ctx.out.bulk_write(reinterpret_cast<std::byte const *>(data), size);
 }
-inline auto emit_u8string_indefinite(emit_context const &ctx) noexcept
-        -> result<void>
+inline auto emit_u8string_indefinite(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, detail::indefinite_add_info,
                                       type_code::text);
 }
 
 template <detail::encodable_int T>
-inline auto emit_array(emit_context const &ctx, T const numElements) noexcept
+inline auto emit_array(emit_context &ctx, T const numElements) noexcept
         -> result<void>
 {
     using code_type = detail::encoder_uint_t<T>;
@@ -231,15 +229,14 @@ inline auto emit_array(emit_context const &ctx, T const numElements) noexcept
     return detail::store_var_uint<code_type>(
             ctx.out, static_cast<code_type>(numElements), type_code::array);
 }
-inline auto emit_array_indefinite(emit_context const &ctx) noexcept
-        -> result<void>
+inline auto emit_array_indefinite(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, detail::indefinite_add_info,
                                       type_code::array);
 }
 
 template <detail::encodable_int T>
-inline auto emit_map(emit_context const &ctx, T const numElements) noexcept
+inline auto emit_map(emit_context &ctx, T const numElements) noexcept
         -> result<void>
 {
     using code_type = detail::encoder_uint_t<T>;
@@ -247,15 +244,14 @@ inline auto emit_map(emit_context const &ctx, T const numElements) noexcept
     return detail::store_var_uint<code_type>(
             ctx.out, static_cast<code_type>(numElements), type_code::map);
 }
-inline auto emit_map_indefinite(emit_context const &ctx) noexcept
-        -> result<void>
+inline auto emit_map_indefinite(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, detail::indefinite_add_info,
                                       type_code::map);
 }
 
 template <detail::encodable_int T>
-inline auto emit_tag(emit_context const &ctx, T const tagValue) noexcept
+inline auto emit_tag(emit_context &ctx, T const tagValue) noexcept
         -> result<void>
 {
     using code_type = detail::encoder_uint_t<T>;
@@ -264,7 +260,7 @@ inline auto emit_tag(emit_context const &ctx, T const tagValue) noexcept
             ctx.out, static_cast<code_type>(tagValue), type_code::tag);
 }
 
-[[nodiscard]] inline auto emit_boolean(emit_context const &ctx,
+[[nodiscard]] inline auto emit_boolean(emit_context &ctx,
                                        bool const value) noexcept
         -> result<void>
 {
@@ -272,8 +268,8 @@ inline auto emit_tag(emit_context const &ctx, T const tagValue) noexcept
                                       type_code::bool_false);
 }
 
-inline auto emit_float_single(emit_context const &ctx,
-                              float const value) noexcept -> result<void>
+inline auto emit_float_single(emit_context &ctx, float const value) noexcept
+        -> result<void>
 {
     constexpr auto encodedSize = 1U + sizeof(value);
     if (ctx.out.size() < encodedSize) [[unlikely]]
@@ -290,8 +286,8 @@ inline auto emit_float_single(emit_context const &ctx,
     return oc::success();
 }
 
-inline auto emit_float_double(emit_context const &ctx,
-                              double const value) noexcept -> result<void>
+inline auto emit_float_double(emit_context &ctx, double const value) noexcept
+        -> result<void>
 {
     constexpr auto encodedSize = 1U + sizeof(value);
     if (ctx.out.size() < encodedSize) [[unlikely]]
@@ -308,15 +304,15 @@ inline auto emit_float_double(emit_context const &ctx,
     return oc::success();
 }
 
-inline auto emit_null(emit_context const &ctx) noexcept -> result<void>
+inline auto emit_null(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, 0U, type_code::null);
 }
-inline auto emit_undefined(emit_context const &ctx) noexcept -> result<void>
+inline auto emit_undefined(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, 0U, type_code::undefined);
 }
-inline auto emit_break(emit_context const &ctx) noexcept -> result<void>
+inline auto emit_break(emit_context &ctx) noexcept -> result<void>
 {
     return detail::store_inline_value(ctx.out, 0U, type_code::special_break);
 }

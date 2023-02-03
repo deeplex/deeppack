@@ -21,14 +21,12 @@ template <codable_enum T>
 class codec<T>
 {
 public:
-    static auto size_of(emit_context const &ctx, T value) noexcept
-            -> std::uint64_t
+    static auto size_of(emit_context &ctx, T value) noexcept -> std::uint64_t
     {
         return dp::encoded_size_of(
                 ctx, static_cast<std::underlying_type_t<T>>(value));
     }
-    static auto encode(emit_context const &ctx, T value) noexcept
-            -> result<void>
+    static auto encode(emit_context &ctx, T value) noexcept -> result<void>
     {
         return dp::encode(ctx, static_cast<std::underlying_type_t<T>>(value));
     }
