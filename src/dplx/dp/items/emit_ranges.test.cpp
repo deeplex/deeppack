@@ -122,7 +122,7 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
     INFO(sample);
 
     simple_test_emit_context ctx(sample.encoded.size());
-    auto encodePair = [](dp::emit_context const &lctx,
+    auto encodePair = [](dp::emit_context &lctx,
                          std::pair<int, int> const &pair) -> dp::result<void>
     {
         DPLX_TRY(dp::encode(lctx, pair.first));
@@ -146,7 +146,7 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
     {
         CHECK(dp::item_size_of_map(
                       ctx.as_emit_context(), sample.value,
-                      [](dp::emit_context const &lctx,
+                      [](dp::emit_context &lctx,
                          std::pair<int, int> const &pair) -> std::uint64_t
                       {
                           return dp::encoded_size_of(lctx, pair.first)
@@ -166,7 +166,7 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
     INFO(sample);
 
     simple_test_emit_context ctx(sample.encoded.size());
-    auto encodePair = [](dp::emit_context const &lctx,
+    auto encodePair = [](dp::emit_context &lctx,
                          std::pair<int, int> const &pair) -> dp::result<void>
     {
         DPLX_TRY(dp::encode(lctx, pair.first));
@@ -185,7 +185,7 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
     {
         CHECK(dp::item_size_of_map_indefinite(
                       ctx.as_emit_context(), dp::indefinite_range(sample.value),
-                      [](dp::emit_context const &lctx,
+                      [](dp::emit_context &lctx,
                          std::pair<int, int> const &pair) -> std::uint64_t
                       {
                           return dp::encoded_size_of(lctx, pair.first)

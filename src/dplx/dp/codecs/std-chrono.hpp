@@ -24,13 +24,13 @@ template <typename Rep, typename Period>
 class codec<std::chrono::duration<Rep, Period>>
 {
 public:
-    static auto size_of(emit_context const &ctx,
+    static auto size_of(emit_context &ctx,
                         std::chrono::duration<Rep, Period> value) noexcept
             -> std::uint64_t
     {
         return dp::item_size_of_integer(ctx, value.count());
     }
-    static auto encode(emit_context const &ctx,
+    static auto encode(emit_context &ctx,
                        std::chrono::duration<Rep, Period> value) noexcept
             -> result<void>
     {

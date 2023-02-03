@@ -179,10 +179,10 @@ namespace detail
 class fixed_u8string_codec_base
 {
 public:
-    static auto size_of(emit_context const &ctx,
-                        std::u8string_view value) noexcept -> std::uint64_t;
-    static auto encode(emit_context const &ctx,
-                       std::u8string_view value) noexcept -> result<void>;
+    static auto size_of(emit_context &ctx, std::u8string_view value) noexcept
+            -> std::uint64_t;
+    static auto encode(emit_context &ctx, std::u8string_view value) noexcept
+            -> result<void>;
 };
 
 auto decode_fixed_u8string(parse_context &ctx, char8_t *out, unsigned &outlen)

@@ -15,7 +15,7 @@
 namespace dplx::dp
 {
 auto codec<std::filesystem::path>::size_of(
-        emit_context const &ctx, std::filesystem::path const &path) noexcept
+        emit_context &ctx, std::filesystem::path const &path) noexcept
         -> std::uint64_t
 try
 {
@@ -27,7 +27,7 @@ catch (...)
     return 0U;
 }
 auto codec<std::filesystem::path>::encode(
-        emit_context const &ctx, std::filesystem::path const &path) noexcept
+        emit_context &ctx, std::filesystem::path const &path) noexcept
         -> result<void>
 try
 {

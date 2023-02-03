@@ -20,13 +20,13 @@
 namespace dplx::dp::detail
 {
 
-auto fixed_u8string_codec_base::size_of(emit_context const &ctx,
+auto fixed_u8string_codec_base::size_of(emit_context &ctx,
                                         std::u8string_view value) noexcept
         -> std::uint64_t
 {
     return dp::item_size_of_u8string(ctx, value.size());
 }
-auto fixed_u8string_codec_base::encode(emit_context const &ctx,
+auto fixed_u8string_codec_base::encode(emit_context &ctx,
                                        std::u8string_view value) noexcept
         -> result<void>
 {

@@ -37,7 +37,7 @@ TEMPLATE_TEST_CASE("positive integers' size is correctly estimated",
     INFO(sample);
 
     dp::void_stream testStream;
-    dp::emit_context const ctx{testStream};
+    dp::emit_context ctx{testStream};
 
     CHECK(dp::item_size_of_integer(ctx, sample.value) == sample.encoded_length);
 }
@@ -54,7 +54,7 @@ TEMPLATE_TEST_CASE("negative integers' size is correctly estimated",
     INFO(sample);
 
     dp::void_stream testStream;
-    dp::emit_context const ctx{testStream};
+    dp::emit_context ctx{testStream};
 
     CHECK(dp::item_size_of_integer(ctx, sample.value) == sample.encoded_length);
 }
@@ -65,7 +65,7 @@ TEST_CASE("binary item size is correctly estimated")
             = GENERATE(borrowed_range(binary_samples));
 
     dp::void_stream testStream;
-    dp::emit_context const ctx{testStream};
+    dp::emit_context ctx{testStream};
 
     CHECK(dp::item_size_of_binary(ctx, sample.value) == sample.encoded_length);
     CHECK(dp::item_size_of_binary_indefinite(ctx, sample.value)
@@ -78,7 +78,7 @@ TEST_CASE("u8string item size is correctly estimated")
             = GENERATE(borrowed_range(u8string_samples));
 
     dp::void_stream testStream;
-    dp::emit_context const ctx{testStream};
+    dp::emit_context ctx{testStream};
 
     CHECK(dp::item_size_of_u8string(ctx, sample.value.size())
           == sample.encoded_length);

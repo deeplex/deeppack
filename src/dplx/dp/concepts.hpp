@@ -23,7 +23,7 @@ namespace dplx::dp
 // clang-format off
 template <typename T>
 concept encodable
-    = requires(T const t, emit_context const ctx)
+    = requires(T const t, emit_context ctx)
     {
         requires !std::is_reference_v<T>;
         requires !std::is_pointer_v<T>;

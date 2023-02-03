@@ -32,7 +32,7 @@ namespace dplx::dp::detail
 template <typename T>
 struct mp_encode_object_property_fn
 {
-    emit_context const &ctx;
+    emit_context &ctx;
     T const &value;
 
     template <typename PropDefType>
@@ -53,7 +53,7 @@ struct mp_encode_object_property_fn
 template <typename T>
 struct mp_size_of_object_property_fn
 {
-    emit_context const &ctx;
+    emit_context &ctx;
     T const &value;
 
     template <typename PropDefType>
@@ -79,7 +79,7 @@ namespace dplx::dp
 
 template <auto const &descriptor>
 inline auto
-encode_object(emit_context const &ctx,
+encode_object(emit_context &ctx,
               detail::descriptor_class_type<descriptor> const &value) noexcept
         -> result<void>
 {
@@ -103,7 +103,7 @@ encode_object(emit_context const &ctx,
 }
 
 template <packable_object T>
-inline auto encode_object(emit_context const &ctx, T const &value) noexcept
+inline auto encode_object(emit_context &ctx, T const &value) noexcept
         -> result<void>
 {
     return dp::encode_object<layout_descriptor_for_v<T>>(ctx, value);
@@ -111,7 +111,7 @@ inline auto encode_object(emit_context const &ctx, T const &value) noexcept
 
 template <auto const &descriptor>
 constexpr auto
-size_of_object(emit_context const &ctx,
+size_of_object(emit_context &ctx,
                detail::descriptor_class_type<descriptor> const &value) noexcept
         -> std::uint64_t
 {
@@ -138,7 +138,7 @@ size_of_object(emit_context const &ctx,
 }
 
 template <packable_object T>
-constexpr auto size_of_object(emit_context const &ctx, T const &value) noexcept
+constexpr auto size_of_object(emit_context &ctx, T const &value) noexcept
         -> std::uint64_t
 {
     return dp::size_of_object<layout_descriptor_for_v<T>>(ctx, value);

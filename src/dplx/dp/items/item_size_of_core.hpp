@@ -17,7 +17,7 @@ namespace dplx::dp
 {
 
 template <detail::encodable_int T>
-[[nodiscard]] constexpr auto item_size_of_integer(emit_context const &,
+[[nodiscard]] constexpr auto item_size_of_integer(emit_context &,
                                                   T value) noexcept
         -> std::uint64_t
 {
@@ -42,7 +42,7 @@ template <detail::encodable_int T>
 }
 
 template <detail::encodable_int T>
-[[nodiscard]] constexpr auto item_size_of_binary(emit_context const &,
+[[nodiscard]] constexpr auto item_size_of_binary(emit_context &,
                                                  T byteSize) noexcept
         -> std::uint64_t
 {
@@ -53,8 +53,8 @@ template <detail::encodable_int T>
          + static_cast<std::uint64_t>(byteSize);
 }
 template <detail::encodable_int T>
-[[nodiscard]] constexpr auto
-item_size_of_binary_indefinite(emit_context const &, T byteSize) noexcept
+[[nodiscard]] constexpr auto item_size_of_binary_indefinite(emit_context &,
+                                                            T byteSize) noexcept
         -> std::uint64_t
 {
     assert(byteSize >= 0);
@@ -62,7 +62,7 @@ item_size_of_binary_indefinite(emit_context const &, T byteSize) noexcept
 }
 
 template <detail::encodable_int T>
-[[nodiscard]] constexpr auto item_size_of_u8string(emit_context const &,
+[[nodiscard]] constexpr auto item_size_of_u8string(emit_context &,
                                                    T numCodeUnits) noexcept
         -> std::uint64_t
 {
@@ -74,42 +74,41 @@ template <detail::encodable_int T>
 }
 template <detail::encodable_int T>
 [[nodiscard]] constexpr auto
-item_size_of_u8string_indefinite(emit_context const &, T numCodeUnits) noexcept
+item_size_of_u8string_indefinite(emit_context &, T numCodeUnits) noexcept
         -> std::uint64_t
 {
     assert(numCodeUnits >= 0);
     return 1U + static_cast<std::uint64_t>(numCodeUnits) + 1U;
 }
 
-[[nodiscard]] constexpr auto item_size_of_boolean(emit_context const &,
-                                                  bool) noexcept
+[[nodiscard]] constexpr auto item_size_of_boolean(emit_context &, bool) noexcept
         -> std::uint64_t
 {
     return 1U;
 }
 
-[[nodiscard]] constexpr auto item_size_of_float_single(emit_context const &,
+[[nodiscard]] constexpr auto item_size_of_float_single(emit_context &,
                                                        float) noexcept
         -> std::uint64_t
 {
     return 5U; // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 }
 
-[[nodiscard]] constexpr auto item_size_of_float_double(emit_context const &,
+[[nodiscard]] constexpr auto item_size_of_float_double(emit_context &,
                                                        double) noexcept
         -> std::uint64_t
 {
     return 9U; // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 }
 
-[[nodiscard]] constexpr auto item_size_of_null(emit_context const &) noexcept
+[[nodiscard]] constexpr auto item_size_of_null(emit_context &) noexcept
         -> std::uint64_t
 {
     return 1U;
 }
 
-[[nodiscard]] constexpr auto
-item_size_of_undefined(emit_context const &) noexcept -> std::uint64_t
+[[nodiscard]] constexpr auto item_size_of_undefined(emit_context &) noexcept
+        -> std::uint64_t
 {
     return 1U;
 }

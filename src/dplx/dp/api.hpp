@@ -43,13 +43,13 @@ inline constexpr struct encoded_size_of_fn
     {
         using unqualified_type = cncr::remove_cref_t<T>;
         void_stream dummyStream{};
-        emit_context const ctx{dummyStream};
+        emit_context ctx{dummyStream};
         return codec<unqualified_type>::size_of(
                 ctx, static_cast<unqualified_type const &>(value));
     }
     template <typename T>
         requires encodable<cncr::remove_cref_t<T>>
-    constexpr auto operator()(emit_context const &ctx, T &&value) const noexcept
+    constexpr auto operator()(emit_context &ctx, T &&value) const noexcept
     {
         using unqualified_type = cncr::remove_cref_t<T>;
         return codec<unqualified_type>::size_of(
@@ -69,7 +69,7 @@ inline constexpr struct encode_fn final
                  -> result<void>
     {
         auto &&buffer = get_output_buffer(static_cast<OutStream &&>(outStream));
-        emit_context const ctx{static_cast<output_buffer &>(buffer)};
+        emit_context ctx{static_cast<output_buffer &>(buffer)};
         DPLX_TRY(codec<cncr::remove_cref_t<T>>::encode(
                 ctx, static_cast<cncr::remove_cref_t<T> const &>(value)));
         return static_cast<output_buffer &>(buffer).sync_output();
@@ -79,13 +79,13 @@ inline constexpr struct encode_fn final
     inline auto operator()(output_buffer &outStream, T &&value) const noexcept
             -> result<void>
     {
-        emit_context const ctx{outStream};
+        emit_context ctx{outStream};
         return codec<cncr::remove_cref_t<T>>::encode(
                 ctx, static_cast<cncr::remove_cref_t<T> const &>(value));
     }
     template <typename T>
         requires encodable<cncr::remove_cref_t<T>>
-    inline auto operator()(emit_context const &ctx, T &&value) const noexcept
+    inline auto operator()(emit_context &ctx, T &&value) const noexcept
             -> result<void>
     {
         return codec<cncr::remove_cref_t<T>>::encode(
