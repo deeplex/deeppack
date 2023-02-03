@@ -136,11 +136,10 @@ inline constexpr struct decode_fn final
         auto &&buffer = get_input_buffer(static_cast<InStream &&>(inStream));
         parse_context ctx{static_cast<input_buffer &>(buffer)};
         result<T> decodeRx = (*this)(as_value<T>, ctx);
-        if (decodeRx.has_failure())
+        if (decodeRx.has_value())
         {
-            return static_cast<decltype(decodeRx) &&>(decodeRx).as_failure();
+            DPLX_TRY(static_cast<input_buffer &>(buffer).sync_input());
         }
-        DPLX_TRY(static_cast<input_buffer &>(buffer).sync_input());
         return decodeRx;
     }
     template <typename T>
@@ -188,9 +187,9 @@ inline constexpr struct decode_fn final
         {
             result<T> rx(oc::success());
             if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
-                parseRx.has_failure()) [[unlikely]]
+                parseRx.has_error()) [[unlikely]]
             {
-                rx = static_cast<decltype(parseRx) &&>(parseRx).as_failure();
+                rx = static_cast<decltype(parseRx) &&>(parseRx).assume_error();
             }
             return rx;
         }
