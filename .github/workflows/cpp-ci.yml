@@ -40,7 +40,7 @@ jobs:
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
-          vcpkgGitCommitId: 17030920aa97f2dc17a0bdc314344b5ca2807fdf
+          vcpkgGitCommitId: 71d3fa60b67540e9bf5fde2bf2188f579ff09433
           prependedCacheKey: compiler=${{ matrix.compiler }}
           #appendedCacheKey: r00
 
@@ -100,7 +100,7 @@ jobs:
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: ${{ github.workspace }}/../vcpkg
-          vcpkgGitCommitId: 17030920aa97f2dc17a0bdc314344b5ca2807fdf
+          vcpkgGitCommitId: 71d3fa60b67540e9bf5fde2bf2188f579ff09433
           prependedCacheKey: compiler=clang-15
           #appendedCacheKey: r00
 
@@ -126,3 +126,8 @@ jobs:
       - name: Fail if issues have been raised
         if: steps.linter.outputs.checks-failed > 0
         run: exit 1
+
+      - if: ${{ failure() || cancelled() }}
+        run: |
+          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
+        shell: bash

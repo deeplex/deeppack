@@ -52,7 +52,6 @@ option(DPLX_DP_FLAG_OUTDATED_WORKAROUNDS "Emit compiler errors for workarounds w
 option(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER "Use the branching store_var_uint implementation" OFF)
 mark_as_advanced(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER)
 
-cmake_dependent_option(DPLX_DP_TESTS_PCH "enable std header precompilation for test TUs" ON "BUILD_TESTING" OFF)
 
 ########################################################################
 # dependencies
@@ -81,11 +80,11 @@ set_package_properties(Catch2 PROPERTIES
 cmake_dependent_option(BUILD_TESTING "Build the test suite" ON "Catch2_FOUND;yaml-cpp_FOUND" OFF)
 
 find_package(Sphinx)
-cmake_dependent_option(BUILD_DOCS "Build the documentation using sphinx" ON Sphinx_FOUND OFF)
 set_package_properties(Sphinx PROPERTIES
     TYPE OPTIONAL
     PURPOSE "Allows to build the documentation"
 )
+cmake_dependent_option(BUILD_DOCS "Build the documentation using sphinx" ON Sphinx_FOUND OFF)
 
 
 ########################################################################

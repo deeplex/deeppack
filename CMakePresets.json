@@ -138,7 +138,6 @@
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": "x64-linux-clang-15",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/tools/toolchains/clang-15-x64-linux.cmake",
-                "DPLX_DP_TESTS_PCH": false,
                 "CMAKE_EXPORT_COMPILE_COMMANDS": true
             }
         },
