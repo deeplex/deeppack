@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <span>
 
+#include <dplx/dp/fwd.hpp>
 #include <dplx/dp/streams/output_buffer.hpp>
 
 namespace dplx::dp
@@ -23,6 +24,12 @@ class memory_output_stream final : public output_buffer
 
 public:
     ~memory_output_stream() noexcept = default;
+    memory_output_stream() noexcept
+        : output_buffer()
+        , mBuffer()
+    {
+    }
+
     explicit memory_output_stream(std::span<std::byte> output) noexcept
         : output_buffer(output.data(), output.size())
         , mBuffer(output)
@@ -32,6 +39,10 @@ public:
     [[nodiscard]] auto written() const noexcept -> std::span<std::byte>
     {
         return mBuffer.first(mBuffer.size() - output_buffer::size());
+    }
+    [[nodiscard]] auto written_size() const noexcept -> std::size_t
+    {
+        return mBuffer.size() - output_buffer::size();
     }
 
 private:
