@@ -12,7 +12,6 @@
 
 #include "blob_matcher.hpp"
 #include "dplx/dp/codecs/core.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "dplx/dp/streams/void_stream.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"

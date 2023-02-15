@@ -63,7 +63,7 @@ dplx_target_sources(deeppack
         dp/items/type_code
 
         dp/streams/input_buffer
-        dp/streams/memory_output_stream2
+        dp/streams/memory_output_stream
         dp/streams/output_buffer
         dp/streams/void_stream
 

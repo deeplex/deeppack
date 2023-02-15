@@ -5,7 +5,7 @@
 //         (See accompanying file LICENSE or copy at
 //           https://www.boost.org/LICENSE_1_0.txt)
 
-#include "dplx/dp/streams/memory_output_stream2.hpp"
+#include "dplx/dp/streams/memory_output_stream.hpp"
 
 #include <array>
 

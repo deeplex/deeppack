@@ -16,7 +16,6 @@
 
 #include "blob_matcher.hpp"
 #include "dplx/dp/api.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
 #include "test_input_stream.hpp"
 #include "test_output_stream.hpp"

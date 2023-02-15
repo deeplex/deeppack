@@ -13,7 +13,6 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "blob_matcher.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
 #include "range_generator.hpp"
 #include "test_input_stream.hpp"
