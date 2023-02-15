@@ -40,6 +40,12 @@ inline constexpr struct get_output_buffer_fn
         return outStream;
     }
 
+    // poison pill to remove implicit conversions of "real" streams to some type
+    // for which a get_output_buffer customization exists
+    template <typename T>
+        requires std::derived_from<std::remove_cvref_t<T>, output_buffer>
+    friend inline void tag_invoke(get_output_buffer_fn, T &&) noexcept = delete;
+
 } get_output_buffer{};
 
 inline constexpr struct get_input_buffer_fn
@@ -74,6 +80,13 @@ inline constexpr struct get_input_buffer_fn
     {
         return static_cast<T &&>(inStream);
     }
+
+    // poison pill to remove implicit conversions of "real" streams to some type
+    // for which a get_input_buffer customization exists
+    // e.g. memory_input_stream => std::span<std::byte const>
+    template <typename T>
+        requires std::derived_from<std::remove_cvref_t<T>, input_buffer>
+    friend inline void tag_invoke(get_input_buffer_fn, T &&) noexcept = delete;
 
 } get_input_buffer{};
 
