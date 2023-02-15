@@ -51,21 +51,21 @@ public:
     using difference_type = std::ptrdiff_t;
 
 protected:
-    ~input_buffer() noexcept = default;
-    input_buffer() noexcept
+    constexpr ~input_buffer() noexcept = default;
+    constexpr input_buffer() noexcept
         : mInputBuffer(nullptr)
         , mInputBufferSize(0U)
         , mInputSize(0U)
     {
     }
-    input_buffer(input_buffer const &) noexcept = default;
-    auto operator=(input_buffer const &) noexcept -> input_buffer & = default;
+    constexpr input_buffer(input_buffer const &) noexcept = default;
+    constexpr auto operator=(input_buffer const &) noexcept
+            -> input_buffer & = default;
 
-public:
-    input_buffer(input_buffer &&) noexcept = delete;
-    auto operator=(input_buffer &&) noexcept -> input_buffer & = delete;
+    constexpr input_buffer(input_buffer &&) noexcept = default;
+    constexpr auto operator=(input_buffer &&) noexcept
+            -> input_buffer & = default;
 
-protected:
     static constexpr struct indefinite_input_size_t
     {
     } indefinite_input_size{};

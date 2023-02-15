@@ -58,11 +58,10 @@ protected:
     constexpr auto operator=(output_buffer const &) noexcept
             -> output_buffer & = default;
 
-public:
-    output_buffer(output_buffer &&) noexcept = delete;
-    auto operator=(output_buffer &&) noexcept -> output_buffer & = delete;
+    constexpr output_buffer(output_buffer &&) noexcept = default;
+    constexpr auto operator=(output_buffer &&) noexcept
+            -> output_buffer & = default;
 
-protected:
     constexpr explicit output_buffer(std::span<std::byte> const buffer) noexcept
         : mOutputBuffer(buffer.data())
         , mOutputBufferSize(buffer.size())
