@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <span>
 #include <type_traits>
 #include <utility>
 
@@ -62,10 +63,15 @@ public:
     auto operator=(output_buffer &&) noexcept -> output_buffer & = delete;
 
 protected:
-    constexpr explicit output_buffer(std::byte *const buffer,
-                                     size_type const size) noexcept
-        : mOutputBuffer(buffer)
-        , mOutputBufferSize(size)
+    constexpr explicit output_buffer(std::span<std::byte> const buffer) noexcept
+        : mOutputBuffer(buffer.data())
+        , mOutputBufferSize(buffer.size())
+    {
+    }
+    constexpr explicit output_buffer(std::byte *const bufferData,
+                                     size_type const bufferSize) noexcept
+        : mOutputBuffer(bufferData)
+        , mOutputBufferSize(bufferSize)
     {
     }
 
@@ -111,6 +117,11 @@ public:
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
+    auto bulk_write(std::span<std::byte const> const buffer) noexcept
+            -> result<void>
+    {
+        return bulk_write(buffer.data(), buffer.size());
+    }
     auto bulk_write(std::byte const *bytes, std::size_t bytesSize) noexcept
             -> result<void>
     {
@@ -147,16 +158,22 @@ protected:
         mOutputBuffer = nullptr;
         mOutputBufferSize = 0;
     }
-    constexpr void reset(std::byte *const buffer, size_type const size) noexcept
+    constexpr void reset(std::span<std::byte> const buffer) noexcept
+    {
+        mOutputBuffer = buffer.data();
+        mOutputBufferSize = buffer.size();
+    }
+    constexpr void reset(std::byte *const buffer,
+                         size_type const bufferSize) noexcept
     {
         mOutputBuffer = buffer;
-        mOutputBufferSize = size;
+        mOutputBufferSize = bufferSize;
     }
 
 private:
     virtual auto do_grow(size_type requestedSize) noexcept -> result<void> = 0;
-    virtual auto do_bulk_write(std::byte const *src, std::size_t size) noexcept
-            -> result<void>
+    virtual auto do_bulk_write(std::byte const *src,
+                               std::size_t srcSize) noexcept -> result<void>
             = 0;
     virtual auto do_sync_output() noexcept -> result<void>
     {
