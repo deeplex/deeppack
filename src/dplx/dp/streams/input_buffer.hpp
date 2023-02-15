@@ -10,10 +10,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <type_traits>
 #include <utility>
 
 #include <dplx/dp/disappointment.hpp>
+#include <dplx/dp/fwd.hpp>
 
 namespace dplx::dp
 {
@@ -49,31 +51,45 @@ public:
     using difference_type = std::ptrdiff_t;
 
 protected:
-    ~input_buffer() noexcept = default;
-    input_buffer() noexcept
+    constexpr ~input_buffer() noexcept = default;
+    constexpr input_buffer() noexcept
         : mInputBuffer(nullptr)
         , mInputBufferSize(0U)
         , mInputSize(0U)
     {
     }
-    input_buffer(input_buffer const &) noexcept = default;
-    auto operator=(input_buffer const &) noexcept -> input_buffer & = default;
+    constexpr input_buffer(input_buffer const &) noexcept = default;
+    constexpr auto operator=(input_buffer const &) noexcept
+            -> input_buffer & = default;
 
-public:
-    input_buffer(input_buffer &&) noexcept = delete;
-    auto operator=(input_buffer &&) noexcept -> input_buffer & = delete;
+    constexpr input_buffer(input_buffer &&) noexcept = default;
+    constexpr auto operator=(input_buffer &&) noexcept
+            -> input_buffer & = default;
 
-protected:
     static constexpr struct indefinite_input_size_t
     {
     } indefinite_input_size{};
 
+    explicit input_buffer(std::span<std::byte const> inputBuffer,
+                          std::uint64_t const inputSize) noexcept
+        : mInputBuffer(inputBuffer.data())
+        , mInputBufferSize(inputBuffer.size())
+        , mInputSize(inputSize)
+    {
+    }
     explicit input_buffer(pointer const inputBuffer,
                           size_type const inputBufferSize,
                           std::uint64_t const inputSize) noexcept
         : mInputBuffer(inputBuffer)
         , mInputBufferSize(inputBufferSize)
         , mInputSize(inputSize)
+    {
+    }
+    explicit input_buffer(std::span<std::byte const> inputBuffer,
+                          indefinite_input_size_t) noexcept
+        : mInputBuffer(inputBuffer.data())
+        , mInputBufferSize(inputBuffer.size())
+        , mInputSize(UINT64_MAX)
     {
     }
     explicit input_buffer(pointer const inputBuffer,
@@ -154,6 +170,10 @@ public:
         return do_discard_input(remaining);
     }
 
+    auto bulk_read(std::span<std::byte> destBuffer) noexcept -> result<void>
+    {
+        return bulk_read(destBuffer.data(), destBuffer.size());
+    }
     auto bulk_read(std::byte *dest, std::size_t amount) noexcept -> result<void>
     {
         if (amount == 0U) [[unlikely]]
@@ -195,6 +215,13 @@ protected:
         mInputSize -= mInputBufferSize;
         mInputBufferSize = 0;
     }
+    void reset(std::span<std::byte const> buffer,
+               std::uint64_t inputSize) noexcept
+    {
+        mInputBuffer = buffer.data();
+        mInputBufferSize = buffer.size();
+        mInputSize = inputSize;
+    }
     void reset(pointer const buffer,
                size_type const size,
                std::uint64_t const inputSize) noexcept
@@ -202,6 +229,13 @@ protected:
         mInputBuffer = buffer;
         mInputBufferSize = size;
         mInputSize = inputSize;
+    }
+    void reset(std::span<std::byte const> buffer,
+               indefinite_input_size_t) noexcept
+    {
+        mInputBuffer = buffer.data();
+        mInputBufferSize = buffer.size();
+        mInputSize = UINT64_MAX;
     }
     void reset(pointer const buffer,
                size_type const size,

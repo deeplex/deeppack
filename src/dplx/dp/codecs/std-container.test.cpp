@@ -31,7 +31,6 @@
 #include "dplx/dp/api.hpp"
 #include "dplx/dp/codecs/core.hpp"
 #include "dplx/dp/indefinite_range.hpp"
-#include "dplx/dp/streams/memory_output_stream2.hpp"
 #include "item_sample_ct.hpp"
 #include "item_sample_rt.hpp"
 #include "test_input_stream.hpp"
@@ -345,12 +344,11 @@ TEST_CASE("an indefinite range gets encoded")
             .encoded = {0x9f, 0x18, 0xfe, 0x18, 0xfe, 0xff},
     };
 
-    std::vector<std::byte> buffer(sample.encoded_length);
-    dp::memory_output_stream outputStream(buffer);
+    simple_test_output_stream outputStream(sample.encoded_length);
 
     REQUIRE(dp::encode(outputStream, dp::indefinite_range(sample.value)));
 
-    CHECK(std::ranges::equal(buffer, sample.encoded_bytes()));
+    CHECK_BLOB_EQ(outputStream.written(), sample.encoded_bytes());
 }
 
 /*
