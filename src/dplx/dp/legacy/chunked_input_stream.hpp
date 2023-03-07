@@ -55,7 +55,9 @@ protected:
         else if (
                 auto const consumedSize = static_cast<int>(
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-                        const_cast<input_buffer *>(this)->data()
+                        const_cast<input_buffer *>(
+                                static_cast<input_buffer const *>(this))
+                                ->data()
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                         - static_cast<std::byte const *>(mSmallBuffer));
                 consumedSize > mBufferStart)
