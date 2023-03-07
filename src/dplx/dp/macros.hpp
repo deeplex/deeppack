@@ -12,6 +12,7 @@
 // NOLINTBEGIN(modernize-macro-to-enum)
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define DPLX_DP_DECLARE_CODEC_SIMPLE(_fq_type)                                 \
     template <>                                                                \
     class dplx::dp::codec<_fq_type>                                            \
@@ -26,6 +27,7 @@
         static auto decode(parse_context &ctx, _fq_type &outValue) noexcept    \
                 -> result<void>;                                               \
     }
+// NOLINTEND(bugprone-macro-parentheses)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 // NOLINTEND(modernize-macro-to-enum)
