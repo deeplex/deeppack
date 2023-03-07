@@ -29,6 +29,7 @@ dplx_target_sources(deeppack
         dp/fwd
         dp/indefinite_range
         dp/layout_descriptor
+        dp/macros
         dp/object_def
         dp/tuple_def
 
