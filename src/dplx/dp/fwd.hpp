@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <type_traits>
 
+#include <dplx/dp/disappointment.hpp>
+
 namespace dplx::dp
 {
 
