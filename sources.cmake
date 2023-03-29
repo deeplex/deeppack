@@ -31,6 +31,7 @@ dplx_target_sources(deeppack
         dp/layout_descriptor
         dp/macros
         dp/object_def
+        dp/state
         dp/tuple_def
 
         dp/codecs/auto_enum
