@@ -7,5 +7,6 @@
 
 #pragma once
 
+#include <dplx/dp/config.hpp>
 #include <dplx/dp/disappointment.hpp>
 #include <dplx/dp/fwd.hpp>

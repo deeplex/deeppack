@@ -1,9 +1,10 @@
 # Changes here will be overwritten by Copier
-_commit: v0.2.5
+_commit: v0.2.6
 _src_path: gh:deeplex/copier-cpp
 buildver: 0.1.0.2
 email: henrik@gassmann.onl
 full_name: Henrik Steffen Gaßmann
+header_config: true
 header_only: false
 namespace: dp
 project_name: deeppack

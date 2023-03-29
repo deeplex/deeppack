@@ -156,7 +156,7 @@ endif()
 ########################################################################
 # source files
 include(sources.cmake)
-source_group(TREE src/dplx)
+source_group(vcpkg REGULAR_EXPRESSION .*/vcpkg_installed/.*)
 
 
 ########################################################################
@@ -168,6 +168,11 @@ endif()
 ########################################################################
 # cmake install
 install(DIRECTORY src/dplx
+    TYPE INCLUDE
+    FILES_MATCHING
+    REGEX ".*\\.h(pp)?"
+)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx
     TYPE INCLUDE
     FILES_MATCHING
     REGEX ".*\\.h(pp)?"
