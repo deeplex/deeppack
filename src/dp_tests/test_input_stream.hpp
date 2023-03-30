@@ -88,22 +88,25 @@ private:
     }
 };
 
-class simple_test_parse_context final : private dp::parse_context
+class simple_test_parse_context final
 {
+    dp::parse_context ctx;
+
 public:
+    // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     simple_test_input_stream stream;
 
     explicit simple_test_parse_context(
             std::span<std::byte const> const readBuffer,
             bool const initiallyEmpty = false)
-        : parse_context{stream}
+        : ctx{stream}
         , stream(readBuffer, initiallyEmpty)
     {
     }
 
     auto as_parse_context() noexcept -> dp::parse_context &
     {
-        return *this;
+        return ctx;
     }
 };
 

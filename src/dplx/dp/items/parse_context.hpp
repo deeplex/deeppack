@@ -7,7 +7,11 @@
 
 #pragma once
 
+#include <cstddef>
+#include <memory_resource>
+
 #include <dplx/dp/fwd.hpp>
+#include <dplx/dp/state.hpp>
 
 namespace dplx::dp
 {
@@ -15,6 +19,24 @@ namespace dplx::dp
 struct parse_context
 {
     input_buffer &in;
+    state_store states;
+    link_store links;
+
+    explicit parse_context(
+            input_buffer &inStreamBuffer,
+            std::pmr::polymorphic_allocator<std::byte> const &allocator
+            = std::pmr::polymorphic_allocator<std::byte>{})
+        : in(inStreamBuffer)
+        , states(allocator)
+        , links(allocator)
+    {
+    }
+
+    [[nodiscard]] auto get_allocator() const noexcept
+            -> std::pmr::polymorphic_allocator<std::byte>
+    {
+        return states.get_allocator();
+    }
 };
 
 } // namespace dplx::dp
