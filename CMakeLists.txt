@@ -109,6 +109,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         /Zc:__cplusplus # correctly define the __cplusplus macro
     )
 endif()
+if (WIN32)
+    target_compile_definitions(compiler_settings INTERFACE
+        -D_ENABLE_EXTENDED_ALIGNED_STORAGE=1
+    )
+endif()
 
 
 ########################################################################
