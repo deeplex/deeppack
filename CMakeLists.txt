@@ -58,14 +58,14 @@ mark_as_advanced(DPLX_DP_USE_BRANCHING_INTEGER_ENCODER)
 
 set(Boost_NO_WARN_NEW_VERSIONS ON)
 
-find_package(concrete CONFIG REQUIRED)
+find_package(concrete 0.0 CONFIG REQUIRED)
 
-find_package(fmt CONFIG REQUIRED)
+find_package(fmt 9 CONFIG REQUIRED)
 
 find_package(status-code CONFIG REQUIRED)
 find_package(outcome CONFIG REQUIRED)
 
-find_package(Boost 1.71 REQUIRED)
+find_package(Boost 1.81 REQUIRED)
 
 find_package(yaml-cpp CONFIG)
 set_package_properties(yaml-cpp PROPERTIES

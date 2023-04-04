@@ -7,10 +7,10 @@
         "boost-endian",
         "boost-container",
         "boost-mp11",
+        "boost-unordered",
         "concrete",
         "fmt",
         "outcome",
-        "parallel-hashmap",
         "status-code"
     ],
     "features": {

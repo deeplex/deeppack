@@ -11,11 +11,12 @@
 #include <memory_resource>
 #include <utility>
 
-#include <parallel_hashmap/phmap.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include <dplx/cncr/utils.hpp>
 #include <dplx/cncr/uuid.hpp>
 
+#include <dplx/dp/detail/workaround.hpp>
 #include <dplx/dp/fwd.hpp>
 
 namespace dplx::dp::detail
@@ -121,6 +122,13 @@ public:
         , mDelete(std::exchange(other.mDelete, nullptr))
     {
     }
+#if DPLX_DP_WORKAROUND_ISSUE_LIBSTDCPP_108952
+    constexpr unique_erased_state_ptr(unique_erased_state_ptr &other) noexcept
+        : mObj(std::exchange(other.mObj, nullptr))
+        , mDelete(std::exchange(other.mDelete, nullptr))
+    {
+    }
+#endif
     constexpr auto operator=(unique_erased_state_ptr &&other) noexcept
             -> unique_erased_state_ptr &
     {
@@ -195,7 +203,7 @@ namespace dplx::dp::detail
 {
 
 template <typename Key, typename T>
-using flat_hash_map = phmap::flat_hash_map<
+using flat_hash_map = boost::unordered_flat_map<
         Key,
         T,
         std::hash<Key>,
@@ -278,14 +286,14 @@ public:
     auto emplace(state_key<StateT> const &key, Args &&...args)
             -> std::pair<StateT *, bool>
     {
-        auto const h = mImpl.hash(key.value);
-        if (auto it = mImpl.find(key.value, h); it != mImpl.end())
+        auto hint = mImpl.find(key.value);
+        if (hint != mImpl.end())
         {
             // this way, we don't need to allocate if key already has a value
-            return {it->second.template get<StateT>(), false};
+            return {hint->second.template get<StateT>(), false};
         }
-        auto [it, emplaced] = mImpl.emplace_with_hash(
-                h, key.value,
+        auto it = mImpl.emplace_hint(
+                hint, key.value,
                 detail::allocate_state<StateT, allocator_type>(
                         mImpl.get_allocator(), static_cast<Args &&>(args)...));
         return {it->second.template get<StateT>(), true};
@@ -401,15 +409,13 @@ public:
     template <state_link T>
     auto replace(state_link_key<T> const &key, T value) -> T
     {
-        auto const h = mImpl.hash(key.value);
-        auto it = mImpl.find(key.value, h);
+        auto it = mImpl.find(key.value);
         if (it == mImpl.end())
         {
             if (value != T{})
             {
-                mImpl.emplace_with_hash(
-                        h, key.value,
-                        detail::erasure_cast<erased_type, T>(value));
+                mImpl.emplace_hint(it, key.value,
+                                   detail::erasure_cast<erased_type, T>(value));
             }
             return T{};
         }
