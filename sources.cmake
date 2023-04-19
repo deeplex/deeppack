@@ -12,6 +12,7 @@ dplx_target_sources(deeppack
         dp/codecs/std-chrono
         dp/codecs/std-filesystem
         dp/codecs/std-string
+        dp/codecs/system_error2
 
         dp/items/skip_item
 )
