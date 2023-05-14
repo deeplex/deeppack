@@ -27,7 +27,7 @@ endif()
 
 ########################################################################
 project(deeppack
-    VERSION 0.1.0.6
+    VERSION 0.1.0.7
     LANGUAGES CXX
 )
 
