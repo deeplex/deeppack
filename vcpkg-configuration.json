@@ -2,14 +2,16 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg-configuration.schema.json",
     "default-registry": {
         "kind": "builtin",
-        "baseline": "501db0f17ef6df184fcdbfbe0f87cde2313b6ab1"
+        "baseline": "f6a5d4e8eb7476b8d7fc12a56dff300c1c986131"
     },
     "registries": [
         {
             "kind": "git",
             "repository": "https://github.com/deeplex/vcpkg-registry",
-            "baseline": "92fdbb474589c5b134d1dd2083df3f258c56c639",
-            "packages": ["concrete"]
+            "baseline": "25b7089cc89009464ea4401d10c5b7b84a162c11",
+            "packages": [
+                "concrete"
+            ]
         }
     ]
 }

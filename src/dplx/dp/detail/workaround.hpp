@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2021.
+// Copyright 2020-2023 Henrik Steffen Gaßmann
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
@@ -12,6 +12,7 @@
 #include <dplx/predef/workaround.h>
 
 #include <dplx/dp/config.hpp>
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 // these macros are very similar to those in <dplx/predef/other/workaround.h>
 // but offer library specific configuration knobs
@@ -35,3 +36,5 @@
 // see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108952
 #define DPLX_DP_WORKAROUND_ISSUE_LIBSTDCPP_108952                              \
     DPLX_DP_WORKAROUND_TESTED_AT(DPLX_LIB_STD_GNU, 12, 2, 0)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
