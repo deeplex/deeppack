@@ -10,10 +10,10 @@
 // NOLINTBEGIN(modernize-macro-to-enum)
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
+#cmakedefine01 DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
+
 #cmakedefine01 DPLX_DP_DISABLE_WORKAROUNDS
 #cmakedefine01 DPLX_DP_FLAG_OUTDATED_WORKAROUNDS
-
-#cmakedefine01 DPLX_DP_USE_BRANCHING_INTEGER_ENCODER
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 // NOLINTEND(modernize-macro-to-enum)

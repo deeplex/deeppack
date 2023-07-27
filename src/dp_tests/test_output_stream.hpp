@@ -252,17 +252,19 @@ private:
 
 class test_emit_context final
 {
-    dp::emit_context ctx;
-
 public:
     // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
     test_output_stream stream;
 
+private:
+    dp::emit_context ctx;
+
+public:
     explicit test_emit_context(
             std::initializer_list<std::size_t> const gatherBufferSizes,
             bool const initiallyEmpty = false)
-        : ctx{stream}
-        , stream(gatherBufferSizes, initiallyEmpty)
+        : stream(gatherBufferSizes, initiallyEmpty)
+        , ctx{stream}
     {
     }
 

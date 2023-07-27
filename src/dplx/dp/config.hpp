@@ -11,3 +11,10 @@
 #if __has_include(<dplx/dp/detail/config.hpp>)
 #include <dplx/dp/detail/config.hpp>
 #endif
+
+#if !defined(DPLX_DP_DISABLE_WORKAROUNDS)
+#define DPLX_DP_DISABLE_WORKAROUNDS 0
+#endif
+#if !defined(DPLX_DP_FLAG_OUTDATED_WORKAROUNDS)
+#define DPLX_DP_FLAG_OUTDATED_WORKAROUNDS 0
+#endif

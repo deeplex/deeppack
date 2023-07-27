@@ -1,5 +1,5 @@
 
-// Copyright Henrik Steffen Gaßmann 2020
+// Copyright 2020-2023 Henrik Steffen Gaßmann
 //
 // Distributed under the Boost Software License, Version 1.0.
 //         (See accompanying file LICENSE or copy at
