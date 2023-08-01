@@ -45,7 +45,7 @@ auto codec<std::u8string>::decode(parse_context &ctx,
                                   std::u8string &value) noexcept -> result<void>
 {
     DPLX_TRY(dp::parse_text<std::u8string>(ctx, value));
-    return oc::success();
+    return outcome::success();
 }
 
 auto codec<std::string_view>::size_of(emit_context &ctx,
@@ -78,7 +78,7 @@ auto codec<std::string>::decode(parse_context &ctx, std::string &value) noexcept
         -> result<void>
 {
     DPLX_TRY(dp::parse_text<std::string>(ctx, value));
-    return oc::success();
+    return outcome::success();
 }
 
 } // namespace dplx::dp

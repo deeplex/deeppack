@@ -65,7 +65,7 @@ private:
 
         mRemaining -= mCurrentChunk.size();
 
-        return oc::success();
+        return outcome::success();
     }
 #if defined(DPLX_COMP_GNUC_AVAILABLE) && !defined(DPLX_COMP_CLANG_AVAILABLE)
 #pragma GCC diagnostic pop
@@ -79,7 +79,7 @@ private:
             {
                 DPLX_TRY(acquire_next_chunk());
                 reset(mCurrentChunk.data(), mCurrentChunk.size());
-                return oc::success();
+                return outcome::success();
             }
             if (requestedSize > small_buffer_size)
             {
@@ -87,7 +87,7 @@ private:
             }
             mDecomissionThreshold = static_cast<std::int8_t>(size());
             reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
-            return oc::success();
+            return outcome::success();
         }
 
         auto const chunkPart = mCurrentChunk.last(
@@ -105,7 +105,7 @@ private:
 
             reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
             mDecomissionThreshold -= static_cast<std::int8_t>(consumedSize);
-            return oc::success();
+            return outcome::success();
         }
 
         std::memcpy(chunkPart.data(), static_cast<std::byte *>(mSmallBuffer),
@@ -174,7 +174,7 @@ private:
             }
         } while (writeAmount != 0);
         reset(mCurrentChunk.data(), mCurrentChunk.size());
-        return oc::success();
+        return outcome::success();
     }
 };
 

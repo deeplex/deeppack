@@ -132,7 +132,7 @@ public:
 
     auto require_input(size_type const requiredSize) noexcept -> result<void>
     {
-        result<void> rx = oc::success();
+        result<void> rx = outcome::success();
         if (requiredSize > mInputSize)
         {
             rx = errc::end_of_stream;
@@ -157,7 +157,7 @@ public:
         if (amount <= mInputBufferSize)
         {
             discard_buffered(amount);
-            return oc::success();
+            return outcome::success();
         }
         if (amount > mInputSize)
         {
@@ -178,7 +178,7 @@ public:
     {
         if (amount == 0U) [[unlikely]]
         {
-            return oc::success();
+            return outcome::success();
         }
         if (amount > mInputSize)
         {
@@ -198,7 +198,7 @@ public:
         }
         if (amount == 0U)
         {
-            return oc::success();
+            return outcome::success();
         }
         return do_bulk_read(dest, amount);
     }
@@ -257,7 +257,7 @@ private:
             = 0;
     virtual auto do_sync_input() noexcept -> result<void>
     {
-        return oc::success();
+        return outcome::success();
     }
 };
 

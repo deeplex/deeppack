@@ -39,7 +39,7 @@ public:
             return static_cast<result<void> &&>(parseRx).as_failure();
         }
         value = static_cast<T>(underlyingValue);
-        return oc::success();
+        return outcome::success();
     }
 };
 

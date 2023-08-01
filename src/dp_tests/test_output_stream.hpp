@@ -62,7 +62,7 @@ private:
             return dp::errc::end_of_stream;
         }
         reset(mBuffer.data(), mBuffer.size());
-        return dp::oc::success();
+        return outcome::success();
     }
 
     auto do_bulk_write(std::byte const *const src,
@@ -79,7 +79,7 @@ private:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             reset(mBuffer.data() + srcSize, mBuffer.size() - srcSize);
         }
-        return dp::oc::success();
+        return outcome::success();
     }
 };
 
@@ -197,7 +197,7 @@ private:
             else
             {
                 reset(currentBuffer.data(), currentBuffer.size());
-                return dp::oc::success();
+                return outcome::success();
             }
         }
         reset();
@@ -237,7 +237,7 @@ private:
         {
             return dp::errc::end_of_stream;
         }
-        return dp::oc::success();
+        return outcome::success();
     }
 
     void finalize_current_buffer() noexcept

@@ -55,7 +55,7 @@ private:
         mTotalWritten += void_buffer_size - size();
         output_buffer::reset(static_cast<std::byte *>(mMemory),
                              sizeof(mMemory));
-        return oc::success();
+        return outcome::success();
     }
     auto do_bulk_write(std::byte const *, std::size_t toBeWritten) noexcept
             -> result<void> override
@@ -65,7 +65,7 @@ private:
         mTotalWritten += void_buffer_size + toBeWritten;
         output_buffer::reset(static_cast<std::byte *>(mMemory),
                              sizeof(mMemory));
-        return oc::success();
+        return outcome::success();
     }
 };
 

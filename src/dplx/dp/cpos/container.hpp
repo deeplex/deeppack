@@ -54,7 +54,7 @@ inline constexpr struct container_reserve_fn
         try
         {
             container.reserve(reservationSize);
-            return oc::success();
+            return outcome::success();
         }
         catch (std::bad_alloc const &)
         {
@@ -102,7 +102,7 @@ inline constexpr struct container_resize_fn
         try
         {
             container.resize(newSize);
-            return oc::success();
+            return outcome::success();
         }
         catch (std::bad_alloc const &)
         {

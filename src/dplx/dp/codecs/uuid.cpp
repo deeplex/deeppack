@@ -24,7 +24,7 @@ auto dplx::dp::codec<cncr::uuid>::decode(parse_context &ctx,
     DPLX_TRY(ctx.in.bulk_read(static_cast<std::byte *>(raw.values), stateSize));
 
     value = cncr::uuid(raw.values);
-    return oc::success();
+    return outcome::success();
 }
 
 auto codec<cncr::uuid>::encode(emit_context &ctx,

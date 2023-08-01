@@ -172,20 +172,20 @@ inline constexpr struct decode_fn final
         // clang-format on
         {
             if (auto parseRx = codec<T>::decode(ctx);
-                oc::try_operation_has_value(parseRx)) [[likely]]
+                outcome::try_operation_has_value(parseRx)) [[likely]]
             {
-                return oc::try_operation_extract_value(
+                return outcome::try_operation_extract_value(
                         static_cast<decltype(parseRx) &&>(parseRx));
             }
             else [[unlikely]]
             {
-                return oc::try_operation_return_as(
+                return outcome::try_operation_return_as(
                         static_cast<decltype(parseRx) &&>(parseRx));
             }
         }
         else
         {
-            result<T> rx(oc::success());
+            result<T> rx(outcome::success());
             if (auto parseRx = codec<T>::decode(ctx, rx.assume_value());
                 parseRx.has_error()) [[unlikely]]
             {

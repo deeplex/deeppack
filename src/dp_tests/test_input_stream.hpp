@@ -58,7 +58,7 @@ private:
             return dp::errc::end_of_stream;
         }
         reset(mReadBuffer.data(), mReadBuffer.size(), mReadBuffer.size());
-        return dp::oc::success();
+        return outcome::success();
     }
     auto do_discard_input(size_type amount) noexcept -> result<void> override
     {
@@ -69,7 +69,7 @@ private:
         }
         auto const remaining = mReadBuffer.subspan(amount);
         reset(remaining.data(), remaining.size(), remaining.size());
-        return dp::oc::success();
+        return outcome::success();
     }
     auto do_bulk_read(std::byte *dest, std::size_t size) noexcept
             -> result<void> override
@@ -83,7 +83,7 @@ private:
 
         auto const remaining = mReadBuffer.subspan(size);
         reset(remaining.data(), remaining.size(), remaining.size());
-        return dp::oc::success();
+        return outcome::success();
     }
 };
 

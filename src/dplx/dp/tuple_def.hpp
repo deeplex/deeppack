@@ -118,7 +118,7 @@ struct tuple_def
     template <typename Fn>
     static inline auto mp_for_dots(Fn &&fn) -> result<void>
     {
-        result<void> rx = oc::success();
+        result<void> rx = outcome::success();
 
         [[maybe_unused]] bool failed
                 = (...

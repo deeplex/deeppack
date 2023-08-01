@@ -54,7 +54,7 @@ static auto skip_binary_or_text(parse_context &ctx, item_head const &item)
 
         DPLX_TRY(ctx.in.discard_input(chunkInfo.value));
     }
-    return oc::success();
+    return outcome::success();
 }
 
 } // namespace detail
@@ -201,7 +201,7 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
 
     } while (!stack.empty());
 
-    return oc::success();
+    return outcome::success();
 }
 
 } // namespace dplx::dp
