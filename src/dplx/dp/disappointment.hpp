@@ -11,11 +11,8 @@
 #include <type_traits>
 #include <utility>
 
-#include <outcome/experimental/status_result.hpp>
-#include <outcome/try.hpp>
-#include <status-code/system_code.hpp>
-
 #include <dplx/cncr/data_defined_status_domain.hpp>
+#include <dplx/cncr/disappointment.hpp>
 
 namespace dplx::dp
 {
@@ -118,7 +115,7 @@ namespace dplx::dp
 {
 
 template <typename R>
-using result = oc::experimental::status_result<R>;
+using result = dplx::result<R>;
 
 }
 
