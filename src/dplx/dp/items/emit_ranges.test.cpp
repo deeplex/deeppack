@@ -123,7 +123,7 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
 
     simple_test_emit_context ctx(sample.encoded.size());
     auto encodePair = [](dp::emit_context &lctx,
-                         std::pair<int, int> const &pair) -> dp::result<void>
+                         std::pair<int, int> const &pair) -> result<void>
     {
         DPLX_TRY(dp::encode(lctx, pair.first));
         return dp::encode(lctx, pair.second);
@@ -167,7 +167,7 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
 
     simple_test_emit_context ctx(sample.encoded.size());
     auto encodePair = [](dp::emit_context &lctx,
-                         std::pair<int, int> const &pair) -> dp::result<void>
+                         std::pair<int, int> const &pair) -> result<void>
     {
         DPLX_TRY(dp::encode(lctx, pair.first));
         return dp::encode(lctx, pair.second);

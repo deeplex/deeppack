@@ -38,7 +38,7 @@ public:
     using output_buffer::reset;
 
     auto do_grow(size_type const requestedSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         grow_calls += 1;
         last_grow_param = requestedSize;
@@ -47,7 +47,7 @@ public:
 
     auto do_bulk_write(std::byte const *const bytes,
                        std::size_t const bytesSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         bulk_write_calls += 1;
         last_bulk_write_call_param0 = bytes;

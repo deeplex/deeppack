@@ -167,7 +167,7 @@ inline constexpr struct decode_fn final
         // clang-format off
         else if constexpr (requires {
                               { codec<T>::decode(ctx) } noexcept
-                                  -> detail::tryable_result<T>;
+                                  -> cncr::tryable_result<T>;
                            })
         // clang-format on
         {

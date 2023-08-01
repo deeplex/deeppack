@@ -17,11 +17,10 @@
 namespace dplx::dp
 {
 
-namespace system_error = SYSTEM_ERROR2_NAMESPACE;
-namespace oc = OUTCOME_V2_NAMESPACE;
+namespace oc = outcome;
 
-using oc::failure;
-using oc::success;
+using outcome::failure;
+using outcome::success;
 
 enum class errc
 {
@@ -122,71 +121,24 @@ using result = dplx::result<R>;
 namespace dplx::dp::detail
 {
 
-template <typename B>
-concept boolean_testable_impl = std::convertible_to<B, bool>;
-// clang-format off
-template <typename B>
-concept boolean_testable
-        = boolean_testable_impl<B>
-        && requires(B &&b)
-        {
-            { !static_cast<B &&>(b) }
-                -> boolean_testable_impl;
-        };
-// clang-format on
-
-// clang-format off
-template <typename T>
-concept tryable
-    = requires(T t)
-{
-    { oc::try_operation_has_value(t) }
-        -> boolean_testable;
-    { oc::try_operation_return_as(static_cast<T &&>(t)) }
-        -> std::convertible_to<result<void>>;
-    oc::try_operation_extract_value(static_cast<T &&>(t));
-};
-// clang-format on
-
-template <tryable T>
-using result_value_t
-        = std::remove_cvref_t<decltype(oc::try_operation_extract_value(
-                std::declval<T &&>()))>;
-
-// clang-format off
-template <typename T, typename R>
-concept tryable_result
-    = tryable<T>
-    && requires(T rx)
-    {
-        { oc::try_operation_extract_value(static_cast<T &&>(rx)) }
-            -> std::convertible_to<R>;
-    };
-// clang-format on
-
 inline auto try_extract_failure(result<void> in, result<void> &out) -> bool
 {
-    if (oc::try_operation_has_value(in))
+    if (outcome::try_operation_has_value(in))
     {
         return false;
     }
-    out = oc::try_operation_return_as(static_cast<result<void> &&>(in));
+    out = outcome::try_operation_return_as(static_cast<result<void> &&>(in));
     return true;
 }
-template <tryable T>
+template <cncr::tryable T>
 inline auto try_extract_failure(T &&in, result<void> &out) -> bool
 {
-    if (oc::try_operation_has_value(in))
+    if (outcome::try_operation_has_value(in))
     {
         return false;
     }
-    out = oc::try_operation_return_as(static_cast<T &&>(in));
+    out = outcome::try_operation_return_as(static_cast<T &&>(in));
     return true;
 }
 
 } // namespace dplx::dp::detail
-
-#ifndef DPLX_TRY
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DPLX_TRY(...) OUTCOME_TRY(__VA_ARGS__)
-#endif

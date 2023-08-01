@@ -54,8 +54,7 @@ public:
     }
 
 private:
-    auto do_grow(size_type const requested) noexcept
-            -> dp::result<void> override
+    auto do_grow(size_type const requested) noexcept -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false)
             || requested > mBuffer.size())
@@ -68,7 +67,7 @@ private:
 
     auto do_bulk_write(std::byte const *const src,
                        std::size_t const srcSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false) || srcSize > mBuffer.size())
         {
@@ -182,7 +181,7 @@ private:
     }
 
     auto do_grow(size_type const requestedSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false))
         {
@@ -205,7 +204,7 @@ private:
         return dp::errc::end_of_stream;
     }
     auto do_bulk_write(std::byte const *src, std::size_t size) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false))
         {

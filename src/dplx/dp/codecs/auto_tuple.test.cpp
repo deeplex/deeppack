@@ -96,7 +96,7 @@ TEST_CASE("encode tuple with layout descriptor 1")
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<dp::tuple_head_info> headParseRx
+        result<dp::tuple_head_info> headParseRx
                 = dp::decode_tuple_head(ctx.as_parse_context());
         REQUIRE(headParseRx);
         auto const &head = headParseRx.assume_value();
@@ -143,7 +143,7 @@ TEST_CASE("encode tuple with layout descriptor 2")
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<dp::tuple_head_info> headParseRx
+        result<dp::tuple_head_info> headParseRx
                 = dp::decode_tuple_head(ctx.as_parse_context());
         REQUIRE(headParseRx);
         auto const &head = headParseRx.assume_value();
@@ -190,7 +190,7 @@ TEST_CASE("encode tuple with layout descriptor 3")
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<dp::tuple_head_info> headParseRx
+        result<dp::tuple_head_info> headParseRx
                 = dp::decode_tuple_head(ctx.as_parse_context());
         REQUIRE(headParseRx);
         auto const &head = headParseRx.assume_value();
@@ -232,7 +232,7 @@ TEST_CASE("encode tuple with layout descriptor 4")
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<dp::tuple_head_info> headParseRx = dp::decode_tuple_head(
+        result<dp::tuple_head_info> headParseRx = dp::decode_tuple_head(
                 ctx.as_parse_context(), std::true_type{});
         REQUIRE(headParseRx);
         auto const &head = headParseRx.assume_value();
@@ -274,7 +274,7 @@ TEST_CASE("encode tuple with layout descriptor 5")
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        dp::result<dp::tuple_head_info> headParseRx
+        result<dp::tuple_head_info> headParseRx
                 = dp::decode_tuple_head(ctx.as_parse_context());
         REQUIRE(headParseRx);
         auto const &head = headParseRx.assume_value();

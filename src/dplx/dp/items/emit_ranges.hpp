@@ -30,7 +30,7 @@ concept subitem_emitlet
                    std::ranges::range_reference_t<R const> v)
         {
             { static_cast<Fn &&>(encodeFn)(ctx, v) }
-                -> tryable;
+                -> cncr::tryable;
         };
 // clang-format on
 
