@@ -267,7 +267,7 @@ inline auto expect_item_head(parse_context &ctx,
             // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
             if (value == 0x1fU)
             {
-                return oc::success();
+                return outcome::success();
             }
             // unwanted special break.
             return errc::item_type_mismatch;
@@ -278,7 +278,7 @@ inline auto expect_item_head(parse_context &ctx,
     {
         return errc::item_value_out_of_range;
     }
-    return oc::success();
+    return outcome::success();
 }
 
 template <detail::encodable_int T>
@@ -316,7 +316,7 @@ inline auto parse_integer(parse_context &ctx, T &outValue) noexcept
     auto const xorpad = static_cast<std::uint64_t>(signExtended);
 
     outValue = static_cast<T>(head.value ^ xorpad);
-    return oc::success();
+    return outcome::success();
 }
 
 template <detail::encodable_int T>
@@ -343,7 +343,7 @@ inline auto parse_integer(parse_context &ctx,
         return errc::item_value_out_of_range;
     }
     outValue = static_cast<T>(head.value);
-    return oc::success();
+    return outcome::success();
 }
 
 inline auto parse_boolean(parse_context &ctx, bool &outValue) noexcept
@@ -365,7 +365,7 @@ inline auto parse_boolean(parse_context &ctx, bool &outValue) noexcept
     }
     outValue = rolled == 1U;
     ctx.in.discard_buffered(1U);
-    return oc::success();
+    return outcome::success();
 }
 
 namespace detail

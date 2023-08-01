@@ -22,7 +22,7 @@ inline auto tag_invoke(container_reserve_fn,
 {
     if (size <= c.size())
     {
-        return oc::success();
+        return outcome::success();
     }
     return errc::not_enough_memory;
 }
@@ -33,7 +33,7 @@ inline auto tag_invoke(container_resize_fn,
 {
     if (size <= c.size())
     {
-        return oc::success();
+        return outcome::success();
     }
     return errc::not_enough_memory;
 }

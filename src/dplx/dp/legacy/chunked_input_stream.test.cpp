@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    auto acquire_next_chunk_impl(std::uint64_t) -> dp::result<dp::memory_view>
+    auto acquire_next_chunk_impl(std::uint64_t) -> result<dp::memory_view>
     {
         if (mNext >= mChunks.size())
         {

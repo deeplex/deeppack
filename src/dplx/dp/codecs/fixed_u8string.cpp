@@ -41,7 +41,7 @@ auto decode_fixed_u8string(parse_context &ctx, char8_t *out, unsigned &outlen)
     DPLX_TRY(auto len, dp::parse_text_finite(ctx, buffer, maxlen));
 
     outlen = static_cast<unsigned>(len);
-    return oc::success();
+    return outcome::success();
 }
 
 } // namespace dplx::dp::detail

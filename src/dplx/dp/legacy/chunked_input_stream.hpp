@@ -134,7 +134,7 @@ private:
             {
                 return require_input(requiredSize);
             }
-            return oc::success();
+            return outcome::success();
         }
 
         if (mBufferStart < 0)
@@ -150,7 +150,7 @@ private:
 
             if (requiredSize <= size())
             {
-                return oc::success();
+                return outcome::success();
             }
             if (size() == small_buffer_size)
             {
@@ -172,7 +172,7 @@ private:
             {
                 return require_input(requiredSize);
             }
-            return oc::success();
+            return outcome::success();
         }
 
         if (requiredSize > small_buffer_size)
@@ -185,7 +185,7 @@ private:
 
         if (requiredSize <= size())
         {
-            return oc::success();
+            return outcome::success();
         }
 
         // mReadArea has been completely drained and copied to mSmallBuffer
@@ -218,7 +218,7 @@ private:
         }
         reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
               input_size());
-        return oc::success();
+        return outcome::success();
     }
 
     auto do_bulk_read(std::byte *dest, std::size_t readAmount) noexcept
@@ -248,7 +248,7 @@ private:
         }
         reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
               input_size());
-        return oc::success();
+        return outcome::success();
     }
 };
 

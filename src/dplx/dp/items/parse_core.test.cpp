@@ -26,7 +26,7 @@ using enum dp::type_code;
 
 constexpr item_sample_ct<dp::item_head> parse_samples[] = {
   // clang-format off
-              
+
     // Appendix A.Examples
     {
         {posint, {}, 1, 0},
@@ -76,7 +76,7 @@ constexpr item_sample_ct<dp::item_head> parse_samples[] = {
     // posint boundaries
     {
         {posint, {}, 1, 0x17},
-        1, {0x17}, 
+        1, {0x17},
     },
     {
         {posint, {}, 2, 0x18},
@@ -315,7 +315,7 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
         simple_test_parse_context ctx(sample.encoded_bytes());
 
         TestType value;
-        dp::result<void> rx
+        result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
@@ -334,7 +334,7 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
         TestType value;
-        dp::result<void> rx
+        result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
@@ -367,7 +367,7 @@ TEMPLATE_TEST_CASE("parse_integer parses negative integers correctly",
         simple_test_parse_context ctx(sample.encoded_bytes());
 
         TestType value;
-        dp::result<void> rx
+        result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {
@@ -386,7 +386,7 @@ TEMPLATE_TEST_CASE("parse_integer parses negative integers correctly",
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
         TestType value;
-        dp::result<void> rx
+        result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
         {

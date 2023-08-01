@@ -50,7 +50,7 @@ public:
 
 private:
     auto do_require_input(size_type requiredSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false)
             || requiredSize > mReadBuffer.size())
@@ -58,10 +58,9 @@ private:
             return dp::errc::end_of_stream;
         }
         reset(mReadBuffer.data(), mReadBuffer.size(), mReadBuffer.size());
-        return dp::oc::success();
+        return outcome::success();
     }
-    auto do_discard_input(size_type amount) noexcept
-            -> dp::result<void> override
+    auto do_discard_input(size_type amount) noexcept -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false)
             || amount > mReadBuffer.size())
@@ -70,10 +69,10 @@ private:
         }
         auto const remaining = mReadBuffer.subspan(amount);
         reset(remaining.data(), remaining.size(), remaining.size());
-        return dp::oc::success();
+        return outcome::success();
     }
     auto do_bulk_read(std::byte *dest, std::size_t size) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false) || size > mReadBuffer.size())
         {
@@ -84,7 +83,7 @@ private:
 
         auto const remaining = mReadBuffer.subspan(size);
         reset(remaining.data(), remaining.size(), remaining.size());
-        return dp::oc::success();
+        return outcome::success();
     }
 };
 

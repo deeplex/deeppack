@@ -63,7 +63,7 @@ inline auto store_var_uint_eos(output_buffer &out,
     // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
     out.commit_written(byteSize);
-    return oc::success();
+    return outcome::success();
 }
 
 template <typename T>
@@ -112,7 +112,7 @@ inline auto store_var_uint(output_buffer &out,
     detail::store(dest + 1, encoded);
 
     out.commit_written(byteSize);
-    return oc::success();
+    return outcome::success();
 }
 
 inline auto store_inline_value(output_buffer &out,
@@ -130,7 +130,7 @@ inline auto store_inline_value(output_buffer &out,
             = static_cast<std::byte>(value | static_cast<unsigned>(category));
 
     out.commit_written(encodedSize);
-    return oc::success();
+    return outcome::success();
 }
 
 } // namespace dplx::dp::detail
@@ -283,7 +283,7 @@ inline auto emit_float_single(emit_context &ctx, float const value) noexcept
     detail::store(dest + 1, value);
 
     ctx.out.commit_written(encodedSize);
-    return oc::success();
+    return outcome::success();
 }
 
 inline auto emit_float_double(emit_context &ctx, double const value) noexcept
@@ -301,7 +301,7 @@ inline auto emit_float_double(emit_context &ctx, double const value) noexcept
     detail::store(dest + 1, value);
 
     ctx.out.commit_written(encodedSize);
-    return oc::success();
+    return outcome::success();
 }
 
 inline auto emit_null(emit_context &ctx) noexcept -> result<void>

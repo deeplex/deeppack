@@ -339,7 +339,7 @@ public:
     {
         vs.clear();
         DPLX_TRY(dp::parse_map(ctx, vs, decode_pair));
-        return oc::success();
+        return outcome::success();
     }
 
 private:
@@ -528,7 +528,7 @@ private:
         auto const &[key, mapped] = value;
         DPLX_TRY(encode(ctx, key));
         DPLX_TRY(encode(ctx, mapped));
-        return oc::success();
+        return outcome::success();
     }
     static auto decode_pair(parse_context &ctx,
                             std::span<T> const value,
@@ -538,7 +538,7 @@ private:
         auto &[key, mapped] = value[i];
         DPLX_TRY(decode(ctx, key));
         DPLX_TRY(decode(ctx, mapped));
-        return oc::success();
+        return outcome::success();
     }
 };
 */

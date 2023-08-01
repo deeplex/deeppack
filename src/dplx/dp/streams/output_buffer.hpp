@@ -100,7 +100,7 @@ public:
 
     auto ensure_size(size_type const requestedSize) noexcept -> result<void>
     {
-        result<void> rx = oc::success();
+        result<void> rx = outcome::success();
         if (mOutputBufferSize < requestedSize)
         {
             rx = do_grow(requestedSize);
@@ -126,7 +126,7 @@ public:
     {
         if (bytesSize == 0U) [[unlikely]]
         {
-            return oc::success();
+            return outcome::success();
         }
         if (mOutputBufferSize > 0U) [[likely]]
         {
@@ -141,7 +141,7 @@ public:
         }
         if (bytesSize == 0U)
         {
-            return oc::success();
+            return outcome::success();
         }
         return do_bulk_write(bytes, bytesSize);
     }
@@ -176,7 +176,7 @@ private:
             = 0;
     virtual auto do_sync_output() noexcept -> result<void>
     {
-        return oc::success();
+        return outcome::success();
     }
 };
 

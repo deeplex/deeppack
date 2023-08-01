@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    auto acquire_next_chunk_impl() -> dp::result<std::span<std::byte>>
+    auto acquire_next_chunk_impl() -> result<std::span<std::byte>>
     {
         if (mNext >= mChunks.size())
         {

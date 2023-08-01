@@ -63,7 +63,7 @@ private:
         mImpl.move_consumer(
                 static_cast<typename basic_memory_buffer<T>::difference_type>(
                         writtenSize));
-        return oc::success();
+        return outcome::success();
     }
 };
 

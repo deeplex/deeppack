@@ -30,7 +30,7 @@ concept subitem_emitlet
                    std::ranges::range_reference_t<R const> v)
         {
             { static_cast<Fn &&>(encodeFn)(ctx, v) }
-                -> tryable;
+                -> cncr::tryable;
         };
 // clang-format on
 
@@ -54,7 +54,7 @@ inline auto emit_array_like(emit_context &ctx,
         {
             DPLX_TRY(static_cast<EncodeElementFn &&>(encodeElement)(ctx, v));
         }
-        return oc::success();
+        return outcome::success();
     }
     else
     {
@@ -71,7 +71,7 @@ inline auto emit_array_like(emit_context &ctx,
         {
             DPLX_TRY(static_cast<EncodeElementFn &&>(encodeElement)(ctx, *it));
         }
-        return oc::success();
+        return outcome::success();
     }
 }
 template <typename R, typename EncodeElementFn>

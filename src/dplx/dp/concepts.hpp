@@ -28,7 +28,7 @@ concept encodable
         requires !std::is_reference_v<T>;
         requires !std::is_pointer_v<T>;
         { codec<std::remove_const_t<T>>::encode(ctx, t) } noexcept
-            -> oc::concepts::basic_result;
+            -> outcome::concepts::basic_result;
         { codec<std::remove_const_t<T>>::size_of(ctx, t) } noexcept
             -> std::same_as<std::uint64_t>;
     };
@@ -43,7 +43,7 @@ concept decodable
         requires !std::is_pointer_v<T>;
         requires !std::is_const_v<T>;
         { codec<T>::decode(ctx, t) } noexcept
-            -> oc::concepts::basic_result;
+            -> outcome::concepts::basic_result;
     };
 // clang-format on
 
@@ -56,7 +56,7 @@ concept value_decodable
         || requires(parse_context ctx)
            {
                { codec<T>::decode(ctx) } noexcept
-                   -> detail::tryable_result<T>;
+                   -> cncr::tryable_result<T>;
            });
 // clang-format on
 

@@ -42,6 +42,6 @@ public:
         DPLX_TRY(ctx.out.ensure_size(1U));
         *ctx.out.data() = static_cast<std::byte>(obj.value);
         ctx.out.commit_written(1U);
-        return oc::success();
+        return outcome::success();
     }
 };

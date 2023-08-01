@@ -46,27 +46,27 @@ public:
 
 private:
     auto do_require_input(input_buffer::size_type) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         return dp::errc::bad;
     }
     auto do_discard_input(input_buffer::size_type) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         return dp::errc::bad;
     }
     auto do_bulk_read(std::byte *, std::size_t) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         return dp::errc::bad;
     }
 
-    auto do_grow(output_buffer::size_type) noexcept -> dp::result<void> override
+    auto do_grow(output_buffer::size_type) noexcept -> result<void> override
     {
         return dp::errc::bad;
     }
     auto do_bulk_write(std::byte const *, std::size_t) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         return dp::errc::bad;
     }

@@ -40,21 +40,21 @@ public:
     using input_buffer::reset;
 
     auto do_require_input(size_type const requiredSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         require_input_calls += 1;
         last_require_input_param = requiredSize;
         return dp::errc::end_of_stream;
     }
     auto do_discard_input(size_type const amount) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         discard_input_calls += 1;
         last_discard_input_param = amount;
         return dp::errc::end_of_stream;
     }
     auto do_bulk_read(std::byte *const dest, std::size_t const size) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         bulk_read_calls += 1;
         last_bulk_read_param0 = dest;

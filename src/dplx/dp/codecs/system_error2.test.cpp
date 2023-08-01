@@ -20,7 +20,7 @@
 namespace dp_tests
 {
 
-using string_ref = dp::system_error::status_code_domain::string_ref;
+using string_ref = system_error::status_code_domain::string_ref;
 
 TEST_CASE("system_error2::status_code_domain::string_ref should be encodable")
 {

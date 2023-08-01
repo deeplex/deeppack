@@ -50,7 +50,7 @@ private:
         auto const writtenSize = data() - mImpl.remaining_begin();
         mImpl.move_consumer(
                 static_cast<memory_buffer::difference_type>(writtenSize));
-        return oc::success();
+        return outcome::success();
     }
 };
 

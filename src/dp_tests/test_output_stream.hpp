@@ -54,8 +54,7 @@ public:
     }
 
 private:
-    auto do_grow(size_type const requested) noexcept
-            -> dp::result<void> override
+    auto do_grow(size_type const requested) noexcept -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false)
             || requested > mBuffer.size())
@@ -63,12 +62,12 @@ private:
             return dp::errc::end_of_stream;
         }
         reset(mBuffer.data(), mBuffer.size());
-        return dp::oc::success();
+        return outcome::success();
     }
 
     auto do_bulk_write(std::byte const *const src,
                        std::size_t const srcSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false) || srcSize > mBuffer.size())
         {
@@ -80,7 +79,7 @@ private:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             reset(mBuffer.data() + srcSize, mBuffer.size() - srcSize);
         }
-        return dp::oc::success();
+        return outcome::success();
     }
 };
 
@@ -182,7 +181,7 @@ private:
     }
 
     auto do_grow(size_type const requestedSize) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false))
         {
@@ -198,14 +197,14 @@ private:
             else
             {
                 reset(currentBuffer.data(), currentBuffer.size());
-                return dp::oc::success();
+                return outcome::success();
             }
         }
         reset();
         return dp::errc::end_of_stream;
     }
     auto do_bulk_write(std::byte const *src, std::size_t size) noexcept
-            -> dp::result<void> override
+            -> result<void> override
     {
         if (!std::exchange(mInitiallyEmpty, false))
         {
@@ -238,7 +237,7 @@ private:
         {
             return dp::errc::end_of_stream;
         }
-        return dp::oc::success();
+        return outcome::success();
     }
 
     void finalize_current_buffer() noexcept
