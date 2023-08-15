@@ -51,6 +51,8 @@ AttributeMacros:
   - __capability
   - DPLX_ATTR_FORCE_INLINE
   - DPLX_ATTR_NO_UNIQUE_ADDRESS
+  - DPLX_ATTR_DP_DEPRECATED
+  - DPLX_ATTR_DP_DEPRECATED_
 BinPackArguments: true
 BinPackParameters: false
 BraceWrapping:

@@ -128,7 +128,7 @@ TEST_CASE("parse_item_head_speculative can parse basic item_heads")
     simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
     auto const parsed
-            = dp::detail::parse_item_head_speculative(ctx.as_parse_context());
+            = dp::detail::do_parse_item_head<true>(ctx.as_parse_context());
     REQUIRE(parsed);
     auto const &head = parsed.assume_value();
 
@@ -146,7 +146,7 @@ TEST_CASE("parse_item_head_safe can parse basic item_heads")
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
         auto const parsed
-                = dp::detail::parse_item_head_safe(ctx.as_parse_context());
+                = dp::detail::do_parse_item_head<false>(ctx.as_parse_context());
         REQUIRE(parsed);
         auto const &head = parsed.assume_value();
 
@@ -158,7 +158,7 @@ TEST_CASE("parse_item_head_safe can parse basic item_heads")
         simple_test_parse_context ctx(sample.encoded_bytes());
 
         auto const parsed
-                = dp::detail::parse_item_head_safe(ctx.as_parse_context());
+                = dp::detail::do_parse_item_head<false>(ctx.as_parse_context());
         REQUIRE(parsed);
         auto const &head = parsed.assume_value();
 

@@ -12,9 +12,23 @@
 #include <dplx/dp/detail/config.hpp>
 #endif
 
+// NOLINTBEGIN(modernize-macro-to-enum)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #if !defined(DPLX_DP_DISABLE_WORKAROUNDS)
 #define DPLX_DP_DISABLE_WORKAROUNDS 0
 #endif
 #if !defined(DPLX_DP_FLAG_OUTDATED_WORKAROUNDS)
 #define DPLX_DP_FLAG_OUTDATED_WORKAROUNDS 0
 #endif
+
+#if DPLX_DP_SILENCE_DEPRECATION_WARNINGS
+#define DPLX_ATTR_DP_DEPRECATED
+#define DPLX_ATTR_DP_DEPRECATED_(reason)
+#else
+#define DPLX_ATTR_DP_DEPRECATED          [[deprecated]]
+#define DPLX_ATTR_DP_DEPRECATED_(reason) [[deprecated(reason)]]
+#endif
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(modernize-macro-to-enum)
