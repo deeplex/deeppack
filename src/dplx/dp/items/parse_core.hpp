@@ -76,7 +76,7 @@ inline constexpr std::uint8_t item_type_mask = 0b111'00000U;
 inline constexpr std::uint8_t item_inline_info_mask = 0b000'11111U;
 inline constexpr unsigned item_var_int_coding_threshold = 27U;
 
-template <bool speculative>
+template <bool speculative, bool discard>
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline auto do_parse_item_head(parse_context &ctx) noexcept -> result<item_head>
 {
@@ -183,9 +183,12 @@ inline auto do_parse_item_head(parse_context &ctx) noexcept -> result<item_head>
         rx = errc::invalid_additional_information;
     }
 
-    if (rx.has_value())
+    if constexpr (discard)
     {
-        ctx.in.discard_buffered(info.encoded_length);
+        if (rx.has_value())
+        {
+            ctx.in.discard_buffered(info.encoded_length);
+        }
     }
     return rx;
 }
@@ -193,13 +196,27 @@ inline auto do_parse_item_head(parse_context &ctx) noexcept -> result<item_head>
 DPLX_ATTR_DP_DEPRECATED inline auto
 parse_item_head_speculative(parse_context &ctx) noexcept -> result<item_head>
 {
-    return detail::do_parse_item_head<true>(ctx);
+    return detail::do_parse_item_head<true, true>(ctx);
 }
 
 DPLX_ATTR_DP_DEPRECATED inline auto
 parse_item_head_safe(parse_context &ctx) noexcept -> result<item_head>
 {
-    return detail::do_parse_item_head<false>(ctx);
+    return detail::do_parse_item_head<false, true>(ctx);
+}
+
+template <bool discard>
+inline auto parse_item_head(parse_context &ctx) noexcept -> result<item_head>
+{
+    if (ctx.in.empty())
+    {
+        DPLX_TRY(ctx.in.require_input(1U));
+    }
+    if (ctx.in.size() >= detail::var_uint_max_size)
+    {
+        return detail::do_parse_item_head<true, discard>(ctx);
+    }
+    return detail::do_parse_item_head<false, discard>(ctx);
 }
 
 } // namespace dplx::dp::detail
@@ -209,15 +226,12 @@ namespace dplx::dp
 
 inline auto parse_item_head(parse_context &ctx) noexcept -> result<item_head>
 {
-    if (ctx.in.empty())
-    {
-        DPLX_TRY(ctx.in.require_input(1U));
-    }
-    if (ctx.in.size() >= detail::var_uint_max_size)
-    {
-        return detail::do_parse_item_head<true>(ctx);
-    }
-    return detail::do_parse_item_head<false>(ctx);
+    return detail::parse_item_head<true>(ctx);
+}
+
+inline auto peek_item_head(parse_context &ctx) noexcept -> result<item_head>
+{
+    return detail::parse_item_head<false>(ctx);
 }
 
 inline auto expect_item_head(parse_context &ctx,
