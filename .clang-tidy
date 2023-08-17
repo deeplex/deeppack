@@ -2,11 +2,13 @@
 # cppcoreguidelines-avoid-magic-numbers aliases readability-magic-numbers
 # cppcoreguidelines-avoid-c-arrays aliases modernize-avoid-c-arrays
 # cppcoreguidelines-special-member-functions is overly explicit and verbose
+# clang-analyzer-core.uninitialized.Assign happens to choke on OUTCOME_TRY
 Checks: >
   boost-*,
   bugprone-*,
     -bugprone-easily-swappable-parameters,
   clang-analyzer-*,
+    -clang-analyzer-core.uninitialized.Assign,
   clang-diagnostic-*,
   cppcoreguidelines-*,
     -cppcoreguidelines-avoid-c-arrays,

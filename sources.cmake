@@ -15,7 +15,10 @@ dplx_target_sources(deeppack
         dp/codecs/system_error2
         dp/codecs/uuid
 
+        dp/items/copy_item
         dp/items/skip_item
+
+        dp/streams/dynamic_memory_output_stream
 )
 
 dplx_target_sources(deeppack
