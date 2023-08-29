@@ -2,7 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 find_dependency(Boost 1.81)
-find_dependency(fmt 9)
+find_dependency(fmt 10)
 find_dependency(status-code)
 find_dependency(outcome)
 find_dependency(concrete 0.0)
