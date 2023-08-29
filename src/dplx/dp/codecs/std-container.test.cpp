@@ -7,6 +7,7 @@
 
 #include "dplx/dp/codecs/std-container.hpp"
 
+#include <algorithm>
 #include <array>
 #include <deque>
 #include <list>

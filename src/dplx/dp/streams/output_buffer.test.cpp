@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
 #include <ranges>
 
 #include <catch2/catch_test_macros.hpp>

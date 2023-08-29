@@ -8,6 +8,7 @@
 #include "dplx/dp/indefinite_range.hpp"
 
 #include <array>
+#include <ranges>
 #include <type_traits>
 #include <vector>
 

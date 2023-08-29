@@ -7,6 +7,7 @@
 
 #include "dplx/dp/items/parse_ranges.hpp"
 
+#include <algorithm>
 #include <numeric>
 
 #include <catch2/catch_test_macros.hpp>

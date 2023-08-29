@@ -7,6 +7,7 @@
 
 #include "dplx/dp/legacy/memory_output_stream.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <vector>
 
