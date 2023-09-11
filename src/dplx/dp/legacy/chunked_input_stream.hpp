@@ -119,26 +119,37 @@ private:
         reset(static_cast<std::byte *>(mSmallBuffer),
               static_cast<std::size_t>(mBufferStart), input_size());
     }
+    inline void retire_small_buffer() noexcept
+    {
+        auto const consumedSize = static_cast<int>(
+                data() - static_cast<std::byte *>(mSmallBuffer));
+        mReadArea.move_consumer(consumedSize - mBufferStart);
+        mBufferStart = -1;
+        reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
+              input_size());
+    }
 
     auto do_require_input(size_type const requiredSize) noexcept
             -> result<void> override
     {
-        if (size() == 0U)
-        {
-            mBufferStart = -1;
-            DPLX_TRY(acquire_next_chunk());
-            reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
-                  input_size());
-
-            if (requiredSize > size())
-            {
-                return require_input(requiredSize);
-            }
-            return outcome::success();
-        }
-
         if (mBufferStart < 0)
         {
+            // small buffer is inactive
+            if (size() == 0U)
+            {
+                // we exactly hit the buffer split
+                // => no fusing via small buffer necessary
+                DPLX_TRY(acquire_next_chunk());
+                reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
+                      input_size());
+
+                if (requiredSize > size())
+                {
+                    return require_input(requiredSize);
+                }
+                return outcome::success();
+            }
+
             if (requiredSize > small_buffer_size)
             {
                 return errc::buffer_size_exceeded;
@@ -152,10 +163,6 @@ private:
             {
                 return outcome::success();
             }
-            if (size() == small_buffer_size)
-            {
-                return errc::buffer_size_exceeded;
-            }
             return require_input(requiredSize);
         }
 
@@ -163,6 +170,8 @@ private:
                 data() - static_cast<std::byte *>(mSmallBuffer));
         if (consumedSize >= mBufferStart)
         {
+            // remnants from the old buffer have been summarily consumed
+            // => switch back to main buffer
             mReadArea.move_consumer(consumedSize - mBufferStart);
             mBufferStart = -1;
             reset(mReadArea.remaining_begin(), mReadArea.remaining_size(),
@@ -180,6 +189,8 @@ private:
             return errc::buffer_size_exceeded;
         }
 
+        // there are still remnants of the old buffer, but the read
+        // doesn't exceed small_buffer_size.
         move_small_buffer_content_to_front();
         append_current_to_small_buffer();
 
@@ -198,7 +209,17 @@ private:
     auto do_discard_input(size_type discardAmount) noexcept
             -> result<void> override
     {
-        mBufferStart = -1;
+        if (mBufferStart >= 0)
+        {
+            retire_small_buffer();
+            if (discardAmount < mReadArea.remaining_size())
+            {
+                discard_buffered(discardAmount);
+                return outcome::success();
+            }
+            discard_buffered(mReadArea.remaining_size());
+        }
+
         do
         {
             DPLX_TRY(acquire_next_chunk());
@@ -224,7 +245,11 @@ private:
     auto do_bulk_read(std::byte *dest, std::size_t readAmount) noexcept
             -> result<void> override
     {
-        mBufferStart = -1;
+        if (mBufferStart >= 0)
+        {
+            retire_small_buffer();
+            return bulk_read(dest, readAmount);
+        }
 
         do
         {
