@@ -52,12 +52,12 @@ public:
     {
     }
 
-    [[nodiscard]] auto written() const &noexcept -> std::span<std::byte const>
+    [[nodiscard]] auto written() const & noexcept -> std::span<std::byte const>
     {
         return std::span<std::byte const>(mBuffer).subspan(
                 0U, mBuffer.size() - size());
     }
-    [[nodiscard]] auto written() &&noexcept -> buffer_type
+    [[nodiscard]] auto written() && noexcept -> buffer_type
     {
         mBuffer.resize(mBuffer.size() - size());
         output_buffer::reset();

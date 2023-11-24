@@ -26,10 +26,9 @@ inline constexpr struct get_output_buffer_fn
             && std::convertible_to<
                     std::add_lvalue_reference_t<cncr::tag_invoke_result_t<get_output_buffer_fn, OutStream &&>>,
                     output_buffer &>
-                 // clang-format on
-                 inline auto operator()(OutStream &&outStream) const noexcept
-                 -> cncr::tag_invoke_result_t<get_output_buffer_fn,
-                                              OutStream &&>
+    // clang-format on
+    inline auto operator()(OutStream &&outStream) const noexcept
+            -> cncr::tag_invoke_result_t<get_output_buffer_fn, OutStream &&>
     {
         return cncr::tag_invoke(*this, static_cast<OutStream &&>(outStream));
     }
@@ -58,9 +57,9 @@ inline constexpr struct get_input_buffer_fn
             && std::convertible_to<
                     std::add_lvalue_reference_t<cncr::tag_invoke_result_t<get_input_buffer_fn, InStream &&>>,
                     input_buffer &>
-                 // clang-format on
-                 inline auto operator()(InStream &&inStream) const noexcept
-                 -> cncr::tag_invoke_result_t<get_input_buffer_fn, InStream &&>
+    // clang-format on
+    inline auto operator()(InStream &&inStream) const noexcept
+            -> cncr::tag_invoke_result_t<get_input_buffer_fn, InStream &&>
     {
         return cncr::tag_invoke(*this, static_cast<InStream &&>(inStream));
     }
@@ -72,11 +71,11 @@ inline constexpr struct get_input_buffer_fn
     }
     template <typename T>
         requires(!cncr::tag_invocable<get_input_buffer_fn, T &&>)
-             && std::is_rvalue_reference_v<T &&>
-             && (!std::is_const_v<std::remove_reference_t<T>>)
-             && std::movable<std::remove_reference_t<T>>
-             && std::derived_from<std::remove_reference_t<T>, input_buffer>
-                inline auto operator()(T &&inStream) const noexcept -> T
+                && std::is_rvalue_reference_v<T &&>
+                && (!std::is_const_v<std::remove_reference_t<T>>)
+                && std::movable<std::remove_reference_t<T>>
+                && std::derived_from<std::remove_reference_t<T>, input_buffer>
+    inline auto operator()(T &&inStream) const noexcept -> T
     {
         return static_cast<T &&>(inStream);
     }

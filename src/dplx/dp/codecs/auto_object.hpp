@@ -134,7 +134,7 @@ size_of_object(emit_context &ctx,
     }
 
     return prefixSize
-         + descriptor.mp_map_fold_left(size_of_property_fn{ctx, value});
+           + descriptor.mp_map_fold_left(size_of_property_fn{ctx, value});
 }
 
 template <packable_object T>

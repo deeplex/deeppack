@@ -44,16 +44,16 @@ bulk_copy(input_buffer &in, std::uint64_t amount, output_buffer &out) noexcept
         std::size_t chunk(amount);
 #else
         std::size_t chunk = amount > SIZE_MAX
-                                  ? SIZE_MAX
-                                  : static_cast<std::size_t>(amount);
+                                    ? SIZE_MAX
+                                    : static_cast<std::size_t>(amount);
 #endif
         DPLX_TRY(out.ensure_size(chunk));
         chunk = std::min(chunk, out.size());
         DPLX_TRY(in.bulk_read(out.data(), chunk));
         out.commit_written(chunk);
         amount -= chunk;
-
-    } while (amount > 0U);
+    }
+    while (amount > 0U);
     return outcome::success();
 }
 
@@ -121,8 +121,7 @@ auto copy_item_to(parse_context &ctx, output_buffer &out) noexcept
     constexpr std::size_t numStackItems = 64;
 
     boost::container::small_vector<item_head, numStackItems> stack;
-    auto pushItemHead = [&ctx, &out, &stack](item_head head) -> result<void>
-    {
+    auto pushItemHead = [&ctx, &out, &stack](item_head head) -> result<void> {
         try
         {
             DPLX_TRY(detail::small_buffer_copy(ctx.in, head.encoded_length,
@@ -164,16 +163,14 @@ auto copy_item_to(parse_context &ctx, output_buffer &out) noexcept
             break;
 
         case static_cast<unsigned>(type_code::binary) >> majorTypeBitOffset:
-        case static_cast<unsigned>(type_code::text) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::text) >> majorTypeBitOffset: {
             // neither finite nor indefinite binary/text items can be nested
             DPLX_TRY(detail::copy_binary_or_text_to(ctx, item, out));
             stack.pop_back();
             break;
         }
 
-        case static_cast<unsigned>(type_code::array) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::array) >> majorTypeBitOffset: {
             if (item.value == 0)
             {
                 stack.pop_back();
@@ -199,8 +196,7 @@ auto copy_item_to(parse_context &ctx, output_buffer &out) noexcept
             break;
         }
 
-        case static_cast<unsigned>(type_code::map) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::map) >> majorTypeBitOffset: {
             if (item.value == 0)
             {
                 stack.pop_back();
@@ -211,7 +207,7 @@ auto copy_item_to(parse_context &ctx, output_buffer &out) noexcept
             auto const indefinite
                     = (rawFlags
                        & static_cast<unsigned>(item_head::flag::indefinite))
-                   != 0U;
+                      != 0U;
             // we abuse item.flags to track whether to expect a value or key
             // code == 0b0x  =>  next item is a key
             // code == 0b1x  =>  next item is a value, therefore decrement kv
@@ -243,16 +239,15 @@ auto copy_item_to(parse_context &ctx, output_buffer &out) noexcept
             break;
         }
 
-        case static_cast<unsigned>(type_code::tag) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::tag) >> majorTypeBitOffset: {
             DPLX_TRY(item, dp::peek_item_head(ctx));
             DPLX_TRY(detail::small_buffer_copy(ctx.in, item.encoded_length,
                                                out));
             break;
         }
         }
-
-    } while (!stack.empty());
+    }
+    while (!stack.empty());
 
     return outcome::success();
 }

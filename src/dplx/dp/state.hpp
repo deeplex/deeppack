@@ -346,7 +346,7 @@ public:
 
 template <typename T>
 concept state_link = std::regular<T> && std::is_trivial_v<T>
-                  && (sizeof(T) <= sizeof(cncr::uuid));
+                     && (sizeof(T) <= sizeof(cncr::uuid));
 
 template <state_link T>
 struct [[nodiscard]] state_link_key

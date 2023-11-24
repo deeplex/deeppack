@@ -114,7 +114,7 @@ size_of_tuple(emit_context &ctx,
     }
 
     return prefixSize
-         + descriptor.mp_map_fold_left(size_of_element_fn{ctx, value});
+           + descriptor.mp_map_fold_left(size_of_element_fn{ctx, value});
 }
 
 template <packable_tuple T>

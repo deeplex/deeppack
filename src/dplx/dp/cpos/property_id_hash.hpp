@@ -31,10 +31,9 @@ inline constexpr struct property_id_hash_fn
         return cncr::tag_invoke(*this, value);
     }
     template <typename T>
-        requires cncr::tag_invocable<property_id_hash_fn,
-                                     T const &,
-                                     std::uint64_t>
-    constexpr auto operator()(T const &value, std::uint64_t seed) const
+        requires cncr::
+                tag_invocable<property_id_hash_fn, T const &, std::uint64_t>
+            constexpr auto operator()(T const &value, std::uint64_t seed) const
             noexcept(cncr::nothrow_tag_invocable<property_id_hash_fn,
                                                  T const &,
                                                  std::uint64_t>)

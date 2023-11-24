@@ -153,8 +153,7 @@ TEST_CASE("parse_array parses a finite array of integers into a vector")
     simple_test_parse_context ctx(sample.encoded_bytes());
     std::vector<int> value;
     auto decodeElement = [](dp::parse_context &lctx, std::vector<int> &dest,
-                            std::size_t const) noexcept -> result<void>
-    {
+                            std::size_t const) noexcept -> result<void> {
         return dp::decode(lctx, dest.emplace_back());
     };
 
@@ -190,8 +189,7 @@ TEST_CASE("parse_array parses an indefinite array of integers into a vector")
     simple_test_parse_context ctx(sample.encoded_bytes());
     std::vector<int> value;
     auto decodeElement = [](dp::parse_context &lctx, std::vector<int> &dest,
-                            std::size_t const) noexcept -> result<void>
-    {
+                            std::size_t const) noexcept -> result<void> {
         return dp::decode(lctx, dest.emplace_back());
     };
 
@@ -225,8 +223,7 @@ TEST_CASE("parse_map parses a finite map of integers into a vector of pairs")
     std::vector<std::pair<int, int>> value;
     auto decodePair = [](dp::parse_context &lctx,
                          std::vector<std::pair<int, int>> &dest,
-                         std::size_t const) noexcept -> result<void>
-    {
+                         std::size_t const) noexcept -> result<void> {
         auto &pair = dest.emplace_back();
         DPLX_TRY(dp::decode(lctx, pair.first));
         DPLX_TRY(dp::decode(lctx, pair.second));
@@ -266,8 +263,7 @@ TEST_CASE(
     std::vector<std::pair<int, int>> value;
     auto decodePair = [](dp::parse_context &lctx,
                          std::vector<std::pair<int, int>> &dest,
-                         std::size_t const) noexcept -> result<void>
-    {
+                         std::size_t const) noexcept -> result<void> {
         auto &pair = dest.emplace_back();
         DPLX_TRY(dp::decode(lctx, pair.first));
         DPLX_TRY(dp::decode(lctx, pair.second));

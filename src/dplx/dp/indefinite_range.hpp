@@ -24,8 +24,9 @@ public:
 
     template <std::ranges::input_range R>
         requires std::assignable_from<T &, std::ranges::iterator_t<R const>>
-                      && std::assignable_from<S &,
-                                              std::ranges::sentinel_t<R const>>
+                         && std::assignable_from<
+                                 S &,
+                                 std::ranges::sentinel_t<R const>>
     constexpr explicit indefinite_range(R const &range)
         : mIt(std::ranges::begin(range))
         , mEnd(std::ranges::end(range))

@@ -94,8 +94,7 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
             break;
 
         case static_cast<unsigned>(type_code::binary) >> majorTypeBitOffset:
-        case static_cast<unsigned>(type_code::text) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::text) >> majorTypeBitOffset: {
             // neither finite nor indefinite binary/text items can be nested
             if (auto &&skipBinaryOrTextRx
                 = detail::skip_binary_or_text(ctx, item);
@@ -109,8 +108,7 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
             break;
         }
 
-        case static_cast<unsigned>(type_code::array) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::array) >> majorTypeBitOffset: {
             if (item.value == 0)
             {
                 stack.pop_back();
@@ -142,8 +140,7 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
             break;
         }
 
-        case static_cast<unsigned>(type_code::map) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::map) >> majorTypeBitOffset: {
             if (item.value == 0)
             {
                 stack.pop_back();
@@ -154,7 +151,7 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
             auto const indefinite
                     = (rawFlags
                        & static_cast<unsigned>(item_head::flag::indefinite))
-                   != 0U;
+                      != 0U;
             // we abuse item.flags to track whether to expect a value or key
             // code == 0b0x  =>  next item is a key
             // code == 0b1x  =>  next item is a value, therefore decrement kv
@@ -192,14 +189,13 @@ auto skip_item(parse_context &ctx) noexcept -> result<void>
             break;
         }
 
-        case static_cast<unsigned>(type_code::tag) >> majorTypeBitOffset:
-        {
+        case static_cast<unsigned>(type_code::tag) >> majorTypeBitOffset: {
             DPLX_TRY(item, dp::parse_item_head(ctx));
             break;
         }
         }
-
-    } while (!stack.empty());
+    }
+    while (!stack.empty());
 
     return outcome::success();
 }

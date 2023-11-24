@@ -63,10 +63,9 @@ inline constexpr struct encode_fn final
 {
     template <typename T, typename OutStream>
         requires encodable<cncr::remove_cref_t<T>>
-              && output_stream<OutStream &&>
-                 inline auto operator()(OutStream &&outStream,
-                                        T &&value) const noexcept
-                 -> result<void>
+                 && output_stream<OutStream &&>
+    inline auto operator()(OutStream &&outStream, T &&value) const noexcept
+            -> result<void>
     {
         auto &&buffer = get_output_buffer(static_cast<OutStream &&>(outStream));
         emit_context ctx{static_cast<output_buffer &>(buffer)};
@@ -98,11 +97,9 @@ inline constexpr struct encode_fn final
 inline constexpr struct decode_fn final
 {
     template <typename T, typename InStream>
-        requires decodable<T>
-              && input_stream<InStream>
-                 inline auto operator()(InStream &&inStream,
-                                        T &outValue) const noexcept
-                 -> result<void>
+        requires decodable<T> && input_stream<InStream>
+    inline auto operator()(InStream &&inStream, T &outValue) const noexcept
+            -> result<void>
     {
         auto &&buffer = get_input_buffer(static_cast<InStream &&>(inStream));
         parse_context ctx{static_cast<input_buffer &>(buffer)};
@@ -127,11 +124,9 @@ inline constexpr struct decode_fn final
 
     template <typename T, typename InStream>
         requires value_decodable<T> && std::default_initializable<T>
-              && std::movable<T>
-              && input_stream<InStream>
-                 inline auto operator()(as_value_t<T>,
-                                        InStream &&inStream) const noexcept
-                 -> result<T>
+                 && std::movable<T> && input_stream<InStream>
+    inline auto operator()(as_value_t<T>, InStream &&inStream) const noexcept
+            -> result<T>
     {
         auto &&buffer = get_input_buffer(static_cast<InStream &&>(inStream));
         parse_context ctx{static_cast<input_buffer &>(buffer)};

@@ -24,7 +24,7 @@ namespace dplx::dp::detail
 constexpr auto approx_integer_sqrt(std::size_t const v) noexcept -> std::size_t
 {
     constexpr std::size_t x = std::size_t{1}
-                           << (sizeof(std::size_t) * CHAR_BIT / 2);
+                              << (sizeof(std::size_t) * CHAR_BIT / 2);
     std::size_t r = v / 2 < x ? v : x - 1;
     for (std::size_t l = 1U; l != r;)
     {
@@ -181,8 +181,9 @@ public:
 
         // sort patterns by the number of keys in each one
         std::sort(remapPatterns.data(), remapPatterns.data() + remap_size,
-                  [](pattern_type const &l, pattern_type const &r)
-                  { return l.back() > r.back(); });
+                  [](pattern_type const &l, pattern_type const &r) {
+                      return l.back() > r.back();
+                  });
 
         std::size_t i = 0U;
         // find a seed for every pattern with more than one key which maps these

@@ -123,8 +123,7 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
 
     simple_test_emit_context ctx(sample.encoded.size());
     auto encodePair = [](dp::emit_context &lctx,
-                         std::pair<int, int> const &pair) -> result<void>
-    {
+                         std::pair<int, int> const &pair) -> result<void> {
         DPLX_TRY(dp::encode(lctx, pair.first));
         return dp::encode(lctx, pair.second);
     };
@@ -147,10 +146,9 @@ TEST_CASE("emit_map loops over a range of encodable pairs and emits them")
         CHECK(dp::item_size_of_map(
                       ctx.as_emit_context(), sample.value,
                       [](dp::emit_context &lctx,
-                         std::pair<int, int> const &pair) -> std::uint64_t
-                      {
+                         std::pair<int, int> const &pair) -> std::uint64_t {
                           return dp::encoded_size_of(lctx, pair.first)
-                               + dp::encoded_size_of(lctx, pair.second);
+                                 + dp::encoded_size_of(lctx, pair.second);
                       })
               == sample.encoded.size());
         CHECK(ctx.stream.written().empty());
@@ -167,8 +165,7 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
 
     simple_test_emit_context ctx(sample.encoded.size());
     auto encodePair = [](dp::emit_context &lctx,
-                         std::pair<int, int> const &pair) -> result<void>
-    {
+                         std::pair<int, int> const &pair) -> result<void> {
         DPLX_TRY(dp::encode(lctx, pair.first));
         return dp::encode(lctx, pair.second);
     };
@@ -186,10 +183,9 @@ TEST_CASE("emit_map_indefinite loops over an input range of encodable pairs "
         CHECK(dp::item_size_of_map_indefinite(
                       ctx.as_emit_context(), dp::indefinite_range(sample.value),
                       [](dp::emit_context &lctx,
-                         std::pair<int, int> const &pair) -> std::uint64_t
-                      {
+                         std::pair<int, int> const &pair) -> std::uint64_t {
                           return dp::encoded_size_of(lctx, pair.first)
-                               + dp::encoded_size_of(lctx, pair.second);
+                                 + dp::encoded_size_of(lctx, pair.second);
                       })
               == sample.encoded.size());
         CHECK(ctx.stream.written().empty());

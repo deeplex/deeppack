@@ -41,14 +41,14 @@ struct item_sample_rt
     }
 
     friend inline auto operator<<(std::ostream &os,
-                                  item_sample_rt const &sample) -> std::ostream
-            &requires(!detail::is_fmt_formattable<T const &>) {
-                 fmt::print(
-                         os,
-                         "{{item_value[{}]: <please specialize me>, 0x{:02x}}}",
-                         sample.name, fmt::join(sample.encoded, "'"));
-                 return os;
-             } friend inline auto
+                                  item_sample_rt const &sample)
+            -> std::ostream &requires(!detail::is_fmt_formattable<T const &>) {
+                fmt::print(
+                        os,
+                        "{{item_value[{}]: <please specialize me>, 0x{:02x}}}",
+                        sample.name, fmt::join(sample.encoded, "'"));
+                return os;
+            } friend inline auto
             operator<<(std::ostream &os, item_sample_rt const &sample)
                     -> std::ostream &
     {
