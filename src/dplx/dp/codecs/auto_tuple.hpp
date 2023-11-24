@@ -197,10 +197,11 @@ inline auto decode_tuple_head(parse_context &ctx,
             return errc::item_version_property_missing;
         }
 
-        std::uint32_t version; // NOLINT(cppcoreguidelines-init-variables)
-        DPLX_TRY(dp::parse_integer(ctx, version, null_def_version - 1U));
+        tuple_head_info headInfo{numProps - 1, 0U};
+        DPLX_TRY(dp::parse_integer(ctx, headInfo.version,
+                                   null_def_version - 1U));
 
-        return tuple_head_info{numProps - 1, version};
+        return headInfo;
     }
 }
 
