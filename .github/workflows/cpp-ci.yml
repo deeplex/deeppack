@@ -19,6 +19,8 @@ jobs:
         exclude:
           - os: macos-13
             compiler: msvc
+          - os: macos-13
+            compiler: clang
           - os: ubuntu-22.04
             compiler: msvc
           - os: windows-2022
@@ -26,11 +28,6 @@ jobs:
         include:
           - os: macos-13
             triplet: x64-macos
-          - os: macos-13
-            compiler: clang
-            triplet: x64-macos
-            install: |
-              HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install llvm@16
           - os: ubuntu-22.04
             triplet: x64-linux
           - os: ubuntu-22.04
