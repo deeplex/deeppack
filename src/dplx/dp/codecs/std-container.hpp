@@ -31,7 +31,7 @@ namespace dplx::dp
 template <typename Range>
 inline constexpr bool enable_indefinite_encoding
         = std::ranges::input_range<Range> && !std::ranges::sized_range<Range>
-       && !std::ranges::forward_range<Range>;
+          && !std::ranges::forward_range<Range>;
 
 template <typename T>
 inline constexpr bool disable_range
@@ -143,7 +143,7 @@ namespace dplx::dp
 
 template <range R>
     requires std::ranges::contiguous_range<R>
-          && std::same_as<std::byte, std::ranges::range_value_t<R>>
+             && std::same_as<std::byte, std::ranges::range_value_t<R>>
 class codec<R>
 {
 public:
@@ -160,7 +160,7 @@ public:
     }
     static auto decode(parse_context &ctx, R &value) noexcept -> result<void>
         requires container_traits<R>::resize
-              && std::ranges::output_range<R, std::byte>
+                 && std::ranges::output_range<R, std::byte>
     {
         result<std::size_t> parseRx = dp::parse_binary(ctx, value);
         if (parseRx.has_failure()) [[unlikely]]
@@ -200,7 +200,7 @@ public:
     static auto size_of(emit_context &ctx, R const &vs) noexcept
             -> std::uint64_t
         requires std::ranges::input_range<R>
-              && encodable<std::ranges::range_value_t<R>>
+                 && encodable<std::ranges::range_value_t<R>>
     {
         if constexpr (enable_indefinite_encoding<R>)
         {
@@ -214,7 +214,7 @@ public:
     }
     static auto encode(emit_context &ctx, R const &vs) noexcept -> result<void>
         requires std::ranges::input_range<R>
-              && encodable<std::ranges::range_value_t<R>>
+                 && encodable<std::ranges::range_value_t<R>>
     {
         if constexpr (enable_indefinite_encoding<R>)
         {
@@ -309,7 +309,7 @@ public:
     static auto size_of(emit_context &ctx, C const &vs) noexcept
             -> std::uint64_t
         requires encodable<typename C::key_type>
-              && encodable<typename C::mapped_type>
+                 && encodable<typename C::mapped_type>
     {
         if constexpr (enable_indefinite_encoding<C>)
         {
@@ -322,7 +322,7 @@ public:
     }
     static auto encode(emit_context &ctx, C const &vs) noexcept -> result<void>
         requires encodable<typename C::key_type>
-              && encodable<typename C::mapped_type>
+                 && encodable<typename C::mapped_type>
     {
         if constexpr (enable_indefinite_encoding<C>)
         {
@@ -335,7 +335,7 @@ public:
     }
     static auto decode(parse_context &ctx, C &vs) noexcept -> result<void>
         requires decodable<typename C::key_type>
-              && decodable<typename C::mapped_type>
+                 && decodable<typename C::mapped_type>
     {
         vs.clear();
         DPLX_TRY(dp::parse_map(ctx, vs, decode_pair));
@@ -347,7 +347,7 @@ private:
                              typename C::value_type const &pair) noexcept
             -> std::uint64_t
         requires encodable<typename C::key_type>
-              && encodable<typename C::mapped_type>
+                 && encodable<typename C::mapped_type>
     {
         auto const &[key, mapped] = pair;
         return dp::encoded_size_of(ctx, key) + dp::encoded_size_of(ctx, mapped);
@@ -356,7 +356,7 @@ private:
                             typename C::value_type const &pair) noexcept
             -> result<void>
         requires encodable<typename C::key_type>
-              && encodable<typename C::mapped_type>
+                 && encodable<typename C::mapped_type>
     {
         auto const &[key, mapped] = pair;
         DPLX_TRY(dp::encode(ctx, key));
@@ -367,7 +367,7 @@ private:
                             C &vs,
                             std::size_t const) noexcept -> result<void>
         requires decodable<typename C::key_type>
-              && decodable<typename C::mapped_type>
+                 && decodable<typename C::mapped_type>
     {
         try
         {

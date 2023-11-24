@@ -171,7 +171,7 @@ struct fixed_u8string
 
 template <std::size_t N>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)
-fixed_u8string(char8_t const (&)[N])->fixed_u8string<N - 1>;
+fixed_u8string(char8_t const (&)[N]) -> fixed_u8string<N - 1>;
 
 namespace detail
 {

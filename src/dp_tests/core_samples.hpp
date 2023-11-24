@@ -45,11 +45,12 @@ auto integer_samples(item_sample_ct<T> const (&samples)[N])
     using namespace std::ranges::views;
 
     return dp_tests::from_range(
-            samples
-            | filter([](item_sample_ct<T> const &sample)
-                     { return std::in_range<R>(sample.value); })
-            | transform([](item_sample_ct<T> const &sample)
-                        { return sample.template as<R>(); }));
+            samples | filter([](item_sample_ct<T> const &sample) {
+                return std::in_range<R>(sample.value);
+            })
+            | transform([](item_sample_ct<T> const &sample) {
+                  return sample.template as<R>();
+              }));
 #endif
 }
 

@@ -41,7 +41,7 @@ inline auto var_uint_encoded_size_ct(T const value) noexcept -> unsigned int
             = static_cast<unsigned>(detail::find_last_set_bit(value));
     auto const bytePower
             = static_cast<unsigned>(detail::find_last_set_bit(lastSetBitIndex))
-            - 2U;
+              - 2U;
 
     return 1U + (1U << bytePower);
 }

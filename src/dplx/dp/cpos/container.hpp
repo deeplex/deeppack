@@ -164,9 +164,9 @@ struct container_traits
 
     static constexpr bool resize_for_overwrite
             = resize
-           || cncr::nothrow_tag_invocable<container_resize_for_overwrite_fn,
-                                          Container &,
-                                          std::size_t const>;
+              || cncr::nothrow_tag_invocable<container_resize_for_overwrite_fn,
+                                             Container &,
+                                             std::size_t const>;
 };
 
 } // namespace dplx::dp

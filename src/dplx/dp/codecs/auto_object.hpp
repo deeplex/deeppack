@@ -32,7 +32,9 @@ namespace dplx::dp::detail
 template <typename T>
 struct mp_encode_object_property_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     emit_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T const &value;
 
     template <typename PropDefType>
@@ -53,7 +55,9 @@ struct mp_encode_object_property_fn
 template <typename T>
 struct mp_size_of_object_property_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     emit_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T const &value;
 
     template <typename PropDefType>
@@ -134,7 +138,7 @@ size_of_object(emit_context &ctx,
     }
 
     return prefixSize
-         + descriptor.mp_map_fold_left(size_of_property_fn{ctx, value});
+           + descriptor.mp_map_fold_left(size_of_property_fn{ctx, value});
 }
 
 template <packable_object T>
@@ -233,8 +237,10 @@ namespace dplx::dp::detail
 template <auto const &descriptor, std::size_t Offset = 0U>
 struct decode_prop_by_index_fn
 {
+    // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
     parse_context &ctx;
     typename cncr::remove_cref_t<decltype(descriptor)>::class_type &self;
+    // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 
     template <std::size_t I>
     inline auto operator()(boost::mp11::mp_size_t<I>) const noexcept
@@ -331,8 +337,10 @@ class decode_object_property_fn<descriptor>
 
     struct decode_prop_small_id_fn
     {
+        // NOLINTBEGIN(cppcoreguidelines-avoid-const-or-ref-data-members)
         parse_context &ctx;
         class_type &self;
+        // NOLINTEND(cppcoreguidelines-avoid-const-or-ref-data-members)
 
         template <std::size_t I>
         inline auto operator()(boost::mp11::mp_size_t<I>) const noexcept

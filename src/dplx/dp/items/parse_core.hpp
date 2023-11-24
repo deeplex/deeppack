@@ -40,7 +40,7 @@ struct item_head
     {
         return (static_cast<std::uint8_t>(flags)
                 & static_cast<std::uint8_t>(flag::indefinite))
-            != 0U;
+               != 0U;
     }
     constexpr void make_indefinite() noexcept
     {
@@ -52,9 +52,9 @@ struct item_head
     [[nodiscard]] constexpr auto is_special_break() const noexcept -> bool
     {
         return type == type_code::special
-            && (static_cast<std::uint8_t>(flags)
-                & static_cast<std::uint8_t>(flag::indefinite))
-                       != 0U;
+               && (static_cast<std::uint8_t>(flags)
+                   & static_cast<std::uint8_t>(flag::indefinite))
+                          != 0U;
     }
 
     friend inline constexpr auto operator==(item_head const &,
@@ -112,7 +112,7 @@ inline auto do_parse_item_head(parse_context &ctx) noexcept -> result<item_head>
             // 1B value => shift by 56 (0b11'1000)
             constexpr unsigned varLenPattern = 0b0011'1000U;
             unsigned char const varLenShift = (varLenPattern << sizeBytesPower)
-                                            & (digits_v<std::uint64_t> - 1U);
+                                              & (digits_v<std::uint64_t> - 1U);
 
             info.encoded_length = 1U + (1U << sizeBytesPower);
             info.value = encodedValue >> varLenShift;

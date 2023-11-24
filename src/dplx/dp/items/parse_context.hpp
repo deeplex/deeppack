@@ -18,6 +18,7 @@ namespace dplx::dp
 
 struct parse_context
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     input_buffer &in;
     state_store states;
     link_store links;

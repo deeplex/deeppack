@@ -91,11 +91,11 @@ item_size_of_indefinite_array_like(emit_context &ctx,
 
 template <std::ranges::input_range R, typename SizeOfElementFn>
     requires(std::ranges::forward_range<R> || std::ranges::sized_range<R>)
-         && detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
-            inline auto item_size_of_array(
-                    emit_context &ctx,
-                    R const &vs,
-                    SizeOfElementFn &&sizeOfElement) noexcept -> std::uint64_t
+            && detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
+inline auto item_size_of_array(emit_context &ctx,
+                               R const &vs,
+                               SizeOfElementFn &&sizeOfElement) noexcept
+        -> std::uint64_t
 {
     return detail::item_size_of_array_like(
             ctx, vs, static_cast<SizeOfElementFn &&>(sizeOfElement));
@@ -114,12 +114,12 @@ item_size_of_array_indefinite(emit_context &ctx,
 
 template <std::ranges::input_range R, typename SizeOfElementFn>
     requires(std::ranges::forward_range<R> || std::ranges::sized_range<R>)
-         && detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
-            // clang-format on
-            inline auto item_size_of_map(
-                    emit_context &ctx,
-                    R const &vs,
-                    SizeOfElementFn &&sizeOfElement) noexcept -> std::uint64_t
+            && detail::subitem_size_of<std::remove_cvref_t<SizeOfElementFn>, R>
+// clang-format on
+inline auto item_size_of_map(emit_context &ctx,
+                             R const &vs,
+                             SizeOfElementFn &&sizeOfElement) noexcept
+        -> std::uint64_t
 {
     return detail::item_size_of_array_like(
             ctx, vs, static_cast<SizeOfElementFn &&>(sizeOfElement));

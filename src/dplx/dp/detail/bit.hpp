@@ -35,7 +35,7 @@ struct byte_bag
     std::byte bytes[N];
 };
 
-#if __cpp_lib_byteswap < 202110L
+#if __cpp_lib_byteswap < 202'110L
 inline
 #endif
         namespace cpp20
@@ -89,7 +89,7 @@ DPLX_ATTR_FORCE_INLINE auto load(std::byte const *src) noexcept -> T
 
 } // namespace cpp20
 
-#if __cpp_lib_byteswap >= 202110L
+#if __cpp_lib_byteswap >= 202'110L
 
 inline namespace cpp23
 {
@@ -173,17 +173,17 @@ DPLX_ATTR_FORCE_INLINE constexpr auto find_last_set_bit(T value) noexcept -> int
     if constexpr (sizeof(T) <= sizeof(unsigned int))
     {
         return (digits_v<unsigned int> - 1)
-             ^ __builtin_clz(static_cast<unsigned int>(value));
+               ^ __builtin_clz(static_cast<unsigned int>(value));
     }
     else if constexpr (sizeof(T) <= sizeof(unsigned long))
     {
         return (digits_v<unsigned long> - 1)
-             ^ __builtin_clzl(static_cast<unsigned long>(value));
+               ^ __builtin_clzl(static_cast<unsigned long>(value));
     }
     else if constexpr (sizeof(T) <= sizeof(unsigned long long))
     {
         return (digits_v<unsigned long long> - 1)
-             ^ __builtin_clzll(static_cast<unsigned long long>(value));
+               ^ __builtin_clzll(static_cast<unsigned long long>(value));
     }
 
 #elif defined(DPLX_COMP_MSVC_AVAILABLE)
@@ -250,7 +250,7 @@ byte_swap_u32(std::uint32_t const x) noexcept -> std::uint32_t
         // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
         std::uint32_t const step16 = x << 16 | x >> 16;
-        return ((step16 << 8) & 0xff00ff00) | ((step16 >> 8) & 0x00ff00ff);
+        return ((step16 << 8) & 0xff00'ff00) | ((step16 >> 8) & 0x00ff'00ff);
 
         // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
     }

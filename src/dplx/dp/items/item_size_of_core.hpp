@@ -50,7 +50,7 @@ template <detail::encodable_int T>
     assert(byteSize >= 0);
     return dp::encoded_item_head_size<type_code::binary>(
                    static_cast<code_type>(byteSize))
-         + static_cast<std::uint64_t>(byteSize);
+           + static_cast<std::uint64_t>(byteSize);
 }
 template <detail::encodable_int T>
 [[nodiscard]] constexpr auto item_size_of_binary_indefinite(emit_context &,
@@ -70,7 +70,7 @@ template <detail::encodable_int T>
     assert(numCodeUnits >= 0);
     return dp::encoded_item_head_size<type_code::text>(
                    static_cast<code_type>(numCodeUnits))
-         + static_cast<std::uint64_t>(numCodeUnits);
+           + static_cast<std::uint64_t>(numCodeUnits);
 }
 template <detail::encodable_int T>
 [[nodiscard]] constexpr auto

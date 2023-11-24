@@ -71,7 +71,7 @@ TEST_CASE("encode tuple with layout descriptor 1")
 {
     constexpr auto const &descriptor = test_tuple_def_1;
     item_sample_ct<test_tuple> const sample{
-            {0xdeadbeefU, 0x07U, 0xfefeU},
+            {0xdead'beefU, 0x07U, 0xfefeU},
             6,
             {0x81, 0x1a, 0xde, 0xad, 0xbe, 0xef}
     };
@@ -119,7 +119,7 @@ TEST_CASE("encode tuple with layout descriptor 2")
 {
     constexpr auto const &descriptor = test_tuple_def_2;
     item_sample_ct<test_tuple> const sample{
-            {0xdeadbeafU, 0x07U, 0xfefeU},
+            {0xdead'beafU, 0x07U, 0xfefeU},
             7,
             {0x82, 0x1a, 0xde, 0xad, 0xbe, 0xaf, 0x07}
     };
@@ -250,7 +250,7 @@ TEST_CASE("encode tuple with layout descriptor 5")
 {
     constexpr auto const &descriptor = test_tuple_def_5;
     item_sample_ct<test_tuple> const sample{
-            {0xdeadbeafU, 0x07U, 0xfefeU},
+            {0xdead'beafU, 0x07U, 0xfefeU},
             7,
             {0x82, 0x07, 0x1a, 0xde, 0xad, 0xbe, 0xaf}
     };

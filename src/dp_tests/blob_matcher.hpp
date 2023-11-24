@@ -50,9 +50,9 @@ public:
 
         mMismatchOffset
                 = lit == std::ranges::end(arg)
-                               && rit == std::ranges::end(expected)
-                        ? -1
-                        : std::ranges::distance(std::ranges::begin(arg), lit);
+                                  && rit == std::ranges::end(expected)
+                          ? -1
+                          : std::ranges::distance(std::ranges::begin(arg), lit);
         return mMismatchOffset == -1;
     }
 
@@ -70,7 +70,7 @@ private:
                 -> bool
         {
             return static_cast<std::uint8_t>(lv)
-                == static_cast<std::uint8_t>(rv);
+                   == static_cast<std::uint8_t>(rv);
         }
     };
 };
@@ -83,15 +83,17 @@ struct as_printable_ascii
         constexpr C isprint_ascii_lower_bound{0x32};
         constexpr C isprint_ascii_upper_bound{0x7E};
         return isprint_ascii_lower_bound <= c && c <= isprint_ascii_upper_bound
-                     ? static_cast<char>(c)
-                     : '.';
+                       ? static_cast<char>(c)
+                       : '.';
     }
 };
 
 template <blob_like ArgT, blob_like ExpectedT>
 class BlobMatchExpr final : public Catch::ITransientExpression
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     ArgT &&mArg;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     ExpectedT &&mExpected;
     BlobMatcher mMatcher;
 
@@ -118,8 +120,8 @@ public:
         constexpr auto maxDisplayElems = 16;
         auto const mismatchPosition = mMatcher.mismatch_position();
         auto const contextBegin = mismatchPosition >= maxDisplayOffset
-                                        ? mismatchPosition - maxDisplayOffset
-                                        : 0;
+                                          ? mismatchPosition - maxDisplayOffset
+                                          : 0;
         auto const mismatchOffset = mismatchPosition - contextBegin;
 
         auto const argDisplayBegin
@@ -193,7 +195,8 @@ auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
         }                                                                      \
         INTERNAL_CATCH_CATCH(catchAssertionHandler)                            \
         INTERNAL_CATCH_REACT(catchAssertionHandler)                            \
-    } while (false)
+    }                                                                          \
+    while (false)
 
 #define CHECK_BLOB_EQ(arg, expected)                                           \
     INTERNAL_CHECK_BLOB_EQ("CHECK_BLOB_EQ", expected,                          \

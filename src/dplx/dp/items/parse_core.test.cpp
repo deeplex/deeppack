@@ -417,7 +417,7 @@ TEST_CASE("parse_integer<unsigned> rejects other major types")
 
     simple_test_parse_context ctx(memory);
 
-    unsigned value; // NOLINT(cppcoreguidelines-init-variables)
+    unsigned value{};
     REQUIRE(dp::parse_integer<unsigned>(ctx.as_parse_context(), value).error()
             == dp::errc::item_type_mismatch);
 }
@@ -436,7 +436,7 @@ TEST_CASE("parse_integer<int> rejects other major types")
 
     simple_test_parse_context ctx(memory);
 
-    int value; // NOLINT(cppcoreguidelines-init-variables)
+    int value{};
     REQUIRE(dp::parse_integer<int>(ctx.as_parse_context(), value).error()
             == dp::errc::item_type_mismatch);
 }
@@ -449,7 +449,7 @@ TEST_CASE("boolean parses correctly")
     }));
 
     simple_test_parse_context ctx(sample.encoded_bytes());
-    bool value; // NOLINT(cppcoreguidelines-init-variables)
+    bool value{};
     REQUIRE(dp::parse_boolean(ctx.as_parse_context(), value));
 
     CHECK(value == sample.value);
@@ -463,7 +463,7 @@ TEST_CASE("parse_floating_point parses large double")
 
     simple_test_parse_context ctx(sample.encoded_bytes());
 
-    double value; // NOLINT(cppcoreguidelines-init-variables)
+    double value{};
     REQUIRE(dp::parse_floating_point(ctx.as_parse_context(), value));
 
     if (std::isnan(sample.value))
@@ -483,7 +483,7 @@ TEST_CASE("parse_floating_point parses small double")
 
     simple_test_parse_context ctx(sample.encoded_bytes());
 
-    double value; // NOLINT(cppcoreguidelines-init-variables)
+    double value{};
     REQUIRE(dp::parse_floating_point(ctx.as_parse_context(), value));
 
     if (std::isnan(sample.value))
@@ -504,7 +504,7 @@ TEST_CASE("parse_floating_point parses float")
 
     simple_test_parse_context ctx(sample.encoded_bytes());
 
-    float value; // NOLINT(cppcoreguidelines-init-variables)
+    float value{};
     REQUIRE(dp::parse_floating_point(ctx.as_parse_context(), value));
 
     if (std::isnan(sample.value))

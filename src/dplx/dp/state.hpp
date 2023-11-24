@@ -234,7 +234,7 @@ protected:
 template <typename StateT>
 struct state_key
 {
-    cncr::uuid const value{};
+    cncr::uuid value{};
 
     using state_type = StateT;
 };
@@ -318,6 +318,7 @@ template <typename StateT>
 class [[nodiscard]] scoped_state
 {
     state_key<StateT> mKey;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     state_store &mStore;
     bool owned;
 
@@ -346,12 +347,12 @@ public:
 
 template <typename T>
 concept state_link = std::regular<T> && std::is_trivial_v<T>
-                  && (sizeof(T) <= sizeof(cncr::uuid));
+                     && (sizeof(T) <= sizeof(cncr::uuid));
 
 template <state_link T>
 struct [[nodiscard]] state_link_key
 {
-    cncr::uuid const value{};
+    cncr::uuid value{};
 
     using link_type = T;
 };
@@ -440,6 +441,7 @@ class [[nodiscard]] scoped_link
 {
     state_link_key<T> mKey;
     T mPreviousValue;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     link_store &mStore;
 
 public:

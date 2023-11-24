@@ -238,7 +238,7 @@ TEST_CASE("object codec helpers with layout descriptor")
 {
     constexpr auto const &descriptor = test_object_def_2;
     item_sample_ct<test_object> const sample{
-            {0xdeadbeafU, 0x07U, 0xfefeU},
+            {0xdead'beafU, 0x07U, 0xfefeU},
             9,
             {0xa2, 0x01, 0x1a, 0xde, 0xad, 0xbe, 0xaf, 0x17, 0x07}
     };

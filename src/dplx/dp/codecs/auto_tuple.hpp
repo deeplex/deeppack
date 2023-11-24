@@ -29,7 +29,9 @@ namespace dplx::dp::detail
 template <typename T>
 struct mp_encode_tuple_member_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     emit_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T const &value;
 
     template <typename PropDefType>
@@ -44,7 +46,9 @@ struct mp_encode_tuple_member_fn
 template <typename T>
 struct mp_size_of_tuple_element_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     emit_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T const &value;
 
     template <typename PropDefType>
@@ -114,7 +118,7 @@ size_of_tuple(emit_context &ctx,
     }
 
     return prefixSize
-         + descriptor.mp_map_fold_left(size_of_element_fn{ctx, value});
+           + descriptor.mp_map_fold_left(size_of_element_fn{ctx, value});
 }
 
 template <packable_tuple T>
@@ -134,7 +138,9 @@ namespace detail
 template <typename T>
 struct mp_decode_v_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     parse_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T &dest;
 
     template <typename PropDefType>
@@ -191,10 +197,11 @@ inline auto decode_tuple_head(parse_context &ctx,
             return errc::item_version_property_missing;
         }
 
-        std::uint32_t version; // NOLINT(cppcoreguidelines-init-variables)
-        DPLX_TRY(dp::parse_integer(ctx, version, null_def_version - 1U));
+        tuple_head_info headInfo{numProps - 1, 0U};
+        DPLX_TRY(dp::parse_integer(ctx, headInfo.version,
+                                   null_def_version - 1U));
 
-        return tuple_head_info{numProps - 1, version};
+        return headInfo;
     }
 }
 

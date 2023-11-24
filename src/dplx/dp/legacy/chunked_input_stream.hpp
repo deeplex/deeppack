@@ -41,6 +41,7 @@ protected:
                 initialReadArea.data(), initialReadArea.size(), streamSize)
         , mReadArea(initialReadArea)
         , mBufferStart(-1)
+        , mSmallBuffer{}
     {
     }
 
@@ -231,7 +232,8 @@ private:
             mReadArea.move_consumer(static_cast<memory_buffer::difference_type>(
                     discardChunkSize));
             discardAmount -= discardChunkSize;
-        } while (discardAmount != 0U);
+        }
+        while (discardAmount != 0U);
 
         if (mReadArea.remaining_size() == 0U)
         {
@@ -265,7 +267,8 @@ private:
             mReadArea.move_consumer(
                     static_cast<memory_buffer::difference_type>(readChunkSize));
             readAmount -= readChunkSize;
-        } while (readAmount != 0);
+        }
+        while (readAmount != 0);
 
         if (mReadArea.remaining_size() == 0U)
         {

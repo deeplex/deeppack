@@ -72,15 +72,15 @@ struct covariance_combiner
 
 template <typename T>
 auto operator,(covariance_combiner<T>, covariance_combiner<T>)
-                      -> covariance_combiner<T>;
+        -> covariance_combiner<T>;
 template <typename T, typename U>
     requires(std::is_base_of_v<T, U>)
 auto operator,(covariance_combiner<T>, covariance_combiner<U>)
-                      -> covariance_combiner<U>;
+        -> covariance_combiner<U>;
 template <typename T, typename U>
     requires(std::is_base_of_v<U, T>)
 auto operator,(covariance_combiner<T>, covariance_combiner<U>)
-                      -> covariance_combiner<T>;
+        -> covariance_combiner<T>;
 
 template <typename... Ts>
 struct covariance

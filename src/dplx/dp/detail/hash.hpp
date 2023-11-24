@@ -28,7 +28,7 @@ constexpr auto fnvx_hash(T const *const data,
     std::uint64_t state = {0x243f'6a88'85a3'08d3 ^ seed};
     for (std::size_t i = 0; i < size; ++i)
     {
-        state *= 0x00000100000001B3;
+        state *= 0x0000'0100'0000'01B3;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         state ^= static_cast<std::uint8_t>(data[i]);
     }
@@ -57,9 +57,9 @@ constexpr auto xxhash3_fixed_impl(std::uint64_t const val,
 
     std::uint64_t const mixedSeed
             = seed
-            ^ (static_cast<std::uint64_t>(
-                       detail::byte_swap_u32(static_cast<std::uint32_t>(seed)))
-               << 32);
+              ^ (static_cast<std::uint64_t>(detail::byte_swap_u32(
+                         static_cast<std::uint32_t>(seed)))
+                 << 32);
 
     std::uint64_t const xorpad = ivx - mixedSeed;
     std::uint64_t const spread = val ^ xorpad;

@@ -40,6 +40,7 @@ protected:
         , mCurrentChunk(initialWriteArea)
         , mRemaining(remaining)
         , mDecomissionThreshold(-1)
+        , mSmallBuffer{}
     {
     }
 
@@ -58,10 +59,9 @@ private:
         using byte_span = std::span<std::byte>;
         DPLX_TRY(byte_span const nextChunk, impl()->acquire_next_chunk_impl());
 
-        mCurrentChunk
-                = nextChunk.size() > mRemaining
-                        ? nextChunk.first(static_cast<std::size_t>(mRemaining))
-                        : nextChunk;
+        mCurrentChunk = nextChunk.size() > mRemaining ? nextChunk.first(
+                                static_cast<std::size_t>(mRemaining))
+                                                      : nextChunk;
 
         mRemaining -= mCurrentChunk.size();
 
@@ -114,7 +114,7 @@ private:
         DPLX_TRY(acquire_next_chunk());
 
         auto const overlap = consumedSize
-                           - static_cast<std::size_t>(mDecomissionThreshold);
+                             - static_cast<std::size_t>(mDecomissionThreshold);
         std::memcpy(
                 mCurrentChunk.data(),
                 static_cast<std::byte *>(mSmallBuffer)
@@ -140,7 +140,7 @@ private:
             DPLX_TRY(acquire_next_chunk());
 
             auto const overlap = small_buffer_size
-                               - static_cast<unsigned>(mDecomissionThreshold);
+                                 - static_cast<unsigned>(mDecomissionThreshold);
             std::memcpy(
                     mCurrentChunk.data(),
                     static_cast<std::byte *>(mSmallBuffer)
@@ -172,7 +172,8 @@ private:
             {
                 mCurrentChunk = mCurrentChunk.subspan(chunkSize);
             }
-        } while (writeAmount != 0);
+        }
+        while (writeAmount != 0);
         reset(mCurrentChunk.data(), mCurrentChunk.size());
         return outcome::success();
     }
