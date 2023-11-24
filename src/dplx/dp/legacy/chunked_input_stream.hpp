@@ -41,6 +41,7 @@ protected:
                 initialReadArea.data(), initialReadArea.size(), streamSize)
         , mReadArea(initialReadArea)
         , mBufferStart(-1)
+        , mSmallBuffer{}
     {
     }
 

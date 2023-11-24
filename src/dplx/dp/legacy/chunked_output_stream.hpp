@@ -40,6 +40,7 @@ protected:
         , mCurrentChunk(initialWriteArea)
         , mRemaining(remaining)
         , mDecomissionThreshold(-1)
+        , mSmallBuffer{}
     {
     }
 
