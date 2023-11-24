@@ -14,6 +14,7 @@ namespace dplx::dp
 
 struct emit_context
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     output_buffer &out;
 };
 

@@ -29,7 +29,9 @@ namespace dplx::dp::detail
 template <typename T>
 struct mp_encode_tuple_member_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     emit_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T const &value;
 
     template <typename PropDefType>
@@ -44,7 +46,9 @@ struct mp_encode_tuple_member_fn
 template <typename T>
 struct mp_size_of_tuple_element_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     emit_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T const &value;
 
     template <typename PropDefType>
@@ -134,7 +138,9 @@ namespace detail
 template <typename T>
 struct mp_decode_v_fn
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     parse_context &ctx;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     T &dest;
 
     template <typename PropDefType>

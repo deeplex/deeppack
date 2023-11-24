@@ -91,7 +91,9 @@ struct as_printable_ascii
 template <blob_like ArgT, blob_like ExpectedT>
 class BlobMatchExpr final : public Catch::ITransientExpression
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     ArgT &&mArg;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     ExpectedT &&mExpected;
     BlobMatcher mMatcher;
 
