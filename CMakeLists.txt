@@ -148,7 +148,7 @@ if (BUILD_TESTING)
         Deeplex::deeppack
 
         Catch2::Catch2 Catch2::Catch2WithMain
-        yaml-cpp
+        yaml-cpp::yaml-cpp
     )
 
     target_include_directories(deeppack-tests PRIVATE
