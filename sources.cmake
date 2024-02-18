@@ -82,8 +82,8 @@ dplx_target_sources(deeppack
         dp/legacy/memory_output_stream
 )
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail)
-configure_file(tools/config.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail/config.hpp @ONLY)
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail")
+configure_file(tools/config.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail/config.hpp" @ONLY)
 target_sources(deeppack PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated/src/dplx/dp/detail/config.hpp>)
 
 if (BUILD_TESTING)

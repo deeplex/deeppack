@@ -14,20 +14,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, ubuntu-22.04, windows-2022]
+        os: [ubuntu-22.04, windows-2022]
         compiler: [gcc, clang, msvc]
         exclude:
-          - os: macos-13
-            compiler: msvc
-          - os: macos-13
-            compiler: clang
           - os: ubuntu-22.04
             compiler: msvc
           - os: windows-2022
             compiler: gcc
         include:
           - os: macos-13
+            compiler: gcc
             triplet: x64-macos
+          - os: macos-14
+            compiler: clang
+            triplet: arm64-macos
+            install: |
+              HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install llvm@16
           - os: ubuntu-22.04
             triplet: x64-linux
           - os: ubuntu-22.04
@@ -59,7 +61,6 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
-          vcpkgGitCommitId: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
 
       - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }} preset
         uses: lukka/run-cmake@v10
@@ -80,12 +81,6 @@ jobs:
         env:
           CC: ''
           CXX: ''
-
-      - name: Prevent uploading a corrupted vcpkg cache
-        if: ${{ failure() || cancelled() }}
-        run: |
-          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
-        shell: bash
 
 
   check-format:
@@ -110,7 +105,6 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: ${{ github.workspace }}/../vcpkg
-          vcpkgGitCommitId: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
 
       - name: Configure x64-linux-clang preset
         uses: lukka/run-cmake@v10
@@ -134,8 +128,3 @@ jobs:
       - name: Fail if issues have been raised
         if: steps.linter.outputs.checks-failed > 0
         run: exit 1
-
-      - if: ${{ failure() || cancelled() }}
-        run: |
-          echo "RUNVCPKG_NO_CACHE=1" >> $GITHUB_ENV
-        shell: bash
