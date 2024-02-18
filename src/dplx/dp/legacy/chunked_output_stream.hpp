@@ -81,12 +81,12 @@ private:
                 reset(mCurrentChunk.data(), mCurrentChunk.size());
                 return outcome::success();
             }
+            mDecomissionThreshold = static_cast<std::int8_t>(size());
+            reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
             if (requestedSize > small_buffer_size)
             {
                 return errc::buffer_size_exceeded;
             }
-            mDecomissionThreshold = static_cast<std::int8_t>(size());
-            reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
             return outcome::success();
         }
 
@@ -96,34 +96,38 @@ private:
                 data() - static_cast<std::byte *>(mSmallBuffer));
         if (consumedSize < static_cast<std::size_t>(mDecomissionThreshold))
         {
-            if (requestedSize > small_buffer_size)
-            {
-                return errc::buffer_size_exceeded;
-            }
             std::memcpy(chunkPart.data(),
                         static_cast<std::byte *>(mSmallBuffer), consumedSize);
 
             reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
             mDecomissionThreshold -= static_cast<std::int8_t>(consumedSize);
+            if (requestedSize > small_buffer_size)
+            {
+                return errc::buffer_size_exceeded;
+            }
             return outcome::success();
         }
 
-        std::memcpy(chunkPart.data(), static_cast<std::byte *>(mSmallBuffer),
-                    chunkPart.size());
-
-        DPLX_TRY(acquire_next_chunk());
+        if (!chunkPart.empty()) [[likely]]
+        {
+            std::memcpy(chunkPart.data(),
+                        static_cast<std::byte *>(mSmallBuffer),
+                        chunkPart.size());
+        }
 
         auto const overlap = consumedSize
                              - static_cast<std::size_t>(mDecomissionThreshold);
-        std::memcpy(
-                mCurrentChunk.data(),
-                static_cast<std::byte *>(mSmallBuffer)
-                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                        + mDecomissionThreshold,
-                overlap);
+        if (auto acquireRx = acquire_next_chunk(); acquireRx.has_error())
+                [[unlikely]]
+        {
+            move_remaining_small_buffer_to_front(overlap);
+            return std::move(acquireRx).assume_error();
+        }
 
-        mCurrentChunk = mCurrentChunk.subspan(overlap);
-        mDecomissionThreshold = -1;
+        if (!try_move_small_buffer_to_next_chunk(overlap) && mRemaining == 0)
+        {
+            return errc::end_of_stream;
+        }
         return ensure_size(requestedSize);
     }
     auto do_bulk_write(std::byte const *src, std::size_t writeAmount) noexcept
@@ -137,18 +141,25 @@ private:
                         static_cast<std::byte *>(mSmallBuffer),
                         chunkPart.size());
 
-            DPLX_TRY(acquire_next_chunk());
+            // we can use small_buffer_size here as bulk_write is guaranteed to
+            // fill the buffer completely
+            // => small_buffer_size == data() - mSmallBuffer
+            auto const overlap
+                    = small_buffer_size
+                      - static_cast<std::size_t>(mDecomissionThreshold);
 
-            auto const overlap = small_buffer_size
-                                 - static_cast<unsigned>(mDecomissionThreshold);
-            std::memcpy(
-                    mCurrentChunk.data(),
-                    static_cast<std::byte *>(mSmallBuffer)
-                            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                            + chunkPart.size(),
-                    overlap);
-            mCurrentChunk = mCurrentChunk.subspan(overlap);
-            mDecomissionThreshold = -1;
+            if (auto acquireRx = acquire_next_chunk(); acquireRx.has_error())
+                    [[unlikely]]
+            {
+                move_remaining_small_buffer_to_front(overlap);
+                return std::move(acquireRx).assume_error();
+            }
+
+            if (!try_move_small_buffer_to_next_chunk(overlap)) [[unlikely]]
+            {
+                DPLX_TRY(acquire_next_chunk());
+            }
+            reset();
         }
         else
         {
@@ -176,6 +187,100 @@ private:
         while (writeAmount != 0);
         reset(mCurrentChunk.data(), mCurrentChunk.size());
         return outcome::success();
+    }
+
+    auto do_sync_output() noexcept -> result<void> override
+    {
+        if (mDecomissionThreshold < 0)
+        {
+            // small buffer is not in use => nothing to do
+            return outcome::success();
+        }
+
+        auto const chunkPart = mCurrentChunk.last(
+                static_cast<std::size_t>(mDecomissionThreshold));
+        auto const consumedSize = static_cast<std::size_t>(
+                data() - static_cast<std::byte *>(mSmallBuffer));
+        if (consumedSize <= static_cast<std::size_t>(mDecomissionThreshold))
+        {
+            // written data still does not exceed current chunk
+            std::memcpy(chunkPart.data(),
+                        static_cast<std::byte *>(mSmallBuffer), consumedSize);
+            if (consumedSize == static_cast<std::size_t>(mDecomissionThreshold))
+            {
+                // avoid acquiring a new chunk as sync_output is usually called
+                // as a cleanup operation and a new chunk would go to waste
+                // and/or an illegal operation in case of a pre-sized stream
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                reset(mCurrentChunk.data() + mCurrentChunk.size(), 0U);
+                mDecomissionThreshold = -1;
+            }
+            else
+            {
+                reset(static_cast<std::byte *>(mSmallBuffer),
+                      small_buffer_size);
+                mDecomissionThreshold -= static_cast<std::int8_t>(consumedSize);
+            }
+            return outcome::success();
+        }
+
+        std::memcpy(chunkPart.data(), static_cast<std::byte *>(mSmallBuffer),
+                    chunkPart.size());
+        auto const overlap = consumedSize
+                             - static_cast<std::size_t>(mDecomissionThreshold);
+        if (auto acquireRx = acquire_next_chunk(); acquireRx.has_error())
+                [[unlikely]]
+        {
+            move_remaining_small_buffer_to_front(overlap);
+            return std::move(acquireRx).assume_error();
+        }
+
+        if (!try_move_small_buffer_to_next_chunk(overlap))
+        {
+            return errc::end_of_stream;
+        }
+        return outcome::success();
+    }
+
+    auto
+    try_move_small_buffer_to_next_chunk(std::size_t const remaining) noexcept
+            -> bool
+    {
+        auto const copyAmount = std::min(remaining, mCurrentChunk.size());
+        if (mCurrentChunk.data() != nullptr) [[likely]]
+        {
+            std::memcpy(
+                    mCurrentChunk.data(),
+                    static_cast<std::byte *>(mSmallBuffer)
+                            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                            + mDecomissionThreshold,
+                    remaining);
+            mCurrentChunk = mCurrentChunk.subspan(copyAmount);
+        }
+        if (remaining != copyAmount) [[unlikely]]
+        {
+            mDecomissionThreshold += static_cast<std::int8_t>(copyAmount);
+            move_remaining_small_buffer_to_front(remaining - copyAmount);
+            return false;
+        }
+        reset(mCurrentChunk.data(), mCurrentChunk.size());
+        mDecomissionThreshold = -1;
+        return true;
+    }
+
+    void
+    move_remaining_small_buffer_to_front(std::size_t const remaining) noexcept
+    {
+        std::memmove(
+                static_cast<std::byte *>(mSmallBuffer),
+                static_cast<std::byte *>(mSmallBuffer)
+                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                        + mDecomissionThreshold,
+                remaining);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        reset(static_cast<std::byte *>(mSmallBuffer) + remaining,
+              small_buffer_size - remaining);
+        mDecomissionThreshold = 0;
     }
 };
 
