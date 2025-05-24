@@ -14,10 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        os: [ubuntu-24.04, windows-2022]
         compiler: [gcc, clang, msvc]
         exclude:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             compiler: msvc
           - os: windows-2022
             compiler: gcc
@@ -30,9 +30,9 @@ jobs:
             triplet: arm64-macos
             install: |
               HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install llvm@16
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             triplet: x64-linux
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             triplet: x64-linux
             compiler: clang
             install: |
@@ -62,22 +62,22 @@ jobs:
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
 
-      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }} preset
+      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-ci preset
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
-          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
-          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
+          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
+          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
+          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
         env:
           CC: ''
           CXX: ''
 
-      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-release preset
+      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release preset
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
-          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
-          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
+          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
+          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release
+          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release
         env:
           CC: ''
           CXX: ''
