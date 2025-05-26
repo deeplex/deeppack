@@ -154,9 +154,19 @@
             }
         },
         {
+            "name": "x64-linux-clang-19",
+            "inherits": [
+                "x64-linux-clang"
+            ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-linux-clang-19",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/tools/toolchains/x64-linux-clang-19.cmake"
+            }
+        },
+        {
             "name": "x64-linux-clang-ci",
             "inherits": [
-                "x64-linux-clang-16"
+                "x64-linux-clang-19"
             ]
         },
         {
@@ -197,8 +207,8 @@
                 "base"
             ],
             "cacheVariables": {
-                "VCPKG_TARGET_TRIPLET": "arm64-macos-clang-16-brew",
-                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/tools/toolchains/arm64-macos-clang-16-brew.cmake"
+                "VCPKG_TARGET_TRIPLET": "arm64-macos-clang-19-brew",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/tools/toolchains/arm64-macos-clang-19-brew.cmake"
             },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
