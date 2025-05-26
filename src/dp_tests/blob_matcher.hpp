@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <ranges>
 
+#include <catch2/internal/catch_decomposer.hpp>
 #include <catch2/internal/catch_move_and_forward.hpp>
 #include <catch2/internal/catch_test_macro_impl.hpp>
 #include <fmt/core.h>
@@ -88,6 +89,14 @@ struct as_printable_ascii
     }
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 template <blob_like ArgT, blob_like ExpectedT>
 class BlobMatchExpr final : public Catch::ITransientExpression
 {
@@ -98,6 +107,7 @@ class BlobMatchExpr final : public Catch::ITransientExpression
     BlobMatcher mMatcher;
 
 public:
+    virtual ~BlobMatchExpr() = default;
     inline BlobMatchExpr(ArgT &&arg,
                          ExpectedT &&expected,
                          BlobMatcher blobMatcher)
@@ -170,6 +180,12 @@ public:
     }
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 template <typename ArgT, typename ExpectedT>
 auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
 {
@@ -194,7 +210,7 @@ auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
                     ::dp_tests::make_blob_match_expr(arg, expected));          \
         }                                                                      \
         INTERNAL_CATCH_CATCH(catchAssertionHandler)                            \
-        INTERNAL_CATCH_REACT(catchAssertionHandler)                            \
+        catchAssertionHandler.complete();                                      \
     }                                                                          \
     while (false)
 
