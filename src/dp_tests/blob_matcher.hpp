@@ -194,7 +194,7 @@ auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
                     ::dp_tests::make_blob_match_expr(arg, expected));          \
         }                                                                      \
         INTERNAL_CATCH_CATCH(catchAssertionHandler)                            \
-        INTERNAL_CATCH_REACT(catchAssertionHandler)                            \
+        catchAssertionHandler.complete();                                      \
     }                                                                          \
     while (false)
 
