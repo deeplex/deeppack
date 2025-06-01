@@ -14,10 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        os: [ubuntu-24.04, windows-2022]
         compiler: [gcc, clang, msvc]
         exclude:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             compiler: msvc
           - os: windows-2022
             compiler: gcc
@@ -25,21 +25,21 @@ jobs:
           - os: macos-13
             compiler: gcc
             triplet: x64-macos
-          - os: macos-14
+          - os: macos-15
             compiler: clang
             triplet: arm64-macos
             install: |
-              HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install llvm@16
-          - os: ubuntu-22.04
+              HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install llvm@19
+          - os: ubuntu-24.04
             triplet: x64-linux
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             triplet: x64-linux
             compiler: clang
             install: |
               sudo cp tools/llvm-snapshot.gpg.key.asc /etc/apt/trusted.gpg.d/llvm-snapshot.asc
-              sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
+              sudo add-apt-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-19 main"
               sudo apt-get -qq update
-              sudo apt-get -qq -y install clang-16
+              sudo apt-get -qq -y install clang-19
           - os: windows-2022
             triplet: x64-windows
 
@@ -55,29 +55,29 @@ jobs:
 
       - uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: 3.22.6
+          cmakeVersion: 3.31.7
 
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: ${{ github.workspace }}/build/vcpkg
 
-      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }} preset
+      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-ci preset
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
-          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
-          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
+          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
+          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
+          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
         env:
           CC: ''
           CXX: ''
 
-      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-release preset
+      - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release preset
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}
-          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
-          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-release
+          configurePreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci
+          buildPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release
+          testPreset: ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release
         env:
           CC: ''
           CXX: ''
@@ -85,21 +85,21 @@ jobs:
 
   check-format:
     name: clang-tidy & clang-format
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: "Install clang-tools-16"
+      - name: "Install clang-tools-19"
         run: |
           sudo cp ${{ github.workspace }}/tools/llvm-snapshot.gpg.key.asc /etc/apt/trusted.gpg.d/llvm-snapshot.asc
-          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
+          sudo add-apt-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-19 main"
           sudo apt-get -qq update
-          sudo apt-get -qq -y install clang-16 clang-tidy-16 clang-format-16
+          sudo apt-get -qq -y install clang-19 clang-tidy-19 clang-format-19
 
       - uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: 3.22.6
+          cmakeVersion: 3.31.7
 
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@v11
@@ -117,7 +117,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          version: 16.0.6
+          version: 19.1.7
           style: file # use .clang-format settings
           tidy-checks: '' # use .clang-tidy settings
           extensions: cpp,hpp
