@@ -158,17 +158,17 @@ public:
                                as_printable_ascii{});
 
         // this is a bit brittle, but Catch isn't exactly helpful in this case…
-        auto const prefixAlign = mismatchOffset * 3 + 1;
+        auto const prefixAlign = (mismatchOffset * 3) + 1;
         fmt::print(os, "pos: {:>{}}{:#06x}\n", "  vv ", prefixAlign + 3,
                    mismatchPosition);
         fmt::print(os, "val: {:>{}}{:02x}  {:>{}}\n", " /", prefixAlign,
                    fmt::join(argMismatch, argDisplayEnd, " "), strArg,
-                   argNumSkipped * 3 + argNumDisplayed - 1);
+                   (argNumSkipped * 3) + argNumDisplayed - 1);
         fmt::print(os, "     {:02x}<\n",
                    fmt::join(argDisplayBegin, argMismatch, " "));
         fmt::print(os, "exp: {:>{}}{:02x}  {:>{}}\n", " \\", prefixAlign,
                    fmt::join(expectedMismatch, expectedDisplayEnd, " "), strExp,
-                   expectedNumSkipped * 3 + expectedNumDisplayed - 1);
+                   (expectedNumSkipped * 3) + expectedNumDisplayed - 1);
     }
 };
 
