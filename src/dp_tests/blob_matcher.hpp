@@ -101,6 +101,7 @@ class BlobMatchExpr final : public Catch::ITransientExpression
 
 public:
     virtual ~BlobMatchExpr() = default;
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
     BlobMatchExpr(ArgT &&arg, ExpectedT &&expected, BlobMatcher blobMatcher)
         : ITransientExpression{true, blobMatcher.match(arg, expected)}
         , mArg(CATCH_FORWARD(arg))
@@ -178,6 +179,7 @@ public:
 #endif
 
 template <typename ArgT, typename ExpectedT>
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
 {
     return ::dp_tests::BlobMatchExpr<ArgT, ExpectedT>(
