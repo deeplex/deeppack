@@ -57,8 +57,7 @@ public:
         return mMismatchOffset == -1;
     }
 
-    [[nodiscard]] inline auto mismatch_position() const noexcept
-            -> std::ptrdiff_t
+    [[nodiscard]] auto mismatch_position() const noexcept -> std::ptrdiff_t
     {
         return mMismatchOffset;
     }
@@ -67,8 +66,7 @@ private:
     struct byte_equal
     {
         template <typename LV, typename RV>
-        [[nodiscard]] inline auto operator()(LV lv, RV rv) const noexcept
-                -> bool
+        [[nodiscard]] auto operator()(LV lv, RV rv) const noexcept -> bool
         {
             return static_cast<std::uint8_t>(lv)
                    == static_cast<std::uint8_t>(rv);
@@ -79,7 +77,7 @@ private:
 struct as_printable_ascii
 {
     template <typename C>
-    [[nodiscard]] inline auto operator()(C const c) const noexcept -> char
+    [[nodiscard]] auto operator()(C const c) const noexcept -> char
     {
         constexpr C isprint_ascii_lower_bound{0x32};
         constexpr C isprint_ascii_upper_bound{0x7E};
@@ -108,9 +106,7 @@ class BlobMatchExpr final : public Catch::ITransientExpression
 
 public:
     virtual ~BlobMatchExpr() = default;
-    inline BlobMatchExpr(ArgT &&arg,
-                         ExpectedT &&expected,
-                         BlobMatcher blobMatcher)
+    BlobMatchExpr(ArgT &&arg, ExpectedT &&expected, BlobMatcher blobMatcher)
         : ITransientExpression{true, blobMatcher.match(arg, expected)}
         , mArg(CATCH_FORWARD(arg))
         , mExpected(CATCH_FORWARD(expected))
