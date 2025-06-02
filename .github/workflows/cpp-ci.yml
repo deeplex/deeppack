@@ -43,6 +43,9 @@ jobs:
           - os: windows-2022
             triplet: x64-windows
 
+    permissions:
+      actions: read
+
     env:
       CTEST_OUTPUT_ON_FAILURE: "1"
 
@@ -56,6 +59,13 @@ jobs:
       - uses: lukka/get-cmake@latest
         with:
           cmakeVersion: 3.31.7
+
+      - name: Restore vcpkg cache
+        id: vcpkg-cache
+        uses: TAServers/vcpkg-cache@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prefix: vcpkg/${{ matrix.triplet }}-${{ matrix.compiler }}/
 
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@b3dd708d38df5c856fe1c18dc0d59ab771f93921
@@ -71,6 +81,7 @@ jobs:
         env:
           CC: ''
           CXX: ''
+          VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
 
       - name: Build ${{ matrix.triplet }}-${{ matrix.compiler }}-ci-release preset
         uses: lukka/run-cmake@v10
@@ -81,10 +92,14 @@ jobs:
         env:
           CC: ''
           CXX: ''
+          VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
 
   check-format:
     name: clang-tidy & clang-format
     runs-on: ubuntu-24.04
+
+    permissions:
+        actions: read
 
     steps:
       - uses: actions/checkout@v3
@@ -100,15 +115,24 @@ jobs:
         with:
           cmakeVersion: 3.31.7
 
+      - name: Restore vcpkg cache
+        id: vcpkg-cache
+        uses: TAServers/vcpkg-cache@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prefix: vcpkg/lint/
+
       - name: Initialize vcpkg
         uses: lukka/run-vcpkg@b3dd708d38df5c856fe1c18dc0d59ab771f93921
         with:
           vcpkgDirectory: ${{ github.workspace }}/../vcpkg
 
-      - name: Configure x64-linux-clang preset
+      - name: Configure x64-linux-ci-lint preset
         uses: lukka/run-cmake@v10
         with:
           configurePreset: x64-linux-ci-lint
+        env:
+          VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
 
       - uses: cpp-linter/cpp-linter-action@v2
         name: Lint with clang-format and clang-tidy
