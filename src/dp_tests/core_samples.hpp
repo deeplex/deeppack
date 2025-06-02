@@ -55,7 +55,7 @@ auto integer_samples(item_sample_ct<T> const (&samples)[N])
 }
 
 constexpr item_sample_ct<unsigned long long> posint_samples[] = {
-  // Appendix A.Examples
+        // Appendix A.Examples
         {0x00, 1, {0b000'00000}},
         {0x01, 1, {0b000'00001}},
         {0x0a, 1, {0b000'01010}},
@@ -67,7 +67,7 @@ constexpr item_sample_ct<unsigned long long> posint_samples[] = {
          0x0000'00e8'd4a5'1000, 9,
          {0x1b, 0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00},
          },
- // boundary test cases
+        // boundary test cases
         {0x00, 1, {0b000'00000}},
         {0x17, 1, {0b000'10111}},
         {0x18, 2, {0x18, 0x18}},
@@ -101,11 +101,11 @@ constexpr item_sample_ct<unsigned long long> posint_samples[] = {
 };
 
 constexpr item_sample_ct<long long> negint_samples[] = {
-  // Appendix A.Examples
+        // Appendix A.Examples
         {-10LL, 1, {0b001'01001}},
         {-100LL, 2, {0x38, 0x63}},
         {-1000LL, 3, {0x39, 0x03, 0xe7}},
- // boundary test cases
+        // boundary test cases
         {-0x01LL, 1, {0b001'00000}},
         {-1 - 0x17LL, 1, {0b001'10111}},
         {-1 - 0x18LL, 2, {0x38, 0x18}},

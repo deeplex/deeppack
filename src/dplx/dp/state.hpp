@@ -208,7 +208,7 @@ using flat_hash_map = boost::unordered_flat_map<
         T,
         std::hash<Key>,
         std::equal_to<>,
-        std::pmr::polymorphic_allocator<std::pair<const Key, T>>>;
+        std::pmr::polymorphic_allocator<std::pair<Key const, T>>>;
 
 }
 

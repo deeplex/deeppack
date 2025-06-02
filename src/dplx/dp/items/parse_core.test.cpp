@@ -25,7 +25,7 @@ namespace dp_tests
 using enum dp::type_code;
 
 constexpr item_sample_ct<dp::item_head> parse_samples[] = {
-  // clang-format off
+        // clang-format off
 
     // Appendix A.Examples
     {
@@ -117,7 +117,7 @@ constexpr item_sample_ct<dp::item_head> parse_samples[] = {
         1, {0xff},
     },
 
-  // clang-format on
+        // clang-format on
 };
 
 TEST_CASE("parse_item_head_speculative can parse basic item_heads")

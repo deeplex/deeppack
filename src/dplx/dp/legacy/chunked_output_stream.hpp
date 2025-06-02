@@ -59,9 +59,10 @@ private:
         using byte_span = std::span<std::byte>;
         DPLX_TRY(byte_span const nextChunk, impl()->acquire_next_chunk_impl());
 
-        mCurrentChunk = nextChunk.size() > mRemaining ? nextChunk.first(
-                                static_cast<std::size_t>(mRemaining))
-                                                      : nextChunk;
+        mCurrentChunk = nextChunk.size() > mRemaining
+                                ? nextChunk.first(
+                                          static_cast<std::size_t>(mRemaining))
+                                : nextChunk;
 
         mRemaining -= mCurrentChunk.size();
 

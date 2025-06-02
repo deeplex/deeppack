@@ -38,7 +38,7 @@ protected:
             std::span<std::byte const> const initialReadArea,
             std::uint64_t streamSize)
         : input_buffer(
-                initialReadArea.data(), initialReadArea.size(), streamSize)
+                  initialReadArea.data(), initialReadArea.size(), streamSize)
         , mReadArea(initialReadArea)
         , mBufferStart(-1)
         , mSmallBuffer{}
