@@ -34,14 +34,9 @@ concept blob_like
 
 class BlobMatcher
 {
-    std::ptrdiff_t mMismatchOffset;
+    std::ptrdiff_t mMismatchOffset{-2};
 
 public:
-    BlobMatcher()
-        : mMismatchOffset(-2)
-    {
-    }
-
     template <blob_like ArgT, blob_like ExpectedT>
     [[nodiscard]] auto match(ArgT const &arg,
                              ExpectedT const &expected) noexcept -> bool
