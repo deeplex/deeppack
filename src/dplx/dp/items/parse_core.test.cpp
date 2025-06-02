@@ -314,7 +314,7 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        TestType value;
+        TestType value{};
         result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
@@ -333,7 +333,7 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
     {
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
-        TestType value;
+        TestType value{};
         result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
