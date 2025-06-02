@@ -82,7 +82,6 @@ jobs:
           CC: ''
           CXX: ''
 
-
   check-format:
     name: clang-tidy & clang-format
     runs-on: ubuntu-24.04
