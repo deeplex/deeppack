@@ -137,6 +137,7 @@ inline auto do_parse_item_head(parse_context &ctx) noexcept -> result<item_head>
             {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 std::byte const *const payload = ctx.in.data() + 1;
+                // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
                 switch (sizeBytesPower)
                 {
                 case 0U:

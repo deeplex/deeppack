@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <concepts>
-#include <type_traits>
-#include <utility>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
 
 #include <dplx/cncr/data_defined_status_domain.hpp>
 #include <dplx/cncr/disappointment.hpp>
@@ -22,10 +22,11 @@ namespace oc = outcome;
 using outcome::failure;
 using outcome::success;
 
-enum class errc
+// NOLINTNEXTLINE(performance-enum-size)
+enum class errc : std::uint32_t
 {
     nothing = 0,
-    bad = 1,
+    bad,
     end_of_stream,
     invalid_additional_information,
     item_type_mismatch,
