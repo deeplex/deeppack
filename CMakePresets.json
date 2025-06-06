@@ -153,6 +153,16 @@
             }
         },
         {
+            "name": "x64-linux-clang-20",
+            "inherits": [
+                "x64-linux-clang"
+            ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-linux-clang-20",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/tools/toolchains/x64-linux-clang-20.cmake"
+            }
+        },
+        {
             "name": "x64-linux-clang-ci",
             "inherits": [
                 "x64-linux-clang-19"
@@ -161,7 +171,7 @@
         {
             "name": "x64-linux-ci-lint",
             "inherits": [
-                "x64-linux-clang-19"
+                "x64-linux-clang-20"
             ]
         },
         {
