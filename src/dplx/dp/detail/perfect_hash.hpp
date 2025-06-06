@@ -115,19 +115,19 @@ struct least_uint
     using type = std::size_t;
 };
 template <std::size_t N>
-    requires(N <= 0xffU)
+    requires(N <= UINT8_MAX)
 struct least_uint<N>
 {
     using type = std::uint8_t;
 };
 template <std::size_t N>
-    requires(0xffU < N && N <= 0xffffU)
+    requires(UINT8_MAX < N && N <= UINT16_MAX)
 struct least_uint<N>
 {
     using type = std::uint16_t;
 };
 template <std::size_t N>
-    requires(0xffffU < N && N <= 0xffff'ffffU)
+    requires(UINT16_MAX < N && N <= UINT32_MAX)
 struct least_uint<N>
 {
     using type = std::uint32_t;
