@@ -140,7 +140,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          version: 20.1.7
+          version: 20
           style: file # use .clang-format settings
           tidy-checks: '' # use .clang-tidy settings
           extensions: cpp,hpp
