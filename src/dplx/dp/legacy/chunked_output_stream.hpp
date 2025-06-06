@@ -93,12 +93,13 @@ private:
 
         auto const chunkPart = mCurrentChunk.last(
                 static_cast<std::size_t>(mDecomissionThreshold));
-        auto const consumedSize = static_cast<std::size_t>(
-                data() - static_cast<std::byte *>(mSmallBuffer));
-        if (consumedSize < static_cast<std::size_t>(mDecomissionThreshold))
+        auto const consumedSize
+                = data() - static_cast<std::byte *>(mSmallBuffer);
+        if (consumedSize < mDecomissionThreshold)
         {
             std::memcpy(chunkPart.data(),
-                        static_cast<std::byte *>(mSmallBuffer), consumedSize);
+                        static_cast<std::byte *>(mSmallBuffer),
+                        static_cast<std::size_t>(consumedSize));
 
             reset(static_cast<std::byte *>(mSmallBuffer), small_buffer_size);
             mDecomissionThreshold -= static_cast<std::int8_t>(consumedSize);
@@ -116,16 +117,18 @@ private:
                         chunkPart.size());
         }
 
-        auto const overlap = consumedSize
-                             - static_cast<std::size_t>(mDecomissionThreshold);
+        auto const overlap = consumedSize - mDecomissionThreshold;
         if (auto acquireRx = acquire_next_chunk(); acquireRx.has_error())
                 [[unlikely]]
         {
-            move_remaining_small_buffer_to_front(overlap);
+            move_remaining_small_buffer_to_front(
+                    static_cast<std::size_t>(overlap));
             return std::move(acquireRx).assume_error();
         }
 
-        if (!try_move_small_buffer_to_next_chunk(overlap) && mRemaining == 0)
+        if (!try_move_small_buffer_to_next_chunk(
+                    static_cast<std::size_t>(overlap))
+            && mRemaining == 0)
         {
             return errc::end_of_stream;
         }
@@ -200,14 +203,15 @@ private:
 
         auto const chunkPart = mCurrentChunk.last(
                 static_cast<std::size_t>(mDecomissionThreshold));
-        auto const consumedSize = static_cast<std::size_t>(
-                data() - static_cast<std::byte *>(mSmallBuffer));
-        if (consumedSize <= static_cast<std::size_t>(mDecomissionThreshold))
+        auto const consumedSize
+                = data() - static_cast<std::byte *>(mSmallBuffer);
+        if (consumedSize <= mDecomissionThreshold)
         {
             // written data still does not exceed current chunk
             std::memcpy(chunkPart.data(),
-                        static_cast<std::byte *>(mSmallBuffer), consumedSize);
-            if (consumedSize == static_cast<std::size_t>(mDecomissionThreshold))
+                        static_cast<std::byte *>(mSmallBuffer),
+                        static_cast<std::size_t>(consumedSize));
+            if (consumedSize == mDecomissionThreshold)
             {
                 // avoid acquiring a new chunk as sync_output is usually called
                 // as a cleanup operation and a new chunk would go to waste
@@ -227,16 +231,17 @@ private:
 
         std::memcpy(chunkPart.data(), static_cast<std::byte *>(mSmallBuffer),
                     chunkPart.size());
-        auto const overlap = consumedSize
-                             - static_cast<std::size_t>(mDecomissionThreshold);
+        auto const overlap = consumedSize - mDecomissionThreshold;
         if (auto acquireRx = acquire_next_chunk(); acquireRx.has_error())
                 [[unlikely]]
         {
-            move_remaining_small_buffer_to_front(overlap);
+            move_remaining_small_buffer_to_front(
+                    static_cast<std::size_t>(overlap));
             return std::move(acquireRx).assume_error();
         }
 
-        if (!try_move_small_buffer_to_next_chunk(overlap))
+        if (!try_move_small_buffer_to_next_chunk(
+                    static_cast<std::size_t>(overlap)))
         {
             return errc::end_of_stream;
         }
