@@ -23,6 +23,8 @@ namespace dplx::dp::legacy
 template <typename Impl>
 class chunked_input_stream_base : public input_buffer
 {
+    friend Impl;
+
     memory_view mReadArea;
 
     static constexpr unsigned int small_buffer_size
@@ -33,6 +35,8 @@ class chunked_input_stream_base : public input_buffer
 
 protected:
     ~chunked_input_stream_base() noexcept = default;
+
+private:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     explicit chunked_input_stream_base(
             std::span<std::byte const> const initialReadArea,
@@ -45,6 +49,7 @@ protected:
     {
     }
 
+protected:
     [[nodiscard]] inline auto current_read_area() const noexcept -> memory_view
     {
         memory_view readArea{mReadArea};

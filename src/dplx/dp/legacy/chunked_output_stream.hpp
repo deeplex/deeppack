@@ -22,6 +22,8 @@ namespace dplx::dp::legacy
 template <typename Impl>
 class chunked_output_stream_base : public output_buffer
 {
+    friend Impl;
+
     std::span<std::byte> mCurrentChunk;
     size_type mRemaining;
 
@@ -33,6 +35,8 @@ class chunked_output_stream_base : public output_buffer
 
 protected:
     ~chunked_output_stream_base() noexcept = default;
+
+private:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     chunked_output_stream_base(std::span<std::byte> initialWriteArea,
                                size_type remaining) noexcept
@@ -44,7 +48,6 @@ protected:
     {
     }
 
-private:
     auto impl() noexcept -> Impl *
     {
         return static_cast<Impl *>(this);
