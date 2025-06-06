@@ -37,6 +37,7 @@ inline auto store_var_uint_eos(output_buffer &out,
     auto *const dest = out.data();
     // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
     switch (bytePowerPlus2)
     {
     case 1U:

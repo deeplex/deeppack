@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <ranges>
 
+#include <catch2/internal/catch_decomposer.hpp>
 #include <catch2/internal/catch_move_and_forward.hpp>
 #include <catch2/internal/catch_test_macro_impl.hpp>
 #include <fmt/core.h>
@@ -33,14 +34,9 @@ concept blob_like
 
 class BlobMatcher
 {
-    std::ptrdiff_t mMismatchOffset;
+    std::ptrdiff_t mMismatchOffset{-2};
 
 public:
-    BlobMatcher()
-        : mMismatchOffset(-2)
-    {
-    }
-
     template <blob_like ArgT, blob_like ExpectedT>
     [[nodiscard]] auto match(ArgT const &arg,
                              ExpectedT const &expected) noexcept -> bool
@@ -56,8 +52,7 @@ public:
         return mMismatchOffset == -1;
     }
 
-    [[nodiscard]] inline auto mismatch_position() const noexcept
-            -> std::ptrdiff_t
+    [[nodiscard]] auto mismatch_position() const noexcept -> std::ptrdiff_t
     {
         return mMismatchOffset;
     }
@@ -66,8 +61,7 @@ private:
     struct byte_equal
     {
         template <typename LV, typename RV>
-        [[nodiscard]] inline auto operator()(LV lv, RV rv) const noexcept
-                -> bool
+        [[nodiscard]] auto operator()(LV lv, RV rv) const noexcept -> bool
         {
             return static_cast<std::uint8_t>(lv)
                    == static_cast<std::uint8_t>(rv);
@@ -78,7 +72,7 @@ private:
 struct as_printable_ascii
 {
     template <typename C>
-    [[nodiscard]] inline auto operator()(C const c) const noexcept -> char
+    [[nodiscard]] auto operator()(C const c) const noexcept -> char
     {
         constexpr C isprint_ascii_lower_bound{0x32};
         constexpr C isprint_ascii_upper_bound{0x7E};
@@ -87,6 +81,14 @@ struct as_printable_ascii
                        : '.';
     }
 };
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
 
 template <blob_like ArgT, blob_like ExpectedT>
 class BlobMatchExpr final : public Catch::ITransientExpression
@@ -98,9 +100,9 @@ class BlobMatchExpr final : public Catch::ITransientExpression
     BlobMatcher mMatcher;
 
 public:
-    inline BlobMatchExpr(ArgT &&arg,
-                         ExpectedT &&expected,
-                         BlobMatcher blobMatcher)
+    virtual ~BlobMatchExpr() = default;
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
+    BlobMatchExpr(ArgT &&arg, ExpectedT &&expected, BlobMatcher blobMatcher)
         : ITransientExpression{true, blobMatcher.match(arg, expected)}
         , mArg(CATCH_FORWARD(arg))
         , mExpected(CATCH_FORWARD(expected))
@@ -156,21 +158,28 @@ public:
                                as_printable_ascii{});
 
         // this is a bit brittle, but Catch isn't exactly helpful in this case…
-        auto const prefixAlign = mismatchOffset * 3 + 1;
+        auto const prefixAlign = (mismatchOffset * 3) + 1;
         fmt::print(os, "pos: {:>{}}{:#06x}\n", "  vv ", prefixAlign + 3,
                    mismatchPosition);
         fmt::print(os, "val: {:>{}}{:02x}  {:>{}}\n", " /", prefixAlign,
                    fmt::join(argMismatch, argDisplayEnd, " "), strArg,
-                   argNumSkipped * 3 + argNumDisplayed - 1);
+                   (argNumSkipped * 3) + argNumDisplayed - 1);
         fmt::print(os, "     {:02x}<\n",
                    fmt::join(argDisplayBegin, argMismatch, " "));
         fmt::print(os, "exp: {:>{}}{:02x}  {:>{}}\n", " \\", prefixAlign,
                    fmt::join(expectedMismatch, expectedDisplayEnd, " "), strExp,
-                   expectedNumSkipped * 3 + expectedNumDisplayed - 1);
+                   (expectedNumSkipped * 3) + expectedNumDisplayed - 1);
     }
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 template <typename ArgT, typename ExpectedT>
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
 {
     return ::dp_tests::BlobMatchExpr<ArgT, ExpectedT>(
@@ -194,7 +203,7 @@ auto make_blob_match_expr(ArgT &&arg, ExpectedT &&expected)
                     ::dp_tests::make_blob_match_expr(arg, expected));          \
         }                                                                      \
         INTERNAL_CATCH_CATCH(catchAssertionHandler)                            \
-        INTERNAL_CATCH_REACT(catchAssertionHandler)                            \
+        catchAssertionHandler.complete();                                      \
     }                                                                          \
     while (false)
 

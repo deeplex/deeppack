@@ -8,6 +8,7 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 #include <dplx/cncr/type_utils.hpp>
 
@@ -212,7 +213,7 @@ inline auto decode_tuple_properties(parse_context &ctx,
         -> result<void>
 {
     constexpr std::size_t expectedNumProps = descriptor.num_properties;
-    if (numProperties != expectedNumProps)
+    if (std::cmp_not_equal(numProperties, expectedNumProps))
     {
         return errc::tuple_size_mismatch;
     }

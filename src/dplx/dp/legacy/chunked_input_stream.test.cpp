@@ -34,7 +34,8 @@ public:
     std::array<std::vector<std::byte>, 2> mChunks;
     unsigned int mNext = 0;
 
-    static constexpr auto partition = dp::minimum_guaranteed_read_size * 2 - 1;
+    static constexpr auto partition
+            = (dp::minimum_guaranteed_read_size * 2) - 1;
     explicit test_legacy_chunked_input_stream(unsigned int streamSize)
         : base_type({}, streamSize)
         , mChunks()
@@ -70,7 +71,7 @@ private:
 TEST_CASE("legacy_chunked_input_stream smoke tests")
 {
     test_legacy_chunked_input_stream subject(
-            dp::minimum_guaranteed_read_size * 4 - 1);
+            (dp::minimum_guaranteed_read_size * 4) - 1);
 
     std::array<std::byte, 2> vals{};
     REQUIRE(subject.bulk_read(vals.data(), vals.size()));

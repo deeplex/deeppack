@@ -36,7 +36,7 @@ public:
     unsigned mNext;
 
     static constexpr auto partition
-            = dp::minimum_guaranteed_write_size * 2U - 1U;
+            = (dp::minimum_guaranteed_write_size * 2U) - 1U;
 
     explicit test_legacy_chunked_output_stream(unsigned streamSize)
         : base_type({}, streamSize)
@@ -80,7 +80,7 @@ private:
 TEST_CASE("legacy_chunked_output_stream smoke tests")
 {
     test_legacy_chunked_output_stream subject(
-            dp::minimum_guaranteed_write_size * 4 - 1);
+            (dp::minimum_guaranteed_write_size * 4) - 1);
 
     std::array<std::byte, 2> vals{};
     REQUIRE(subject.bulk_write(vals.data(), vals.size()));
@@ -92,7 +92,7 @@ TEST_CASE("legacy_chunked_output_stream smoke tests")
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 TEST_CASE("legacy_chunked_output_stream wraps correctly with do_grow")
 {
-    constexpr unsigned streamSize = dp::minimum_guaranteed_write_size * 4 - 1;
+    constexpr unsigned streamSize = (dp::minimum_guaranteed_write_size * 4) - 1;
     test_legacy_chunked_output_stream subject(streamSize);
 
     REQUIRE(subject.ensure_size(1U));

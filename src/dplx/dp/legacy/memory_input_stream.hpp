@@ -28,6 +28,7 @@ template <typename T>
 // NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
 class legacy_memory_input_stream final : public input_buffer
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     basic_memory_buffer<T> &mImpl;
 
 public:

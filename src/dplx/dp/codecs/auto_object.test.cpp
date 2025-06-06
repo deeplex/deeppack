@@ -267,7 +267,8 @@ TEST_CASE("object codec helpers with layout descriptor")
         auto const &head = decodeHeadRx.assume_value();
 
         CHECK(head.version == descriptor.version);
-        CHECK(head.num_properties == descriptor.num_properties);
+        CHECK(static_cast<unsigned>(head.num_properties)
+              == descriptor.num_properties);
 
         std::remove_cvref_t<decltype(sample.value)> value{};
         REQUIRE(dp::decode_object_properties<descriptor>(

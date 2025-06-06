@@ -10,6 +10,7 @@
 #include <cstddef>
 
 #include <catch2/catch_test_macros.hpp>
+#include <fmt/ranges.h>
 
 #include <dplx/dp/api.hpp>
 #include <dplx/dp/codecs/core.hpp>

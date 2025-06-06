@@ -148,6 +148,7 @@ auto copy_item_to(parse_context &ctx, output_buffer &out) noexcept
     do
     {
         auto &item = stack.back();
+        // NOLINTNEXTLINE(bugprone-switch-missing-default-case)
         switch (static_cast<std::uint8_t>(item.type) >> majorTypeBitOffset)
         {
         case static_cast<unsigned>(type_code::special) >> majorTypeBitOffset:

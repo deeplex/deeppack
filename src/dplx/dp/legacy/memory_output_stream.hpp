@@ -23,6 +23,7 @@ namespace detail
 // NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
 class legacy_memory_output_stream final : public output_buffer
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
     memory_buffer &mImpl;
 
 public:

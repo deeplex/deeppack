@@ -115,7 +115,9 @@ class yaml_sample_loader final : public gens::IGenerator<item_sample_rt<T>>
 public:
     explicit yaml_sample_loader(std::filesystem::path const &filename,
                                 std::string_view const slice)
-    try : mSamples(), mCurrent()
+    try
+        : mSamples()
+        , mCurrent()
     {
         std::ifstream file(filename);
         file.exceptions(std::ios_base::badbit | std::ios_base::failbit);

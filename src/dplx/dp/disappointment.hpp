@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <concepts>
-#include <type_traits>
-#include <utility>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
 
 #include <dplx/cncr/data_defined_status_domain.hpp>
 #include <dplx/cncr/disappointment.hpp>
@@ -22,10 +22,11 @@ namespace oc = outcome;
 using outcome::failure;
 using outcome::success;
 
-enum class errc
+// NOLINTNEXTLINE(performance-enum-size)
+enum class errc : std::uint32_t
 {
     nothing = 0,
-    bad = 1,
+    bad,
     end_of_stream,
     invalid_additional_information,
     item_type_mismatch,
@@ -61,7 +62,7 @@ struct status_enum_definition<::dplx::dp::errc>
     static constexpr char domain_name[] = "dplx::dp error domain";
 
     static constexpr value_descriptor values[] = {
-  // clang-format off
+            // clang-format off
         { code::nothing, generic_errc::success,
             "no error/success" },
         { code::bad, generic_errc::unknown,
@@ -102,7 +103,7 @@ struct status_enum_definition<::dplx::dp::errc>
             "A binary/string CBOR item exceeded a size limit imposed by the user." },
         { code::buffer_size_exceeded, generic_errc::no_buffer_space,
             "The require_input(amount)/ensure_size(amount) call failed due to `amount` exceeding the streams internal buffer size." },
-  // clang-format on
+            // clang-format on
     };
 
     static_assert(std::size(values) == static_cast<std::size_t>(code::LIMIT));

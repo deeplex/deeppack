@@ -27,10 +27,9 @@ namespace dp_tests
 static_assert(std::same_as<dp::fixed_u8string<5>,
                            decltype(dp::fixed_u8string(u8"hello"))>);
 
-static_assert(
-        std::same_as<dp::fixed_u8string<16>,
-                     typename std::common_type<dp::fixed_u8string<1>,
-                                               dp::fixed_u8string<5>>::type>);
+static_assert(std::same_as<dp::fixed_u8string<16>,
+                           std::common_type_t<dp::fixed_u8string<1>,
+                                              dp::fixed_u8string<5>>>);
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 TEST_CASE("fixed_u8string has a codec")

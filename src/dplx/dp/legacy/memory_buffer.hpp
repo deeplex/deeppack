@@ -56,7 +56,7 @@ public:
         requires(std::convertible_to<U (*)[], T (*)[]>)
     explicit constexpr basic_memory_buffer(std::span<U, Extent> const &memory)
         : basic_memory_buffer(
-                memory.data(), static_cast<size_type>(memory.size_bytes()), 0)
+                  memory.data(), static_cast<size_type>(memory.size_bytes()), 0)
     {
     }
     template <typename U>

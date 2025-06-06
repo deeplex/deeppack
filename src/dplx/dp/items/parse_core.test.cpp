@@ -25,7 +25,7 @@ namespace dp_tests
 using enum dp::type_code;
 
 constexpr item_sample_ct<dp::item_head> parse_samples[] = {
-  // clang-format off
+        // clang-format off
 
     // Appendix A.Examples
     {
@@ -117,7 +117,7 @@ constexpr item_sample_ct<dp::item_head> parse_samples[] = {
         1, {0xff},
     },
 
-  // clang-format on
+        // clang-format on
 };
 
 TEST_CASE("parse_item_head_speculative can parse basic item_heads")
@@ -314,7 +314,7 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
     {
         simple_test_parse_context ctx(sample.encoded_bytes());
 
-        TestType value;
+        TestType value{};
         result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
@@ -333,7 +333,7 @@ TEMPLATE_TEST_CASE("parse_integer parses positive integers",
     {
         simple_test_parse_context ctx(as_bytes(std::span(sample.encoded)));
 
-        TestType value;
+        TestType value{};
         result<void> rx
                 = dp::parse_integer<TestType>(ctx.as_parse_context(), value);
         if (std::in_range<TestType>(sample.value))
