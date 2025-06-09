@@ -40,7 +40,7 @@ public:
                        std::chrono::duration<Rep, Period> &value) noexcept
             -> result<void>
     {
-        Rep count; // NOLINT(cppcoreguidelines-init-variables)
+        Rep count{};
         DPLX_TRY(dp::parse_integer<Rep>(ctx, count));
         value = std::chrono::duration<Rep, Period>(count);
         return dp::success();

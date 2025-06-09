@@ -209,22 +209,22 @@ public:
 
         auto const *const begin = ids.data();
         auto const *const end = ids.data() + ids.size();
-        id_type const *it; // NOLINT(cppcoreguidelines-init-variables)
         if constexpr (NumIds <= linear_search_efficiency_threshold)
         {
-            if (it = std::find(begin, end, id); it == end)
+            if (id_type const *it = std::find(begin, end, id); it != end)
             {
-                return unknown_property_id;
+                return static_cast<std::size_t>(it - begin);
             }
         }
         else
         {
-            if (it = std::lower_bound(begin, end, id); it == end || *it != id)
+            if (id_type const *it = std::lower_bound(begin, end, id);
+                it != end && *it == id)
             {
-                return unknown_property_id;
+                return static_cast<std::size_t>(it - begin);
             }
         }
-        return static_cast<std::size_t>(it - begin);
+        return unknown_property_id;
     }
 };
 
@@ -504,7 +504,7 @@ inline auto decode_object_head(parse_context &ctx,
         ctx.in.discard_buffered(1U);
 
         // 0xffff'ffff => max() is reserved as null_def_version
-        std::uint32_t version; // NOLINT(cppcoreguidelines-init-variables)
+        std::uint32_t version{null_def_version};
         DPLX_TRY(dp::parse_integer(ctx, version, null_def_version - 1U));
 
         return object_head_info{numProps - 1, version};

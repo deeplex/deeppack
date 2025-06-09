@@ -369,7 +369,7 @@ inline auto load_iec559_half(unsigned bits) noexcept -> double
     unsigned const significand = bits & 0x3ffU;
     auto const exponent = static_cast<int>((bits >> 10) & 0x1fU);
 
-    double value;      // NOLINT(cppcoreguidelines-init-variables)
+    double value{};
     if (exponent == 0) // zero | subnormal
     {
         value = std::ldexp(significand, -24);
