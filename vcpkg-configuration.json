@@ -11,7 +11,7 @@
         {
             "kind": "git",
             "repository": "https://github.com/deeplex/vcpkg-registry",
-            "baseline": "90373c127f67e25393120e7332270aa1a27d54f8",
+            "baseline": "70800657bcd57ab9ac7d0963e01d475236b4da03",
             "packages": [
                 "concrete"
             ]
