@@ -372,7 +372,7 @@ public:
     auto operator()(parse_context &ctx, class_type &dest) const
             -> result<std::size_t>
     {
-        id_type id; // NOLINT(cppcoreguidelines-pro-type-member-init)
+        id_type id{};
         DPLX_TRY(dp::parse_integer<id_type>(ctx, id));
 
         if constexpr (small_ids_end != 0)
