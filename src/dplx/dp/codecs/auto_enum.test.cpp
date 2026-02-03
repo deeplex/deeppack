@@ -118,7 +118,7 @@ TEMPLATE_TEST_CASE("enums have an auto codec",
     {
         simple_test_input_stream inputStream(sample.encoded_bytes());
 
-        TestType value;
+        TestType value{};
         REQUIRE(dp::decode(inputStream, value));
 
         CHECK(value == sample.value);
